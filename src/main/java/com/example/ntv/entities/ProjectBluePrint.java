@@ -12,7 +12,7 @@ import java.util.Objects;
 @Setter
 @Entity
 @Table(name = "projectblueprint")
-public class ProjectBlueprint {
+class ProjectBlueprint {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ProjectBlueprintId", nullable = false)
