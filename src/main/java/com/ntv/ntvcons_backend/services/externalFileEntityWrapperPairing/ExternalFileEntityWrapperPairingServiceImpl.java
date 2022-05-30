@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFileEntityWrapperPairingService {
     @Autowired
-    ExternalFileEntityWrapperPairingRepository eFEWPRepository;
+    private ExternalFileEntityWrapperPairingRepository eFEWPRepository;
 
 
 }

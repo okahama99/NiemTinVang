@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Autowired
-    EntityWrapperRepository entityWrapperRepository;
+    private EntityWrapperRepository entityWrapperRepository;
 
 
 }

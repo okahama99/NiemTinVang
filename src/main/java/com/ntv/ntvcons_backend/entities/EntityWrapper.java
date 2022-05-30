@@ -1,7 +1,6 @@
 package com.ntv.ntvcons_backend.entities;
 
-import com.ntv.ntvcons_backend.constants.EntityWrapperType;
-import lombok.AllArgsConstructor;
+import com.ntv.ntvcons_backend.constants.EntityType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +27,7 @@ public class EntityWrapper extends BaseEntity {
     @Column(name = "RequestId", nullable = true, unique = true)
     private Integer requestId;
 
-    public EntityWrapper(Integer entityId, EntityWrapperType type) {
+    public EntityWrapper(Integer entityId, EntityType type) {
         switch (type) {
             case PROJECT_ENTITY:
                 this.projectId = entityId;
