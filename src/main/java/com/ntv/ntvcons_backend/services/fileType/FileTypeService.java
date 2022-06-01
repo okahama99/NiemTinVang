@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.services.fileType;
 
 import com.ntv.ntvcons_backend.entities.FileType;
+import com.ntv.ntvcons_backend.entities.fileTypeModel.FileTypeModel;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ public interface FileTypeService {
     FileType getById(int fileTypeId);
 
     /* UPDATE */
-    FileType updateFileType(int fileTypeId, String fileTypeName, String fileTypeDesc, String fileTypeExtension);
+    boolean updateFileType(FileTypeModel fileTypeModel);
 
 
     /* DELETE */
