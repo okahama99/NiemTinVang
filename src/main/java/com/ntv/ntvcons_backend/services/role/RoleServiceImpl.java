@@ -13,8 +13,8 @@ public class RoleServiceImpl implements RoleService{
     RoleRepository roleRepository;
 
     @Override
-    public boolean insertRole(int roleID, String roleName) {
-        return false;
+    public Role insertRole(int roleID, String roleName) {
+        return null;
     }
 
     @Override

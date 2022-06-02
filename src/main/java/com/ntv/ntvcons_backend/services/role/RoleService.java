@@ -5,7 +5,7 @@ import com.ntv.ntvcons_backend.entities.Role;
 import java.util.List;
 
 public interface RoleService {
-    boolean insertRole (int roleID, String roleName);
+    Role insertRole (int roleID, String roleName);
 
     boolean updateRole(int roleID, String roleName);
 

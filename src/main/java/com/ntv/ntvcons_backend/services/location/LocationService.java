@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.services.location;
 
 import com.ntv.ntvcons_backend.entities.Location;
+import com.ntv.ntvcons_backend.entities.locationModels.LocationModel;
 
 import java.util.List;
 
@@ -25,8 +26,7 @@ public interface LocationService {
     Location getById(int locationId);
 
     /* UPDATE */
-    Location updateLocation(int locationId, String addressNumber, String street, String ward,
-                            String district, String city, String province, String coordinate);
+    boolean updateLocation(LocationModel locationModel);
 
 
     /* DELETE */

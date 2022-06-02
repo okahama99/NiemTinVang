@@ -1,17 +1,16 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.entities.FileType;
-import com.ntv.ntvcons_backend.entities.fileTypeModel.FileTypeModel;
+import com.ntv.ntvcons_backend.entities.fileTypeModels.FileTypeModel;
 import com.ntv.ntvcons_backend.services.fileType.FileTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/chat")
+@RequestMapping("/FileType")
 public class FileTypeController {
     @Autowired
     FileTypeService fileTypeService;

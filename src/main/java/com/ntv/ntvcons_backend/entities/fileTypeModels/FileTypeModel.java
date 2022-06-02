@@ -1,4 +1,4 @@
-package com.ntv.ntvcons_backend.entities.fileTypeModel;
+package com.ntv.ntvcons_backend.entities.fileTypeModels;
 
 public class FileTypeModel {
     private int fileTypeId;

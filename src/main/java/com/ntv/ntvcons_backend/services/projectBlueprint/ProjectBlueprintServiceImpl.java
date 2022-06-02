@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.services.projectBlueprint;
 
 import com.ntv.ntvcons_backend.entities.ProjectBlueprint;
+import com.ntv.ntvcons_backend.entities.ProjectBlueprintModels.ProjectBlueprintModel;
 import com.ntv.ntvcons_backend.repositories.ProjectBlueprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,8 +50,8 @@ public class ProjectBlueprintServiceImpl implements ProjectBlueprintService {
     }
 
     @Override
-    public ProjectBlueprint updateProjectBlueprint(int projectBlueprintId, String projectBlueprintName, int designerId, double projectBlueprintCost) {
-        return null;
+    public boolean updateProjectBlueprint(ProjectBlueprintModel projectBlueprintModel) {
+        return true;
     }
 
     @Override
