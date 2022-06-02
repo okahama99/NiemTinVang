@@ -1,7 +1,5 @@
 package com.ntv.ntvcons_backend.services.fileType;
 
-import com.ntv.ntvcons_backend.entities.FileType;
-
 import java.util.List;
 
 public interface FileTypeService {

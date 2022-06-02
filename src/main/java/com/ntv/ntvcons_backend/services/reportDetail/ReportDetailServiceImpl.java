@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.services.reportDetail;
 
-import com.ntv.ntvcons_backend.entities.ReportDetail;
 import com.ntv.ntvcons_backend.repositories.ReportDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

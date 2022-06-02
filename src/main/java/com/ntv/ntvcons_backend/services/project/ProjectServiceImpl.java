@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.services.project;
 
-import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

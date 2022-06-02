@@ -1,43 +1,32 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
-import java.util.Objects;
 
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
-public class FileType extends BaseEntity {
+@Table(name = "file_type")
+public class FileType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "FileTypeId", nullable = false)
-    private int fileTypeId;
-    @Basic
-    @Column(name = "FileTypeName", nullable = false, length = 500)
+    @Column(name = "fileTypeId", nullable = false)
+    private Integer fileTypeId;
+
+    @Column(name = "fileTypeName", nullable = false, length = 100)
     private String fileTypeName;
-    @Basic
-    @Column(name = "FileTypeDesc", nullable = true, length = 500)
+
+    @Column(name = "fileTypeDesc", length = 500)
     private String fileTypeDesc;
-    @Basic
-    @Column(name = "FileTypeExtension", nullable = false, length = 500)
+
+    @Column(name = "fileTypeExtension", nullable = false, length = 10)
     private String fileTypeExtension;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FileType fileType = (FileType) o;
-        return fileTypeId == fileType.fileTypeId && Objects.equals(fileTypeName, fileType.fileTypeName) && Objects.equals(fileTypeDesc, fileType.fileTypeDesc) && Objects.equals(fileTypeExtension, fileType.fileTypeExtension);
-    }
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted = false;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(fileTypeId, fileTypeName, fileTypeDesc, fileTypeExtension);
-    }
 }

@@ -1,7 +1,5 @@
 package com.ntv.ntvcons_backend.services.projectBlueprint;
 
-import com.ntv.ntvcons_backend.entities.ProjectBlueprint;
-
 import java.util.Collection;
 import java.util.List;
 

@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.repositories;
 
-import com.ntv.ntvcons_backend.entities.User;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
