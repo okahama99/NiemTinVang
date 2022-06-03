@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.location;
 
+import com.ntv.ntvcons_backend.entities.Location;
+import com.ntv.ntvcons_backend.entities.locationModels.LocationModel;
 import com.ntv.ntvcons_backend.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,8 +54,8 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public Location updateLocation(int locationId, String addressNumber, String street, String ward, String district, String city, String province, String coordinate) {
-        return null;
+    public boolean updateLocation(LocationModel locationModel) {
+        return true;
     }
 
     @Override

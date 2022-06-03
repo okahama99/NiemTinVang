@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing;
 
+
+import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
 import com.ntv.ntvcons_backend.repositories.EntityWrapperRepository;
 import com.ntv.ntvcons_backend.repositories.ExternalFileEntityWrapperPairingRepository;
 import org.springframework.beans.factory.annotation.Autowired;

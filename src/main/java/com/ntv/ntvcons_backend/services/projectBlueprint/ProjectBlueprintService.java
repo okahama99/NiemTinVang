@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.projectBlueprint;
 
+import com.ntv.ntvcons_backend.entities.ProjectBlueprint;
+import com.ntv.ntvcons_backend.entities.ProjectBlueprintModels.ProjectBlueprintModel;
 import java.util.Collection;
 import java.util.List;
 
@@ -22,8 +24,7 @@ public interface ProjectBlueprintService {
     ProjectBlueprint getById(int projectBlueprintId);
 
     /* UPDATE */
-    ProjectBlueprint updateProjectBlueprint(int projectBlueprintId, String projectBlueprintName,
-                                            int designerId, double projectBlueprintCost);
+    boolean updateProjectBlueprint(ProjectBlueprintModel projectBlueprintModel);
 
     /* DELETE */
     boolean deleteProjectBlueprint(int projectBlueprintId);

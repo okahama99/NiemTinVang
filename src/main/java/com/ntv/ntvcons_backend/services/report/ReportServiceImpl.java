@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.report;
 
+import com.ntv.ntvcons_backend.entities.Report;
+import com.ntv.ntvcons_backend.entities.ReportModels.ReportModel;
 import com.ntv.ntvcons_backend.repositories.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,8 +51,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Report updateReport(int reportId, int projectId, int reporterId, Timestamp reportDate, String reportDesc) {
-        return null;
+    public boolean updateReport(ReportModel reportModel) {
+        return true;
     }
 
     @Override

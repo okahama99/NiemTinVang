@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.report;
 
+import com.ntv.ntvcons_backend.entities.Report;
+import com.ntv.ntvcons_backend.entities.ReportModels.ReportModel;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
@@ -22,7 +24,7 @@ public interface ReportService {
     Report getById(int reportId);
 
     /* UPDATE */
-    Report updateReport(int reportId, int projectId, int reporterId, Timestamp reportDate, String reportDesc);
+    boolean updateReport(ReportModel reportModel);
 
     /* DELETE */
     boolean deleteReport(int reportId);

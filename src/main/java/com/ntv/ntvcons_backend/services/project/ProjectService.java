@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.project;
 
+import com.ntv.ntvcons_backend.entities.Project;
+import com.ntv.ntvcons_backend.entities.projectModels.ProjectModel;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
@@ -31,8 +33,7 @@ public interface ProjectService {
     Project getById(int projectId);
 
     /* UPDATE */
-    Project updateProject(int projectId, String projectName, int locationId, Timestamp startDate,
-                          Timestamp endDate, int blueprintId, Double estimateCost);
+    boolean updateProject(ProjectModel projectModel);
 
     /* DELETE */
     boolean deleteProject(int projectId);

@@ -1,5 +1,8 @@
 package com.ntv.ntvcons_backend.services.project;
 
+
+import com.ntv.ntvcons_backend.entities.Project;
+import com.ntv.ntvcons_backend.entities.projectModels.ProjectModel;
 import com.ntv.ntvcons_backend.repositories.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,8 +72,8 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public Project updateProject(int projectId, String projectName, int locationId, Timestamp startDate, Timestamp endDate, int blueprintId, Double estimateCost) {
-        return null;
+    public boolean updateProject(ProjectModel projectModel) {
+        return true;
     }
 
     @Override
