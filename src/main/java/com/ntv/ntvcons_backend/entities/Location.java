@@ -1,56 +1,51 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
-import java.util.Objects;
 
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
-public class Location extends BaseEntity {
-
+@Table(name = "location")
+public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "LocationId", nullable = false)
-    private int locationId;
-    @Basic
-    @Column(name = "AddressNumber", nullable = true, length = 50)
+    @Column(name = "locationId", nullable = false)
+    private Integer locationId;
+
+    @Column(name = "addressNumber", length = 100)
     private String addressNumber;
-    @Basic
-    @Column(name = "Street", nullable = true, length = 500)
+
+    @Column(name = "street", length = 100)
     private String street;
-    @Basic
-    @Column(name = "Ward", nullable = false, length = 500)
+
+    /** area = Khu phố, khu dân cư,... (optional) */
+    @Column(name = "area", length = 100)
+    private String area;
+
+    @Column(name = "ward", length = 100)
     private String ward;
-    @Basic
-    @Column(name = "District", nullable = false, length = 500)
+
+    @Column(name = "district", length = 100)
     private String district;
-    @Basic
-    @Column(name = "City", nullable = false, length = 500)
+
+    @Column(name = "city", length = 100)
     private String city;
-    @Basic
-    @Column(name = "Province", nullable = false, length = 500)
+
+    @Column(name = "province", length = 100)
     private String province;
-    @Basic
-    @Column(name = "Coordinate", nullable = false, length = 500)
+
+    @Column(name = "country", length = 100)
+    private String country;
+
+    @Column(name = "coordinate", nullable = false, length = 500, unique = true)
     private String coordinate;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Location location = (Location) o;
-        return locationId == location.locationId && Objects.equals(addressNumber, location.addressNumber) && Objects.equals(street, location.street) && Objects.equals(ward, location.ward) && Objects.equals(district, location.district) && Objects.equals(city, location.city) && Objects.equals(province, location.province) && Objects.equals(coordinate, location.coordinate);
-    }
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted = false;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(locationId, addressNumber, street, ward, district, city, province, coordinate);
-    }
 }

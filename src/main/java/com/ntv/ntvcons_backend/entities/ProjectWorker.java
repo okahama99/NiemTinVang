@@ -11,15 +11,15 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "project_manager")
-public class ProjectManager {
+@Table(name = "project_worker")
+public class ProjectWorker {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "projectManagerId", nullable = false)
-    private Integer projectManagerId;
+    @Column(name = "projectWorkerId", nullable = false)
+    private Integer projectWorkerId;
 
-    @Column(name = "managerId", nullable = false)
-    private Integer managerId;
+    @Column(name = "workerId", nullable = false)
+    private Integer workerId;
 
     @Column(name = "projectId", nullable = false)
     private Integer projectId;
