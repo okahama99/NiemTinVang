@@ -48,7 +48,23 @@ public interface RequestRepository extends JpaRepository<Request, Integer> {
     /* isVerified */
     List<Request> findAllByIsVerifiedAndIsDeletedIsFalse(boolean isVerified);
 
+    /* isVerified = true  & verifyDate */
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateAfterAndIsDeletedIsFalse(Instant afterDate);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBetweenAndIsDeletedIsFalse(Instant fromDate, Instant toDate);
+
+    /* isVerified = true  & verifierId */
+    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdAndIsDeletedIsFalse(int verifierId);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdInAndIsDeletedIsFalse(Collection<Integer> verifierIdCollection);
 
     /* isVerified = true & isApproved (Approval required Verification) */
     List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndIsDeletedIsFalse(boolean isApproved);
+
+    /* isVerified = true & isApproved & verifyDate */
+    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateAfterAndIsDeletedIsFalse
+            (boolean isApproved, Instant afterDate);
+    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateBeforeAndIsDeletedIsFalse
+            (boolean isApproved, Instant beforeDate);
+    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateBetweenAndIsDeletedIsFalse
+            (boolean isApproved, Instant fromDate, Instant toDate);
 }
