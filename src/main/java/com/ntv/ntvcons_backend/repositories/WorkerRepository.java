@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.repositories;
 
-import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.Worker;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

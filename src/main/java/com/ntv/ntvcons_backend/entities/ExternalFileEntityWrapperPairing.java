@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name = "external_file_entity_wrapper_pairing")
-public class ExternalFileEntityWrapperPairing {
+public class ExternalFileEntityWrapperPairing extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pairingId", nullable = false)

@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name = "project_blueprint")
-public class ProjectBlueprint {
+public class ProjectBlueprint extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "blueprintId", nullable = false)
