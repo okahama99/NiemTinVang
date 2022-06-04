@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.entities.Report;
-import com.ntv.ntvcons_backend.entities.ReportModels.ReportModel;
+import com.ntv.ntvcons_backend.entities.ReportModels.ShowReportModel;
 import com.ntv.ntvcons_backend.services.report.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -32,8 +32,8 @@ public class ReportController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/updateReport", produces = "application/json;charset=UTF-8")
-    public HttpStatus updateReport(@RequestBody ReportModel reportModel){
-        boolean result = reportService.updateReport(reportModel);
+    public HttpStatus updateReport(@RequestBody ShowReportModel showReportModel){
+        boolean result = reportService.updateReport(showReportModel);
         if(result){
             return HttpStatus.OK;
         }
@@ -43,8 +43,11 @@ public class ReportController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    List<Report> getAll() {
-        List<Report> reports = reportService.getAll();
+    List<ShowReportModel> getAll(@RequestBody int pageNo,
+                        @RequestBody int pageSize,
+                        @RequestBody String sortBy,
+                        @RequestBody boolean sortType) {
+        List<ShowReportModel> reports = reportService.getAll(pageNo, pageSize, sortBy, sortType);
         return reports;
     }
 

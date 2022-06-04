@@ -2,13 +2,12 @@ package com.ntv.ntvcons_backend.controllers;
 
 
 import com.ntv.ntvcons_backend.entities.ProjectBlueprint;
-import com.ntv.ntvcons_backend.entities.ProjectBlueprintModels.ProjectBlueprintModel;
+import com.ntv.ntvcons_backend.entities.ProjectBlueprintModels.ShowProjectBlueprintModel;
 import com.ntv.ntvcons_backend.services.projectBlueprint.ProjectBlueprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 @RestController
@@ -32,8 +31,8 @@ public class ProjectBlueprintController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/updateProjectBlueprint", produces = "application/json;charset=UTF-8")
-    public HttpStatus updateProjectBlueprint(@RequestBody ProjectBlueprintModel projectBlueprintModel){
-        boolean result = projectBlueprintService.updateProjectBlueprint(projectBlueprintModel);
+    public HttpStatus updateProjectBlueprint(@RequestBody ShowProjectBlueprintModel showProjectBlueprintModel){
+        boolean result = projectBlueprintService.updateProjectBlueprint(showProjectBlueprintModel);
         if(result){
             return HttpStatus.OK;
         }
@@ -43,8 +42,11 @@ public class ProjectBlueprintController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    List<ProjectBlueprint> getAll() {
-        List<ProjectBlueprint> projects = projectBlueprintService.getAll();
+    List<ShowProjectBlueprintModel> getAll(@RequestBody int pageNo,
+                                  @RequestBody int pageSize,
+                                  @RequestBody String sortBy,
+                                  @RequestBody boolean sortType) {
+        List<ShowProjectBlueprintModel> projects = projectBlueprintService.getAll(pageNo, pageSize, sortBy, sortType);
         return projects;
     }
 

@@ -1,25 +1,22 @@
 package com.ntv.ntvcons_backend.services.reportDetail;
 
 import com.ntv.ntvcons_backend.entities.ReportDetail;
-import com.ntv.ntvcons_backend.entities.ReportDetailModels.ReportDetailModel;
+import com.ntv.ntvcons_backend.entities.ReportDetailModels.ShowReportDetailModel;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public interface ReportDetailService {
     ReportDetail createReportDetail();
 
     /* READ */
-    List<ReportDetail> getAll();
+    List<ShowReportDetailModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<ReportDetail> getAllByReportId(int reportID);
 
     ReportDetail getById(int reportId);
 
     /* UPDATE */
-    boolean updateReport(ReportDetailModel reportDetailModel);
+    boolean updateReport(ShowReportDetailModel showReportDetailModel);
 
     /* DELETE */
     boolean deleteReport(int reportId);

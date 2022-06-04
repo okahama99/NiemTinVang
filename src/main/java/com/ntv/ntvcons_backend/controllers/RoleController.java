@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.entities.Role;
+import com.ntv.ntvcons_backend.entities.RoleModels.ShowRoleModel;
 import com.ntv.ntvcons_backend.services.role.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,8 +41,11 @@ public class RoleController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    List<Role> getAll() {
-        List<Role> roles = roleService.getAllRole();
+    List<ShowRoleModel> getAll(@RequestBody int pageNo,
+                               @RequestBody int pageSize,
+                               @RequestBody String sortBy,
+                               @RequestBody boolean sortType) {
+        List<ShowRoleModel> roles = roleService.getAllRole(pageNo, pageSize, sortBy, sortType);
         return roles;
     }
 

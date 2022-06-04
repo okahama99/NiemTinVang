@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.services.project;
 
 import com.ntv.ntvcons_backend.entities.Project;
-import com.ntv.ntvcons_backend.entities.projectModels.ProjectModel;
+import com.ntv.ntvcons_backend.entities.projectModels.ShowProjectModel;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -13,7 +13,7 @@ public interface ProjectService {
                           int blueprintId, Double estimateCost);
 
     /* READ */
-    List<Project> getAll();
+    List<ShowProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<Project> getAllByIdIn(Collection<Integer> projectIdCollection);
 
@@ -34,7 +34,7 @@ public interface ProjectService {
     Project getById(int projectId);
 
     /* UPDATE */
-    boolean updateProject(ProjectModel projectModel);
+    boolean updateProject(ShowProjectModel showProjectModel);
 
     /* DELETE */
     boolean deleteProject(int projectId);

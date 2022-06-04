@@ -1,11 +1,18 @@
 package com.ntv.ntvcons_backend.services.location;
 
 import com.ntv.ntvcons_backend.entities.Location;
-import com.ntv.ntvcons_backend.entities.locationModels.LocationModel;
+import com.ntv.ntvcons_backend.entities.LocationModels.ShowLocationModel;
 import com.ntv.ntvcons_backend.repositories.LocationRepository;
+import com.ntv.ntvcons_backend.repositories.PagingRepositories.LocationPagingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Converter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -13,14 +20,55 @@ public class LocationServiceImpl implements LocationService {
     @Autowired
     private LocationRepository locationRepository;
 
+    @Autowired
+    private LocationPagingRepository locationPagingRepository;
+
     @Override
     public Location createLocation(String addressNumber, String street, String ward, String district, String city, String province, String coordinate) {
         return null;
     }
 
     @Override
-    public List<Location> getAll() {
-        return null;
+    public List<ShowLocationModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType)
+        {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+        Page<Location> pagingResult = locationPagingRepository.findAll(paging);
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+            Page<ShowLocationModel> modelResult = pagingResult.map(new Converter<Location, ShowLocationModel>() {
+                @Override
+                protected ShowLocationModel doForward(Location location) {
+                    ShowLocationModel model = new ShowLocationModel();
+                    model.setLocationId(location.getLocationId());
+                    model.setAddressNumber(location.getAddressNumber());
+                    model.setStreet(location.getStreet());
+                    model.setWard(location.getWard());
+                    model.setDistrict(location.getDistrict());
+                    model.setCity(location.getCity());
+                    model.setProvince(location.getProvince());
+                    model.setCoordinate(location.getCoordinate());
+                    model.setCreatedAt(location.getCreatedAt());
+                    model.setCreatedBy(location.getCreatedBy());
+                    model.setUpdatedAt(location.getCreatedAt());
+                    model.setUpdatedBy(location.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Location doBackward(ShowLocationModel showLocationModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowLocationModel>();
+        }
     }
 
     @Override
@@ -54,7 +102,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public boolean updateLocation(LocationModel locationModel) {
+    public boolean updateLocation(ShowLocationModel showLocationModel) {
         return true;
     }
 
