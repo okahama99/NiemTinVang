@@ -19,7 +19,7 @@ public class RoleController {
     public HttpStatus insertRole(@RequestBody int roleID,
                                  @RequestBody String roleName){
 
-        Role result = roleService.insertRole(roleID, roleName);
+        Role result = roleService.createRole(roleID, roleName);
         if(result!=null){
             return HttpStatus.OK;
         }

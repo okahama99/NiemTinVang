@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.role;
 
+import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,21 +12,13 @@ public class RoleServiceImpl implements RoleService{
     @Autowired
     RoleRepository roleRepository;
 
+    /* CREATE */
     @Override
-    public Role insertRole(int roleID, String roleName) {
+    public Role createRole(int roleID, String roleName) {
         return null;
     }
 
-    @Override
-    public boolean updateRole(int roleID, String roleName) {
-        return false;
-    }
-
-    @Override
-    public boolean deleteRole(int roleID) {
-        return false;
-    }
-
+    /* READ */
     @Override
     public List<Role> getAllRole() {
         return null;
@@ -34,5 +27,17 @@ public class RoleServiceImpl implements RoleService{
     @Override
     public List<Role> getRoleByRoleName(String roleName) {
         return null;
+    }
+
+    /* UPDATE */
+    @Override
+    public boolean updateRole(int roleID, String roleName) {
+        return false;
+    }
+
+    /* DELETE */
+    @Override
+    public boolean deleteRole(int roleID) {
+        return false;
     }
 }
