@@ -1,39 +1,49 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.sql.Timestamp;
+import java.util.Objects;
 
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "report")
 public class Report extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reportId", nullable = false)
-    private Integer reportId;
-
-    @Column(name = "projectId", nullable = false)
-    private Integer projectId;
-
-    @Column(name = "reportTypeId", nullable = false)
-    private Integer reportTypeId;
-
-    @Column(name = "reporterId", nullable = false)
-    private Integer reporterId;
-
-    @Column(name = "reportDate", nullable = false)
-    private Instant reportDate;
-
-    @Column(name = "reportDesc", nullable = false, length = 500)
+    @Column(name = "ReportId", nullable = false)
+    private int reportId;
+    @Basic
+    @Column(name = "ProjectId", nullable = false)
+    private int projectId;
+    @Basic
+    @Column(name = "ReporterId", nullable = false)
+    private int reporterId;
+    @Basic
+    @Column(name = "ReportDate", nullable = false)
+    private Timestamp reportDate;
+    @Basic
+    @Column(name = "ReportDesc", nullable = false, length = 500)
     private String reportDesc;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Report report = (Report) o;
+        return reportId == report.reportId && projectId == report.projectId && reporterId == report.reporterId && Objects.equals(reportDate, report.reportDate) && Objects.equals(reportDesc, report.reportDesc);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(reportId, projectId, reporterId, reportDate, reportDesc);
+    }
 }

@@ -1,54 +1,56 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.sql.Timestamp;
+import java.util.Objects;
 
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "request")
 public class Request extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "requestId", nullable = false)
-    private Integer requestId;
-
-    @Column(name = "projectId", nullable = false)
-    private Integer projectId;
-
-    @Column(name = "requestTypeId", nullable = false)
-    private Integer requestTypeId;
-
+    @Column(name = "RequestId", nullable = false)
+    private int requestId;
+    @Basic
+    @Column(name = "ProjectId", nullable = false)
+    private int projectId;
+    @Basic
     @Column(name = "RequesterId", nullable = false)
-    private Integer RequesterId;
-
-    @Column(name = "requestDate", nullable = false)
-    private Instant requestDate;
-
-    @Column(name = "requestDesc", nullable = false, length = 500)
+    private int requesterId;
+    @Basic
+    @Column(name = "RequestDatetime", nullable = false)
+    private Timestamp requestDatetime;
+    @Basic
+    @Column(name = "RequestDesc", nullable = false, length = 500)
     private String requestDesc;
-
-    @Column(name = "verifierId")
+    @Basic
+    @Column(name = "VerifierId", nullable = true)
     private Integer verifierId;
-
-    @Column(name = "isVerified", nullable = false)
-    private Boolean isVerified = false;
-
-    @Column(name = "verifyDate")
-    private Instant verifyDate;
-
-    @Column(name = "verifyNote", length = 500)
-    private String verifyNote;
-
-    @Column(name = "isApproved")
+    @Basic
+    @Column(name = "IsVerified", nullable = false)
+    private boolean isVerified;
+    @Basic
+    @Column(name = "IsApproved", nullable = true)
     private Boolean isApproved;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Request request = (Request) o;
+        return requestId == request.requestId && projectId == request.projectId && requesterId == request.requesterId && isVerified == request.isVerified && Objects.equals(requestDatetime, request.requestDatetime) && Objects.equals(requestDesc, request.requestDesc) && Objects.equals(verifierId, request.verifierId) && Objects.equals(isApproved, request.isApproved);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestId, projectId, requesterId, requestDatetime, requestDesc, verifierId, isVerified, isApproved);
+    }
 }

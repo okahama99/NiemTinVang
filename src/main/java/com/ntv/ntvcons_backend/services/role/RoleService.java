@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.role;
 
+import com.ntv.ntvcons_backend.entities.Role;
+
 import java.util.List;
 
 public interface RoleService {

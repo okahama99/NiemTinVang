@@ -1,51 +1,53 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.sql.Timestamp;
+import java.util.Objects;
 
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "project")
 public class Project extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "projectId", nullable = false)
-    private Integer projectId;
-
-    @Column(name = "projectName", nullable = false, length = 500)
+    @Column(name = "ProjectId", nullable = false)
+    private int projectId;
+    @Basic
+    @Column(name = "ProjectName", nullable = false, length = 255)
     private String projectName;
-
-    @Column(name = "locationId", nullable = false)
-    private Integer locationId;
-
-    @Column(name = "blueprintId", nullable = false)
-    private Integer blueprintId;
-
-    @Column(name = "planStartDate", nullable = false)
-    private Instant planStartDate;
-
-    @Column(name = "planEndDate")
-    private Instant planEndDate;
-
-    @Column(name = "estimatedCost")
+    @Basic
+    @Column(name = "LocationId", nullable = false)
+    private int locationId;
+    @Basic
+    @Column(name = "StartDate", nullable = false)
+    private Timestamp startDate;
+    @Basic
+    @Column(name = "EndDate", nullable = true)
+    private Timestamp endDate;
+    @Basic
+    @Column(name = "BlueprintId", nullable = false)
+    private int blueprintId;
+    @Basic
+    @Column(name = "EstimatedCost", nullable = true, precision = 0)
     private Double estimatedCost;
 
-    @Column(name = "actualStartDate")
-    private Instant actualStartDate;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Project project = (Project) o;
+        return projectId == project.projectId && locationId == project.locationId && blueprintId == project.blueprintId && Objects.equals(projectName, project.projectName) && Objects.equals(startDate, project.startDate) && Objects.equals(endDate, project.endDate) && Objects.equals(estimatedCost, project.estimatedCost);
+    }
 
-    @Column(name = "actualEndDate")
-    private Instant actualEndDate;
-
-    @Column(name = "actualCost")
-    private Double actualCost;
-
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectId, projectName, locationId, startDate, endDate, blueprintId, estimatedCost);
+    }
 }
