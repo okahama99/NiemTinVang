@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.projectManager;
 
+import com.ntv.ntvcons_backend.entities.ProjectManager;
+
 import java.util.Collection;
 import java.util.List;
 

@@ -1,39 +1,43 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.util.Objects;
 
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "task_assignment")
 public class TaskAssignment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "assignmentId", nullable = false)
-    private Integer assignmentId;
+    @Column(name = "AssignmentId", nullable = false)
+    private int assignmentId;
+    @Basic
+    @Column(name = "TaskId", nullable = false)
+    private int taskId;
+    @Basic
+    @Column(name = "AssignerId", nullable = false)
+    private int assignerId;
+    @Basic
+    @Column(name = "AssigneeId", nullable = false)
+    private int assigneeId;
 
-    @Column(name = "taskId", nullable = false)
-    private Integer taskId;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TaskAssignment that = (TaskAssignment) o;
+        return assignmentId == that.assignmentId && taskId == that.taskId && assignerId == that.assignerId && assigneeId == that.assigneeId;
+    }
 
-    @Column(name = "assignerId", nullable = false)
-    private Integer assignerId;
-
-    @Column(name = "assigneeId", nullable = false)
-    private Integer assigneeId;
-
-    @Column(name = "assignDate", nullable = false)
-    private Instant assignDate;
-
-    @Column(name = "removeDate")
-    private Instant removeDate;
-
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(assignmentId, taskId, assignerId, assigneeId);
+    }
 }

@@ -1,29 +1,37 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Objects;
 
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "role")
 public class Role extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "roleId", nullable = false)
-    private Integer roleId;
-
-    @Column(name = "roleName", nullable = false, length = 50)
+    @Column(name = "RoleId", nullable = false)
+    private int roleId;
+    @Basic
+    @Column(name = "RoleName", nullable = false, length = 50)
     private String roleName;
 
-    @Column(name = "roleDesc", length = 500)
-    private String roleDesc;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Role role = (Role) o;
+        return roleId == role.roleId && Objects.equals(roleName, role.roleName);
+    }
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(roleId, roleName);
+    }
 }

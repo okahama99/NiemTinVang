@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.role;
 
+import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,36 +1,40 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.util.Objects;
 
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Entity
-@Table(name = "project_manager")
 public class ProjectManager extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "projectManagerId", nullable = false)
-    private Integer projectManagerId;
+    @Column(name = "ProjectManagerId", nullable = false)
+    private int projectManagerId;
+    @Basic
+    @Column(name = "ManagerId", nullable = false)
+    private int managerId;
+    @Basic
+    @Column(name = "ProjectId", nullable = false)
+    private int projectId;
 
-    @Column(name = "managerId", nullable = false)
-    private Integer managerId;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProjectManager that = (ProjectManager) o;
+        return projectManagerId == that.projectManagerId && managerId == that.managerId && projectId == that.projectId;
+    }
 
-    @Column(name = "projectId", nullable = false)
-    private Integer projectId;
-
-    @Column(name = "assignDate", nullable = false)
-    private Instant assignDate;
-
-    @Column(name = "removeDate")
-    private Instant removeDate;
-
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(projectManagerId, managerId, projectId);
+    }
 }
