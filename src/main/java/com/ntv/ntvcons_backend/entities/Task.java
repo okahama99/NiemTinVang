@@ -1,56 +1,48 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
-import java.sql.Date;
-import java.util.Objects;
+import java.time.Instant;
 
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
+@Table(name = "task")
 public class Task extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "TaskId", nullable = false)
-    private int taskId;
-    @Basic
-    @Column(name = "ProjectId", nullable = false)
-    private int projectId;
-    @Basic
-    @Column(name = "TaskName", nullable = false, length = 255)
+    @Column(name = "taskId", nullable = false)
+    private Integer taskId;
+
+    @Column(name = "projectId", nullable = false)
+    private Integer projectId;
+
+    @Column(name = "creatorId", nullable = false)
+    private Integer creatorId;
+
+    @Column(name = "taskName", nullable = false)
     private String taskName;
-    @Basic
-    @Column(name = "TaskDesc", nullable = true, length = 500)
+
+    @Column(name = "taskDesc", length = 500)
     private String taskDesc;
-    @Basic
-    @Column(name = "PlanStartDate", nullable = false)
-    private Date planStartDate;
-    @Basic
-    @Column(name = "PlanEndDate", nullable = false)
-    private Date planEndDate;
-    @Basic
-    @Column(name = "ActualStartDate", nullable = true)
-    private Date actualStartDate;
-    @Basic
-    @Column(name = "ActualEndDate", nullable = true)
-    private Date actualEndDate;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Task task = (Task) o;
-        return taskId == task.taskId && projectId == task.projectId && Objects.equals(taskName, task.taskName) && Objects.equals(taskDesc, task.taskDesc) && Objects.equals(planStartDate, task.planStartDate) && Objects.equals(planEndDate, task.planEndDate) && Objects.equals(actualStartDate, task.actualStartDate) && Objects.equals(actualEndDate, task.actualEndDate);
-    }
+    @Column(name = "planStartDate", nullable = false)
+    private Instant planStartDate;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(taskId, projectId, taskName, taskDesc, planStartDate, planEndDate, actualStartDate, actualEndDate);
-    }
+    @Column(name = "planEndDate")
+    private Instant planEndDate;
+
+    @Column(name = "actualStartDate")
+    private Instant actualStartDate;
+
+    @Column(name = "actualEndDate")
+    private Instant actualEndDate;
+
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted = false;
+
 }

@@ -2,7 +2,6 @@ package com.ntv.ntvcons_backend.services.location;
 
 import com.ntv.ntvcons_backend.entities.Location;
 import com.ntv.ntvcons_backend.entities.locationModels.LocationModel;
-
 import java.util.List;
 
 public interface LocationService {

@@ -2,7 +2,6 @@ package com.ntv.ntvcons_backend.services.project;
 
 import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.projectModels.ProjectModel;
-
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;

@@ -2,7 +2,6 @@ package com.ntv.ntvcons_backend.services.report;
 
 import com.ntv.ntvcons_backend.entities.Report;
 import com.ntv.ntvcons_backend.entities.ReportModels.ReportModel;
-
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;

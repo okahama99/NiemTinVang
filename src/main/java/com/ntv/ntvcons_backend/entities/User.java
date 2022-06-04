@@ -1,46 +1,35 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
-import java.util.Objects;
 
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
+@Table(name = "user")
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "UserId", nullable = false)
-    private int userId;
-    @Basic
-    @Column(name = "RoleId", nullable = false)
-    private int roleId;
-    @Basic
-    @Column(name = "Username", nullable = false, length = 50)
+    @Column(name = "userId", nullable = false)
+    private Integer userId;
+
+    @Column(name = "roleId", nullable = false)
+    private Integer roleId;
+
+    @Column(name = "username", nullable = false, length = 50, unique = true)
     private String username;
-    @Basic
-    @Column(name = "Phone", nullable = false, length = 15)
+
+    @Column(name = "phone", nullable = false, length = 15, unique = true)
     private String phone;
-    @Basic
-    @Column(name = "Email", nullable = true, length = 320)
+
+    @Column(name = "email", length = 320)
     private String email;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return userId == user.userId && roleId == user.roleId && Objects.equals(username, user.username) && Objects.equals(phone, user.phone) && Objects.equals(email, user.email);
-    }
+    @Column(name = "isDeleted", nullable = false)
+    private Boolean isDeleted = false;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId, roleId, username, phone, email);
-    }
 }
