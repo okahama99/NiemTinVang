@@ -12,7 +12,7 @@ import java.time.Instant;
 @Setter
 @Entity
 @Table(name = "request")
-public class Request {
+public class Request extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "requestId", nullable = false)
@@ -27,8 +27,8 @@ public class Request {
     @Column(name = "RequesterId", nullable = false)
     private Integer RequesterId;
 
-    @Column(name = "requestDatetime", nullable = false)
-    private Instant requestDatetime;
+    @Column(name = "requestDate", nullable = false)
+    private Instant requestDate;
 
     @Column(name = "requestDesc", nullable = false, length = 500)
     private String requestDesc;
