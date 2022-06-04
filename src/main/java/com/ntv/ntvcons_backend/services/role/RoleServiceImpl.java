@@ -23,21 +23,24 @@ public class RoleServiceImpl implements RoleService{
     @Autowired
     RolePagingRepository rolePagingRepository;
 
+    /* CREATE */
     @Override
-    public Role insertRole(int roleID, String roleName) {
+    public Role createRole(int roleID, String roleName) {
+        return null;
+    }
+
+    /* READ */
+    @Override
+    public List<Role> getAllRole() {
         return null;
     }
 
     @Override
-    public boolean updateRole(int roleID, String roleName) {
-        return false;
+    public List<Role> getRoleByRoleName(String roleName) {
+        return null;
     }
 
-    @Override
-    public boolean deleteRole(int roleID) {
-        return false;
-    }
-
+    /* UPDATE */
     @Override
     public List<ShowRoleModel> getAllRole(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
@@ -68,9 +71,14 @@ public class RoleServiceImpl implements RoleService{
             return new ArrayList<ShowRoleModel>();
         }
     }
+  
+    public boolean updateRole(int roleID, String roleName) {
+        return false;
+    }
 
+    /* DELETE */
     @Override
-    public List<Role> getRoleByRoleName(String roleName) {
-        return null;
+    public boolean deleteRole(int roleID) {
+        return false;
     }
 }
