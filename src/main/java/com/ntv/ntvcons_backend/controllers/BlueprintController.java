@@ -12,28 +12,28 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/ProjectBlueprint")
-public class ProjectBlueprintController {
+public class BlueprintController {
     @Autowired
     BlueprintService blueprintService;
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping(value = "/createProjectBlueprint", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/createBlueprint", produces = "application/json;charset=UTF-8")
     public HttpStatus createProjectBlueprint(@RequestBody String projectBlueprintName,
                                              @RequestBody int designerId,
-                                             @RequestBody double projectBlueprintCost){
+                                             @RequestBody double projectBlueprintCost) {
 
         Blueprint result = blueprintService.createProjectBlueprint(projectBlueprintName, designerId, projectBlueprintCost);
-        if(result!=null){
+        if (result != null) {
             return HttpStatus.OK;
         }
         return HttpStatus.BAD_REQUEST;
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping(value = "/updateProjectBlueprint", produces = "application/json;charset=UTF-8")
-    public HttpStatus updateProjectBlueprint(@RequestBody ShowProjectBlueprintModel showProjectBlueprintModel){
+    @PutMapping(value = "/updateBlueprint", produces = "application/json;charset=UTF-8")
+    public HttpStatus updateProjectBlueprint(@RequestBody ShowProjectBlueprintModel showProjectBlueprintModel) {
         boolean result = blueprintService.updateProjectBlueprint(showProjectBlueprintModel);
-        if(result){
+        if (result) {
             return HttpStatus.OK;
         }
         return HttpStatus.BAD_REQUEST;
@@ -41,22 +41,20 @@ public class ProjectBlueprintController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
-    public @ResponseBody
-    List<ShowProjectBlueprintModel> getAll(@RequestBody int pageNo,
-                                  @RequestBody int pageSize,
-                                  @RequestBody String sortBy,
-                                  @RequestBody boolean sortType) {
+    public @ResponseBody List<ShowProjectBlueprintModel> getAll(@RequestBody int pageNo,
+                                                                @RequestBody int pageSize,
+                                                                @RequestBody String sortBy,
+                                                                @RequestBody boolean sortType) {
         List<ShowProjectBlueprintModel> projects = blueprintService.getAll(pageNo, pageSize, sortBy, sortType);
         return projects;
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping(value = "/deleteProjectBlueprint/{projectBlueprintId}", produces = "application/json;charset=UTF-8")
-    public HttpStatus deleteProjectBlueprint(@PathVariable(name = "projectBlueprintId") int projectBlueprintId){
-        if(blueprintService.deleteProjectBlueprint(projectBlueprintId))
-        {
+    @DeleteMapping(value = "/deleteBlueprint/{blueprintId}", produces = "application/json;charset=UTF-8")
+    public HttpStatus deleteProjectBlueprint(@PathVariable(name = "blueprintId") int projectBlueprintId) {
+        if (blueprintService.deleteProjectBlueprint(projectBlueprintId)) {
             return HttpStatus.OK;
-        }else{
+        } else {
             return HttpStatus.BAD_REQUEST;
         }
     }
