@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.entities;
 
+import com.ntv.ntvcons_backend.constants.EntityType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -41,4 +42,40 @@ public class EntityWrapper extends BaseEntity {
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;
 
+    /** For CREATE only */
+    public EntityWrapper(long entityId, EntityType type) {
+        this.entityWrapperId = null;
+        this.projectId = null;
+        this.reportId = null;
+        this.requestId = null;
+        this.postId = null;
+        this.userId = null;
+        this.workerId = null;
+        this.taskId = null;
+        this.isDeleted = false;
+
+        switch (type) {
+            case PROJECT_ENTITY:
+                this.projectId = entityId;
+                break;
+            case REPORT_ENTITY:
+                this.reportId = entityId;
+                break;
+            case REQUEST_ENTITY:
+                this.requestId = entityId;
+                break;
+            case POST_ENTITY:
+                this.postId = entityId;
+                break;
+            case USER_ENTITY:
+                this.userId = entityId;
+                break;
+            case WORKER_ENTITY:
+                this.workerId = entityId;
+                break;
+            case TASK_ENTITY:
+                this.taskId = entityId;
+                break;
+        }
+    }
 }

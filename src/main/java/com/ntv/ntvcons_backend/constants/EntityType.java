@@ -6,5 +6,6 @@ public enum EntityType {
     REQUEST_ENTITY,
     POST_ENTITY,
     USER_ENTITY,
-    WORKER_ENTITY
+    WORKER_ENTITY,
+    TASK_ENTITY
 }
