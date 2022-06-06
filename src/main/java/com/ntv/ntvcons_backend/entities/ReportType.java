@@ -15,7 +15,7 @@ public class ReportType extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reportTypeId", nullable = false)
-    private Integer reportTypeId;
+    private Long reportTypeId;
 
     @Column(name = "reportTypeName", nullable = false, length = 50)
     private String reportTypeName;

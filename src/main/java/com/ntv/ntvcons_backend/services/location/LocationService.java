@@ -1,7 +1,8 @@
 package com.ntv.ntvcons_backend.services.location;
 
 import com.ntv.ntvcons_backend.entities.Location;
-import com.ntv.ntvcons_backend.entities.locationModels.LocationModel;
+import com.ntv.ntvcons_backend.entities.LocationModels.ShowLocationModel;
+
 import java.util.List;
 
 public interface LocationService {
@@ -10,7 +11,7 @@ public interface LocationService {
                             String city, String province, String coordinate);
 
     /* READ */
-    List<Location> getAll();
+    List<ShowLocationModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<Location> getAllByWardLike(String ward);
 
@@ -25,8 +26,7 @@ public interface LocationService {
     Location getById(int locationId);
 
     /* UPDATE */
-    boolean updateLocation(LocationModel locationModel);
-
+    boolean updateLocation(ShowLocationModel showLocationModel);
 
     /* DELETE */
     boolean deleteLocation(int locationId);

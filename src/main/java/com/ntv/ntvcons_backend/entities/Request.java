@@ -16,16 +16,16 @@ public class Request extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "requestId", nullable = false)
-    private Integer requestId;
+    private Long requestId;
 
     @Column(name = "projectId", nullable = false)
-    private Integer projectId;
+    private Long projectId;
 
     @Column(name = "requestTypeId", nullable = false)
-    private Integer requestTypeId;
+    private Long requestTypeId;
 
     @Column(name = "RequesterId", nullable = false)
-    private Integer RequesterId;
+    private Long RequesterId;
 
     @Column(name = "requestDate", nullable = false)
     private Instant requestDate;
@@ -34,7 +34,7 @@ public class Request extends BaseEntity {
     private String requestDesc;
 
     @Column(name = "verifierId")
-    private Integer verifierId;
+    private Long verifierId;
 
     @Column(name = "isVerified", nullable = false)
     private Boolean isVerified = false;

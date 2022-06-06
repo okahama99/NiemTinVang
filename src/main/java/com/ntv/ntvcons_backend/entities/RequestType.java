@@ -15,7 +15,7 @@ public class RequestType extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "requestTypeId", nullable = false)
-    private Integer requestTypeId;
+    private Long requestTypeId;
 
     @Column(name = "requestTypeName", nullable = false, length = 50)
     private String requestTypeName;

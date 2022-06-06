@@ -16,16 +16,16 @@ public class Report extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reportId", nullable = false)
-    private Integer reportId;
+    private Long reportId;
 
     @Column(name = "projectId", nullable = false)
-    private Integer projectId;
+    private Long projectId;
 
     @Column(name = "reportTypeId", nullable = false)
-    private Integer reportTypeId;
+    private Long reportTypeId;
 
     @Column(name = "reporterId", nullable = false)
-    private Integer reporterId;
+    private Long reporterId;
 
     @Column(name = "reportDate", nullable = false)
     private Instant reportDate;

@@ -1,8 +1,7 @@
 package com.ntv.ntvcons_backend.services.externalFile;
 
-
 import com.ntv.ntvcons_backend.entities.ExternalFile;
-import com.ntv.ntvcons_backend.entities.externalFileModels.ShowExternalFileModel;
+import com.ntv.ntvcons_backend.entities.ExternalFileModels.ShowExternalFileModel;
 
 import java.util.Collection;
 import java.util.List;

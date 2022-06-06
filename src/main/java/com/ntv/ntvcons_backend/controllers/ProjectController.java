@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.entities.Project;
-import com.ntv.ntvcons_backend.entities.projectModels.ProjectModel;
+import com.ntv.ntvcons_backend.entities.projectModels.ShowProjectModel;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -34,8 +34,8 @@ public class ProjectController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/updateProject", produces = "application/json;charset=UTF-8")
-    public HttpStatus updateProject(@RequestBody ProjectModel projectModel){
-        boolean result = projectService.updateProject(projectModel);
+    public HttpStatus updateProject(@RequestBody ShowProjectModel showProjectModel){
+        boolean result = projectService.updateProject(showProjectModel);
         if(result){
             return HttpStatus.OK;
         }
@@ -45,8 +45,11 @@ public class ProjectController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    List<Project> getAll() {
-        List<Project> projects = projectService.getAll();
+    List<ShowProjectModel> getAll(@RequestBody int pageNo,
+                         @RequestBody int pageSize,
+                         @RequestBody String sortBy,
+                         @RequestBody boolean sortType) {
+        List<ShowProjectModel> projects = projectService.getAll(pageNo, pageSize, sortBy, sortType);
         return projects;
     }
 

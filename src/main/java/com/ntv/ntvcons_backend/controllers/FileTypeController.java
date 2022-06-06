@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.entities.FileType;
-import com.ntv.ntvcons_backend.entities.fileTypeModels.FileTypeModel;
+import com.ntv.ntvcons_backend.entities.FileTypeModels.ShowFileTypeModel;
 import com.ntv.ntvcons_backend.services.fileType.FileTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,8 +30,8 @@ public class FileTypeController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/updateFileType", produces = "application/json;charset=UTF-8")
-    public HttpStatus updateFileType(@RequestBody FileTypeModel fileTypeModel){
-        boolean result = fileTypeService.updateFileType(fileTypeModel);
+    public HttpStatus updateFileType(@RequestBody ShowFileTypeModel showFileTypeModel){
+        boolean result = fileTypeService.updateFileType(showFileTypeModel);
         if(result){
             return HttpStatus.OK;
         }

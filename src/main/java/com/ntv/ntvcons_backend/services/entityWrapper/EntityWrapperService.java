@@ -22,6 +22,7 @@ public interface EntityWrapperService {
     EntityWrapper getById(int entityWrapperId);
 
     /* UPDATE */
+
     /* DELETE */
     boolean deleteEntityWrapper(int entityWrapperID);
 }

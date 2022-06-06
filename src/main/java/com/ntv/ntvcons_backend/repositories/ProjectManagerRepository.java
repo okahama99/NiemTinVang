@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.entities.ProjectManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,21 +11,21 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProjectManagerRepository extends JpaRepository<ProjectManager, Integer> {
-    List<ProjectManager> findAllByIsDeletedFalse();
+public interface ProjectManagerRepository extends JpaRepository<ProjectManager, Long> {
+    Page<ProjectManager> findAllByIsDeletedIsFalse(Pageable pageable);
 
 
     /* Id */
-    Optional<ProjectManager> findByProjectManagerIdAndIsDeletedIsFalse(int projectManagerId);
-    List<ProjectManager> findAllByProjectManagerIdInAndIsDeletedIsFalse(Collection<Integer> projectManagerIdCollection);
+    Optional<ProjectManager> findByProjectManagerIdAndIsDeletedIsFalse(long projectManagerId);
+    List<ProjectManager> findAllByProjectManagerIdInAndIsDeletedIsFalse(Collection<Long> projectManagerIdCollection);
 
 
     /* projectId */
-    List<ProjectManager> findAllByProjectIdAndIsDeletedIsFalse(int projectId);
-    List<ProjectManager> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Integer> projectIdCollection);
+    List<ProjectManager> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
+    List<ProjectManager> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
 
 
     /* managerId */
-    List<ProjectManager> findAllByManagerIdAndIsDeletedIsFalse(int managerId);
-    List<ProjectManager> findAllByManagerIdInAndIsDeletedIsFalse(Collection<Integer> managerIdCollection);
+    List<ProjectManager> findAllByManagerIdAndIsDeletedIsFalse(long managerId);
+    List<ProjectManager> findAllByManagerIdInAndIsDeletedIsFalse(Collection<Long> managerIdCollection);
 }

@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.project;
 
 import com.ntv.ntvcons_backend.dtos.location.LocationDTO;
-import com.ntv.ntvcons_backend.dtos.projectBlueprint.ProjectBlueprintDTO;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ public class ProjectDTO implements Serializable {
     private Integer projectId;
     private String projectName;
     private LocationDTO location;
-    private ProjectBlueprintDTO blueprint;
+    private BlueprintDTO blueprint;
     private Instant planStartDate;
     private Instant planEndDate;
     private Double estimatedCost;

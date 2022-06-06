@@ -10,18 +10,18 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name = "project_blueprint")
-public class ProjectBlueprint extends BaseEntity {
+@Table(name = "blueprint")
+public class Blueprint extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "blueprintId", nullable = false)
-    private Integer blueprintId;
+    private Long blueprintId;
+
+    @Column(name = "designerId", nullable = false)
+    private Long designerId;
 
     @Column(name = "blueprintName", nullable = false, length = 500)
     private String blueprintName;
-
-    @Column(name = "designerId", nullable = false)
-    private Integer designerId;
 
     @Column(name = "estimatedCost", nullable = false)
     private Double estimatedCost;

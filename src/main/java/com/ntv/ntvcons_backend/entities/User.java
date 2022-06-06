@@ -15,10 +15,10 @@ public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "userId", nullable = false)
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "roleId", nullable = false)
-    private Integer roleId;
+    private Long roleId;
 
     @Column(name = "username", nullable = false, length = 50, unique = true)
     private String username;

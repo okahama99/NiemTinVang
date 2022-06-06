@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,24 +12,24 @@ import java.util.Optional;
 
 @Repository
 public interface ExternalFileEntityWrapperPairingRepository
-        extends JpaRepository<ExternalFileEntityWrapperPairing, Integer> {
-    List<ExternalFileEntityWrapperPairing> findAllByIsDeletedFalse();
+        extends JpaRepository<ExternalFileEntityWrapperPairing, Long> {
+    Page<ExternalFileEntityWrapperPairing> findAllByIsDeletedIsFalse(Pageable pageable);
 
 
     /* Id */
-    Optional<ExternalFileEntityWrapperPairing> findByPairingIdAndIsDeletedIsFalse(int pairingId);
+    Optional<ExternalFileEntityWrapperPairing> findByPairingIdAndIsDeletedIsFalse(long pairingId);
     List<ExternalFileEntityWrapperPairing> findAllByPairingIdInAndIsDeletedIsFalse
-            (Collection<Integer> pairingIdCollection);
+            (Collection<Long> pairingIdCollection);
 
 
     /* entityWrapperId */
-    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdAndIsDeletedIsFalse(int entityWrapperId);
+    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdAndIsDeletedIsFalse(long entityWrapperId);
     List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdInAndIsDeletedIsFalse
-            (Collection<Integer> entityWrapperIdCollection);
+            (Collection<Long> entityWrapperIdCollection);
 
 
     /* externalFileId */
-    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdAndIsDeletedIsFalse(int externalFileId);
+    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdAndIsDeletedIsFalse(long externalFileId);
     List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdInAndIsDeletedIsFalse
-            (Collection<Integer> externalFileIdCollection);
+            (Collection<Long> externalFileIdCollection);
 }

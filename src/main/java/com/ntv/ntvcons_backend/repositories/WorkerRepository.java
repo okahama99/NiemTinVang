@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.entities.Worker;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface WorkerRepository extends JpaRepository<Worker, Integer> {
-        List<Worker> findAllByIsDeletedFalse();
+public interface WorkerRepository extends JpaRepository<Worker, Long> {
+        Page<Worker> findAllByIsDeletedIsFalse(Pageable pageable);
 
 
         /* Id */
-        Optional<Worker> findByWorkerIdAndIsDeletedIsFalse(int workerId);
-        List<Worker> findAllByWorkerIdInAndIsDeletedIsFalse(Collection<Integer> workerIdCollection);
+        Optional<Worker> findByWorkerIdAndIsDeletedIsFalse(long workerId);
+        List<Worker> findAllByWorkerIdInAndIsDeletedIsFalse(Collection<Long> workerIdCollection);
 
 
         /* fullName */
@@ -34,6 +36,6 @@ public interface WorkerRepository extends JpaRepository<Worker, Integer> {
 
 
         /* addressId */
-        List<Worker> findAllByAddressIdAndIsDeletedIsFalse(int addressId);
-        List<Worker> findAllByAddressIdInAndIsDeletedIsFalse(Collection<Integer> addressIdCollection);
+        List<Worker> findAllByAddressIdAndIsDeletedIsFalse(long addressId);
+        List<Worker> findAllByAddressIdInAndIsDeletedIsFalse(Collection<Long> addressIdCollection);
 }

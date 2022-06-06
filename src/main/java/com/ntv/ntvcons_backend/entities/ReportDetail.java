@@ -15,10 +15,10 @@ public class ReportDetail extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reportDetailId", nullable = false)
-    private Integer reportDetailId;
+    private Long reportDetailId;
 
     @Column(name = "reportId", nullable = false)
-    private Integer reportId;
+    private Long reportId;
 
     @Column(name = "itemDesc", nullable = false, length = 500)
     private String itemDesc;

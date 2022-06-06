@@ -1,4 +1,4 @@
-package com.ntv.ntvcons_backend.dtos.projectBlueprint;
+package com.ntv.ntvcons_backend.dtos.blueprint;
 
 import com.ntv.ntvcons_backend.dtos.user.UserDTO;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectBlueprintDTO implements Serializable {
+public class BlueprintDTO implements Serializable {
     private Integer blueprintId;
     private String blueprintName;
     private UserDTO designer;

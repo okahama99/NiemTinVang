@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.entities.Location;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface LocationRepository extends JpaRepository<Location, Integer> {
-        List<Location> findAllByIsDeletedFalse();
+public interface LocationRepository extends JpaRepository<Location, Long> {
+        Page<Location> findAllByIsDeletedIsFalse(Pageable pageable);
 
 
         /* Id */
-        Optional<Location> findByLocationIdAndIsDeletedIsFalse(int locationId);
-        List<Location> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Integer> locationIdCollection);
+        Optional<Location> findByLocationIdAndIsDeletedIsFalse(long locationId);
+        List<Location> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Long> locationIdCollection);
 
 
         /* Top down */

@@ -16,10 +16,10 @@ public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "postId", nullable = false)
-    private Integer postId;
+    private Long postId;
 
     @Column(name = "authorId", nullable = false)
-    private Integer authorId;
+    private Long authorId;
 
     @Column(name = "postTitle", nullable = false, length = 500)
     private String postTitle;

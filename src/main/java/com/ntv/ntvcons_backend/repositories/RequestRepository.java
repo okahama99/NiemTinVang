@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.entities.Request;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,38 +12,38 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RequestRepository extends JpaRepository<Request, Integer> {
-    List<Request> findAllByIsDeletedFalse();
+public interface RequestRepository extends JpaRepository<Request, Long> {
+    Page<Request> findAllByIsDeletedIsFalse(Pageable pageable);
 
 
     /* Id */
-    Optional<Request> findByRequestIdAndIsDeletedIsFalse(int requestId);
-    List<Request> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Integer> requestIdCollection);
+    Optional<Request> findByRequestIdAndIsDeletedIsFalse(long requestId);
+    List<Request> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
 
 
     /* projectId */
-    List<Request> findAllByProjectIdAndIsDeletedIsFalse(int projectId);
-    List<Request> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Integer> projectIdCollection);
+    List<Request> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
+    List<Request> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
     /* projectId & isVerified */
-    List<Request> findAllByProjectIdAndIsVerifiedAndIsDeletedIsFalse(int projectId, boolean isVerified);
+    List<Request> findAllByProjectIdAndIsVerifiedAndIsDeletedIsFalse(long projectId, boolean isVerified);
     /* projectId & isVerified = true & isApproved (Approval required Verification) */
-    List<Request> findAllByProjectIdAndIsVerifiedIsTrueAndIsApprovedAndIsDeletedIsFalse(int projectId, boolean isApproved);
+    List<Request> findAllByProjectIdAndIsVerifiedIsTrueAndIsApprovedAndIsDeletedIsFalse(long projectId, boolean isApproved);
 
 
     /* requestTypeId */
-    List<Request> findAllByRequestTypeIdAndIsDeletedIsFalse(int requestTypeId);
-    List<Request> findAllByRequestTypeIdInAndIsDeletedIsFalse(Collection<Integer> requestTypeIdCollection);
+    List<Request> findAllByRequestTypeIdAndIsDeletedIsFalse(long requestTypeId);
+    List<Request> findAllByRequestTypeIdInAndIsDeletedIsFalse(Collection<Long> requestTypeIdCollection);
 
 
     /* requesterId */
-    List<Request> findAllByRequesterIdAndIsDeletedIsFalse(int requesterId);
-    List<Request> findAllByRequesterIdInAndIsDeletedIsFalse(Collection<Integer> requesterIdCollection);
+    List<Request> findAllByRequesterIdAndIsDeletedIsFalse(long requesterId);
+    List<Request> findAllByRequesterIdInAndIsDeletedIsFalse(Collection<Long> requesterIdCollection);
 
 
     /* requestDatetime */
-    List<Request> findAllByRequestDatetimeAfterAndIsDeletedIsFalse(Instant afterDatetime);
-    List<Request> findAllByRequestDatetimeBeforeAndIsDeletedIsFalse(Instant beforeDatetime);
-    List<Request> findAllByRequestDatetimeBetweenAndIsDeletedIsFalse(Instant fromDatetime, Instant toDatetime);
+    List<Request> findAllByRequestDateAfterAndIsDeletedIsFalse(Instant afterDatetime);
+    List<Request> findAllByRequestDateBeforeAndIsDeletedIsFalse(Instant beforeDatetime);
+    List<Request> findAllByRequestDateBetweenAndIsDeletedIsFalse(Instant fromDatetime, Instant toDatetime);
 
 
     /* isVerified */
@@ -53,8 +55,8 @@ public interface RequestRepository extends JpaRepository<Request, Integer> {
     List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBetweenAndIsDeletedIsFalse(Instant fromDate, Instant toDate);
 
     /* isVerified = true  & verifierId */
-    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdAndIsDeletedIsFalse(int verifierId);
-    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdInAndIsDeletedIsFalse(Collection<Integer> verifierIdCollection);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdAndIsDeletedIsFalse(long verifierId);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdInAndIsDeletedIsFalse(Collection<Long> verifierIdCollection);
 
     /* isVerified = true & isApproved (Approval required Verification) */
     List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndIsDeletedIsFalse(boolean isApproved);

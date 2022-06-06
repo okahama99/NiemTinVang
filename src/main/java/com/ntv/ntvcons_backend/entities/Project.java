@@ -16,16 +16,16 @@ public class Project extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "projectId", nullable = false)
-    private Integer projectId;
+    private Long projectId;
 
     @Column(name = "projectName", nullable = false, length = 500)
     private String projectName;
 
     @Column(name = "locationId", nullable = false)
-    private Integer locationId;
+    private Long locationId;
 
     @Column(name = "blueprintId", nullable = false)
-    private Integer blueprintId;
+    private Long blueprintId;
 
     @Column(name = "planStartDate", nullable = false)
     private Instant planStartDate;

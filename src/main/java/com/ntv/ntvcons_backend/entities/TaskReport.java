@@ -15,13 +15,13 @@ public class TaskReport extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "taskReportId", nullable = false)
-    private Integer taskReportId;
+    private Long taskReportId;
 
     @Column(name = "taskId", nullable = false)
-    private Integer taskId;
+    private Long taskId;
 
     @Column(name = "reportId", nullable = false)
-    private Integer reportId;
+    private Long reportId;
 
     @Column(name = "taskProgress", nullable = false, length = 500)
     private String taskProgress;

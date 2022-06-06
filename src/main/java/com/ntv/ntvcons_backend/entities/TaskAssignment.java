@@ -16,16 +16,16 @@ public class TaskAssignment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "assignmentId", nullable = false)
-    private Integer assignmentId;
+    private Long assignmentId;
 
     @Column(name = "taskId", nullable = false)
-    private Integer taskId;
+    private Long taskId;
 
     @Column(name = "assignerId", nullable = false)
-    private Integer assignerId;
+    private Long assignerId;
 
     @Column(name = "assigneeId", nullable = false)
-    private Integer assigneeId;
+    private Long assigneeId;
 
     @Column(name = "assignDate", nullable = false)
     private Instant assignDate;

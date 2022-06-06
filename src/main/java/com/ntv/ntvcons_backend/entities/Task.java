@@ -16,13 +16,10 @@ public class Task extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "taskId", nullable = false)
-    private Integer taskId;
+    private Long taskId;
 
     @Column(name = "projectId", nullable = false)
-    private Integer projectId;
-
-    @Column(name = "creatorId", nullable = false)
-    private Integer creatorId;
+    private Long projectId;
 
     @Column(name = "taskName", nullable = false)
     private String taskName;

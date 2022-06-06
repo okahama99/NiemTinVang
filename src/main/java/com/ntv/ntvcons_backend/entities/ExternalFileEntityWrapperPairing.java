@@ -15,13 +15,13 @@ public class ExternalFileEntityWrapperPairing extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pairingId", nullable = false)
-    private Integer pairingId;
+    private Long pairingId;
 
     @Column(name = "externalFileId", nullable = false)
-    private Integer externalFileId;
+    private Long externalFileId;
 
     @Column(name = "entityWrapperId", nullable = false)
-    private Integer entityWrapperId;
+    private Long entityWrapperId;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

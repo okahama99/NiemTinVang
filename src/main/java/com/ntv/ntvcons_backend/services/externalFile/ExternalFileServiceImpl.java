@@ -1,8 +1,7 @@
 package com.ntv.ntvcons_backend.services.externalFile;
 
-
 import com.ntv.ntvcons_backend.entities.ExternalFile;
-import com.ntv.ntvcons_backend.entities.externalFileModels.ShowExternalFileModel;
+import com.ntv.ntvcons_backend.entities.ExternalFileModels.ShowExternalFileModel;
 import com.ntv.ntvcons_backend.repositories.ExternalFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,11 +14,13 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Autowired
     private ExternalFileRepository externalFileRepository;
 
+    /* CREATE */
     @Override
     public ExternalFile createExternalFile(String fileName, String fileLink, int fileTypeId) {
         return null;
     }
 
+    /* READ */
     @Override
     public ExternalFile checkDuplicateByFileName(String fileName) {
         return null;
@@ -55,11 +56,13 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return null;
     }
 
+    /* UPDATE */
     @Override
     public ExternalFile updateExternalFile(int id, String name, String fileLink, int typeID) {
         return null;
     }
 
+    /* DELETE */
     @Override
     public boolean deleteExternalFile(int id) {
         return false;

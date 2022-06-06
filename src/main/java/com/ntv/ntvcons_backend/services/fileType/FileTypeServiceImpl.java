@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.services.fileType;
 
 import com.ntv.ntvcons_backend.entities.FileType;
-import com.ntv.ntvcons_backend.entities.fileTypeModels.FileTypeModel;
+import com.ntv.ntvcons_backend.entities.FileTypeModels.ShowFileTypeModel;
 import com.ntv.ntvcons_backend.repositories.FileTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,11 +13,13 @@ public class FileTypeServiceImpl implements FileTypeService{
     @Autowired
     private FileTypeRepository fileTypeRepository;
 
+    /* CREATE */
     @Override
     public FileType createFileType(String fileTypeName, String fileTypeDesc, String fileTypeExtension) {
         return null;
     }
 
+    /* READ */
     @Override
     public List<FileType> getAll() {
         return null;
@@ -48,11 +50,13 @@ public class FileTypeServiceImpl implements FileTypeService{
         return null;
     }
 
+    /* UPDATE */
     @Override
-    public boolean updateFileType(FileTypeModel fileTypeModel) {
+    public boolean updateFileType(ShowFileTypeModel showFileTypeModel) {
         return true;
     }
 
+    /* DELETE */
     @Override
     public boolean deleteFileType(int fileTypeId) {
         return false;

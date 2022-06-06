@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.entities.Project;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,13 +12,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProjectRepository extends JpaRepository<Project, Integer> {
-    List<Project> findAllByIsDeletedFalse();
+public interface ProjectRepository extends JpaRepository<Project, Long> {
+    Page<Project> findAllByIsDeletedIsFalse(Pageable pageable);
 
 
     /* Id */
-    Optional<Project> findByProjectIdAndIsDeletedIsFalse(int projectId);
-    List<Project> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Integer> projectIdCollection);
+    Optional<Project> findByProjectIdAndIsDeletedIsFalse(long projectId);
+    List<Project> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
 
 
     /* projectName */
@@ -25,8 +27,8 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
 
 
     /* locationId */
-    List<Project> findAllByLocationIdAndIsDeletedIsFalse(int locationId);
-    List<Project> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Integer> locationIdCollection);
+    List<Project> findAllByLocationIdAndIsDeletedIsFalse(long locationId);
+    List<Project> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Long> locationIdCollection);
 
 
     /* planStartDate */

@@ -16,13 +16,13 @@ public class ProjectManager extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "projectManagerId", nullable = false)
-    private Integer projectManagerId;
-
-    @Column(name = "managerId", nullable = false)
-    private Integer managerId;
+    private Long projectManagerId;
 
     @Column(name = "projectId", nullable = false)
-    private Integer projectId;
+    private Long projectId;
+
+    @Column(name = "managerId", nullable = false)
+    private Long managerId;
 
     @Column(name = "assignDate", nullable = false)
     private Instant assignDate;

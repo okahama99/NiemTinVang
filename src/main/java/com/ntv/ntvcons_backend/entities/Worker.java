@@ -15,7 +15,7 @@ public class Worker extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "workerId", nullable = false)
-    private Integer workerId;
+    private Long workerId;
 
     @Column(name = "fullName", nullable = false, length = 100)
     private String fullName;
@@ -27,7 +27,7 @@ public class Worker extends BaseEntity {
     private String socialSecurityCode;
 
     @Column(name = "addressId", nullable = false)
-    private Integer addressId;
+    private Long addressId;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

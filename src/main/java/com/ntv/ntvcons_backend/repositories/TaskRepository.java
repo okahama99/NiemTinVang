@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.entities.Task;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,23 +12,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TaskRepository extends JpaRepository<Task, Integer> {
-    List<Task> findAllByIsDeletedFalse();
+public interface TaskRepository extends JpaRepository<Task, Long> {
+    Page<Task> findAllByIsDeletedIsFalse(Pageable pageable);
 
 
     /* Id */
-    Optional<Task> findByTaskIdAndIsDeletedIsFalse(int taskId);
-    List<Task> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Integer> taskIdCollection);
+    Optional<Task> findByTaskIdAndIsDeletedIsFalse(long taskId);
+    List<Task> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
 
 
     /* projectId */
-    List<Task> findAllByProjectIdAndIsDeletedIsFalse(int projectId);
-    List<Task> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Integer> projectIdCollection);
-
-
-    /* creatorId */
-    List<Task> findAllByCreatorIdAndIsDeletedIsFalse(int creatorId);
-    List<Task> findAllByCreatorIdInAndIsDeletedIsFalse(Collection<Integer> creatorIdCollection);
+    List<Task> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
+    List<Task> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
 
 
     /* taskName */

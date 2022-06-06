@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.entities.TaskAssignment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,28 +12,28 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Integer> {
-    List<TaskAssignment> findAllByIsDeletedFalse();
+public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Long> {
+    Page<TaskAssignment> findAllByIsDeletedIsFalse(Pageable pageable);
 
 
     /* Id */
-    Optional<TaskAssignment> findByAssignmentIdAndIsDeletedIsFalse(int assignmentId);
-    List<TaskAssignment> findAllByAssignmentIdInAndIsDeletedIsFalse(Collection<Integer> assignmentIdCollection);
+    Optional<TaskAssignment> findByAssignmentIdAndIsDeletedIsFalse(long assignmentId);
+    List<TaskAssignment> findAllByAssignmentIdInAndIsDeletedIsFalse(Collection<Long> assignmentIdCollection);
 
 
     /* taskId */
-    List<TaskAssignment> findAllByTaskIdAndIsDeletedIsFalse(int taskId);
-    List<TaskAssignment> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Integer> taskIdCollection);
+    List<TaskAssignment> findAllByTaskIdAndIsDeletedIsFalse(long taskId);
+    List<TaskAssignment> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
 
 
     /* assignerId */
-    List<TaskAssignment> findAllByAssignerIdAndIsDeletedIsFalse(int assignerId);
-    List<TaskAssignment> findAllByAssignerIdInAndIsDeletedIsFalse(Collection<Integer> assignerIdCollection);
+    List<TaskAssignment> findAllByAssignerIdAndIsDeletedIsFalse(long assignerId);
+    List<TaskAssignment> findAllByAssignerIdInAndIsDeletedIsFalse(Collection<Long> assignerIdCollection);
 
 
     /* assigneeId */
-    List<TaskAssignment> findAllByAssigneeIdAndIsDeletedIsFalse(int assigneeId);
-    List<TaskAssignment> findAllByAssigneeIdInAndIsDeletedIsFalse(Collection<Integer> assigneeIdCollection);
+    List<TaskAssignment> findAllByAssigneeIdAndIsDeletedIsFalse(long assigneeId);
+    List<TaskAssignment> findAllByAssigneeIdInAndIsDeletedIsFalse(Collection<Long> assigneeIdCollection);
 
 
     /* assignDate */

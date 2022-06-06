@@ -1,12 +1,18 @@
 package com.ntv.ntvcons_backend.services.report;
 
+import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.Report;
-import com.ntv.ntvcons_backend.entities.ReportModels.ReportModel;
+import com.ntv.ntvcons_backend.entities.ReportModels.ShowReportModel;
 import com.ntv.ntvcons_backend.repositories.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,14 +21,49 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private ReportRepository reportRepository;
 
+    /* CREATE */
     @Override
     public Report createReport(int projectId, int reporterId, Timestamp reportDate, String reportDesc) {
         return null;
     }
 
+    /* READ */;
     @Override
-    public List<Report> getAll() {
-        return null;
+    public List<ShowReportModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<Report> pagingResult = reportRepository.findAllByIsDeletedIsFalse(paging);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowReportModel> modelResult =
+                    pagingResult.map(new Converter<Report, ShowReportModel>() {
+
+                @Override
+                protected ShowReportModel doForward(Report report) {
+                    ShowReportModel model = new ShowReportModel();
+                    //TODO
+                    return model;
+                }
+
+                @Override
+                protected Report doBackward(ShowReportModel showReportModel) {
+                    return null;
+                }
+
+            });
+
+            return modelResult.getContent();
+
+        }else{
+            return new ArrayList<ShowReportModel>();
+        }
     }
 
     @Override
@@ -50,11 +91,13 @@ public class ReportServiceImpl implements ReportService {
         return null;
     }
 
+    /* UPDATE */
     @Override
-    public boolean updateReport(ReportModel reportModel) {
+    public boolean updateReport(ShowReportModel showReportModel) {
         return true;
     }
 
+    /* DELETE */
     @Override
     public boolean deleteReport(int reportId) {
         return false;
