@@ -25,7 +25,6 @@ public interface FileTypeService {
     /* UPDATE */
     boolean updateFileType(ShowFileTypeModel showFileTypeModel);
 
-
     /* DELETE */
     boolean deleteFileType(int fileTypeId);
 }

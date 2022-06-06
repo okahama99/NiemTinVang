@@ -1,9 +1,9 @@
 package com.ntv.ntvcons_backend.controllers;
 
 
-import com.ntv.ntvcons_backend.entities.ProjectBlueprint;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.ProjectBlueprintModels.ShowProjectBlueprintModel;
-import com.ntv.ntvcons_backend.services.projectBlueprint.ProjectBlueprintService;
+import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/ProjectBlueprint")
 public class ProjectBlueprintController {
     @Autowired
-    ProjectBlueprintService projectBlueprintService;
+    BlueprintService blueprintService;
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/createProjectBlueprint", produces = "application/json;charset=UTF-8")
@@ -22,7 +22,7 @@ public class ProjectBlueprintController {
                                              @RequestBody int designerId,
                                              @RequestBody double projectBlueprintCost){
 
-        ProjectBlueprint result = projectBlueprintService.createProjectBlueprint(projectBlueprintName, designerId, projectBlueprintCost);
+        Blueprint result = blueprintService.createProjectBlueprint(projectBlueprintName, designerId, projectBlueprintCost);
         if(result!=null){
             return HttpStatus.OK;
         }
@@ -32,7 +32,7 @@ public class ProjectBlueprintController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/updateProjectBlueprint", produces = "application/json;charset=UTF-8")
     public HttpStatus updateProjectBlueprint(@RequestBody ShowProjectBlueprintModel showProjectBlueprintModel){
-        boolean result = projectBlueprintService.updateProjectBlueprint(showProjectBlueprintModel);
+        boolean result = blueprintService.updateProjectBlueprint(showProjectBlueprintModel);
         if(result){
             return HttpStatus.OK;
         }
@@ -46,14 +46,14 @@ public class ProjectBlueprintController {
                                   @RequestBody int pageSize,
                                   @RequestBody String sortBy,
                                   @RequestBody boolean sortType) {
-        List<ShowProjectBlueprintModel> projects = projectBlueprintService.getAll(pageNo, pageSize, sortBy, sortType);
+        List<ShowProjectBlueprintModel> projects = blueprintService.getAll(pageNo, pageSize, sortBy, sortType);
         return projects;
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/deleteProjectBlueprint/{projectBlueprintId}", produces = "application/json;charset=UTF-8")
     public HttpStatus deleteProjectBlueprint(@PathVariable(name = "projectBlueprintId") int projectBlueprintId){
-        if(projectBlueprintService.deleteProjectBlueprint(projectBlueprintId))
+        if(blueprintService.deleteProjectBlueprint(projectBlueprintId))
         {
             return HttpStatus.OK;
         }else{

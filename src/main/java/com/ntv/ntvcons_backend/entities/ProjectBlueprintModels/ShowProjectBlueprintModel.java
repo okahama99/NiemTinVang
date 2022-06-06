@@ -8,7 +8,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class ShowProjectBlueprintModel {
-    private int projectBlueprintId, designerId;
+    private long projectBlueprintId, designerId;
     private String projectBlueprintName;
     private double projectBlueprintCost;
     private Long createdBy, updatedBy;

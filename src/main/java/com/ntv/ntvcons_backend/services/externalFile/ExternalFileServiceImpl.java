@@ -14,11 +14,13 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Autowired
     private ExternalFileRepository externalFileRepository;
 
+    /* CREATE */
     @Override
     public ExternalFile createExternalFile(String fileName, String fileLink, int fileTypeId) {
         return null;
     }
 
+    /* READ */
     @Override
     public ExternalFile checkDuplicateByFileName(String fileName) {
         return null;
@@ -54,11 +56,13 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return null;
     }
 
+    /* UPDATE */
     @Override
     public ExternalFile updateExternalFile(int id, String name, String fileLink, int typeID) {
         return null;
     }
 
+    /* DELETE */
     @Override
     public boolean deleteExternalFile(int id) {
         return false;

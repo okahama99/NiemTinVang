@@ -8,7 +8,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class ShowLocationModel {
-    private int locationId;
+    private long locationId;
     private String addressNumber, street, ward, district, city, province, coordinate;
     private Long createdBy, updatedBy;
     private Date createdAt, updatedAt;

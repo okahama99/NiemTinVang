@@ -15,12 +15,13 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
     @Autowired
     private EntityWrapperRepository entityWrapperRepository;
 
-
+    /* CREATE */
     @Override
     public ExternalFileEntityWrapperPairing createPairing(int externalFileId, int entityWrapperId) {
         return null;
     }
 
+    /* READ */
     @Override
     public List<ExternalFileEntityWrapperPairing> getAll() {
         return null;
@@ -41,6 +42,9 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
         return null;
     }
 
+    /* UPDATE */
+
+    /* DELETE */
     @Override
     public boolean deletePairing(int pairingId) {
         return false;

@@ -3,7 +3,6 @@ package com.ntv.ntvcons_backend.services.entityWrapper;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.entities.EntityWrapper;
 import com.ntv.ntvcons_backend.repositories.EntityWrapperRepository;
-import com.ntv.ntvcons_backend.repositories.ExternalFileEntityWrapperPairingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +14,13 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Autowired
     private EntityWrapperRepository entityWrapperRepository;
 
-
+    /* CREATE */
     @Override
     public EntityWrapper createEntityWrapper(int entityID, EntityType type) {
         return null;
     }
 
+    /* READ */
     @Override
     public List<EntityWrapper> getAll() {
         return null;
@@ -46,6 +46,9 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         return null;
     }
 
+    /* UPDATE */
+
+    /* DELETE */
     @Override
     public boolean deleteEntityWrapper(int entityWrapperID) {
         return false;

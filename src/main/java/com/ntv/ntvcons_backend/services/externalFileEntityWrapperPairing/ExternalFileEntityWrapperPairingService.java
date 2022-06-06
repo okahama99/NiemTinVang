@@ -18,6 +18,7 @@ public interface ExternalFileEntityWrapperPairingService {
     ExternalFileEntityWrapperPairing getById(int pairingId);
 
     /* UPDATE */
+
     /* DELETE */
     boolean deletePairing(int pairingId);
 

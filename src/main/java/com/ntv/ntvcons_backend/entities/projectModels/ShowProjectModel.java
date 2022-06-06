@@ -4,14 +4,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Date;
 
 @Getter
 @Setter
 public class ShowProjectModel {
-    private int projectId, locationId, blueprintId;
+    private long projectId, locationId, blueprintId;
     private String projectName;
-    private Timestamp startDate, endDate;
+    private Instant startDate, endDate;
     private Double estimateCost;
     private Long createdBy, updatedBy;
     private Date createdAt, updatedAt;

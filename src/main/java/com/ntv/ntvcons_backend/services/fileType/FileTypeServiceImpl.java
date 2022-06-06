@@ -13,11 +13,13 @@ public class FileTypeServiceImpl implements FileTypeService{
     @Autowired
     private FileTypeRepository fileTypeRepository;
 
+    /* CREATE */
     @Override
     public FileType createFileType(String fileTypeName, String fileTypeDesc, String fileTypeExtension) {
         return null;
     }
 
+    /* READ */
     @Override
     public List<FileType> getAll() {
         return null;
@@ -48,11 +50,13 @@ public class FileTypeServiceImpl implements FileTypeService{
         return null;
     }
 
+    /* UPDATE */
     @Override
     public boolean updateFileType(ShowFileTypeModel showFileTypeModel) {
         return true;
     }
 
+    /* DELETE */
     @Override
     public boolean deleteFileType(int fileTypeId) {
         return false;

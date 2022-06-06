@@ -3,7 +3,6 @@ package com.ntv.ntvcons_backend.services.reportDetail;
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.ReportDetail;
 import com.ntv.ntvcons_backend.entities.ReportDetailModels.ShowReportDetailModel;
-import com.ntv.ntvcons_backend.repositories.PagingRepositories.ReportDetailPagingRepository;
 import com.ntv.ntvcons_backend.repositories.ReportDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,27 +19,29 @@ public class ReportDetailServiceImpl implements ReportDetailService{
     @Autowired
     ReportDetailRepository reportDetailRepository;
 
-    @Autowired
-    ReportDetailPagingRepository reportDetailPagingRepository;
-
+    /* CREATE */
     @Override
     public ReportDetail createReportDetail() {
         return null;
     }
 
+    /* READ */
     @Override
     public List<ShowReportDetailModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
-        if(sortType)
-        {
+        if(sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
         }else{
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
-        Page<ReportDetail> pagingResult = reportDetailPagingRepository.findAll(paging);
+
+        Page<ReportDetail> pagingResult = reportDetailRepository.findAllByIsDeletedIsFalse(paging);
+
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
             Page<ShowReportDetailModel> modelResult = pagingResult.map(new Converter<ReportDetail, ShowReportDetailModel>() {
+
                 @Override
                 protected ShowReportDetailModel doForward(ReportDetail reportDetail) {
                     ShowReportDetailModel model = new ShowReportDetailModel();
@@ -52,8 +53,11 @@ public class ReportDetailServiceImpl implements ReportDetailService{
                 protected ReportDetail doBackward(ShowReportDetailModel showReportDetailModel) {
                     return null;
                 }
+
             });
+
             return modelResult.getContent();
+
         }else{
             return new ArrayList<ShowReportDetailModel>();
         }
@@ -69,11 +73,13 @@ public class ReportDetailServiceImpl implements ReportDetailService{
         return null;
     }
 
+    /* UPDATE */
     @Override
     public boolean updateReport(ShowReportDetailModel showReportDetailModel) {
         return false;
     }
 
+    /* DELETE */
     @Override
     public boolean deleteReport(int reportId) {
         return false;

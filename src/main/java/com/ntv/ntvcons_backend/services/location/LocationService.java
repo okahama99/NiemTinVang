@@ -28,7 +28,6 @@ public interface LocationService {
     /* UPDATE */
     boolean updateLocation(ShowLocationModel showLocationModel);
 
-
     /* DELETE */
     boolean deleteLocation(int locationId);
 }

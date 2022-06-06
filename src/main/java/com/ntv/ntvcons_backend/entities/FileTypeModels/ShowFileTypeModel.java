@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ShowFileTypeModel {
-    private int fileTypeId;
+    private long fileTypeId;
     private String fileTypeName, fileTypeDesc, fileTypeExtension;
 
 }

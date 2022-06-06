@@ -3,7 +3,6 @@ package com.ntv.ntvcons_backend.services.role;
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.entities.RoleModels.ShowRoleModel;
-import com.ntv.ntvcons_backend.repositories.PagingRepositories.RolePagingRepository;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -20,34 +19,22 @@ public class RoleServiceImpl implements RoleService{
     @Autowired
     RoleRepository roleRepository;
 
-    @Autowired
-    RolePagingRepository rolePagingRepository;
-
+    /* CREATE */
     @Override
-    public Role insertRole(int roleID, String roleName) {
+    public Role createRole(int roleID, String roleName) {
         return null;
     }
 
-    @Override
-    public boolean updateRole(int roleID, String roleName) {
-        return false;
-    }
-
-    @Override
-    public boolean deleteRole(int roleID) {
-        return false;
-    }
-
+    /* READ */
     @Override
     public List<ShowRoleModel> getAllRole(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
-        if(sortType)
-        {
+        if(sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
         }else{
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
-        Page<Role> pagingResult = rolePagingRepository.findAll(paging);
+        Page<Role> pagingResult = roleRepository.findAllByIsDeletedIsFalse(paging);
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
             Page<ShowRoleModel> modelResult = pagingResult.map(new Converter<Role, ShowRoleModel>() {
@@ -72,5 +59,16 @@ public class RoleServiceImpl implements RoleService{
     @Override
     public List<Role> getRoleByRoleName(String roleName) {
         return null;
+    }
+
+    /* UPDATE */
+    public boolean updateRole(int roleID, String roleName) {
+        return false;
+    }
+
+    /* DELETE */
+    @Override
+    public boolean deleteRole(int roleID) {
+        return false;
     }
 }

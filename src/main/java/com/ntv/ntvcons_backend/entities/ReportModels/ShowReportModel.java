@@ -9,7 +9,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class ShowReportModel {
-    private int reportId, projectId, reporterId;
+    private long reportId, projectId, reporterId;
     private Timestamp reportDate;
     private String reportDesc;
     private Long createdBy, updatedBy;
