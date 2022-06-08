@@ -12,7 +12,7 @@
 	<groupId>com.ntv</groupId>
 	<artifactId>NTVCons_Backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>NTVCons_Backend</name>
 	<description>NTVCons_Backend</description>
 
