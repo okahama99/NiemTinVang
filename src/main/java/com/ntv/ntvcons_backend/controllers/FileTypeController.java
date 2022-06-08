@@ -55,4 +55,9 @@ public class FileTypeController {
             return HttpStatus.BAD_REQUEST;
         }
     }
+
+    @GetMapping(value = "/test", produces = "application/json;charset=UTF-8")
+    public String test() {
+        return "Henlo coco";
+    }
 }
