@@ -20,10 +20,10 @@ public class RoleController {
     public HttpStatus insertRole(@RequestBody int roleID,
                                  @RequestBody String roleName){
 
-        Role result = roleService.createRole(roleID, roleName);
-        if(result!=null){
-            return HttpStatus.OK;
-        }
+//        Role result = roleService.createRole(roleID, roleName);
+//        if(result!=null){
+//            return HttpStatus.OK;
+//        }
         return HttpStatus.BAD_REQUEST;
     }
 
@@ -31,10 +31,10 @@ public class RoleController {
     @PutMapping(value = "/updateRole", produces = "application/json;charset=UTF-8")
     public HttpStatus updateRole(@RequestBody int roleID,
                                  @RequestBody String roleName){
-        boolean result = roleService.updateRole(roleID, roleName);
-        if(result){
-            return HttpStatus.OK;
-        }
+//        boolean result = roleService.updateRole(roleID, roleName);
+//        if(result){
+//            return HttpStatus.OK;
+//        }
         return HttpStatus.BAD_REQUEST;
     }
 
@@ -45,17 +45,17 @@ public class RoleController {
                                @RequestBody int pageSize,
                                @RequestBody String sortBy,
                                @RequestBody boolean sortType) {
-        List<ShowRoleModel> roles = roleService.getAllRole(pageNo, pageSize, sortBy, sortType);
-        return roles;
+//        List<ShowRoleModel> roles = roleService.getAllRole(pageNo, pageSize, sortBy, sortType);
+//        return roles;
+        return null;
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/deleteRole/{roleId}", produces = "application/json;charset=UTF-8")
     public HttpStatus deleteRole(@PathVariable(name = "roleId") int roleId){
-        if(roleService.deleteRole(roleId))
-        {
+        if(roleService.deleteRole(roleId)) {
             return HttpStatus.OK;
-        }else{
+        } else{
             return HttpStatus.BAD_REQUEST;
         }
     }

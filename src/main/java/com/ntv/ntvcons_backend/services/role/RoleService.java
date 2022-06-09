@@ -1,23 +1,33 @@
 package com.ntv.ntvcons_backend.services.role;
 
+import com.ntv.ntvcons_backend.dtos.role.RoleDTO;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.entities.RoleModels.ShowRoleModel;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface RoleService {
     /* CREATE */
-    Role createRole(long roleID, String roleName);
+    Role createRole(Role newRole);
+    RoleDTO createRoleByDTO(RoleDTO newRoleDTO);
 
     /* READ */
-    List<ShowRoleModel> getAllRole(int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<Role> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<RoleDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType);
 
-    List<Role> getRoleByRoleName(String roleName);
+    List<Role> getAllByRoleNameLike(String roleName);
+    List<RoleDTO> getAllDTOByRoleNameLike(String roleName);
 
-    List<Role> findAllByStatus();
+    Role getById(long roleId);
+    RoleDTO getDTOById(long roleId);
+
+    Role getAllByIdIn(Collection<Long> roleIdCollection);
+    RoleDTO getAllDTOByIdIn(Collection<Long> roleIdCollection);
 
     /* UPDATE */
-    boolean updateRole(long roleID, String roleName);
+    Role updateRole(Role updatedRole);
+    RoleDTO updateRoleByDTO(RoleDTO updatedRoleDTO);
 
     /* DELETE */
     boolean deleteRole(long roleID);

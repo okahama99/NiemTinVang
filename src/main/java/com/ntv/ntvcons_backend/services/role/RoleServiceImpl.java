@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.services.role;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.dtos.role.RoleDTO;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.entities.RoleModels.ShowRoleModel;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -21,68 +23,87 @@ public class RoleServiceImpl implements RoleService{
 
     /* CREATE */
     @Override
-    public Role createRole(long roleID, String roleName) {
-        Role role = new Role();
-//        role.setName(inputtedRole);
-//        role.setStatus(Status.ACTIVE);
-//        roleRepository.saveAndFlush(role);
-        return role;
+    public Role createRole(Role newRole) {
+
+        return roleRepository.saveAndFlush(newRole);
+    }
+    @Override
+    public RoleDTO createRoleByDTO(RoleDTO newRoleDTO) {
+//        Role role = new Role();
+////        role.setName(inputtedRole);
+////        role.setStatus(Status.ACTIVE);
+////        roleRepository.saveAndFlush(role);
+//        return role;
+        return null;
     }
 
     /* READ */
     @Override
-    public List<ShowRoleModel> getAllRole(int pageNo, int pageSize, String sortBy, boolean sortType) {
-        Pageable paging;
-        if(sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-        Page<Role> pagingResult = roleRepository.findAllByIsDeletedIsFalse(paging);
-        if(pagingResult.hasContent()){
-            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
-            Page<ShowRoleModel> modelResult = pagingResult.map(new Converter<Role, ShowRoleModel>() {
-                @Override
-                protected ShowRoleModel doForward(Role role) {
-                    ShowRoleModel model = new ShowRoleModel();
-                    //TODO
-                    return model;
-                }
-
-                @Override
-                protected Role doBackward(ShowRoleModel showRoleModel) {
-                    return null;
-                }
-            });
-            return modelResult.getContent();
-        }else{
-            return new ArrayList<ShowRoleModel>();
-        }
+    public List<Role> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
+//        Pageable paging;
+//        if(sortType) {
+//            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+//        }else{
+//            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+//        }
+//        Page<Role> pagingResult = roleRepository.findAllByIsDeletedIsFalse(paging);
+//        if(pagingResult.hasContent()){
+//            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+//            Page<ShowRoleModel> modelResult = pagingResult.map(new Converter<Role, ShowRoleModel>() {
+//                @Override
+//                protected ShowRoleModel doForward(Role role) {
+//                    ShowRoleModel model = new ShowRoleModel();
+//                    //TODO
+//                    return model;
+//                }
+//
+//                @Override
+//                protected Role doBackward(ShowRoleModel showRoleModel) {
+//                    return null;
+//                }
+//            });
+//            return modelResult.getContent();
+//        }else{
+//            return new ArrayList<ShowRoleModel>();
+//        }
+        return null;
     }
-
     @Override
-    public List<Role> getRoleByRoleName(String roleName) {
+    public List<RoleDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) {
         return null;
     }
 
     @Override
-    public List<Role> findAllByStatus() {
-        List<Role> tempForComment = new ArrayList<>();
-//        List<Role> role = roleRepository. findByStatus(Status.ACTIVE);
-//        List<RoleModel> roleModels = new ArrayList<>();
-//        for (Role roles : role) {
-//            RoleModel model = new RoleModel();
-//            model.setId(roles.getId());
-//            model.setName(roles.getName());
-//            model.setStatus(roles.getStatus());
-//            roleModels.add(model);
-//        }
-        return tempForComment;
+    public List<Role> getAllByRoleNameLike(String roleName) {
+        return null;
+    }
+    @Override
+    public List<RoleDTO> getAllDTOByRoleNameLike(String roleName) {
+        return null;
+    }
+
+    @Override
+    public Role getById(long roleId) {
+        return null;
+    }
+    @Override
+    public RoleDTO getDTOById(long roleId) {
+        return null;
+    }
+
+    @Override
+    public Role getAllByIdIn(Collection<Long> roleIdCollection) {
+        return null;
+    }
+    @Override
+    public RoleDTO getAllDTOByIdIn(Collection<Long> roleIdCollection) {
+        return null;
     }
 
     /* UPDATE */
-    public boolean updateRole(long roleID, String roleName) {
-        Role result = roleRepository.findById(roleID).get();
+    @Override
+    public Role updateRole(Role updatedRole) {
+//        Role result = roleRepository.findById(roleID).get();
 //        result.setName(role.getName());
 //        result.setStatus(role.getStatus());
 //        roleRepository.saveAndFlush(result);
@@ -90,7 +111,11 @@ public class RoleServiceImpl implements RoleService{
 //        {
 //            return true;
 //        }
-        return false;
+        return null;
+    }
+    @Override
+    public RoleDTO updateRoleByDTO(RoleDTO updatedRoleDTO) {
+        return null;
     }
 
     /* DELETE */
