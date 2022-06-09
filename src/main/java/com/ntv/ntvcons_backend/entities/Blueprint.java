@@ -2,6 +2,8 @@ package com.ntv.ntvcons_backend.entities;
 
 import lombok.*;
 
+//import org.springframework.data.relational.core.mapping.Table;
+
 import javax.persistence.*;
 
 @Builder

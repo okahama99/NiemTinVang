@@ -24,8 +24,8 @@ public class Request extends BaseEntity {
     @Column(name = "requestTypeId", nullable = false)
     private Long requestTypeId;
 
-    @Column(name = "RequesterId", nullable = false)
-    private Long RequesterId;
+    @Column(name = "requesterId", nullable = false)
+    private Long requesterId;
 
     @Column(name = "requestDate", nullable = false)
     private Instant requestDate;
