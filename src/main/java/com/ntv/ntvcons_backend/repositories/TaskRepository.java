@@ -40,7 +40,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findAllByPlanEndDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
     List<Task> findAllByPlanEndDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
     /* planStartDate & planEndDate in range */
-    List<Task> findAllByPlanEndDateAfterAndPlanEndDateBeforeAndIsDeletedIsFalse
+    List<Task> findAllByPlanStartDateAfterAndPlanEndDateBeforeAndIsDeletedIsFalse
             (Instant afterDate, Instant beforeDate);
 
 
@@ -53,6 +53,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findAllByActualEndDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
     List<Task> findAllByActualEndDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
     /* actualStartDate & ActualEndDate in range */
-    List<Task> findAllByActualEndDateAfterAndActualEndDateBeforeAndIsDeletedIsFalse
+    List<Task> findAllByActualStartDateAfterAndActualEndDateBeforeAndIsDeletedIsFalse
             (Instant afterDate, Instant beforeDate);
 }
