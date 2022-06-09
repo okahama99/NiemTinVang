@@ -20,7 +20,7 @@ public class ReportType extends BaseEntity {
     @Column(name = "reportTypeName", nullable = false, length = 50)
     private String reportTypeName;
 
-    @Column(name = "reportTypeDesc", length = 500)
+    @Column(name = "reportTypeDesc", length = 100)
     private String reportTypeDesc;
 
     @Column(name = "isDeleted", nullable = false)

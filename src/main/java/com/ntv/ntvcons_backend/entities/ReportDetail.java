@@ -20,7 +20,7 @@ public class ReportDetail extends BaseEntity {
     @Column(name = "reportId", nullable = false)
     private Long reportId;
 
-    @Column(name = "itemDesc", nullable = false, length = 500)
+    @Column(name = "itemDesc", nullable = false, length = 100)
     private String itemDesc;
 
     @Column(name = "itemAmount", nullable = false)

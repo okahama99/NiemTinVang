@@ -24,7 +24,7 @@ public class Task extends BaseEntity {
     @Column(name = "taskName", nullable = false)
     private String taskName;
 
-    @Column(name = "taskDesc", length = 500)
+    @Column(name = "taskDesc", length = 100)
     private String taskDesc;
 
     @Column(name = "planStartDate", nullable = false)

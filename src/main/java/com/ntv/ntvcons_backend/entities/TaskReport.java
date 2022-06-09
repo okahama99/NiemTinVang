@@ -23,10 +23,10 @@ public class TaskReport extends BaseEntity {
     @Column(name = "reportId", nullable = false)
     private Long reportId;
 
-    @Column(name = "taskProgress", nullable = false, length = 500)
+    @Column(name = "taskProgress", nullable = false, length = 100)
     private String taskProgress;
 
-    @Column(name = "taskNote", length = 500)
+    @Column(name = "taskNote", length = 100)
     private String taskNote;
 
     @Column(name = "isDeleted", nullable = false)
