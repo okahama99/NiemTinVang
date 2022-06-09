@@ -7,16 +7,18 @@ import java.util.List;
 
 public interface RoleService {
     /* CREATE */
-    Role createRole(int roleID, String roleName);
+    Role createRole(long roleID, String roleName);
 
     /* READ */
     List<ShowRoleModel> getAllRole(int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<Role> getRoleByRoleName(String roleName);
 
+    List<Role> findAllByStatus();
+
     /* UPDATE */
-    boolean updateRole(int roleID, String roleName);
+    boolean updateRole(long roleID, String roleName);
 
     /* DELETE */
-    boolean deleteRole(int roleID);
+    boolean deleteRole(long roleID);
 }

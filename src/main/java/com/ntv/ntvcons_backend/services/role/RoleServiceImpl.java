@@ -21,8 +21,12 @@ public class RoleServiceImpl implements RoleService{
 
     /* CREATE */
     @Override
-    public Role createRole(int roleID, String roleName) {
-        return null;
+    public Role createRole(long roleID, String roleName) {
+        Role role = new Role();
+//        role.setName(inputtedRole);
+//        role.setStatus(Status.ACTIVE);
+//        roleRepository.saveAndFlush(role);
+        return role;
     }
 
     /* READ */
@@ -61,14 +65,44 @@ public class RoleServiceImpl implements RoleService{
         return null;
     }
 
+    @Override
+    public List<Role> findAllByStatus() {
+        List<Role> tempForComment = new ArrayList<>();
+//        List<Role> role = roleRepository. findByStatus(Status.ACTIVE);
+//        List<RoleModel> roleModels = new ArrayList<>();
+//        for (Role roles : role) {
+//            RoleModel model = new RoleModel();
+//            model.setId(roles.getId());
+//            model.setName(roles.getName());
+//            model.setStatus(roles.getStatus());
+//            roleModels.add(model);
+//        }
+        return tempForComment;
+    }
+
     /* UPDATE */
-    public boolean updateRole(int roleID, String roleName) {
+    public boolean updateRole(long roleID, String roleName) {
+        Role result = roleRepository.findById(roleID).get();
+//        result.setName(role.getName());
+//        result.setStatus(role.getStatus());
+//        roleRepository.saveAndFlush(result);
+//        if(result != null)
+//        {
+//            return true;
+//        }
         return false;
     }
 
     /* DELETE */
     @Override
-    public boolean deleteRole(int roleID) {
-        return false;
+    public boolean deleteRole(long roleID) {
+        Role role = roleRepository.findById(roleID).get();
+        if(role != null){
+//            role.setStatus(Status.INACTIVE);
+//            roleRepository.save(role);
+            return true;
+        }else{
+            return false;
+        }
     }
 }
