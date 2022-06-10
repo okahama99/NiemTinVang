@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.services.externalFile;
 
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileDTO;
 import com.ntv.ntvcons_backend.entities.ExternalFile;
-import com.ntv.ntvcons_backend.entities.ExternalFileModels.ShowExternalFileModel;
 import com.ntv.ntvcons_backend.repositories.ExternalFileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     }
 
     @Override
-    public List<ShowExternalFileModel> getAllWithPagingAndSorting(int pageNo, int pageSize, String sortBy, boolean sortType) {
+    public List<ExternalFileDTO> getAllWithPagingAndSorting(int pageNo, int pageSize, String sortBy, boolean sortType) {
         return null;
     }
 

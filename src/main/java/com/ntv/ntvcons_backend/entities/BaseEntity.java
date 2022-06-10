@@ -17,10 +17,10 @@ public abstract class BaseEntity {
     @CreatedDate
     private Date createdAt;
 
+    private Long createdBy;
+
     @LastModifiedDate
     private Date updatedAt;
-
-    private Long createdBy;
 
     private Long updatedBy;
 }

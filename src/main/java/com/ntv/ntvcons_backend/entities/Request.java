@@ -24,13 +24,13 @@ public class Request extends BaseEntity {
     @Column(name = "requestTypeId", nullable = false)
     private Long requestTypeId;
 
-    @Column(name = "RequesterId", nullable = false)
-    private Long RequesterId;
+    @Column(name = "requesterId", nullable = false)
+    private Long requesterId;
 
     @Column(name = "requestDate", nullable = false)
     private Instant requestDate;
 
-    @Column(name = "requestDesc", nullable = false, length = 500)
+    @Column(name = "requestDesc", nullable = false, length = 100)
     private String requestDesc;
 
     @Column(name = "verifierId")
@@ -42,7 +42,7 @@ public class Request extends BaseEntity {
     @Column(name = "verifyDate")
     private Instant verifyDate;
 
-    @Column(name = "verifyNote", length = 500)
+    @Column(name = "verifyNote", length = 100)
     private String verifyNote;
 
     @Column(name = "isApproved")

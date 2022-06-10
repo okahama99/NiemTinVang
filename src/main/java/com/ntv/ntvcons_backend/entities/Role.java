@@ -20,7 +20,7 @@ public class Role extends BaseEntity {
     @Column(name = "roleName", nullable = false, length = 50)
     private String roleName;
 
-    @Column(name = "roleDesc", length = 500)
+    @Column(name = "roleDesc", length = 100)
     private String roleDesc;
 
     @Column(name = "isDeleted", nullable = false)

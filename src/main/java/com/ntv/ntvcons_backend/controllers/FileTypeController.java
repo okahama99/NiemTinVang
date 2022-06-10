@@ -5,6 +5,8 @@ import com.ntv.ntvcons_backend.entities.FileTypeModels.ShowFileTypeModel;
 import com.ntv.ntvcons_backend.services.fileType.FileTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -54,5 +56,10 @@ public class FileTypeController {
         }else{
             return HttpStatus.BAD_REQUEST;
         }
+    }
+
+    @GetMapping(value = "/test", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> test() {
+        return ResponseEntity.ok().body("Henlo coco");
     }
 }

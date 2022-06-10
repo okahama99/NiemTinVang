@@ -20,7 +20,7 @@ public class RequestType extends BaseEntity {
     @Column(name = "requestTypeName", nullable = false, length = 50)
     private String requestTypeName;
 
-    @Column(name = "requestTypeDesc", length = 500)
+    @Column(name = "requestTypeDesc", length = 100)
     private String requestTypeDesc;
 
     @Column(name = "isDeleted", nullable = false)

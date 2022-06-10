@@ -20,7 +20,7 @@ public class RequestDetail extends BaseEntity {
     @Column(name = "requestId", nullable = false)
     private Long requestId;
 
-    @Column(name = "itemDesc", nullable = false, length = 500)
+    @Column(name = "itemDesc", nullable = false, length = 100)
     private String itemDesc;
 
     @Column(name = "itemAmount", nullable = false)

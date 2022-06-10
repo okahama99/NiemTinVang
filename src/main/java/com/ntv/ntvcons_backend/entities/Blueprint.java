@@ -2,6 +2,8 @@ package com.ntv.ntvcons_backend.entities;
 
 import lombok.*;
 
+//import org.springframework.data.relational.core.mapping.Table;
+
 import javax.persistence.*;
 
 @Builder
@@ -20,7 +22,7 @@ public class Blueprint extends BaseEntity {
     @Column(name = "designerId", nullable = false)
     private Long designerId;
 
-    @Column(name = "blueprintName", nullable = false, length = 500)
+    @Column(name = "blueprintName", nullable = false, length = 100)
     private String blueprintName;
 
     @Column(name = "estimatedCost", nullable = false)
