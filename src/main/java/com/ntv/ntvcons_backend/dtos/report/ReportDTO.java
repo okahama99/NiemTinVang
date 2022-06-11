@@ -20,5 +20,5 @@ public class ReportDTO implements Serializable {
     private UserDTO reporter;
     private Instant reportDate;
     private String reportDesc;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

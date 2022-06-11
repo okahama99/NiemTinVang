@@ -15,5 +15,5 @@ public class ExternalFileDTO implements Serializable {
     private String fileName;
     private String fileLink;
     private FileTypeDTO fileType;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

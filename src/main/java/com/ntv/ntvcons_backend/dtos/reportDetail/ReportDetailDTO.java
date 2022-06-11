@@ -17,5 +17,5 @@ public class ReportDetailDTO implements Serializable {
     private Double itemAmount;
     private String itemUnit;
     private Double itemPrice;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

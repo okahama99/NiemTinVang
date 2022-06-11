@@ -15,5 +15,5 @@ public class BlueprintDTO implements Serializable {
     private String blueprintName;
     private UserDTO designer;
     private Double estimatedCost;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

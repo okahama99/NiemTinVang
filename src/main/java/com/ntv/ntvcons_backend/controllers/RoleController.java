@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.role.RoleDTO;
 import com.ntv.ntvcons_backend.services.role.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/Role")
+@RequestMapping("/role")
 public class RoleController {
     @Autowired
     RoleService roleService;
@@ -19,13 +20,14 @@ public class RoleController {
     /* CREATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/v1/create", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> insertRole(@RequestBody com.ntv.ntvcons_backend.dtos.role.RoleDTO roleDTO){
+    public ResponseEntity<Object> insertRole(@RequestBody RoleDTO roleDTO){
         try {
-            com.ntv.ntvcons_backend.dtos.role.RoleDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
+            RoleDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
 
             return ResponseEntity.ok().body(newRoleDTO);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error creating Role");
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating Role", e.getMessage()));
         }
     }
 
@@ -46,7 +48,8 @@ public class RoleController {
             return ResponseEntity.ok().body(roleDTOList);
 
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error searching for Role");
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error searching for Role", e.getMessage()));
         }
     }
 
@@ -62,7 +65,8 @@ public class RoleController {
             return ResponseEntity.ok().body(roleDTOList);
 
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error searching for Role with name like: " + roleName);
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error searching for Role with name like: " + roleName, e.getMessage()));
         }
     }
 
@@ -70,13 +74,13 @@ public class RoleController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/v1/update/{roleId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRole(@PathVariable(name = "roleId") long roleId,
-                                             @RequestBody com.ntv.ntvcons_backend.dtos.role.RoleDTO roleDTO){
+                                             @RequestBody RoleDTO roleDTO){
         if (roleId != roleDTO.getRoleId()) {
             return ResponseEntity.badRequest().body("Mismatch Id");
         }
 
         try {
-            com.ntv.ntvcons_backend.dtos.role.RoleDTO updatedRoleDTO = roleService.updateRoleByDTO(roleDTO);
+            RoleDTO updatedRoleDTO = roleService.updateRoleByDTO(roleDTO);
 
             if (updatedRoleDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found with Id: " + roleId);
@@ -84,7 +88,8 @@ public class RoleController {
 
             return ResponseEntity.ok().body(updatedRoleDTO);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error updating Role with Id: " + roleId);
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error updating Role with Id: " + roleId, e.getMessage()));
         }
     }
 
@@ -93,13 +98,14 @@ public class RoleController {
     @DeleteMapping(value = "/v1/delete/{roleId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRole(@PathVariable(name = "roleId") long roleId){
         try {
-            if (roleService.deleteRole(roleId)) {
+            if (!roleService.deleteRole(roleId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found with Id: " + roleId);
             }
 
             return ResponseEntity.ok().body("Deleted Role with Id: " + roleId);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error deleting Role with Id: " + roleId);
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error deleting Role with Id: " + roleId, e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

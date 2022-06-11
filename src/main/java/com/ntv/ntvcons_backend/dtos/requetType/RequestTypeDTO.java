@@ -13,5 +13,5 @@ public class RequestTypeDTO implements Serializable {
     private Integer requestTypeId;
     private String requestTypeName;
     private String requestTypeDesc;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

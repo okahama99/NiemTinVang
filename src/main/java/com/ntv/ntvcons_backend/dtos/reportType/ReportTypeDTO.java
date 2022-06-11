@@ -13,5 +13,5 @@ public class ReportTypeDTO implements Serializable {
     private Integer reportTypeId;
     private String reportTypeName;
     private String reportTypeDesc;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

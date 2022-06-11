@@ -13,5 +13,5 @@ public class RoleDTO implements Serializable {
     private Integer roleId;
     private String roleName;
     private String roleDesc;
-    private Boolean isDeleted;
+    private Boolean isDelete = false;
 }

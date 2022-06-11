@@ -14,5 +14,5 @@ public class FileTypeDTO implements Serializable {
     private String fileTypeName;
     private String fileTypeDesc;
     private String fileTypeExtension;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

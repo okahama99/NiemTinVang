@@ -16,5 +16,5 @@ public class PostDTO implements Serializable {
     private UserDTO author;
     private String postTitle;
     private Instant createDate;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.task.TaskDTO;
 import com.ntv.ntvcons_backend.services.task.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,15 @@ public class TaskController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PostMapping("/v1/create")
+    @PostMapping(value = "/v1/create", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createTask(@RequestBody TaskDTO taskDTO) {
         try {
             TaskDTO newTaskDTO = taskService.createTaskByDTO(taskDTO);
 
             return ResponseEntity.ok().body(newTaskDTO);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error creating Task");
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating Task", e.getMessage()));
         }
     }
 
@@ -57,7 +59,8 @@ public class TaskController {
 
             return ResponseEntity.ok().body(updatedTaskDTO);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error updating Task with Id: " + taskId);
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error updating Task with Id: " + taskId, e.getMessage()));
         }
     }
 
@@ -65,13 +68,14 @@ public class TaskController {
     @DeleteMapping("/v1/delete/{taskId}")
     public ResponseEntity<Object> deleteTask(@PathVariable(name = "taskId") long taskId) {
         try {
-            if (taskService.deleteTask(taskId)) {
+            if (!taskService.deleteTask(taskId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Task found with Id: " + taskId);
             }
 
             return ResponseEntity.ok().body("Deleted Task with Id: " + taskId);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error deleting Task with Id: " + taskId);
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error deleting Task with Id: " + taskId, e.getMessage()));
         }
 
     }
