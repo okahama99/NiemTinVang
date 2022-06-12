@@ -22,7 +22,7 @@ public interface BlueprintRepository extends JpaRepository<Blueprint, Long> {
 
     /* blueprintName */
     Optional<Blueprint> findByBlueprintNameAndIsDeletedIsFalse(String blueprintName);
-    List<Blueprint> findAllByBlueprintNameLikeAndIsDeletedIsFalse(String blueprintName);
+    List<Blueprint> findAllByBlueprintNameContainsAndIsDeletedIsFalse(String blueprintName);
 
 
     /* designerId */

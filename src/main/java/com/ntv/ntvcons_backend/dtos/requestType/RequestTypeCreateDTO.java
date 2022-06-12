@@ -1,17 +1,18 @@
-package com.ntv.ntvcons_backend.dtos.requetType;
+package com.ntv.ntvcons_backend.dtos.requestType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 
 import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestTypeDTO implements Serializable {
-    private Integer requestTypeId;
+public class RequestTypeCreateDTO implements Serializable {
     private String requestTypeName;
     private String requestTypeDesc;
-    private Boolean isDeleted = false;
+    /* TODO: to be replace with status */
+    private final Boolean isDeleted = false;
 }

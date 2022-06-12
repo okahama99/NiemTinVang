@@ -3,7 +3,6 @@ package com.ntv.ntvcons_backend.entities.projectModels;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Date;
 

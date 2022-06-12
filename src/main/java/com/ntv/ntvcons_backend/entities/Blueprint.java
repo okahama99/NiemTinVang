@@ -1,12 +1,13 @@
 package com.ntv.ntvcons_backend.entities;
 
-import lombok.*;
-
-//import org.springframework.data.relational.core.mapping.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Builder
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

@@ -9,9 +9,9 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoleDTO implements Serializable {
-    private Integer roleId;
+public class RoleCreateDTO implements Serializable {
     private String roleName;
     private String roleDesc;
-    private Boolean isDelete = false;
+    /* TODO: to be replace with status */
+    private final Boolean isDeleted = false;
 }

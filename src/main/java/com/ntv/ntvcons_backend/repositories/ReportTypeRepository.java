@@ -22,5 +22,5 @@ public interface ReportTypeRepository extends JpaRepository<ReportType, Long> {
 
     /* reportTypeName */
     Optional<ReportType> findAllByReportTypeNameAndIsDeletedIsFalse(String reportTypeName);
-    List<ReportType> findAllByReportTypeNameLikeAndIsDeletedIsFalse(String reportTypeName);
+    List<ReportType> findAllByReportTypeNameContainsAndIsDeletedIsFalse(String reportTypeName);
 }

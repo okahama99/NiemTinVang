@@ -12,9 +12,9 @@ public interface FileTypeService {
     /* READ */
     List<FileType> getAll();
 
-    List<FileType> getAllByFileTypeNameLike(String fileTypeName);
+    List<FileType> getAllByFileTypeNameContains(String fileTypeName);
 
-    List<FileType> getAllByFileTypeExtensionLike(String fileTypeExtension);
+    List<FileType> getAllByFileTypeExtensionContains(String fileTypeExtension);
 
     FileType getByFileTypeName(String fileTypeName);
 

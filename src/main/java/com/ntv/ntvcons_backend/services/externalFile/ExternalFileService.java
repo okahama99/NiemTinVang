@@ -20,7 +20,7 @@ public interface ExternalFileService {
 
     List<ExternalFile> getAllByFileTypeIdIn(Collection<Integer> fileTypeIdCollection);
 
-    List<ExternalFile> getAllByNameLike(String fileName);
+    List<ExternalFile> getAllByNameContains(String fileName);
 
     List<ExternalFile> getAllByIdIn(Collection<Integer> fileIdCollection);
 

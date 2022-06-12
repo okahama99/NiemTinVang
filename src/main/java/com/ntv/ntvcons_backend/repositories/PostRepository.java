@@ -23,7 +23,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     /* postTitle */
     Optional<Post> findByPostTitleAndIsDeletedIsFalse(String postTitle);
-    List<Post> findAllByPostTitleLikeAndIsDeletedIsFalse(String postTitleCollection);
+    List<Post> findAllByPostTitleContainsAndIsDeletedIsFalse(String postTitleCollection);
 
 
     /* authorId */

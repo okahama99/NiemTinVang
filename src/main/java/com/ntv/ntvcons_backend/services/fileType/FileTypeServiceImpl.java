@@ -26,12 +26,12 @@ public class FileTypeServiceImpl implements FileTypeService{
     }
 
     @Override
-    public List<FileType> getAllByFileTypeNameLike(String fileTypeName) {
+    public List<FileType> getAllByFileTypeNameContains(String fileTypeName) {
         return null;
     }
 
     @Override
-    public List<FileType> getAllByFileTypeExtensionLike(String fileTypeExtension) {
+    public List<FileType> getAllByFileTypeExtensionContains(String fileTypeExtension) {
         return null;
     }
 

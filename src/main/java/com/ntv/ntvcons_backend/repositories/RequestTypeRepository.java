@@ -22,5 +22,5 @@ public interface RequestTypeRepository extends JpaRepository<RequestType, Long> 
 
     /* requestTypeName */
     Optional<RequestType> findAllByRequestTypeNameAndIsDeletedIsFalse(String requestTypeName);
-    List<RequestType> findAllByRequestTypeNameLikeAndIsDeletedIsFalse(String requestTypeName);
+    List<RequestType> findAllByRequestTypeNameContainsAndIsDeletedIsFalse(String requestTypeName);
 }

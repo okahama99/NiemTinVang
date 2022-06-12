@@ -22,15 +22,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         /* username */
         Optional<User> findByUsernameAndIsDeletedIsFalse(String username);
-        List<User> findByUsernameLikeAndIsDeletedIsFalse(String username);
+        List<User> findByUsernameContainsAndIsDeletedIsFalse(String username);
 
 
         /* username */
         Optional<User> findByPhoneAndIsDeletedIsFalse(String phone);
-        List<User> findByPhoneLikeAndIsDeletedIsFalse(String phone);
+        List<User> findByPhoneContainsAndIsDeletedIsFalse(String phone);
 
 
         /* username */
         Optional<User> findByEmailAndIsDeletedIsFalse(String email);
-        List<User> findByEmailLikeAndIsDeletedIsFalse(String email);
+        List<User> findByEmailContainsAndIsDeletedIsFalse(String email);
 }

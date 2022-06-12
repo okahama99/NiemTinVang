@@ -81,7 +81,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     }
 
     @Override
-    public List<Blueprint> getAllByProjectBlueprintNameLike(String projectBlueprintName) {
+    public List<Blueprint> getAllByProjectBlueprintNameContains(String projectBlueprintName) {
         return null;
     }
 

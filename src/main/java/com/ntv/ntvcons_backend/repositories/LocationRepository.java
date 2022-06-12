@@ -48,6 +48,6 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
         /* coordinate */
         Optional<Location> findByCoordinateAndIsDeletedIsFalse(String coordinate);
-        List<Location> findAllByCoordinateLikeAndIsDeletedIsFalse(String coordinate);
+        List<Location> findAllByCoordinateContainsAndIsDeletedIsFalse(String coordinate);
         List<Location> findAllByCoordinateInAndIsDeletedIsFalse(Collection<String> coordinateCollection);
 }

@@ -9,9 +9,10 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReportTypeDTO implements Serializable {
-    private Integer reportTypeId;
+public class ReportTypeUpdateDTO implements Serializable {
+    private Long reportTypeId;
     private String reportTypeName;
     private String reportTypeDesc;
-    private Boolean isDeleted = false;
+    /* TODO: to be replace with status */
+    private final Boolean isDeleted = false;
 }
