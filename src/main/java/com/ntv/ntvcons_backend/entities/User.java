@@ -32,4 +32,7 @@ public class User extends BaseEntity {
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;
 
+    @Column(length = 200)
+    private String fcmToken;
+
 }
