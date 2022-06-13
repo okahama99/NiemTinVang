@@ -21,7 +21,7 @@ public class Post extends BaseEntity {
     @Column(name = "authorId", nullable = false)
     private Long authorId;
 
-    @Column(name = "postTitle", nullable = false, length = 500)
+    @Column(name = "postTitle", nullable = false, length = 100)
     private String postTitle;
 
     @Column(name = "createDate", nullable = false)

@@ -16,5 +16,5 @@ public class WorkerDTO implements Serializable {
     private String citizenId;
     private String socialSecurityCode;
     private LocationDTO address;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

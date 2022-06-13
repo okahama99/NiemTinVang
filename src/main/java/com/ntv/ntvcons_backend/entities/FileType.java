@@ -20,7 +20,7 @@ public class FileType extends BaseEntity {
     @Column(name = "fileTypeName", nullable = false, length = 100)
     private String fileTypeName;
 
-    @Column(name = "fileTypeDesc", length = 500)
+    @Column(name = "fileTypeDesc", length = 100)
     private String fileTypeDesc;
 
     @Column(name = "fileTypeExtension", nullable = false, length = 10)

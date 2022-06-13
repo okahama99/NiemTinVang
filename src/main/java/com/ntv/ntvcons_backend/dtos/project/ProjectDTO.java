@@ -23,5 +23,5 @@ public class ProjectDTO implements Serializable {
     private Instant actualStartDate;
     private Instant actualEndDate;
     private Double actualCost;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

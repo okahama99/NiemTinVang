@@ -25,5 +25,5 @@ public class RequestDTO implements Serializable {
     private Instant verifyDate;
     private String verifyNote;
     private Boolean isApproved;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

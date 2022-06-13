@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -24,7 +25,35 @@ public class ProjectServiceImpl implements ProjectService{
     /* READ */
     @Override
     public Project createProject(String projectName, int locationId, Timestamp startDate, Timestamp endDate, int blueprintId, Double estimateCost) {
-        return null;
+            Project tempForComment = new Project();
+        //        if(userProfileRepository.findByUser(userRepository.getById(model.getUserID()))==null){
+//            return null;
+//        }else {
+//            MarketPost marketPost = new MarketPost();
+//            Config config = configRepository.getById(1);
+//            if (config.isAutoBrowse()) {
+//                marketPost.setStatus(Status.PENDING);
+//            } else {
+//                marketPost.setStatus(Status.ONSELL);
+//            }
+//            marketPost.setDescription(model.getDescription());
+//            marketPost.setUser(userRepository.getById(model.getUserID()));
+//            marketPost.setLocation(model.getLocation());
+//            marketPost.setPrice(model.getPrice());
+//            marketPost.setCreatedBy(model.getUserID());
+//            marketPost.setTitle(model.getTitle());
+//            marketPost.setQuantity(model.getQuantity());
+//            marketPostRepository.saveAndFlush(marketPost);
+//            for (MultipartFile file : files) { chỗ này là cho import file hình của project cũ
+//                String fileName = imageService.save(file);
+//                String imageUrl = imageService.getImageUrl(fileName);
+//                MarketPostImage marketPostImage = new MarketPostImage();
+//                marketPostImage.setMarketPost(marketPost);
+//                marketPostImage.setImageName(imageUrl);
+//                marketPostImageRepository.saveAndFlush(marketPostImage);
+//            }
+            return tempForComment;
+//        }
     }
 
     /* READ */
@@ -124,12 +153,53 @@ public class ProjectServiceImpl implements ProjectService{
     /* UPDATE */
     @Override
     public boolean updateProject(ShowProjectModel showProjectModel) {
-        return true;
+        //MarketPost marketPost = marketPostRepository.findById(model.getMarketPostID()).get();
+        //        if(marketPost != null)
+        //        {
+        //            marketPost.setDescription(model.getDescription());
+        //            marketPost.setUser(userRepository.getById(model.getUserID()));
+        //            marketPost.setLocation(model.getLocation());
+        //            marketPost.setPrice(model.getPrice());
+        //            marketPost.setCreatedBy(model.getUserID());
+        //            marketPost.setTitle(model.getTitle());
+        //            marketPost.setQuantity(model.getQuantity());
+        //
+        //            for (MarketPostImage image : marketPost.getMarketPostImages()) {
+        //                String s = image.getImageName();
+        //                MarketPostImage marketPostImage = marketPostImageRepository.findByImageName(s);
+        //                marketPostImage.setMarketPost(null);
+        //                marketPostImage.setImageName(null);
+        //                marketPostImageRepository.saveAndFlush(marketPostImage);
+        //                String[] strArr;
+        //                strArr = s.split("[/;?]");
+        //                imageService.delete(strArr[7]);
+        //            }
+        //
+        //            for (MultipartFile file : files) {
+        //                String fileName = imageService.save(file);
+        //                String imageUrl = imageService.getImageUrl(fileName);
+        //                MarketPostImage marketPostImage = new MarketPostImage();
+        //                marketPostImage.setMarketPost(marketPost);
+        //                marketPostImage.setImageName(imageUrl);
+        //                marketPostImageRepository.saveAndFlush(marketPostImage);
+        //            }
+        //
+        //            marketPostRepository.saveAndFlush(marketPost);
+        //            return true;
+        //        }
+                return false;
     }
 
     /* DELETE */
     @Override
     public boolean deleteProject(int projectId) {
-        return false;
+        //MarketPost marketPost = marketPostRepository.findById(postID).get();
+        //        if(marketPost!=null)
+        //        {
+        //            marketPost.setStatus(Status.INACTIVE);
+        //            marketPostRepository.saveAndFlush(marketPost);
+        //            return true;
+        //        }
+                return false;
     }
 }

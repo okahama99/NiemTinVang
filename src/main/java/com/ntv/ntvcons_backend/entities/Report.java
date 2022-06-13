@@ -30,7 +30,7 @@ public class Report extends BaseEntity {
     @Column(name = "reportDate", nullable = false)
     private Instant reportDate;
 
-    @Column(name = "reportDesc", nullable = false, length = 500)
+    @Column(name = "reportDesc", nullable = false, length = 100)
     private String reportDesc;
 
     @Column(name = "isDeleted", nullable = false)

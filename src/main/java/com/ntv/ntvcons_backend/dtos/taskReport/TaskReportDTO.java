@@ -17,5 +17,5 @@ public class TaskReportDTO implements Serializable {
     private ReportDTO report;
     private String taskProgress;
     private String taskNote;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

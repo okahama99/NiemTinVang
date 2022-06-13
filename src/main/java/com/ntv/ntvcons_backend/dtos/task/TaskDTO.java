@@ -22,5 +22,5 @@ public class TaskDTO implements Serializable {
     private Instant planEndDate;
     private Instant actualStartDate;
     private Instant actualEndDate;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

@@ -20,5 +20,5 @@ public class LocationDTO implements Serializable {
     private String province;
     private String country;
     private String coordinate;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
 }

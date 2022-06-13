@@ -1,0 +1,19 @@
+{
+  "type": "service_account",
+  "project_id": "hoya-c5d79",
+  "private_key_id": "6056f9f4b4952edeec051955e9aaf2174b69f56e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCn7Ch3TySctFWW\np4PGlPkyeH5uGSt7jD38FsSeIadMrNF//nmwp2ZIomPraTFmmodtjV69FYdcHlPn\n96OSkGWURNUYid1TFOnzpX8nNb24wt4q4BppT8dHxyskoj3XM8CVjld7c5iPN8C5\nI28xIKTfJyCjzeTp84BpUVViBpaGtPYBXm9B92oDa24bdj0+EQfnnIHPtI2vZM4c\nIZZ94v0CvMyD9KFYEY47LhcvZ7mev/K1Y+w6bJLXieBfMeZerUu2n3XMng66Zs7t\nPrL8VFYMZ9ymJyV2oTk99BfKusIsE/bZA9XxtfX91/x1fQ4eTNhV9vTYndzAn1UE\nY+HChAHrAgMBAAECggEAOxRFynAwV+fEgwwtuyS3pg+pn6/AUiftuO8DvwTlGP9m\nd+s+wi2rOVvU3sK0TD6K7jrCPbFA3eKXr7G7PXoLGwa6mHcMxMnDY+LyoQdx1/rL\ncndFI48bdD/5CFsCed/t3lBlq/voDV9WsWxrlvO+vfpErAzpAHyYzbT9Xs8lj3+x\n0Ci2j0g/KWvzJja30kVOQgK+6SQtb1Nv6WSD5iXMV9vnNXKKGJo3wrHLQ50XPAnM\nsAzhohBCtq6fFdyYVZrSsB/2+org9p0ATduStz4LeKj4Gey3yYdRxWAAYZkoHUNq\nOxYRluUtjxh/16nLEtrRx3kQgp7c04RiW0FDRAXBiQKBgQDj3mZbX2f1Zq6rciWp\naExzFzSNLMkbH5kxZy8f/X1Na/THT4GyMdD87rY7DaSNL3W4TqzreVnVmnJXiZis\n/CKIwPgmeOvAGkaGNB2BXgSYPMxYbas0BIaN7FOXDFygsZR3uSlSVW8NsNDVAOuZ\ndgKQNRY3mSmA3l2x8++q2CBqWQKBgQC8pzULrLQUDOaiI8ugyVNwa+prIvRvLON5\nhjpVNVdGVAvDN7/PAtp4B6znRNZdwcbkXNlvlOyxXAJY/jzlzT+FYRCRUjiwNmr7\n2vdod7oO7i9XFuUfPGkSsCyh7EEwdPf0hMHGf7qhkuQSAjs2h9xE9f7a/tUyczA8\nJBIxvRK94wKBgQCJQm1buvOPMgQjSAYBrs7mQOMp6wFU8krAJIyRc4tn+JChAnZ4\nlWNzCIQCvGwTk7QQimvFB/siHP+lVT//a32N7NdNrWcs92bl7jybsbuIzI628ZDA\nK721fda4VPzy2yU4nPOUIdxcXdbdh8ljTl+q6B9y7DLA6rF7wRnsSnX0OQKBgFW7\niyDGGIQwJLO0nrpwI8ooULzlgr3vYWT9ug61Efd1BG9wK2vROSVpH4tuPhkXkeJ/\ny5So0jP7w1lcGKK6ds6PgO75tadm45GXPe4s0tIsLjlevztFwd5rT606Z5m03mYx\n2rnxnAgHcDw65VvvvAte27X8LzkhHd+G6PnPme/PAoGAZM3D4et2sz5v/tfT8mP2\n+QB49acQ9l2KnG5oW6oqKVFlcNPXxBrJBQgM/ocnmrTGclHiUrpn5m/BJbwNKELp\neCWC0ped2CUVxNtRzkV3RU1fna3wEGpEu/EDCH/vhNKHNHb/7fgJl9nvAovXa+Ov\nz6hXesQPLwkbvvjescNWDRI=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-k0u8t@hoya-c5d79.iam.gserviceaccount.com",
+  "client_id": "112333668496260181786",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-k0u8t%40hoya-c5d79.iam.gserviceaccount.com",
+  "apiKey": "AIzaSyDa1gb6R0Fc0QBW_W2aoo7eqNb1Lm61VEs",
+  "authDomain": "hoya-c5d79.firebaseapp.com",
+  "projectId": "hoya-c5d79",
+  "storageBucket": "hoya-c5d79.appspot.com",
+  "messagingSenderId": "552807585709",
+  "appId": "1:552807585709:web:f7df8790e3e99ef5cc7324",
+  "measurementId": "G-FRW314DLVR"
+}
