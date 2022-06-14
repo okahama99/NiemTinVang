@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface LocationRepository extends JpaRepository<Location, Long> {
         Page<Location> findAllByIsDeletedIsFalse(Pageable pageable);
 
+        Location getByAddressNumber (String addressNumber);
 
         /* Id */
         Optional<Location> findByLocationIdAndIsDeletedIsFalse(long locationId);
@@ -23,24 +24,33 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
         /* Top down */
         List<Location> findAllByCountryAndIsDeletedIsFalse
                 (String country);
+
         List<Location> findAllByCountryAndProvinceAndIsDeletedIsFalse
                 (String country, String province);
+
         List<Location> findAllByCountryAndProvinceAndCityAndIsDeletedIsFalse
                 (String country, String province, String city);
+
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndIsDeletedIsFalse
                 (String country, String province, String city, String district);
+
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndIsDeletedIsFalse
                 (String country, String province, String city, String district, String ward);
+
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndStreetAndIsDeletedIsFalse
                 (String country, String province, String city, String district, String ward, String Street);
+
         Optional<Location> findByCountryAndProvinceAndCityAndDistrictAndWardAndStreetAndAddressNumberAndIsDeletedIsFalse
                 (String country, String province, String city, String district,
                  String ward, String Street, String addressNumber);
+
         /* Top down with area */
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndIsDeletedIsFalse
                 (String country, String province, String city, String district, String ward, String area);
+
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndIsDeletedIsFalse
                 (String country, String province, String city, String district, String ward, String area, String Street);
+
         Optional<Location> findByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndIsDeletedIsFalse
                 (String country, String province, String city, String district,
                  String ward, String area, String Street, String addressNumber);

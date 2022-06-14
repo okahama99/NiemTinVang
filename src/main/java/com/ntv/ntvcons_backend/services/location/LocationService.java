@@ -1,14 +1,15 @@
 package com.ntv.ntvcons_backend.services.location;
 
 import com.ntv.ntvcons_backend.entities.Location;
+import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.ShowLocationModel;
+import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
 
 import java.util.List;
 
 public interface LocationService {
     /* CREATE */
-    Location createLocation(String addressNumber, String street, String ward, String district,
-                            String city, String province, String coordinate);
+    void createLocation(CreateLocationModel createLocationModel);
 
     /* READ */
     List<ShowLocationModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
@@ -26,8 +27,8 @@ public interface LocationService {
     Location getById(int locationId);
 
     /* UPDATE */
-    boolean updateLocation(ShowLocationModel showLocationModel);
+    void updateLocation(UpdateLocationModel updateLocationModel);
 
     /* DELETE */
-    boolean deleteLocation(int locationId);
+    boolean deleteLocation(long locationId);
 }
