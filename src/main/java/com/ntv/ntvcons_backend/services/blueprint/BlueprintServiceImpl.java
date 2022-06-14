@@ -2,7 +2,9 @@ package com.ntv.ntvcons_backend.services.blueprint;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.Blueprint;
-import com.ntv.ntvcons_backend.entities.ProjectBlueprintModels.ShowProjectBlueprintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBluePrintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,13 +24,17 @@ public class BlueprintServiceImpl implements BlueprintService {
 
     /* CREATE */
     @Override
-    public Blueprint createProjectBlueprint(String projectBlueprintName, int designerId, double projectBlueprintCost) {
-        return null;
+    public void createProjectBlueprint(CreateBluePrintModel createBluePrintModel) {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintName(createBluePrintModel.getProjectBlueprintName());
+        blueprint.setDesignerName(createBluePrintModel.getDesignerName());
+        blueprint.setEstimatedCost(createBluePrintModel.getEstimateCost());
+        blueprintRepository.saveAndFlush(blueprint);
     }
 
     /* READ */
     @Override
-    public List<ShowProjectBlueprintModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
+    public List<ShowBlueprintModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
         if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
@@ -41,17 +47,17 @@ public class BlueprintServiceImpl implements BlueprintService {
         if (pagingResult.hasContent()) {
             double totalPage = Math.ceil((double) pagingResult.getTotalElements() / pageSize);
 
-            Page<ShowProjectBlueprintModel> modelResult =
-                    pagingResult.map(new Converter<Blueprint, ShowProjectBlueprintModel>() {
+            Page<ShowBlueprintModel> modelResult =
+                    pagingResult.map(new Converter<Blueprint, ShowBlueprintModel>() {
 
                         @Override
-                        protected ShowProjectBlueprintModel doForward(Blueprint projectBlueprint) {
-                            ShowProjectBlueprintModel model = new ShowProjectBlueprintModel();
+                        protected ShowBlueprintModel doForward(Blueprint projectBlueprint) {
+                            ShowBlueprintModel model = new ShowBlueprintModel();
 
                             model.setProjectBlueprintId(projectBlueprint.getBlueprintId());
                             model.setProjectBlueprintName(projectBlueprint.getBlueprintName());
                             model.setProjectBlueprintCost(projectBlueprint.getEstimatedCost());
-                            model.setDesignerId(projectBlueprint.getDesignerId());
+                            model.setDesignerName(projectBlueprint.getDesignerName());
                             model.setCreatedAt(projectBlueprint.getCreatedAt());
                             model.setCreatedBy(projectBlueprint.getCreatedBy());
                             model.setUpdatedAt(projectBlueprint.getCreatedAt());
@@ -62,7 +68,7 @@ public class BlueprintServiceImpl implements BlueprintService {
                         }
 
                         @Override
-                        protected Blueprint doBackward(ShowProjectBlueprintModel showProjectBlueprintModel) {
+                        protected Blueprint doBackward(ShowBlueprintModel showProjectBlueprintModel) {
                             /* TODO: Fill or explain why null */
                             return null;
                         }
@@ -71,7 +77,7 @@ public class BlueprintServiceImpl implements BlueprintService {
             return modelResult.getContent();
 
         } else {
-            return new ArrayList<ShowProjectBlueprintModel>();
+            return new ArrayList<ShowBlueprintModel>();
         }
     }
 
@@ -102,13 +108,26 @@ public class BlueprintServiceImpl implements BlueprintService {
 
     /* UPDATE */
     @Override
-    public boolean updateProjectBlueprint(ShowProjectBlueprintModel showProjectBlueprintModel) {
-        return true;
+    public void updateProjectBlueprint(UpdateBlueprintModel updateBlueprintModel) {
+        Blueprint blueprint = blueprintRepository.findById(updateBlueprintModel.getBlueprintId()).get();
+        blueprint.setBlueprintId(updateBlueprintModel.getBlueprintId());
+        blueprint.setBlueprintName(updateBlueprintModel.getBlueprintName());
+        blueprint.setDesignerName(updateBlueprintModel.getDesignerName());
+        blueprint.setEstimatedCost(updateBlueprintModel.getEstimateCost());
+        blueprint.setUpdatedBy(updateBlueprintModel.getUserId());
+        blueprint.setUpdatedAt(updateBlueprintModel.getUpdatedAt());
+        blueprintRepository.saveAndFlush(blueprint);
     }
 
     /* DELETE */
     @Override
-    public boolean deleteProjectBlueprint(int projectBlueprintId) {
+    public boolean deleteProjectBlueprint(long projectBlueprintId) {
+        Blueprint blueprint = blueprintRepository.findById(projectBlueprintId).get();
+        if(blueprint!=null)
+        {
+            blueprint.setIsDeleted(true);
+            blueprintRepository.saveAndFlush(blueprint);
+        }
         return false;
     }
 }

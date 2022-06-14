@@ -7,10 +7,8 @@ import java.util.Date;
 
 @Getter
 @Setter
-public class ShowLocationModel {
-    private long locationId;
+public class UpdateLocationModel {
+    private long locationId, userId;
     private String addressNumber, street, area, ward, district, city, province, country, coordinate;
-    private Long createdBy, updatedBy;
-    private Date createdAt, updatedAt;
-    private double totalPage;
+    private Date updatedAt;
 }
