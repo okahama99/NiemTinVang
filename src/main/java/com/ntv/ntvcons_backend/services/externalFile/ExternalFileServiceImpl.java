@@ -42,7 +42,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     }
 
     @Override
-    public List<ExternalFile> getAllByNameLike(String fileName) {
+    public List<ExternalFile> getAllByNameContains(String fileName) {
         return null;
     }
 

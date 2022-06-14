@@ -1,6 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.taskAssignment;
 
-import com.ntv.ntvcons_backend.dtos.task.TaskDTO;
+import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.time.Instant;
 @NoArgsConstructor
 public class TaskAssignmentDTO implements Serializable {
     private Integer assignmentId;
-    private TaskDTO task;
+    private TaskReadDTO task;
     private UserDTO assigner;
     private UserDTO assignee;
     private Instant assignDate;

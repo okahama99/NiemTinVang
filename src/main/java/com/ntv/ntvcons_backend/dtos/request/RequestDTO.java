@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.request;
 
 import com.ntv.ntvcons_backend.dtos.project.ProjectDTO;
-import com.ntv.ntvcons_backend.dtos.requetType.RequestTypeDTO;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +16,7 @@ import java.time.Instant;
 public class RequestDTO implements Serializable {
     private Integer requestId;
     private ProjectDTO projectId;
-    private RequestTypeDTO requestType;
+    private RequestTypeReadDTO requestType;
     private UserDTO Requester;
     private Instant requestDate;
     private String requestDesc;

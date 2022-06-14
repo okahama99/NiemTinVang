@@ -9,10 +9,11 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileTypeDTO implements Serializable {
-    private Integer fileTypeId;
+public class FileTypeUpdateDTO implements Serializable {
+    private Long fileTypeId;
     private String fileTypeName;
     private String fileTypeDesc;
     private String fileTypeExtension;
-    private Boolean isDeleted = false;
+    /* TODO: to be replace with status */
+    private final Boolean isDeleted = false;
 }

@@ -28,7 +28,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     /* taskName */
     Optional<Task> findByTaskNameAndIsDeletedIsFalse(String taskName);
-    List<Task> findAllByTaskNameLikeAndIsDeletedIsFalse(String taskName);
+    List<Task> findAllByTaskNameContainsAndIsDeletedIsFalse(String taskName);
 
 
     /* planStartDate */

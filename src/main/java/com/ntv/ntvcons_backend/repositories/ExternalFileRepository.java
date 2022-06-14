@@ -21,12 +21,12 @@ public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long
 
     /* fileName */
     Optional<ExternalFile> findByFileNameAndIsDeletedIsFalse(String fileName);
-    List<ExternalFile> findAllByFileNameLikeAndIsDeletedIsFalse(String fileName);
+    List<ExternalFile> findAllByFileNameContainsAndIsDeletedIsFalse(String fileName);
 
 
     /* fileLink */
     Optional<ExternalFile> findByFileLinkAndIsDeletedIsFalse(String fileLink);
-    List<ExternalFile> findAllByFileLinkLikeAndIsDeletedIsFalse(String fileLink);
+    List<ExternalFile> findAllByFileLinkContainsAndIsDeletedIsFalse(String fileLink);
 
 
     /* filetypeId */

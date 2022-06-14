@@ -22,11 +22,11 @@ public interface FileTypeRepository extends JpaRepository<FileType, Long> {
 
     /* fileTypeName */
     Optional<FileType> findByFileTypeNameAndIsDeletedIsFalse(String fileTypeName);
-    List<FileType> findAllByFileTypeNameLikeAndIsDeletedIsFalse(String fileTypeName);
+    List<FileType> findAllByFileTypeNameContainsAndIsDeletedIsFalse(String fileTypeName);
 
 
     /* fileTypeExtension */
     Optional<FileType> findByFileTypeExtensionAndIsDeletedIsFalse(String fileTypeExtension);
-    List<FileType> findAllByFileTypeExtensionLikeAndIsDeletedIsFalse(String fileTypeExtension);
+    List<FileType> findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(String fileTypeExtension);
     List<FileType> findAllByFileTypeExtensionInAndIsDeletedIsFalse(Collection<String> fileTypeExtensionCollection);
 }

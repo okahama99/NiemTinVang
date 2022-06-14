@@ -17,7 +17,7 @@ public interface BlueprintService {
 
     List<Blueprint> getAllByIdIn(Collection<Integer> projectBlueprintIdCollection);
 
-    List<Blueprint> getAllByProjectBlueprintNameLike(String projectBlueprintName);
+    List<Blueprint> getAllByProjectBlueprintNameContains(String projectBlueprintName);
 
     List<Blueprint> getAllByProjectBlueprintCostBetween(double from, double to);
 

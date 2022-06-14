@@ -1,12 +1,35 @@
 package com.ntv.ntvcons_backend.services.requestType;
 
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeCreateDTO;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
+import com.ntv.ntvcons_backend.entities.RequestType;
+
+import java.util.Collection;
+import java.util.List;
+
 public interface RequestTypeService {
     /* CREATE */
+    RequestType createRequestType(RequestType newRequestType) throws Exception;
+    RequestTypeReadDTO createRequestTypeByDTO(RequestTypeCreateDTO newRequestTypeDTO) throws Exception;
 
-    /* READ */;
+    /* READ */
+    List<RequestType> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
+    List<RequestTypeReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
+
+    RequestType getById(long requestTypeId) throws Exception;
+    RequestTypeReadDTO getDTOById(long requestTypeId) throws Exception;
+
+    List<RequestType> getAllByIdIn(Collection<Long> requestTypeIdCollection) throws Exception;
+    List<RequestTypeReadDTO> getAllDTOByIdIn(Collection<Long> requestTypeIdCollection) throws Exception;
+
+    List<RequestType> getAllByRequestTypeNameContains(String requestTypeName) throws Exception;
+    List<RequestTypeReadDTO> getAllDTOByRequestTypeNameContains(String requestTypeName) throws Exception;
 
     /* UPDATE */
+    RequestType updateRequestType(RequestType updatedRequestType) throws Exception;
+    RequestTypeReadDTO updateRequestTypeByDTO(RequestTypeUpdateDTO updatedRequestTypeDTO) throws Exception;
 
     /* DELETE */
-
+    boolean deleteRequestType(long requestTypeId) throws Exception;
 }

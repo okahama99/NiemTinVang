@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.role.RoleDTO;
+import com.ntv.ntvcons_backend.dtos.role.*;
 import com.ntv.ntvcons_backend.services.role.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,17 +14,18 @@ import java.util.List;
 @RequestMapping("/role")
 public class RoleController {
     @Autowired
-    RoleService roleService;
+    private RoleService roleService;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/v1/create", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> insertRole(@RequestBody RoleDTO roleDTO){
+    public ResponseEntity<Object> insertRole(@RequestBody RoleCreateDTO roleDTO){
         try {
-            RoleDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
+            RoleReadDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
 
             return ResponseEntity.ok().body(newRoleDTO);
+
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Role", e.getMessage()));
@@ -39,14 +40,13 @@ public class RoleController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortType) {
         try {
-            List<RoleDTO> roleDTOList = roleService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+            List<RoleReadDTO> roleDTOList = roleService.getAllDTO(pageNo, pageSize, sortBy, sortType);
 
             if (roleDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found");
             }
 
             return ResponseEntity.ok().body(roleDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Role", e.getMessage()));
@@ -56,40 +56,36 @@ public class RoleController {
     @GetMapping(value = "/v1/read", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParams(@RequestParam String roleName) {
         try {
-            List<RoleDTO> roleDTOList = roleService.getAllDTOByRoleNameLike(roleName);
+            List<RoleReadDTO> roleDTOList = roleService.getAllDTOByRoleNameContains(roleName);
 
             if (roleDTOList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found with name like: " + roleName);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Role found with name contains: " + roleName);
             }
 
             return ResponseEntity.ok().body(roleDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for Role with name like: " + roleName, e.getMessage()));
+                    new ErrorResponse("Error searching for Role with name contains: " + roleName, e.getMessage()));
         }
     }
 
     /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping(value = "/v1/update/{roleId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRole(@PathVariable(name = "roleId") long roleId,
-                                             @RequestBody RoleDTO roleDTO){
-        if (roleId != roleDTO.getRoleId()) {
-            return ResponseEntity.badRequest().body("Mismatch Id");
-        }
-
-        try {
-            RoleDTO updatedRoleDTO = roleService.updateRoleByDTO(roleDTO);
+    @PutMapping(value = "/v1/update", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateRole(@RequestBody RoleUpdateDTO roleDTO){
+       try {
+            RoleReadDTO updatedRoleDTO = roleService.updateRoleByDTO(roleDTO);
 
             if (updatedRoleDTO == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found with Id: " + roleId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Role found with Id: " + roleDTO.getRoleId());
             }
 
             return ResponseEntity.ok().body(updatedRoleDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating Role with Id: " + roleId, e.getMessage()));
+                    new ErrorResponse("Error updating Role with Id: " + roleDTO.getRoleId(), e.getMessage()));
         }
     }
 

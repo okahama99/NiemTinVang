@@ -91,22 +91,22 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public List<Location> getAllByWardLike(String ward) {
+    public List<Location> getAllByWardContains(String ward) {
         return null;
     }
 
     @Override
-    public List<Location> getAllByDistrictLike(String district) {
+    public List<Location> getAllByDistrictContains(String district) {
         return null;
     }
 
     @Override
-    public List<Location> getAllByCityLike(String city) {
+    public List<Location> getAllByCityContains(String city) {
         return null;
     }
 
     @Override
-    public List<Location> getAllByProvinceLike(String province) {
+    public List<Location> getAllByProvinceContains(String province) {
         return null;
     }
 

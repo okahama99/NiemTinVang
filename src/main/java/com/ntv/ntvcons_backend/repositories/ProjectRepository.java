@@ -23,7 +23,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     /* projectName */
     Optional<Project> findByProjectNameAndIsDeletedIsFalse(String projectName);
-    List<Project> findAllByProjectNameLikeAndIsDeletedIsFalse(String projectName);
+    List<Project> findAllByProjectNameContainsAndIsDeletedIsFalse(String projectName);
 
 
     /* locationId */

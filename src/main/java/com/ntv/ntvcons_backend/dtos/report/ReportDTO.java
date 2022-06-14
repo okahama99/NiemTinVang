@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.report;
 
 import com.ntv.ntvcons_backend.dtos.project.ProjectDTO;
-import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeDTO;
+import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +16,7 @@ import java.time.Instant;
 public class ReportDTO implements Serializable {
     private Integer reportId;
     private ProjectDTO project;
-    private ReportTypeDTO reportType;
+    private ReportTypeReadDTO reportType;
     private UserDTO reporter;
     private Instant reportDate;
     private String reportDesc;

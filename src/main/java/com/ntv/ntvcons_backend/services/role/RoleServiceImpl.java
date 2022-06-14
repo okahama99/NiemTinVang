@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.services.role;
 
+import com.ntv.ntvcons_backend.dtos.role.*;
 import com.ntv.ntvcons_backend.entities.Role;
-import com.ntv.ntvcons_backend.dtos.role.RoleDTO;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +29,12 @@ public class RoleServiceImpl implements RoleService {
         return roleRepository.saveAndFlush(newRole);
     }
     @Override
-    public RoleDTO createRoleByDTO(RoleDTO newRoleDTO) throws Exception {
+    public RoleReadDTO createRoleByDTO(RoleCreateDTO newRoleDTO) throws Exception {
         Role newRole = modelMapper.map(newRoleDTO, Role.class);
 
         newRole = createRole(newRole);
 
-        return modelMapper.map(newRole, RoleDTO.class);
+        return modelMapper.map(newRole, RoleReadDTO.class);
     }
 
     /* READ */
@@ -49,47 +49,30 @@ public class RoleServiceImpl implements RoleService {
 
         Page<Role> rolePage = roleRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (!rolePage.hasContent()) {
+        if (rolePage.isEmpty()) {
             return null;
         }
 
         return rolePage.getContent();
     }
     @Override
-    public List<RoleDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
+    public List<RoleReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
         List<Role> roleList = getAll(pageNo, pageSize, sortBy, sortType);
 
         if (roleList != null && !roleList.isEmpty()) {
-//            double totalPage = Math.ceil((double) roleList.size() / pageSize);
+            int totalPage = (int) Math.ceil((double) roleList.size() / pageSize);
 
-            return roleList.stream().map(role -> modelMapper.map(role, RoleDTO.class))
+            return roleList.stream()
+                    .map(role -> {
+                        RoleReadDTO roleReadDTO =
+                                modelMapper.map(role, RoleReadDTO.class);
+                        roleReadDTO.setTotalPage(totalPage);
+                        return roleReadDTO;})
                     .collect(Collectors.toList());
 
         } else {
             return null;
         }
-    }
-
-    @Override
-    public List<Role> getAllByRoleNameLike(String roleName) throws Exception {
-        List<Role> roleList = roleRepository.findAllByRoleNameLikeAndIsDeletedIsFalse(roleName);
-
-        if (roleList.isEmpty()) {
-            return null;
-        }
-
-        return roleList;
-    }
-    @Override
-    public List<RoleDTO> getAllDTOByRoleNameLike(String roleName) throws Exception {
-        List<Role> roleList = getAllByRoleNameLike(roleName);
-
-        if (roleList == null) {
-            return null;
-        }
-
-        return roleList.stream().map(role -> modelMapper.map(role, RoleDTO.class))
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -99,14 +82,14 @@ public class RoleServiceImpl implements RoleService {
         return role.orElse(null);
     }
     @Override
-    public RoleDTO getDTOById(long roleId) throws Exception {
+    public RoleReadDTO getDTOById(long roleId) throws Exception {
         Role role = getById(roleId);
 
         if (role == null) {
             return null;
         }
 
-        return modelMapper.map(role, RoleDTO.class);
+        return modelMapper.map(role, RoleReadDTO.class);
     }
 
     @Override
@@ -120,14 +103,37 @@ public class RoleServiceImpl implements RoleService {
         return roleList;
     }
     @Override
-    public List<RoleDTO> getAllDTOByIdIn(Collection<Long> roleIdCollection) throws Exception {
+    public List<RoleReadDTO> getAllDTOByIdIn(Collection<Long> roleIdCollection) throws Exception {
         List<Role> roleList = getAllByIdIn(roleIdCollection);
 
         if (roleList == null) {
             return null;
         }
 
-        return roleList.stream().map(role -> modelMapper.map(role, RoleDTO.class))
+        return roleList.stream().map(role -> modelMapper.map(role, RoleReadDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Role> getAllByRoleNameContains(String roleName) throws Exception {
+        List<Role> roleList = roleRepository.findAllByRoleNameContainsAndIsDeletedIsFalse(roleName);
+
+        if (roleList.isEmpty()) {
+            return null;
+        }
+
+        return roleList;
+    }
+    @Override
+    public List<RoleReadDTO> getAllDTOByRoleNameContains(String roleName) throws Exception {
+        List<Role> roleList = getAllByRoleNameContains(roleName);
+
+        if (roleList == null) {
+            return null;
+        }
+
+        return roleList.stream()
+                .map(role -> modelMapper.map(role, RoleReadDTO.class))
                 .collect(Collectors.toList());
     }
 
@@ -141,10 +147,10 @@ public class RoleServiceImpl implements RoleService {
             /* Not found by Id, return null */
         }
 
-        return roleRepository.save(updatedRole);
+        return roleRepository.saveAndFlush(updatedRole);
     }
     @Override
-    public RoleDTO updateRoleByDTO(RoleDTO updatedRoleDTO) throws Exception {
+    public RoleReadDTO updateRoleByDTO(RoleUpdateDTO updatedRoleDTO) throws Exception {
         Role updatedRole = modelMapper.map(updatedRoleDTO, Role.class);
 
         updatedRole = updateRole(updatedRole);
@@ -153,7 +159,7 @@ public class RoleServiceImpl implements RoleService {
             return null;
         }
 
-        return modelMapper.map(updatedRole, RoleDTO.class);
+        return modelMapper.map(updatedRole, RoleReadDTO.class);
     }
 
     /* DELETE */

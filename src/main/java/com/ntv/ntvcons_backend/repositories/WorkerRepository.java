@@ -22,17 +22,17 @@ public interface WorkerRepository extends JpaRepository<Worker, Long> {
 
         /* fullName */
         Optional<Worker> findByFullNameAndIsDeletedIsFalse(String fullName);
-        List<Worker> findByFullNameLikeAndIsDeletedIsFalse(String fullName);
+        List<Worker> findByFullNameContainsAndIsDeletedIsFalse(String fullName);
 
 
         /* citizenId */
         Optional<Worker> findByCitizenIdAndIsDeletedIsFalse(String citizenId);
-        List<Worker> findByCitizenIdLikeAndIsDeletedIsFalse(String citizenId);
+        List<Worker> findByCitizenIdContainsAndIsDeletedIsFalse(String citizenId);
 
 
         /* socialSecurityCode */
         Optional<Worker> findBySocialSecurityCodeAndIsDeletedIsFalse(String socialSecurityCode);
-        List<Worker> findBySocialSecurityCodeLikeAndIsDeletedIsFalse(String socialSecurityCode);
+        List<Worker> findBySocialSecurityCodeContainsAndIsDeletedIsFalse(String socialSecurityCode);
 
 
         /* addressId */

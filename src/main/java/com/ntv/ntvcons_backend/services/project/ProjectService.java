@@ -21,7 +21,7 @@ public interface ProjectService {
 
     List<Project> getAllByIdIn(Collection<Integer> projectIdCollection);
 
-    List<Project> getAllByNameLike(String projectName);
+    List<Project> getAllByNameContains(String projectName);
 
     List<Project> getAllByLocationIdIn(Collection<Integer> locationIdCollection);
 

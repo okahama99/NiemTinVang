@@ -1,11 +1,14 @@
 package com.ntv.ntvcons_backend.entities;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
-@Builder
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

@@ -1,11 +1,10 @@
 package com.ntv.ntvcons_backend.dtos.user;
 
-import com.ntv.ntvcons_backend.dtos.role.RoleDTO;
+import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.OneToMany;
 import java.io.Serializable;
 
 @Data
@@ -13,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class UserDTO implements Serializable {
     private Integer userId;
-    private RoleDTO role;
+    private RoleReadDTO role;
     private String username;
     private String phone;
     private String email;
