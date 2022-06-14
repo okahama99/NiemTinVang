@@ -1,18 +1,19 @@
 package com.ntv.ntvcons_backend.services.blueprint;
 
 import com.ntv.ntvcons_backend.entities.Blueprint;
-import com.ntv.ntvcons_backend.entities.ProjectBlueprintModels.ShowProjectBlueprintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBluePrintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
 
 import java.util.Collection;
 import java.util.List;
 
 public interface BlueprintService {
     /* CREATE */
-    Blueprint createProjectBlueprint(String projectBlueprintName, int designerId,
-                                     double projectBlueprintCost);
+    void createProjectBlueprint(CreateBluePrintModel createBluePrintModel);
 
     /* READ */
-    List<ShowProjectBlueprintModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<ShowBlueprintModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<Blueprint> getAllByIdIn(Collection<Integer> projectBlueprintIdCollection);
 
@@ -25,8 +26,8 @@ public interface BlueprintService {
     Blueprint getById(int projectBlueprintId);
 
     /* UPDATE */
-    boolean updateProjectBlueprint(ShowProjectBlueprintModel showProjectBlueprintModel);
+    void updateProjectBlueprint(UpdateBlueprintModel updateBlueprintModel);
 
     /* DELETE */
-    boolean deleteProjectBlueprint(int projectBlueprintId);
+    boolean deleteProjectBlueprint(long projectBlueprintId);
 }

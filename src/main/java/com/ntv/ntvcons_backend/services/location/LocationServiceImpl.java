@@ -2,7 +2,9 @@ package com.ntv.ntvcons_backend.services.location;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.Location;
+import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.ShowLocationModel;
+import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
 import com.ntv.ntvcons_backend.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,8 +23,18 @@ public class LocationServiceImpl implements LocationService {
 
     /* CREATE */
     @Override
-    public Location createLocation(String addressNumber, String street, String ward, String district, String city, String province, String coordinate) {
-        return null;
+    public void createLocation(CreateLocationModel createLocationModel) {
+       Location location = new Location();
+       location.setAddressNumber(createLocationModel.getAddressNumber());
+       location.setStreet(createLocationModel.getStreet());
+       location.setArea(createLocationModel.getArea());
+       location.setWard(createLocationModel.getWard());
+       location.setDistrict(createLocationModel.getDistrict());
+       location.setCity(createLocationModel.getCity());
+       location.setProvince(createLocationModel.getProvince());
+       location.setCountry(createLocationModel.getCountry());
+       location.setCoordinate(createLocationModel.getCoordinate());
+       locationRepository.saveAndFlush(location);
     }
 
     /* CREATE */
@@ -110,13 +122,32 @@ public class LocationServiceImpl implements LocationService {
 
     /* UPDATE */
     @Override
-    public boolean updateLocation(ShowLocationModel showLocationModel) {
-        return true;
+    public void updateLocation(UpdateLocationModel updateLocationModel) {
+          Location location = locationRepository.findById(updateLocationModel.getLocationId()).get();
+          location.setAddressNumber(updateLocationModel.getAddressNumber());
+          location.setStreet(updateLocationModel.getStreet());
+          location.setArea(updateLocationModel.getArea());
+          location.setWard(updateLocationModel.getWard());
+          location.setDistrict(updateLocationModel.getDistrict());
+          location.setCity(updateLocationModel.getCity());
+          location.setProvince(updateLocationModel.getProvince());
+          location.setCountry(updateLocationModel.getCountry());
+          location.setCoordinate(updateLocationModel.getCoordinate());
+          location.setUpdatedAt(updateLocationModel.getUpdatedAt());
+          location.setUpdatedBy(updateLocationModel.getUserId());
+          locationRepository.saveAndFlush(location);
+
     }
 
     /* DELETE */
     @Override
-    public boolean deleteLocation(int locationId) {
+    public boolean deleteLocation(long locationId) {
+        Location location = locationRepository.findById(locationId).get();
+        if(location!=null)
+        {
+            location.setIsDeleted(true);
+            locationRepository.saveAndFlush(location);
+        }
         return false;
     }
 }

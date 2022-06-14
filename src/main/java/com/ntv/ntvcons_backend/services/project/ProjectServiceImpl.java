@@ -1,18 +1,28 @@
 package com.ntv.ntvcons_backend.services.project;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.entities.Blueprint;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBluePrintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
+import com.ntv.ntvcons_backend.entities.Location;
+import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
+import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
 import com.ntv.ntvcons_backend.entities.Project;
-import com.ntv.ntvcons_backend.entities.projectModels.ShowProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
+import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
+import com.ntv.ntvcons_backend.repositories.LocationRepository;
 import com.ntv.ntvcons_backend.repositories.ProjectRepository;
+import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
+import com.ntv.ntvcons_backend.services.location.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -22,43 +32,60 @@ public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private ProjectRepository projectRepository;
 
+    @Autowired
+    private LocationService locationService;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
+    @Autowired
+    private BlueprintService blueprintService;
+
+    @Autowired
+    private BlueprintRepository blueprintRepository;
+
     /* READ */
     @Override
-    public Project createProject(String projectName, int locationId, Timestamp startDate, Timestamp endDate, int blueprintId, Double estimateCost) {
-            Project tempForComment = new Project();
-        //        if(userProfileRepository.findByUser(userRepository.getById(model.getUserID()))==null){
-//            return null;
-//        }else {
-//            MarketPost marketPost = new MarketPost();
-//            Config config = configRepository.getById(1);
-//            if (config.isAutoBrowse()) {
-//                marketPost.setStatus(Status.PENDING);
-//            } else {
-//                marketPost.setStatus(Status.ONSELL);
-//            }
-//            marketPost.setDescription(model.getDescription());
-//            marketPost.setUser(userRepository.getById(model.getUserID()));
-//            marketPost.setLocation(model.getLocation());
-//            marketPost.setPrice(model.getPrice());
-//            marketPost.setCreatedBy(model.getUserID());
-//            marketPost.setTitle(model.getTitle());
-//            marketPost.setQuantity(model.getQuantity());
-//            marketPostRepository.saveAndFlush(marketPost);
-//            for (MultipartFile file : files) { chỗ này là cho import file hình của project cũ
-//                String fileName = imageService.save(file);
-//                String imageUrl = imageService.getImageUrl(fileName);
-//                MarketPostImage marketPostImage = new MarketPostImage();
-//                marketPostImage.setMarketPost(marketPost);
-//                marketPostImage.setImageName(imageUrl);
-//                marketPostImageRepository.saveAndFlush(marketPostImage);
-//            }
-            return tempForComment;
-//        }
+    public String createProject(String projectName, CreateLocationModel createLocationModel,
+                                 CreateBluePrintModel createBluePrintModel, Instant planStartDate, Instant planEndDate,
+                                 Instant actualStartDate, Instant actualEndDate, double estimateCost, double actualCost) {
+        String result;
+        Location checkDuplicateLocation = locationRepository.getByAddressNumber(createLocationModel.getAddressNumber());
+        if(checkDuplicateLocation == null)
+        {
+            Blueprint checkDuplicateBlueprint = blueprintRepository.getByBlueprintName(createBluePrintModel.getProjectBlueprintName());
+            if(checkDuplicateBlueprint == null)
+            {
+                locationService.createLocation(createLocationModel);
+                blueprintService.createProjectBlueprint(createBluePrintModel);
+                Location location = locationRepository.getByAddressNumber(createLocationModel.getAddressNumber());
+                Blueprint blueprint = blueprintRepository.getByBlueprintName(createBluePrintModel.getProjectBlueprintName());
+                Project project = new Project();
+                project.setProjectName(projectName);
+                project.setBlueprintId(blueprint.getBlueprintId());
+                project.setLocationId(location.getLocationId());
+                project.setPlanStartDate(planStartDate);
+                project.setPlanEndDate(planEndDate);
+                project.setActualStartDate(actualStartDate);
+                project.setActualEndDate(actualEndDate);
+                project.setActualCost(actualCost);
+                project.setEstimatedCost(estimateCost);
+                projectRepository.saveAndFlush(project);
+                result = "Create success";
+                return result;
+            }else{
+                result = "Existed blueprint name";
+                return result;
+            }
+        }else{
+            result = "Existed address number";
+            return result;
+        }
     }
 
     /* READ */
     @Override
-    public List<ShowProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
+    public List<ProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
         if(sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
@@ -71,37 +98,57 @@ public class ProjectServiceImpl implements ProjectService{
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
 
-            Page<ShowProjectModel> modelResult =
-                    pagingResult.map(new Converter<Project, ShowProjectModel>() {
+            Page<ProjectModel> modelResult =
+                    pagingResult.map(new Converter<Project, ProjectModel>() {
 
                 @Override
-                protected ShowProjectModel doForward(Project project) {
-                    ShowProjectModel model = new ShowProjectModel();
+                protected ProjectModel doForward(Project project) {
+                    ProjectModel model = new ProjectModel();
 
-                    model.setLocationId(project.getLocationId());
                     model.setProjectId(project.getProjectId());
-                    model.setBlueprintId(project.getBlueprintId());
                     model.setProjectName(project.getProjectName());
-                    model.setStartDate(project.getPlanStartDate());
-                    model.setEndDate(project.getPlanStartDate());
-                    model.setEstimateCost(project.getEstimatedCost());
+                    model.setPlanStartDate(project.getPlanStartDate());
+                    model.setPlanEndDate(project.getPlanEndDate());
+                    model.setActualStartDate(project.getActualStartDate());
+                    model.setActualEndDate(project.getActualEndDate());
+                    model.setProjectEstimateCost(project.getEstimatedCost());
+                    model.setActualCost(project.getActualCost());
+                    model.setDelete(project.getIsDeleted());
+
+                    Location location = locationRepository.findById(project.getLocationId()).get();
+                    model.setLocationId(project.getLocationId());
+                    model.setAddressNumber(location.getAddressNumber());
+                    model.setStreet(location.getStreet());
+                    model.setArea(location.getArea());
+                    model.setWard(location.getWard());
+                    model.setDistrict(location.getDistrict());
+                    model.setCity(location.getCity());
+                    model.setProvince(location.getProvince());
+                    model.setCountry(location.getCountry());
+                    model.setCoordinate(location.getCoordinate());
+
+                    Blueprint blueprint = blueprintRepository.findById(project.getBlueprintId()).get();
+                    model.setBlueprintId(project.getBlueprintId());
+                    model.setDesignerName(blueprint.getDesignerName());
+                    model.setBlueprintName(blueprint.getBlueprintName());
+                    model.setBlueprintEstimateCost(blueprint.getEstimatedCost());
+
                     model.setCreatedAt(project.getCreatedAt());
                     model.setCreatedBy(project.getCreatedBy());
                     model.setUpdatedAt(project.getCreatedAt());
                     model.setUpdatedBy(project.getUpdatedBy());
                     model.setTotalPage(totalPage);
-
                     return model;
                 }
 
                 @Override
-                protected Project doBackward(ShowProjectModel showProjectModel) {
+                protected Project doBackward(ProjectModel showProjectModel) {
                     return null;
                 }
             });
             return modelResult.getContent();
         }else{
-            return new ArrayList<ShowProjectModel>();
+            return new ArrayList<ProjectModel>();
         }
     }
 
@@ -152,54 +199,77 @@ public class ProjectServiceImpl implements ProjectService{
 
     /* UPDATE */
     @Override
-    public boolean updateProject(ShowProjectModel showProjectModel) {
-        //MarketPost marketPost = marketPostRepository.findById(model.getMarketPostID()).get();
-        //        if(marketPost != null)
-        //        {
-        //            marketPost.setDescription(model.getDescription());
-        //            marketPost.setUser(userRepository.getById(model.getUserID()));
-        //            marketPost.setLocation(model.getLocation());
-        //            marketPost.setPrice(model.getPrice());
-        //            marketPost.setCreatedBy(model.getUserID());
-        //            marketPost.setTitle(model.getTitle());
-        //            marketPost.setQuantity(model.getQuantity());
-        //
-        //            for (MarketPostImage image : marketPost.getMarketPostImages()) {
-        //                String s = image.getImageName();
-        //                MarketPostImage marketPostImage = marketPostImageRepository.findByImageName(s);
-        //                marketPostImage.setMarketPost(null);
-        //                marketPostImage.setImageName(null);
-        //                marketPostImageRepository.saveAndFlush(marketPostImage);
-        //                String[] strArr;
-        //                strArr = s.split("[/;?]");
-        //                imageService.delete(strArr[7]);
-        //            }
-        //
-        //            for (MultipartFile file : files) {
-        //                String fileName = imageService.save(file);
-        //                String imageUrl = imageService.getImageUrl(fileName);
-        //                MarketPostImage marketPostImage = new MarketPostImage();
-        //                marketPostImage.setMarketPost(marketPost);
-        //                marketPostImage.setImageName(imageUrl);
-        //                marketPostImageRepository.saveAndFlush(marketPostImage);
-        //            }
-        //
-        //            marketPostRepository.saveAndFlush(marketPost);
-        //            return true;
-        //        }
-                return false;
+    public String updateProject(ProjectModel projectModel) {
+            String result;
+            Project project = projectRepository.findById(projectModel.getProjectId()).get();
+            if(project!=null)
+            {
+                Location checkDuplicateLocation = locationRepository.getByAddressNumber(projectModel.getAddressNumber());
+                if(checkDuplicateLocation == null)
+                {
+                    Blueprint checkDuplicateBlueprint = blueprintRepository.getByBlueprintName(projectModel.getBlueprintName());
+                    if(checkDuplicateBlueprint == null)
+                    {
+                        UpdateLocationModel locationModel = new UpdateLocationModel();
+                        locationModel.setLocationId(projectModel.getLocationId());
+                        locationModel.setAddressNumber(projectModel.getAddressNumber());
+                        locationModel.setStreet(projectModel.getStreet());
+                        locationModel.setArea(projectModel.getArea());
+                        locationModel.setWard(projectModel.getWard());
+                        locationModel.setDistrict(projectModel.getDistrict());
+                        locationModel.setCity(projectModel.getCity());
+                        locationModel.setProvince(projectModel.getProvince());
+                        locationModel.setCountry(projectModel.getCountry());
+                        locationModel.setCoordinate(projectModel.getCoordinate());
+                        locationModel.setUserId(projectModel.getUserId());
+                        locationModel.setUpdatedAt(projectModel.getUpdatedAt());
+                        locationService.updateLocation(locationModel);
+
+                        UpdateBlueprintModel blueprintModel = new UpdateBlueprintModel();
+                        blueprintModel.setBlueprintId(projectModel.getBlueprintId());
+                        blueprintModel.setBlueprintName(projectModel.getBlueprintName());
+                        blueprintModel.setDesignerName(projectModel.getDesignerName());
+                        blueprintModel.setEstimateCost(projectModel.getBlueprintEstimateCost());
+                        blueprintModel.setUserId(projectModel.getUserId());
+                        blueprintModel.setUpdatedAt(projectModel.getUpdatedAt());
+                        blueprintService.updateProjectBlueprint(blueprintModel);
+
+                        project.setProjectName(projectModel.getProjectName());
+                        project.setBlueprintId(projectModel.getBlueprintId());
+                        project.setLocationId(projectModel.getLocationId());
+                        project.setPlanStartDate(projectModel.getPlanStartDate());
+                        project.setPlanEndDate(projectModel.getPlanEndDate());
+                        project.setActualStartDate(projectModel.getActualStartDate());
+                        project.setActualEndDate(projectModel.getActualEndDate());
+                        project.setActualCost(projectModel.getActualCost());
+                        project.setEstimatedCost(projectModel.getProjectEstimateCost());
+                        project.setUpdatedAt(projectModel.getUpdatedAt());
+                        project.setUpdatedBy(projectModel.getUserId());
+                        projectRepository.saveAndFlush(project);
+                        result = "Update success";
+                        return result;
+                    }else{
+                        result = "Existed blueprint name";
+                        return result;
+                    }
+                }else{
+                    result = "Existed address number";
+                    return result;
+                }
+            }
+            result = "ProjectID not existed";
+            return result;
     }
 
     /* DELETE */
     @Override
-    public boolean deleteProject(int projectId) {
-        //MarketPost marketPost = marketPostRepository.findById(postID).get();
-        //        if(marketPost!=null)
-        //        {
-        //            marketPost.setStatus(Status.INACTIVE);
-        //            marketPostRepository.saveAndFlush(marketPost);
-        //            return true;
-        //        }
-                return false;
+    public boolean deleteProject(long projectId) {
+        Project project = projectRepository.findById(projectId).get();
+        if(project!=null){
+            project.setIsDeleted(true);
+            projectRepository.saveAndFlush(project);
+            return true;
+        }
+        return false;
     }
 }

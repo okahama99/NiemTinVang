@@ -20,8 +20,8 @@ public class Blueprint extends BaseEntity {
     @Column(name = "blueprintId", nullable = false)
     private Long blueprintId;
 
-    @Column(name = "designerId", nullable = false)
-    private Long designerId;
+    @Column(name = "designerName", nullable = false)
+    private String designerName; // t đổi qua designerName r nè
 
     @Column(name = "blueprintName", nullable = false, length = 100)
     private String blueprintName;
