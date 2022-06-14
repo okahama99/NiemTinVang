@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.*;
@@ -46,29 +47,64 @@ public class TaskController {
             }
 
             return ResponseEntity.ok().body(taskDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Task", e.getMessage()));
         }
     }
 
+    /* TODO: search by date (plan, actual); separate func or mod this one */
     @GetMapping(value = "/v1/read", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParams(@RequestParam String taskName) {
+    public ResponseEntity<Object> getByParams(@RequestParam String searchParam,
+                                              /*@RequestBody(required = false) Object searchParams,*/
+                                              @RequestParam("searchType") SearchType searchType) {
         try {
-            List<TaskReadDTO> taskDTOList = taskService.getAllDTOByTaskNameContains(taskName);
+            List<TaskReadDTO> taskDTOList;
 
-            if (taskDTOList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Task found with name contains: " + taskName);
+            switch (searchType) {
+                case TASK_BY_NAME_CONTAINS:
+                    taskDTOList = taskService.getAllDTOByTaskNameContains(searchParam);
+
+                    if (taskDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Task found with name contains: " + searchParam);
+                    }
+                    break;
+
+                case TASK_BY_PROJECT_ID:
+                    taskDTOList = taskService.getAllDTOByProjectId(Long.parseLong(searchParam));
+
+                    if (taskDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Task found with projectId: " + searchParam);
+                    }
+                    break;
+
+                default:
+                    return ResponseEntity.badRequest().body("Wrong search type for entity Task");
             }
 
             return ResponseEntity.ok().body(taskDTOList);
-
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid param type for searchType: " + searchType
+                                    + "\nExpecting param of type: Long",
+                            nFE.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for Task with name contains: " + taskName,
-                            e.getMessage()));
+            String errorMsg = "";
+
+            switch (searchType) {
+                case FILE_TYPE_BY_NAME_CONTAINS:
+                    errorMsg += "Error searching for Task with name contains: " + searchParam;
+                    break;
+
+                case FILE_TYPE_BY_EXTENSION_CONTAINS:
+                    errorMsg += "Error searching for Task with projectId: " + searchParam;
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
         }
     }
 

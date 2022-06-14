@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.task;
 
+import com.ntv.ntvcons_backend.constants.SearchOption;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.task.*;
 import com.ntv.ntvcons_backend.entities.Task;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,8 @@ public class TaskServiceImpl implements TaskService{
     /* CREATE */
     @Override
     public Task createTask(Task newTask) throws Exception {
+        /* TODO: also create EntityWrapper for task */
+
         return taskRepository.saveAndFlush(newTask);
     }
     @Override
@@ -40,6 +44,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     /* READ */
+    /* TODO: add get externalFile via pairing */
     @Override
     public List<Task> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
         Pageable paging;
@@ -163,57 +168,219 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllByPlanStartDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
+    public List<Task> getAllByPlanStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+        List<Task> taskList = new ArrayList<>();
+
+        switch (searchOption) {
+            case BEFORE_DATE:
+                taskList = taskRepository.findAllByPlanStartDateBeforeAndIsDeletedIsFalse(toDate);
+                break;
+
+            case AFTER_DATE:
+                taskList = taskRepository.findAllByPlanStartDateAfterAndIsDeletedIsFalse(fromDate);
+                break;
+
+            case BETWEEN_DATE:
+                taskList = taskRepository.findAllByPlanStartDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                break;
+
+            default:
+                /* All invalid searchOption should've been caught at controller,
+                   if reach here then: not normal / slip up */
+                throw new IllegalArgumentException("Invalid SearchOption used for entity Task");
+        }
+
+        if (taskList.isEmpty()) {
+            return null;
+        }
+
+        return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByPlanStartDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
+    public List<TaskReadDTO> getAllDTOByPlanStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+        List<Task> taskList = getAllByPlanStartDate(searchOption, fromDate, toDate);
+
+        if (taskList == null) {
+            return null;
+        }
+
+        return taskList.stream()
+                .map(task -> modelMapper.map(task, TaskReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Task> getAllByPlanEndDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
+    public List<Task> getAllByPlanEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+        List<Task> taskList = new ArrayList<>();
+
+        switch (searchOption) {
+            case BEFORE_DATE:
+                taskList = taskRepository.findAllByPlanEndDateBeforeAndIsDeletedIsFalse(toDate);
+                break;
+
+            case AFTER_DATE:
+                taskList = taskRepository.findAllByPlanEndDateAfterAndIsDeletedIsFalse(fromDate);
+                break;
+
+            case BETWEEN_DATE:
+                taskList = taskRepository.findAllByPlanEndDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                break;
+
+            default:
+                /* All invalid searchOption should've been caught at controller,
+                   if reach here then: not normal / slip up */
+                throw new IllegalArgumentException("Invalid SearchOption used for entity Task");
+        }
+
+        if (taskList.isEmpty()) {
+            return null;
+        }
+
+        return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByPlanEndDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
+    public List<TaskReadDTO> getAllDTOByPlanEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+        List<Task> taskList = getAllByPlanEndDate(searchOption, fromDate, toDate);
+
+        if (taskList == null) {
+            return null;
+        }
+
+        return taskList.stream()
+                .map(task -> modelMapper.map(task, TaskReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Task> getAllByPlanStartDateAfterAndPlanEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
-        return null;
+        List<Task> taskList =
+                taskRepository.findAllByPlanStartDateAfterAndPlanEndDateBeforeAndIsDeletedIsFalse(fromDate, toDate);
+
+        if (taskList.isEmpty()) {
+            return null;
+        }
+
+        return taskList;
     }
     @Override
     public List<TaskReadDTO> getAllDTOByPlanStartDateAfterAndPlanEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
-        return null;
+        List<Task> taskList = getAllByPlanStartDateAfterAndPlanEndDateBefore(fromDate, toDate);
+
+        if (taskList == null) {
+            return null;
+        }
+
+        return taskList.stream()
+                .map(task -> modelMapper.map(task, TaskReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Task> getAllByActualStartDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
+    public List<Task> getAllByActualStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+        List<Task> taskList = new ArrayList<>();
+
+        switch (searchOption) {
+            case BEFORE_DATE:
+                taskList = taskRepository.findAllByActualStartDateBeforeAndIsDeletedIsFalse(toDate);
+                break;
+
+            case AFTER_DATE:
+                taskList = taskRepository.findAllByActualStartDateAfterAndIsDeletedIsFalse(fromDate);
+                break;
+
+            case BETWEEN_DATE:
+                taskList = taskRepository.findAllByActualStartDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                break;
+
+            default:
+                /* All invalid searchOption should've been caught at controller,
+                   if reach here then: not normal / slip up */
+                throw new IllegalArgumentException("Invalid SearchOption used for entity Task");
+        }
+
+        if (taskList.isEmpty()) {
+            return null;
+        }
+
+        return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByActualStartDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
+    public List<TaskReadDTO> getAllDTOByActualStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+        List<Task> taskList = getAllByActualStartDate(searchOption, fromDate, toDate);
+
+        if (taskList == null) {
+            return null;
+        }
+
+        return taskList.stream()
+                .map(task -> modelMapper.map(task, TaskReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Task> getAllByActualEndDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
+    public List<Task> getAllByActualEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+        List<Task> taskList = new ArrayList<>();
+
+        switch (searchOption) {
+            case BEFORE_DATE:
+                taskList = taskRepository.findAllByActualEndDateBeforeAndIsDeletedIsFalse(toDate);
+                break;
+
+            case AFTER_DATE:
+                taskList = taskRepository.findAllByActualEndDateAfterAndIsDeletedIsFalse(fromDate);
+                break;
+
+            case BETWEEN_DATE:
+                taskList = taskRepository.findAllByActualEndDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                break;
+
+            default:
+                /* All invalid searchOption should've been caught at controller,
+                   if reach here then: not normal / slip up */
+                throw new IllegalArgumentException("Invalid SearchOption used for entity Task");
+        }
+
+        if (taskList.isEmpty()) {
+            return null;
+        }
+
+        return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByActualEndDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
+    public List<TaskReadDTO> getAllDTOByActualEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+        List<Task> taskList = getAllByActualEndDate(searchOption, fromDate, toDate);
+
+        if (taskList == null) {
+            return null;
+        }
+
+        return taskList.stream()
+                .map(task -> modelMapper.map(task, TaskReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Task> getAllByActualStartDateAfterAndActualEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
-        return null;
+        List<Task> taskList =
+                taskRepository.findAllByActualStartDateAfterAndActualEndDateBeforeAndIsDeletedIsFalse(fromDate, toDate);
+
+        if (taskList.isEmpty()) {
+            return null;
+        }
+
+        return taskList;
     }
     @Override
     public List<TaskReadDTO> getAllDTOByActualStartDateAfterAndActualEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
-        return null;
+        List<Task> taskList = getAllByActualStartDateAfterAndActualEndDateBefore(fromDate, toDate);
+
+        if (taskList == null) {
+            return null;
+        }
+
+        return taskList.stream()
+                .map(task -> modelMapper.map(task, TaskReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     /* UPDATE */
@@ -250,6 +417,8 @@ public class TaskServiceImpl implements TaskService{
             return false;
             /* Not found with Id */
         }
+
+        /* TODO: also create EntityWrapper for task */
 
         task.get().setIsDeleted(true);
 

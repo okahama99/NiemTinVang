@@ -47,7 +47,6 @@ public class RoleController {
             }
 
             return ResponseEntity.ok().body(roleDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Role", e.getMessage()));
@@ -65,7 +64,6 @@ public class RoleController {
             }
 
             return ResponseEntity.ok().body(roleDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Role with name contains: " + roleName, e.getMessage()));
@@ -85,7 +83,6 @@ public class RoleController {
             }
 
             return ResponseEntity.ok().body(updatedRoleDTO);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Role with Id: " + roleDTO.getRoleId(), e.getMessage()));
@@ -102,7 +99,6 @@ public class RoleController {
             }
 
             return ResponseEntity.ok().body("Deleted Role with Id: " + roleId);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Role with Id: " + roleId, e.getMessage()));

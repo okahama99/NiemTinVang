@@ -49,7 +49,6 @@ public class ReportTypeController {
             }
 
             return ResponseEntity.ok().body(reportTypeDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for ReportType", e.getMessage()));
@@ -68,7 +67,6 @@ public class ReportTypeController {
             }
 
             return ResponseEntity.ok().body(reportTypeDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for ReportType with name contains: " + reportTypeName,

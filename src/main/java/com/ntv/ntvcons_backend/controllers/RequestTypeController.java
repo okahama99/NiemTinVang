@@ -47,7 +47,6 @@ public class RequestTypeController {
             }
 
             return ResponseEntity.ok().body(requestTypeDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for RequestType", e.getMessage()));
@@ -66,7 +65,6 @@ public class RequestTypeController {
             }
 
             return ResponseEntity.ok().body(requestTypeDTOList);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for RequestType with name contains: " + requestTypeName,
