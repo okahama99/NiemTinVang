@@ -150,4 +150,17 @@ public class LocationServiceImpl implements LocationService {
         }
         return false;
     }
+
+    @Override
+    public String checkDuplicate(String addressNumber)
+    {
+        String result = "No duplicate";
+        Location checkDuplicateLocation = locationRepository.getByAddressNumber(addressNumber);
+        if(checkDuplicateLocation != null)
+        {
+            result = "Existed address number";
+            return result;
+        }
+        return result;
+    }
 }

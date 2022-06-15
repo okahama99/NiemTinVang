@@ -3,7 +3,7 @@ package com.ntv.ntvcons_backend.entities;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -28,16 +28,16 @@ public class Task extends BaseEntity {
     private String taskDesc;
 
     @Column(name = "planStartDate", nullable = false)
-    private Instant planStartDate;
+    private LocalDateTime planStartDate;
 
     @Column(name = "planEndDate")
-    private Instant planEndDate;
+    private LocalDateTime planEndDate;
 
     @Column(name = "actualStartDate")
-    private Instant actualStartDate;
+    private LocalDateTime actualStartDate;
 
     @Column(name = "actualEndDate")
-    private Instant actualEndDate;
+    private LocalDateTime actualEndDate;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

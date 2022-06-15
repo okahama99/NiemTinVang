@@ -18,10 +18,10 @@ public class ReportController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/createReport", produces = "application/json;charset=UTF-8")
-    public HttpStatus createReport(@RequestBody int projectId,
-                                   @RequestBody int reporterId,
-                                   @RequestBody Timestamp reportDate,
-                                   @RequestBody String reportDesc){
+    public HttpStatus createReport(@RequestParam int projectId,
+                                   @RequestParam int reporterId,
+                                   @RequestParam Timestamp reportDate,
+                                   @RequestParam String reportDesc){
 
         Report result = reportService.createReport(projectId, reporterId, reportDate, reportDesc);
         if(result!=null){
@@ -43,10 +43,10 @@ public class ReportController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    List<ShowReportModel> getAll(@RequestBody int pageNo,
-                        @RequestBody int pageSize,
-                        @RequestBody String sortBy,
-                        @RequestBody boolean sortType) {
+    List<ShowReportModel> getAll(@RequestParam int pageNo,
+                        @RequestParam int pageSize,
+                        @RequestParam String sortBy,
+                        @RequestParam boolean sortType) {
         List<ShowReportModel> reports = reportService.getAll(pageNo, pageSize, sortBy, sortType);
         return reports;
     }

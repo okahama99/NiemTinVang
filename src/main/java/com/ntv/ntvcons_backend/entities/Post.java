@@ -3,7 +3,7 @@ package com.ntv.ntvcons_backend.entities;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -25,7 +25,7 @@ public class Post extends BaseEntity {
     private String postTitle;
 
     @Column(name = "createDate", nullable = false)
-    private Instant createDate;
+    private LocalDateTime createDate;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

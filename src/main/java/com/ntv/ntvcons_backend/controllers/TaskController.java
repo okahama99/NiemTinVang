@@ -33,10 +33,10 @@ public class TaskController {
 
     /* READ */
     @GetMapping(value = "/v1/read/all", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getAll(@RequestBody int pageNo,
-                                         @RequestBody int pageSize,
-                                         @RequestBody String sortBy,
-                                         @RequestBody boolean sortType) {
+    public ResponseEntity<Object> getAll(@RequestParam int pageNo,
+                                         @RequestParam int pageSize,
+                                         @RequestParam String sortBy,
+                                         @RequestParam boolean sortType) {
 //        List<TaskDTO> taskDTOList = taskService.getAllDTO(pageNo, pageSize, sortBy, sortType);
 //        return ResponseEntity.ok().body(taskDTOList);
         return null;

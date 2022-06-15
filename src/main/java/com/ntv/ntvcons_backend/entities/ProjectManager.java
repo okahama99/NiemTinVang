@@ -3,7 +3,7 @@ package com.ntv.ntvcons_backend.entities;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -25,10 +25,10 @@ public class ProjectManager extends BaseEntity {
     private Long managerId;
 
     @Column(name = "assignDate", nullable = false)
-    private Instant assignDate;
+    private LocalDateTime assignDate;
 
     @Column(name = "removeDate")
-    private Instant removeDate;
+    private LocalDateTime removeDate;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

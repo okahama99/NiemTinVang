@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -18,7 +18,7 @@ public class ReportDTO implements Serializable {
     private ProjectDTO project;
     private ReportTypeDTO reportType;
     private UserDTO reporter;
-    private Instant reportDate;
+    private LocalDateTime reportDate;
     private String reportDesc;
     private Boolean isDeleted = false;
 }

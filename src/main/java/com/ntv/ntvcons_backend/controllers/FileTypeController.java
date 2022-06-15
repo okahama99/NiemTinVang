@@ -19,9 +19,9 @@ public class FileTypeController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/createFileType", produces = "application/json;charset=UTF-8")
-    public HttpStatus createFileType(@RequestBody String fileTypeName,
-                                     @RequestBody String fileTypeDesc,
-                                     @RequestBody String fileTypeExtension){
+    public HttpStatus createFileType(@RequestParam String fileTypeName,
+                                     @RequestParam String fileTypeDesc,
+                                     @RequestParam String fileTypeExtension){
 
         FileType result = fileTypeService.createFileType(fileTypeName, fileTypeDesc, fileTypeExtension);
         if(result!=null){

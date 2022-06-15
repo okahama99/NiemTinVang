@@ -8,7 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,56 +71,56 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllByPlanStartDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByPlanStartDate(SearchType searchType, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         return null;
     }
     @Override
-    public List<TaskDTO> getAllDTOByPlanStartDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
-    }
-
-    @Override
-    public List<Task> getAllByPlanEndDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
-    }
-    @Override
-    public List<TaskDTO> getAllDTOByPlanEndDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskDTO> getAllDTOByPlanStartDate(SearchType searchType, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         return null;
     }
 
     @Override
-    public List<Task> getAllByPlanStartDateAfterAndPlanEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByPlanEndDate(SearchType searchType, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         return null;
     }
     @Override
-    public List<TaskDTO> getAllDTOByPlanStartDateAfterAndPlanEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
-        return null;
-    }
-
-    @Override
-    public List<Task> getAllByActualStartDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
-        return null;
-    }
-    @Override
-    public List<TaskDTO> getAllDTOByActualStartDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskDTO> getAllDTOByPlanEndDate(SearchType searchType, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         return null;
     }
 
     @Override
-    public List<Task> getAllByActualEndDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByPlanStartDateAfterAndPlanEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         return null;
     }
     @Override
-    public List<TaskDTO> getAllDTOByActualEndDate(SearchType searchType, Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskDTO> getAllDTOByPlanStartDateAfterAndPlanEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         return null;
     }
 
     @Override
-    public List<Task> getAllByActualStartDateAfterAndActualEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByActualStartDate(SearchType searchType, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         return null;
     }
     @Override
-    public List<TaskDTO> getAllDTOByActualStartDateAfterAndActualEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskDTO> getAllDTOByActualStartDate(SearchType searchType, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
+        return null;
+    }
+
+    @Override
+    public List<Task> getAllByActualEndDate(SearchType searchType, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
+        return null;
+    }
+    @Override
+    public List<TaskDTO> getAllDTOByActualEndDate(SearchType searchType, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
+        return null;
+    }
+
+    @Override
+    public List<Task> getAllByActualStartDateAfterAndActualEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
+        return null;
+    }
+    @Override
+    public List<TaskDTO> getAllDTOByActualStartDateAfterAndActualEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         return null;
     }
 

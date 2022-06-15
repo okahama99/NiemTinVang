@@ -3,7 +3,7 @@ package com.ntv.ntvcons_backend.entities;
 import lombok.*;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Builder
 @AllArgsConstructor
@@ -28,19 +28,19 @@ public class Project extends BaseEntity {
     private Long blueprintId;
 
     @Column(name = "planStartDate", nullable = false)
-    private Instant planStartDate;
+    private LocalDateTime planStartDate;
 
     @Column(name = "planEndDate")
-    private Instant planEndDate;
+    private LocalDateTime planEndDate;
 
     @Column(name = "estimatedCost")
     private Double estimatedCost;
 
     @Column(name = "actualStartDate")
-    private Instant actualStartDate;
+    private LocalDateTime actualStartDate;
 
     @Column(name = "actualEndDate")
-    private Instant actualEndDate;
+    private LocalDateTime actualEndDate;
 
     @Column(name = "actualCost")
     private Double actualCost;

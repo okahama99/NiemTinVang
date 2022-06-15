@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -18,9 +18,9 @@ public class TaskDTO implements Serializable {
     private UserDTO creator;
     private String taskName;
     private String taskDesc;
-    private Instant planStartDate;
-    private Instant planEndDate;
-    private Instant actualStartDate;
-    private Instant actualEndDate;
+    private LocalDateTime planStartDate;
+    private LocalDateTime planEndDate;
+    private LocalDateTime actualStartDate;
+    private LocalDateTime actualEndDate;
     private Boolean isDeleted = false;
 }

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
 
 
     /* assignDate */
-    List<TaskAssignment> findAllByAssignDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<TaskAssignment> findAllByAssignDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<TaskAssignment> findAllByAssignDateBetweenAndIsDeletedIsFalse(Instant fromDate, Instant toDate);
+    List<TaskAssignment> findAllByAssignDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<TaskAssignment> findAllByAssignDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<TaskAssignment> findAllByAssignDateBetweenAndIsDeletedIsFalse(LocalDateTime fromDate, LocalDateTime toDate);
 }

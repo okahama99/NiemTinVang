@@ -9,6 +9,7 @@ import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
 import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
+import com.ntv.ntvcons_backend.entities.projectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
 import com.ntv.ntvcons_backend.repositories.LocationRepository;
 import com.ntv.ntvcons_backend.repositories.ProjectRepository;
@@ -22,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,41 +46,39 @@ public class ProjectServiceImpl implements ProjectService{
 
     /* READ */
     @Override
-    public String createProject(String projectName, CreateLocationModel createLocationModel,
-                                 CreateBluePrintModel createBluePrintModel, Instant planStartDate, Instant planEndDate,
-                                 Instant actualStartDate, Instant actualEndDate, double estimateCost, double actualCost) {
-        String result;
-        Location checkDuplicateLocation = locationRepository.getByAddressNumber(createLocationModel.getAddressNumber());
-        if(checkDuplicateLocation == null)
-        {
-            Blueprint checkDuplicateBlueprint = blueprintRepository.getByBlueprintName(createBluePrintModel.getProjectBlueprintName());
-            if(checkDuplicateBlueprint == null)
-            {
+    public boolean createProject(CreateProjectModel createProjectModel) {
+                CreateLocationModel createLocationModel = new CreateLocationModel();
+                createLocationModel.setAddressNumber(createProjectModel.getAddressNumber());
+                createLocationModel.setStreet(createProjectModel.getStreet());
+                createLocationModel.setArea(createProjectModel.getArea());
+                createLocationModel.setWard(createProjectModel.getWard());
+                createLocationModel.setDistrict(createProjectModel.getDistrict());
+                createLocationModel.setCity(createProjectModel.getCity());
+                createLocationModel.setProvince(createProjectModel.getProvince());
+                createLocationModel.setCountry(createProjectModel.getCountry());
+                createLocationModel.setCoordinate(createProjectModel.getCoordinate());
                 locationService.createLocation(createLocationModel);
+
+                CreateBluePrintModel createBluePrintModel = new CreateBluePrintModel();
+                createBluePrintModel.setDesignerName(createProjectModel.getDesignerName());
+                createBluePrintModel.setProjectBlueprintName(createProjectModel.getProjectBlueprintName());
+                createBluePrintModel.setEstimateCost(createProjectModel.getBlueprintEstimateCost());
                 blueprintService.createProjectBlueprint(createBluePrintModel);
+
                 Location location = locationRepository.getByAddressNumber(createLocationModel.getAddressNumber());
                 Blueprint blueprint = blueprintRepository.getByBlueprintName(createBluePrintModel.getProjectBlueprintName());
                 Project project = new Project();
-                project.setProjectName(projectName);
+                project.setProjectName(createProjectModel.getProjectName());
                 project.setBlueprintId(blueprint.getBlueprintId());
                 project.setLocationId(location.getLocationId());
-                project.setPlanStartDate(planStartDate);
-                project.setPlanEndDate(planEndDate);
-                project.setActualStartDate(actualStartDate);
-                project.setActualEndDate(actualEndDate);
-                project.setActualCost(actualCost);
-                project.setEstimatedCost(estimateCost);
+                project.setPlanStartDate(createProjectModel.getPlanStartDate());
+                project.setPlanEndDate(createProjectModel.getPlanEndDate());
+                project.setActualStartDate(createProjectModel.getActualStartDate());
+                project.setActualEndDate(createProjectModel.getActualEndDate());
+                project.setActualCost(createProjectModel.getProjectActualCost());
+                project.setEstimatedCost(createProjectModel.getProjectEstimateCost());
                 projectRepository.saveAndFlush(project);
-                result = "Create success";
-                return result;
-            }else{
-                result = "Existed blueprint name";
-                return result;
-            }
-        }else{
-            result = "Existed address number";
-            return result;
-        }
+                return true;
     }
 
     /* READ */
@@ -199,66 +197,48 @@ public class ProjectServiceImpl implements ProjectService{
 
     /* UPDATE */
     @Override
-    public String updateProject(ProjectModel projectModel) {
-            String result;
+    public boolean updateProject(ProjectModel projectModel) {
             Project project = projectRepository.findById(projectModel.getProjectId()).get();
-            if(project!=null)
-            {
-                Location checkDuplicateLocation = locationRepository.getByAddressNumber(projectModel.getAddressNumber());
-                if(checkDuplicateLocation == null)
-                {
-                    Blueprint checkDuplicateBlueprint = blueprintRepository.getByBlueprintName(projectModel.getBlueprintName());
-                    if(checkDuplicateBlueprint == null)
-                    {
-                        UpdateLocationModel locationModel = new UpdateLocationModel();
-                        locationModel.setLocationId(projectModel.getLocationId());
-                        locationModel.setAddressNumber(projectModel.getAddressNumber());
-                        locationModel.setStreet(projectModel.getStreet());
-                        locationModel.setArea(projectModel.getArea());
-                        locationModel.setWard(projectModel.getWard());
-                        locationModel.setDistrict(projectModel.getDistrict());
-                        locationModel.setCity(projectModel.getCity());
-                        locationModel.setProvince(projectModel.getProvince());
-                        locationModel.setCountry(projectModel.getCountry());
-                        locationModel.setCoordinate(projectModel.getCoordinate());
-                        locationModel.setUserId(projectModel.getUserId());
-                        locationModel.setUpdatedAt(projectModel.getUpdatedAt());
-                        locationService.updateLocation(locationModel);
+            if(project!=null) {
+                UpdateLocationModel locationModel = new UpdateLocationModel();
+                locationModel.setLocationId(projectModel.getLocationId());
+                locationModel.setAddressNumber(projectModel.getAddressNumber());
+                locationModel.setStreet(projectModel.getStreet());
+                locationModel.setArea(projectModel.getArea());
+                locationModel.setWard(projectModel.getWard());
+                locationModel.setDistrict(projectModel.getDistrict());
+                locationModel.setCity(projectModel.getCity());
+                locationModel.setProvince(projectModel.getProvince());
+                locationModel.setCountry(projectModel.getCountry());
+                locationModel.setCoordinate(projectModel.getCoordinate());
+                locationModel.setUserId(projectModel.getUserId());
+                locationModel.setUpdatedAt(projectModel.getUpdatedAt());
+                locationService.updateLocation(locationModel);
 
-                        UpdateBlueprintModel blueprintModel = new UpdateBlueprintModel();
-                        blueprintModel.setBlueprintId(projectModel.getBlueprintId());
-                        blueprintModel.setBlueprintName(projectModel.getBlueprintName());
-                        blueprintModel.setDesignerName(projectModel.getDesignerName());
-                        blueprintModel.setEstimateCost(projectModel.getBlueprintEstimateCost());
-                        blueprintModel.setUserId(projectModel.getUserId());
-                        blueprintModel.setUpdatedAt(projectModel.getUpdatedAt());
-                        blueprintService.updateProjectBlueprint(blueprintModel);
+                UpdateBlueprintModel blueprintModel = new UpdateBlueprintModel();
+                blueprintModel.setBlueprintId(projectModel.getBlueprintId());
+                blueprintModel.setBlueprintName(projectModel.getBlueprintName());
+                blueprintModel.setDesignerName(projectModel.getDesignerName());
+                blueprintModel.setEstimateCost(projectModel.getBlueprintEstimateCost());
+                blueprintModel.setUserId(projectModel.getUserId());
+                blueprintModel.setUpdatedAt(projectModel.getUpdatedAt());
+                blueprintService.updateProjectBlueprint(blueprintModel);
 
-                        project.setProjectName(projectModel.getProjectName());
-                        project.setBlueprintId(projectModel.getBlueprintId());
-                        project.setLocationId(projectModel.getLocationId());
-                        project.setPlanStartDate(projectModel.getPlanStartDate());
-                        project.setPlanEndDate(projectModel.getPlanEndDate());
-                        project.setActualStartDate(projectModel.getActualStartDate());
-                        project.setActualEndDate(projectModel.getActualEndDate());
-                        project.setActualCost(projectModel.getActualCost());
-                        project.setEstimatedCost(projectModel.getProjectEstimateCost());
-                        project.setUpdatedAt(projectModel.getUpdatedAt());
-                        project.setUpdatedBy(projectModel.getUserId());
-                        projectRepository.saveAndFlush(project);
-                        result = "Update success";
-                        return result;
-                    }else{
-                        result = "Existed blueprint name";
-                        return result;
-                    }
-                }else{
-                    result = "Existed address number";
-                    return result;
-                }
+                project.setProjectName(projectModel.getProjectName());
+                project.setBlueprintId(projectModel.getBlueprintId());
+                project.setLocationId(projectModel.getLocationId());
+                project.setPlanStartDate(projectModel.getPlanStartDate());
+                project.setPlanEndDate(projectModel.getPlanEndDate());
+                project.setActualStartDate(projectModel.getActualStartDate());
+                project.setActualEndDate(projectModel.getActualEndDate());
+                project.setActualCost(projectModel.getActualCost());
+                project.setEstimatedCost(projectModel.getProjectEstimateCost());
+                project.setUpdatedAt(projectModel.getUpdatedAt());
+                project.setUpdatedBy(projectModel.getUserId());
+                projectRepository.saveAndFlush(project);
+                return true;
             }
-            result = "ProjectID not existed";
-            return result;
+            return false;
     }
 
     /* DELETE */
