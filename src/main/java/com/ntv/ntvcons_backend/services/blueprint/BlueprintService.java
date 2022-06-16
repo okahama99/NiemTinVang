@@ -30,4 +30,6 @@ public interface BlueprintService {
 
     /* DELETE */
     boolean deleteProjectBlueprint(long projectBlueprintId);
+
+    String checkDuplicate(String blueprintName);
 }

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 
 @AllArgsConstructor
@@ -31,7 +31,7 @@ public class Report extends BaseEntity {
     private Long reporterId;
 
     @Column(name = "reportDate", nullable = false)
-    private Instant reportDate;
+    private LocalDateTime reportDate;
 
     @Column(name = "reportDesc", nullable = false, length = 100)
     private String reportDesc;

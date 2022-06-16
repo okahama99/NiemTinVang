@@ -1,14 +1,13 @@
 package com.ntv.ntvcons_backend.controllers;
 
-import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBluePrintModel;
-import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
+import com.ntv.ntvcons_backend.entities.projectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -19,48 +18,45 @@ public class ProjectController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/createProject", produces = "application/json;charset=UTF-8")
-    public String createProject(@RequestBody String projectName,
-                                    @RequestBody CreateLocationModel createLocationModel,
-                                    @RequestBody CreateBluePrintModel createBluePrintModel,
-                                    @RequestBody Instant planStartDate,
-                                    @RequestBody Instant planEndDate,
-                                    @RequestBody Instant actualStartDate,
-                                    @RequestBody Instant actualEndDate,
-                                    @RequestBody double estimateCost,
-                                    @RequestBody double actualCost){
+    public ResponseEntity<?> createProject(@RequestBody CreateProjectModel createProjectModel){
 
-        String result = projectService.createProject(projectName, createLocationModel,
-                createBluePrintModel, planStartDate, planEndDate,
-                actualStartDate, actualEndDate, estimateCost, actualCost);
-        return result;
+        boolean result = projectService.createProject(createProjectModel);
+        if(result)
+        {
+            return new ResponseEntity<>("Tạo thành công.",HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Tạo thất bại.",HttpStatus.BAD_REQUEST);
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/updateProject", produces = "application/json;charset=UTF-8")
-    public String updateProject(@RequestBody ProjectModel projectModel){
-        String result = projectService.updateProject(projectModel);
-        return result;
+    public ResponseEntity<?> updateProject(@RequestBody ProjectModel projectModel){
+        boolean result = projectService.updateProject(projectModel);
+        if(result)
+        {
+            return new ResponseEntity<>("Cập nhật thành công.",HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Cập nhật thất bại.",HttpStatus.BAD_REQUEST);
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
+    @GetMapping(value = "/getAllProject", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    List<ProjectModel> getAll(@RequestBody int pageNo,
-                              @RequestBody int pageSize,
-                              @RequestBody String sortBy,
-                              @RequestBody boolean sortType) {
+    List<ProjectModel> getAllProject(@RequestParam int pageNo,
+                              @RequestParam int pageSize,
+                              @RequestParam String sortBy,
+                              @RequestParam boolean sortType) {
         List<ProjectModel> projects = projectService.getAll(pageNo, pageSize, sortBy, sortType);
         return projects;
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/deleteProject/{projectId}", produces = "application/json;charset=UTF-8")
-    public HttpStatus deleteProject(@PathVariable(name = "projectId") int projectId){
+    public ResponseEntity<?> deleteProject(@PathVariable(name = "projectId") int projectId){
         if(projectService.deleteProject(projectId))
         {
-            return HttpStatus.OK;
-        }else{
-            return HttpStatus.BAD_REQUEST;
+            return new ResponseEntity<>("Xóa thành công.",HttpStatus.OK);
         }
+        return new ResponseEntity<>("Xóa thất bại.",HttpStatus.BAD_REQUEST);
     }
 }

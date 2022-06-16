@@ -1,20 +1,16 @@
 package com.ntv.ntvcons_backend.services.project;
 
-import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBluePrintModel;
-import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
+import com.ntv.ntvcons_backend.entities.projectModels.CreateProjectModel;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 
 public interface ProjectService {
     /* CREATE */
-    String createProject(String projectName, CreateLocationModel createLocationModel,
-                          CreateBluePrintModel createBluePrintModel, Instant planStartDate, Instant planEndDate,
-                          Instant actualStartDate, Instant actualEndDate, double estimateCost, double actualCost);
+    boolean createProject(CreateProjectModel createProjectModel);
 
     /* READ */
     List<ProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
@@ -38,7 +34,7 @@ public interface ProjectService {
     Project getById(int projectId);
 
     /* UPDATE */
-    String updateProject(ProjectModel projectModel);
+    boolean updateProject(ProjectModel projectModel);
 
     /* DELETE */
     boolean deleteProject(long projectId);

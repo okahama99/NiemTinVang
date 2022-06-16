@@ -5,7 +5,7 @@ import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.task.*;
 import com.ntv.ntvcons_backend.entities.Task;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -30,23 +30,23 @@ public interface TaskService {
     List<Task> getAllByTaskNameContains(String taskName) throws Exception;
     List<TaskReadDTO> getAllDTOByTaskNameContains(String taskName) throws Exception;
 
-    List<Task> getAllByPlanStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
-    List<TaskReadDTO> getAllDTOByPlanStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
+    List<Task> getAllByPlanStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
+    List<TaskReadDTO> getAllDTOByPlanStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
 
-    List<Task> getAllByPlanEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
-    List<TaskReadDTO> getAllDTOByPlanEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
+    List<Task> getAllByPlanEndDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
+    List<TaskReadDTO> getAllDTOByPlanEndDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
 
-    List<Task> getAllByPlanStartDateAfterAndPlanEndDateBefore(Instant fromDate, Instant toDate) throws Exception;
-    List<TaskReadDTO> getAllDTOByPlanStartDateAfterAndPlanEndDateBefore(Instant fromDate, Instant toDate) throws Exception;
+    List<Task> getAllByPlanStartDateAfterAndPlanEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
+    List<TaskReadDTO> getAllDTOByPlanStartDateAfterAndPlanEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
 
-    List<Task> getAllByActualStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
-    List<TaskReadDTO> getAllDTOByActualStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
+    List<Task> getAllByActualStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
+    List<TaskReadDTO> getAllDTOByActualStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
 
-    List<Task> getAllByActualEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
-    List<TaskReadDTO> getAllDTOByActualEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
+    List<Task> getAllByActualEndDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
+    List<TaskReadDTO> getAllDTOByActualEndDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
 
-    List<Task> getAllByActualStartDateAfterAndActualEndDateBefore(Instant fromDate, Instant toDate) throws Exception;
-    List<TaskReadDTO> getAllDTOByActualStartDateAfterAndActualEndDateBefore(Instant fromDate, Instant toDate) throws Exception;
+    List<Task> getAllByActualStartDateAfterAndActualEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
+    List<TaskReadDTO> getAllDTOByActualStartDateAfterAndActualEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
 
     /* UPDATE */
     Task updateTask(Task updatedTask) throws Exception;

@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -32,27 +32,27 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 
     /* planStartDate */
-    List<Task> findAllByPlanStartDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Task> findAllByPlanStartDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Task> findAllByPlanStartDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Task> findAllByPlanStartDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Task> findAllByPlanStartDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Task> findAllByPlanStartDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
     /* planEndDate */
-    List<Task> findAllByPlanEndDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Task> findAllByPlanEndDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Task> findAllByPlanEndDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Task> findAllByPlanEndDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Task> findAllByPlanEndDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Task> findAllByPlanEndDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
     /* planStartDate & planEndDate in range */
     List<Task> findAllByPlanStartDateAfterAndPlanEndDateBeforeAndIsDeletedIsFalse
-            (Instant afterDate, Instant beforeDate);
+            (LocalDateTime afterDate, LocalDateTime beforeDate);
 
 
     /* actualStartDate */
-    List<Task> findAllByActualStartDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Task> findAllByActualStartDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Task> findAllByActualStartDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Task> findAllByActualStartDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Task> findAllByActualStartDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Task> findAllByActualStartDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
     /* actualEndDate */
-    List<Task> findAllByActualEndDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Task> findAllByActualEndDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Task> findAllByActualEndDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Task> findAllByActualEndDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Task> findAllByActualEndDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Task> findAllByActualEndDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
     /* actualStartDate & ActualEndDate in range */
     List<Task> findAllByActualStartDateAfterAndActualEndDateBeforeAndIsDeletedIsFalse
-            (Instant afterDate, Instant beforeDate);
+            (LocalDateTime afterDate, LocalDateTime beforeDate);
 }

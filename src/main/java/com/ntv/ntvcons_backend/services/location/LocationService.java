@@ -31,4 +31,6 @@ public interface LocationService {
 
     /* DELETE */
     boolean deleteLocation(long locationId);
+
+    String checkDuplicate(String addressNumber);
 }

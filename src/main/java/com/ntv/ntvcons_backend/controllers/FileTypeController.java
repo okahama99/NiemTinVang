@@ -22,7 +22,7 @@ public class FileTypeController {
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     //@PreAuthorize("hasFileType('ROLE_ADMIN')")
-    @PostMapping(value = "/v1/create", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/createFileType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> insertFileType(@RequestBody FileTypeCreateDTO fileTypeDTO) {
         try {
             FileTypeReadDTO newFileTypeDTO = fileTypeService.createFileTypeByDTO(fileTypeDTO);

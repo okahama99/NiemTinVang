@@ -6,6 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateBluePrintModel {
-    private String designerName, projectBlueprintName, image;
+    private String designerName, projectBlueprintName;
     private double estimateCost;
 }

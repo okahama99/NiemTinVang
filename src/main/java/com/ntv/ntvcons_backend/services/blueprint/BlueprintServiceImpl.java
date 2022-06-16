@@ -130,4 +130,17 @@ public class BlueprintServiceImpl implements BlueprintService {
         }
         return false;
     }
+
+    @Override
+    public String checkDuplicate(String blueprintName)
+    {
+        String result = "No duplicate";
+        Blueprint checkDuplicate = blueprintRepository.getByBlueprintName(blueprintName);
+        if(checkDuplicate != null)
+        {
+            result = "Existed blueprint name";
+            return result;
+        }
+        return result;
+    }
 }

@@ -40,10 +40,10 @@ public class ReportDetailController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
     public @ResponseBody
-    List<ShowReportDetailModel> getAll(@RequestBody int pageNo,
-                              @RequestBody int pageSize,
-                              @RequestBody String sortBy,
-                              @RequestBody boolean sortType) {
+    List<ShowReportDetailModel> getAll(@RequestParam int pageNo,
+                              @RequestParam int pageSize,
+                              @RequestParam String sortBy,
+                              @RequestParam boolean sortType) {
         List<ShowReportDetailModel> reports = reportDetailService.getAll(pageNo, pageSize, sortBy, sortType);
         return reports;
     }

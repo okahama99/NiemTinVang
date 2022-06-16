@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -18,11 +18,11 @@ public class RequestDTO implements Serializable {
     private ProjectDTO projectId;
     private RequestTypeReadDTO requestType;
     private UserDTO Requester;
-    private Instant requestDate;
+    private LocalDateTime requestDate;
     private String requestDesc;
     private UserDTO verifier;
     private Boolean isVerified;
-    private Instant verifyDate;
+    private LocalDateTime verifyDate;
     private String verifyNote;
     private Boolean isApproved;
     private Boolean isDeleted = false;

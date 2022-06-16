@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 
 @AllArgsConstructor
@@ -31,7 +31,7 @@ public class Request extends BaseEntity {
     private Long requesterId;
 
     @Column(name = "requestDate", nullable = false)
-    private Instant requestDate;
+    private LocalDateTime requestDate;
 
     @Column(name = "requestDesc", nullable = false, length = 100)
     private String requestDesc;
@@ -43,7 +43,7 @@ public class Request extends BaseEntity {
     private Boolean isVerified = false;
 
     @Column(name = "verifyDate")
-    private Instant verifyDate;
+    private LocalDateTime verifyDate;
 
     @Column(name = "verifyNote", length = 100)
     private String verifyNote;

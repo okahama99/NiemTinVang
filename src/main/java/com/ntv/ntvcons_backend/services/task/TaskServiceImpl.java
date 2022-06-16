@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -168,7 +168,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllByPlanStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByPlanStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = new ArrayList<>();
 
         switch (searchOption) {
@@ -197,7 +197,7 @@ public class TaskServiceImpl implements TaskService{
         return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByPlanStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskReadDTO> getAllDTOByPlanStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = getAllByPlanStartDate(searchOption, fromDate, toDate);
 
         if (taskList == null) {
@@ -210,7 +210,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllByPlanEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByPlanEndDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = new ArrayList<>();
 
         switch (searchOption) {
@@ -239,7 +239,7 @@ public class TaskServiceImpl implements TaskService{
         return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByPlanEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskReadDTO> getAllDTOByPlanEndDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = getAllByPlanEndDate(searchOption, fromDate, toDate);
 
         if (taskList == null) {
@@ -252,7 +252,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllByPlanStartDateAfterAndPlanEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByPlanStartDateAfterAndPlanEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList =
                 taskRepository.findAllByPlanStartDateAfterAndPlanEndDateBeforeAndIsDeletedIsFalse(fromDate, toDate);
 
@@ -263,7 +263,7 @@ public class TaskServiceImpl implements TaskService{
         return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByPlanStartDateAfterAndPlanEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskReadDTO> getAllDTOByPlanStartDateAfterAndPlanEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = getAllByPlanStartDateAfterAndPlanEndDateBefore(fromDate, toDate);
 
         if (taskList == null) {
@@ -276,7 +276,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllByActualStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByActualStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = new ArrayList<>();
 
         switch (searchOption) {
@@ -305,7 +305,7 @@ public class TaskServiceImpl implements TaskService{
         return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByActualStartDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskReadDTO> getAllDTOByActualStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = getAllByActualStartDate(searchOption, fromDate, toDate);
 
         if (taskList == null) {
@@ -318,7 +318,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllByActualEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByActualEndDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = new ArrayList<>();
 
         switch (searchOption) {
@@ -347,7 +347,7 @@ public class TaskServiceImpl implements TaskService{
         return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByActualEndDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskReadDTO> getAllDTOByActualEndDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = getAllByActualEndDate(searchOption, fromDate, toDate);
 
         if (taskList == null) {
@@ -360,7 +360,7 @@ public class TaskServiceImpl implements TaskService{
     }
 
     @Override
-    public List<Task> getAllByActualStartDateAfterAndActualEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
+    public List<Task> getAllByActualStartDateAfterAndActualEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList =
                 taskRepository.findAllByActualStartDateAfterAndActualEndDateBeforeAndIsDeletedIsFalse(fromDate, toDate);
 
@@ -371,7 +371,7 @@ public class TaskServiceImpl implements TaskService{
         return taskList;
     }
     @Override
-    public List<TaskReadDTO> getAllDTOByActualStartDateAfterAndActualEndDateBefore(Instant fromDate, Instant toDate) throws Exception {
+    public List<TaskReadDTO> getAllDTOByActualStartDateAfterAndActualEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList = getAllByActualStartDateAfterAndActualEndDateBefore(fromDate, toDate);
 
         if (taskList == null) {

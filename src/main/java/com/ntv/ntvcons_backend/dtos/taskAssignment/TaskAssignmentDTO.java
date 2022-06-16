@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +17,7 @@ public class TaskAssignmentDTO implements Serializable {
     private TaskReadDTO task;
     private UserDTO assigner;
     private UserDTO assignee;
-    private Instant assignDate;
-    private Instant removeDate;
+    private LocalDateTime assignDate;
+    private LocalDateTime removeDate;
     private Boolean isDeleted = false;
 }

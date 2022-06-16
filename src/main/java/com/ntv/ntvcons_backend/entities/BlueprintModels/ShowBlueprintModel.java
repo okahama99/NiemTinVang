@@ -9,7 +9,7 @@ import java.util.Date;
 @Setter
 public class ShowBlueprintModel {
     private long projectBlueprintId;
-    private String projectBlueprintName, image, designerName;
+    private String projectBlueprintName, designerName;
     private double projectBlueprintCost;
     private Long createdBy, updatedBy;
     private Date createdAt, updatedAt;
