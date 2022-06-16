@@ -16,6 +16,7 @@ public interface TaskReportRepository extends JpaRepository<TaskReport, Long> {
 
 
     /* Id */
+    boolean existsByTaskReportIdAndIsDeletedIsFalse(long taskReportId);
     Optional<TaskReport> findByTaskReportIdAndIsDeletedIsFalse(long taskReportId);
     List<TaskReport> findAllByTaskReportIdInAndIsDeletedIsFalse(Collection<Long> taskReportIdCollection);
 

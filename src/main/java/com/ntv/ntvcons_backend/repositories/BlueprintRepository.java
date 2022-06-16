@@ -26,11 +26,6 @@ public interface BlueprintRepository extends JpaRepository<Blueprint, Long> {
     List<Blueprint> findAllByBlueprintNameContainsAndIsDeletedIsFalse(String blueprintName);
 
 
-    /* designerId */
-//    List<Blueprint> findAllByDesignerIdAndIsDeletedIsFalse(long designerId);
-//    List<Blueprint> findAllByDesignerIdInAndIsDeletedIsFalse(Collection<Long> designerIdCollection);
-
-
     /* estimatedCost */
     List<Blueprint> findAllByEstimatedCostGreaterThanEqualAndIsDeletedIsFalse(double minCost);
     List<Blueprint> findAllByEstimatedCostLessThanEqualAndIsDeletedIsFalse(double maxCost);

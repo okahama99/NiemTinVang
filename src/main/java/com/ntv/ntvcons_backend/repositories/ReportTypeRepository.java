@@ -16,7 +16,9 @@ public interface ReportTypeRepository extends JpaRepository<ReportType, Long> {
 
 
     /* Id */
+    boolean existsByReportTypeIdAndIsDeletedIsFalse(long reportTypeId);
     Optional<ReportType> findByReportTypeIdAndIsDeletedIsFalse(long reportTypeId);
+    boolean existsAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection);
     List<ReportType> findAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection);
 
 

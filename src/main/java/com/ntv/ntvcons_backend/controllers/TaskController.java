@@ -2,10 +2,12 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
-import com.ntv.ntvcons_backend.dtos.task.*;
+import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.services.task.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,12 +23,16 @@ public class TaskController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PostMapping(value = "/v1/create", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/createTask", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createTask(@RequestBody TaskCreateDTO taskDTO) {
         try {
             TaskReadDTO newTaskDTO = taskService.createTaskByDTO(taskDTO);
 
             return ResponseEntity.ok().body(newTaskDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project by Id, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Task", e.getMessage()));
@@ -34,7 +40,7 @@ public class TaskController {
     }
 
     /* READ */
-    @GetMapping(value = "/v1/read/all", produces = "application/json;charset=UTF-8")
+    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
@@ -47,6 +53,10 @@ public class TaskController {
             }
 
             return ResponseEntity.ok().body(taskDTOList);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Task", e.getMessage()));
@@ -54,10 +64,9 @@ public class TaskController {
     }
 
     /* TODO: search by date (plan, actual); separate func or mod this one */
-    @GetMapping(value = "/v1/read", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParams(@RequestParam String searchParam,
-                                              /*@RequestBody(required = false) Object searchParams,*/
-                                              @RequestParam("searchType") SearchType searchType) {
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam(name = "searchType") SearchType searchType) {
         try {
             List<TaskReadDTO> taskDTOList;
 
@@ -81,26 +90,29 @@ public class TaskController {
                     break;
 
                 default:
-                    return ResponseEntity.badRequest().body("Wrong search type for entity Task");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Task");
             }
 
             return ResponseEntity.ok().body(taskDTOList);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
-                            "Invalid param type for searchType: " + searchType
-                                    + "\nExpecting param of type: Long",
+                            "Invalid parameter type for searchType: " + searchType
+                                    + "\nExpecting parameter of type: Long",
                             nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "";
+            String errorMsg = "Error searching for Task with ";
 
             switch (searchType) {
-                case FILE_TYPE_BY_NAME_CONTAINS:
-                    errorMsg += "Error searching for Task with name contains: " + searchParam;
+                case TASK_BY_NAME_CONTAINS:
+                    errorMsg += "name contains: " + searchParam;
                     break;
 
-                case FILE_TYPE_BY_EXTENSION_CONTAINS:
-                    errorMsg += "Error searching for Task with projectId: " + searchParam;
+                case TASK_BY_PROJECT_ID:
+                    errorMsg += "projectId: " + searchParam;
                     break;
             }
 
@@ -109,7 +121,7 @@ public class TaskController {
     }
 
     /* UPDATE */
-    @PutMapping(value = "/v1/update", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateTask", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateTask(@RequestBody TaskUpdateDTO taskDTO) {
         try {
             TaskReadDTO updatedTaskDTO = taskService.updateTaskByDTO(taskDTO);
@@ -120,6 +132,10 @@ public class TaskController {
             }
 
             return ResponseEntity.ok().body(updatedTaskDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project by Id (if changed), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Task with Id: " + taskDTO.getTaskId(), e.getMessage()));
@@ -127,7 +143,7 @@ public class TaskController {
     }
 
     /* DELETE */
-    @DeleteMapping(value ="/v1/delete/{taskId}", produces = "application/json;charset=UTF-8")
+    @DeleteMapping(value ="/v1/deleteTask/{taskId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteTask(@PathVariable(name = "taskId") long taskId) {
         try {
             if (!taskService.deleteTask(taskId)) {

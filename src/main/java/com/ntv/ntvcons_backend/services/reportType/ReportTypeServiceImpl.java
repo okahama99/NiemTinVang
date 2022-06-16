@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,6 +80,10 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     }
 
     @Override
+    public boolean existsById(long reportTypeId) throws Exception {
+        return reportTypeRepository.existsByReportTypeIdAndIsDeletedIsFalse(reportTypeId);
+    }
+    @Override
     public ReportType getById(long reportTypeId) throws Exception {
         Optional<ReportType> reportType = reportTypeRepository.findByReportTypeIdAndIsDeletedIsFalse(reportTypeId);
 
@@ -94,6 +100,10 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         return modelMapper.map(reportType, ReportTypeReadDTO.class);
     }
 
+    @Override
+    public boolean existsAllByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
+        return reportTypeRepository.existsAllByReportTypeIdInAndIsDeletedIsFalse(reportTypeIdCollection);
+    }
     @Override
     public List<ReportType> getAllByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
         List<ReportType> reportTypeList = reportTypeRepository.findAllByReportTypeIdInAndIsDeletedIsFalse(reportTypeIdCollection);
@@ -114,6 +124,26 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
         return reportTypeList.stream().map(reportType -> modelMapper.map(reportType, ReportTypeReadDTO.class))
                 .collect(Collectors.toList());
+    }
+    @Override
+    public Map<Long, ReportType> mapReportTypeIdReportTypeByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
+        List<ReportType> reportTypeList = getAllByIdIn(reportTypeIdCollection);
+
+        if (reportTypeList == null) {
+            return null;
+        }
+
+        return reportTypeList.stream().collect(Collectors.toMap(ReportType::getReportTypeId, Function.identity()));
+    }
+    @Override
+    public Map<Long, ReportTypeReadDTO> mapReportTypeIdReportTypeDTOByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
+        List<ReportTypeReadDTO> reportTypeDTOList = getAllDTOByIdIn(reportTypeIdCollection);
+
+        if (reportTypeDTOList == null) {
+            return null;
+        }
+
+        return reportTypeDTOList.stream().collect(Collectors.toMap(ReportTypeReadDTO::getReportTypeId, Function.identity()));
     }
 
     @Override

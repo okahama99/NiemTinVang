@@ -17,7 +17,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 
     /* Id */
+    boolean existsByTaskIdAndIsDeletedIsFalse(long taskId);
     Optional<Task> findByTaskIdAndIsDeletedIsFalse(long taskId);
+    boolean existsAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
     List<Task> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
 
 

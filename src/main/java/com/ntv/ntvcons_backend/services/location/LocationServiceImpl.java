@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LocationServiceImpl implements LocationService {
@@ -37,7 +38,7 @@ public class LocationServiceImpl implements LocationService {
        locationRepository.saveAndFlush(location);
     }
 
-    /* CREATE */
+    /* READ */
     @Override
     public List<ShowLocationModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
@@ -91,6 +92,13 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
+    public Location getById(long locationId) {
+        return locationRepository
+                .findByLocationIdAndIsDeletedIsFalse(locationId)
+                .orElse(null);
+    }
+
+    @Override
     public List<Location> getAllByWardContains(String ward) {
         return null;
     }
@@ -115,10 +123,6 @@ public class LocationServiceImpl implements LocationService {
         return null;
     }
 
-    @Override
-    public Location getById(int locationId) {
-        return null;
-    }
 
     /* UPDATE */
     @Override
@@ -142,12 +146,16 @@ public class LocationServiceImpl implements LocationService {
     /* DELETE */
     @Override
     public boolean deleteLocation(long locationId) {
-        Location location = locationRepository.findById(locationId).get();
-        if(location!=null)
-        {
-            location.setIsDeleted(true);
-            locationRepository.saveAndFlush(location);
+        Location location = getById(locationId);
+
+        if (location == null) {
+            return false;
+            /* Not found with Id */
         }
-        return false;
+
+        location.setIsDeleted(true);
+        locationRepository.saveAndFlush(location);
+
+        return true;
     }
 }

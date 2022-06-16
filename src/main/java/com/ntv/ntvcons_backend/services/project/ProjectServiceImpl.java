@@ -2,7 +2,7 @@ package com.ntv.ntvcons_backend.services.project;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.Blueprint;
-import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBluePrintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.Location;
 import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
@@ -47,8 +47,8 @@ public class ProjectServiceImpl implements ProjectService{
     /* READ */
     @Override
     public String createProject(String projectName, CreateLocationModel createLocationModel,
-                                 CreateBluePrintModel createBluePrintModel, Instant planStartDate, Instant planEndDate,
-                                 Instant actualStartDate, Instant actualEndDate, double estimateCost, double actualCost) {
+                                CreateBlueprintModel createBluePrintModel, Instant planStartDate, Instant planEndDate,
+                                Instant actualStartDate, Instant actualEndDate, double estimateCost, double actualCost) {
         String result;
         Location checkDuplicateLocation = locationRepository.getByAddressNumber(createLocationModel.getAddressNumber());
         if(checkDuplicateLocation == null)
@@ -62,7 +62,6 @@ public class ProjectServiceImpl implements ProjectService{
                 Blueprint blueprint = blueprintRepository.getByBlueprintName(createBluePrintModel.getProjectBlueprintName());
                 Project project = new Project();
                 project.setProjectName(projectName);
-                project.setBlueprintId(blueprint.getBlueprintId());
                 project.setLocationId(location.getLocationId());
                 project.setPlanStartDate(planStartDate);
                 project.setPlanEndDate(planEndDate);
@@ -127,12 +126,6 @@ public class ProjectServiceImpl implements ProjectService{
                     model.setCountry(location.getCountry());
                     model.setCoordinate(location.getCoordinate());
 
-                    Blueprint blueprint = blueprintRepository.findById(project.getBlueprintId()).get();
-                    model.setBlueprintId(project.getBlueprintId());
-                    model.setDesignerName(blueprint.getDesignerName());
-                    model.setBlueprintName(blueprint.getBlueprintName());
-                    model.setBlueprintEstimateCost(blueprint.getEstimatedCost());
-
                     model.setCreatedAt(project.getCreatedAt());
                     model.setCreatedBy(project.getCreatedBy());
                     model.setUpdatedAt(project.getCreatedAt());
@@ -153,7 +146,24 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public List<Project> getAllByIdIn(Collection<Integer> projectIdCollection) {
+    public Project getById(long projectId) {
+        return projectRepository
+                .findByProjectIdAndIsDeletedIsFalse(projectId)
+                .orElse(null);
+    }
+
+    @Override
+    public Project getByLocationId(long locationId) {
+        return null;
+    }
+
+    @Override
+    public Project getByBlueprintId(long blueprintId) {
+        return null;
+    }
+
+    @Override
+    public List<Project> getAllByIdIn(Collection<Long> projectIdCollection) {
         return null;
     }
 
@@ -163,7 +173,7 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public List<Project> getAllByLocationIdIn(Collection<Integer> locationIdCollection) {
+    public List<Project> getAllByLocationIdIn(Collection<Long> locationIdCollection) {
         return null;
     }
 
@@ -182,21 +192,6 @@ public class ProjectServiceImpl implements ProjectService{
         return null;
     }
 
-    @Override
-    public Project getByLocationId(int locationId) {
-        return null;
-    }
-
-    @Override
-    public Project getByBlueprintId(int blueprintId) {
-        return null;
-    }
-
-    @Override
-    public Project getById(int projectId) {
-        return null;
-    }
-
     /* UPDATE */
     @Override
     public String updateProject(ProjectModel projectModel) {
@@ -207,9 +202,7 @@ public class ProjectServiceImpl implements ProjectService{
                 Location checkDuplicateLocation = locationRepository.getByAddressNumber(projectModel.getAddressNumber());
                 if(checkDuplicateLocation == null)
                 {
-                    Blueprint checkDuplicateBlueprint = blueprintRepository.getByBlueprintName(projectModel.getBlueprintName());
-                    if(checkDuplicateBlueprint == null)
-                    {
+
                         UpdateLocationModel locationModel = new UpdateLocationModel();
                         locationModel.setLocationId(projectModel.getLocationId());
                         locationModel.setAddressNumber(projectModel.getAddressNumber());
@@ -225,17 +218,7 @@ public class ProjectServiceImpl implements ProjectService{
                         locationModel.setUpdatedAt(projectModel.getUpdatedAt());
                         locationService.updateLocation(locationModel);
 
-                        UpdateBlueprintModel blueprintModel = new UpdateBlueprintModel();
-                        blueprintModel.setBlueprintId(projectModel.getBlueprintId());
-                        blueprintModel.setBlueprintName(projectModel.getBlueprintName());
-                        blueprintModel.setDesignerName(projectModel.getDesignerName());
-                        blueprintModel.setEstimateCost(projectModel.getBlueprintEstimateCost());
-                        blueprintModel.setUserId(projectModel.getUserId());
-                        blueprintModel.setUpdatedAt(projectModel.getUpdatedAt());
-                        blueprintService.updateProjectBlueprint(blueprintModel);
-
                         project.setProjectName(projectModel.getProjectName());
-                        project.setBlueprintId(projectModel.getBlueprintId());
                         project.setLocationId(projectModel.getLocationId());
                         project.setPlanStartDate(projectModel.getPlanStartDate());
                         project.setPlanEndDate(projectModel.getPlanEndDate());
@@ -248,10 +231,7 @@ public class ProjectServiceImpl implements ProjectService{
                         projectRepository.saveAndFlush(project);
                         result = "Update success";
                         return result;
-                    }else{
-                        result = "Existed blueprint name";
-                        return result;
-                    }
+
                 }else{
                     result = "Existed address number";
                     return result;
@@ -264,12 +244,16 @@ public class ProjectServiceImpl implements ProjectService{
     /* DELETE */
     @Override
     public boolean deleteProject(long projectId) {
-        Project project = projectRepository.findById(projectId).get();
-        if(project!=null){
-            project.setIsDeleted(true);
-            projectRepository.saveAndFlush(project);
-            return true;
+        Project project = getById(projectId);
+
+        if (project == null) {
+            return false;
+            /* Not found with Id */
         }
-        return false;
+
+        project.setIsDeleted(true);
+        projectRepository.saveAndFlush(project);
+
+        return true;
     }
 }

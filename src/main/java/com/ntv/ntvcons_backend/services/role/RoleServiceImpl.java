@@ -173,7 +173,6 @@ public class RoleServiceImpl implements RoleService {
         }
 
         role.get().setIsDeleted(true);
-
         roleRepository.saveAndFlush(role.get());
 
         return true;

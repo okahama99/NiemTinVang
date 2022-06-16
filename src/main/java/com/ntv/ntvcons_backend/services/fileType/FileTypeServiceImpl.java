@@ -28,6 +28,7 @@ public class FileTypeServiceImpl implements FileTypeService{
     /* CREATE */
     @Override
     public FileType createFileType(FileType newFileType) throws Exception {
+        /* TODO check repeat name, extension */
         return fileTypeRepository.saveAndFlush(newFileType);
     }
     @Override
@@ -79,9 +80,9 @@ public class FileTypeServiceImpl implements FileTypeService{
 
     @Override
     public FileType getById(long fileTypeId) throws Exception {
-        Optional<FileType> fileType = fileTypeRepository.findByFileTypeIdAndIsDeletedIsFalse(fileTypeId);
-
-        return fileType.orElse(null);
+        return fileTypeRepository
+                .findByFileTypeIdAndIsDeletedIsFalse(fileTypeId)
+                .orElse(null);
     }
     @Override
     public FileTypeReadDTO getDTOById(long fileTypeId) throws Exception {
@@ -167,9 +168,9 @@ public class FileTypeServiceImpl implements FileTypeService{
     /* UPDATE */
     @Override
     public FileType updateFileType(FileType updatedFileType) throws Exception {
-        Optional<FileType> fileType = fileTypeRepository.findByFileTypeIdAndIsDeletedIsFalse(updatedFileType.getFileTypeId());
+        FileType fileType = getById(updatedFileType.getFileTypeId());
 
-        if (!fileType.isPresent()) {
+        if (fileType == null) {
             return null;
             /* Not found by Id, return null */
         }
@@ -192,16 +193,15 @@ public class FileTypeServiceImpl implements FileTypeService{
     /* DELETE */
     @Override
     public boolean deleteFileType(long fileTypeId) throws Exception {
-        Optional<FileType> fileType = fileTypeRepository.findByFileTypeIdAndIsDeletedIsFalse(fileTypeId);
+        FileType fileType = getById(fileTypeId);
 
-        if (!fileType.isPresent()) {
+        if (fileType == null) {
             return false;
             /* Not found with Id */
         }
 
-        fileType.get().setIsDeleted(true);
-
-        fileTypeRepository.saveAndFlush(fileType.get());
+        fileType.setIsDeleted(true);
+        fileTypeRepository.saveAndFlush(fileType);
 
         return true;
     }
