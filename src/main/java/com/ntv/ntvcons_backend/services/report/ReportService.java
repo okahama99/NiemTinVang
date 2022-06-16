@@ -15,9 +15,6 @@ public interface ReportService { /* TODO: throws Exception for controller to han
     Report createReport(Report newReport) throws Exception;
     ReportReadDTO createReportByDTO(ReportCreateDTO newReportDTO) throws Exception;
 
-    List<Report> createBulkReport(List<Report> newReportList) throws Exception;
-    List<ReportReadDTO> createBulkReportByDTO(List<ReportCreateDTO> newReportDTOList) throws Exception;
-
     /* READ */
     List<Report> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
     List<ReportReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
