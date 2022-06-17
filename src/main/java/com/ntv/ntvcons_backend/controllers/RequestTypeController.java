@@ -1,9 +1,13 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.requestType.*;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeCreateDTO;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
 import com.ntv.ntvcons_backend.services.requestType.RequestTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,8 +23,8 @@ public class RequestTypeController {
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
-    @PostMapping(value = "/v1/create", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> insertRequestType(@RequestBody RequestTypeCreateDTO requestTypeDTO){
+    @PostMapping(value = "/v1/createRequestType", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createRequestType(@RequestBody RequestTypeCreateDTO requestTypeDTO){
         try {
             RequestTypeReadDTO newRequestTypeDTO = requestTypeService.createRequestTypeByDTO(requestTypeDTO);
 
@@ -33,7 +37,7 @@ public class RequestTypeController {
 
     /* READ */
     //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
-    @GetMapping(value = "/v1/read/all", produces = "application/json;charset=UTF-8")
+    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
@@ -47,34 +51,58 @@ public class RequestTypeController {
             }
 
             return ResponseEntity.ok().body(requestTypeDTOList);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for RequestType", e.getMessage()));
         }
     }
 
-    @GetMapping(value = "/v1/read", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParams(@RequestParam String requestTypeName) {
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam(name = "searchType") SearchType searchType) {
         try {
-            List<RequestTypeReadDTO> requestTypeDTOList =
-                    requestTypeService.getAllDTOByRequestTypeNameContains(requestTypeName);
+            List<RequestTypeReadDTO> requestTypeDTOList;
 
-            if (requestTypeDTOList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No RequestType found with name contains: " + requestTypeName);
+            /* switch just in case expand later */
+            switch (searchType) {
+                case REQUEST_TYPE_BY_NAME_CONTAINS:
+                    requestTypeDTOList = requestTypeService.getAllDTOByRequestTypeNameContains(searchParam);
+                    if (requestTypeDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No RequestType found with name contains: " + searchParam);
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity RequestType");
             }
 
             return ResponseEntity.ok().body(requestTypeDTOList);
+        }  catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for RequestType with name contains: " + requestTypeName,
-                            e.getMessage()));
+            String errorMsg = "Error searching for RequestType with ";
+
+            /* switch just in case expand later */
+            switch (searchType) {
+                case REQUEST_TYPE_BY_NAME_CONTAINS:
+                    errorMsg += "name contains: " + searchParam;
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
         }
     }
 
     /* UPDATE */
     //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
-    @PutMapping(value = "/v1/update", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateRequestType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequestType(@RequestBody RequestTypeUpdateDTO requestTypeDTO){
         try {
             RequestTypeReadDTO updatedRequestTypeDTO = requestTypeService.updateRequestTypeByDTO(requestTypeDTO);
@@ -94,7 +122,7 @@ public class RequestTypeController {
 
     /* DELETE */
     //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
-    @DeleteMapping(value = "/v1/delete/{requestTypeId}", produces = "application/json;charset=UTF-8")
+    @DeleteMapping(value = "/v1/deleteRequestType/{requestTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRequestType(@PathVariable(name = "requestTypeId") long requestTypeId){
         try {
             if (!requestTypeService.deleteRequestType(requestTypeId)) {
@@ -109,6 +137,5 @@ public class RequestTypeController {
         }
     }
     /* ================================================ Ver 1 ================================================ */
-
 
 }

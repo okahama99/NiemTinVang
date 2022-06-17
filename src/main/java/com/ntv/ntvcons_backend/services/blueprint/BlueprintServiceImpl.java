@@ -2,7 +2,7 @@ package com.ntv.ntvcons_backend.services.blueprint;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.Blueprint;
-import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBluePrintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BlueprintServiceImpl implements BlueprintService {
@@ -25,7 +26,7 @@ public class BlueprintServiceImpl implements BlueprintService {
 
     /* CREATE */
     @Override
-    public void createProjectBlueprint(CreateBluePrintModel createBluePrintModel) {
+    public void createProjectBlueprint(CreateBlueprintModel createBluePrintModel) {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintName(createBluePrintModel.getProjectBlueprintName());
         blueprint.setDesignerName(createBluePrintModel.getDesignerName());
@@ -70,7 +71,6 @@ public class BlueprintServiceImpl implements BlueprintService {
 
                         @Override
                         protected Blueprint doBackward(ShowBlueprintModel showProjectBlueprintModel) {
-                            /* TODO: Fill or explain why null */
                             return null;
                         }
                     });
@@ -83,54 +83,25 @@ public class BlueprintServiceImpl implements BlueprintService {
     }
 
     @Override
+    public Blueprint getById(long projectBlueprintId) {
+        return blueprintRepository
+                .findByBlueprintIdAndIsDeletedIsFalse(projectBlueprintId)
+                .orElse(null);
+    }
+
+    @Override
     public List<Blueprint> getAllByIdIn(Collection<Integer> projectBlueprintIdCollection) {
         return null;
     }
 
     @Override
-    public List<Blueprint> getAllByProjectBlueprintNameContains(String projectBlueprintName) {
+    public List<Blueprint> getAllByBlueprintNameContains(String projectBlueprintName) {
         return null;
     }
 
     @Override
-    public List<Blueprint> getAllByProjectBlueprintCostBetween(double from, double to) {
+    public List<Blueprint> getAllByBlueprintCostBetween(double from, double to) {
         return null;
-    }
-
-    @Override
-    public Blueprint getByDesignerId(int designerId) {
-        return null;
-    }
-
-    @Override
-    public Blueprint getById(int projectBlueprintId) {
-        return null;
-    }
-
-    /* UPDATE */
-    @Override
-    public void updateProjectBlueprint(UpdateBlueprintModel updateBlueprintModel) {
-        Blueprint blueprint = blueprintRepository.findById(updateBlueprintModel.getBlueprintId()).get();
-        blueprint.setBlueprintId(updateBlueprintModel.getBlueprintId());
-        blueprint.setBlueprintName(updateBlueprintModel.getBlueprintName());
-        blueprint.setDesignerName(updateBlueprintModel.getDesignerName());
-        blueprint.setEstimatedCost(updateBlueprintModel.getEstimateCost());
-        blueprint.setUpdatedBy(updateBlueprintModel.getUserId());
-        Date date = new Date();
-        blueprint.setUpdatedAt(date);
-        blueprintRepository.saveAndFlush(blueprint);
-    }
-
-    /* DELETE */
-    @Override
-    public boolean deleteProjectBlueprint(long projectBlueprintId) {
-        Blueprint blueprint = blueprintRepository.findById(projectBlueprintId).get();
-        if(blueprint!=null)
-        {
-            blueprint.setIsDeleted(true);
-            blueprintRepository.saveAndFlush(blueprint);
-        }
-        return false;
     }
 
     @Override
@@ -144,5 +115,35 @@ public class BlueprintServiceImpl implements BlueprintService {
             return result;
         }
         return result;
+    }
+
+    /* UPDATE */
+    @Override
+    public void updateBlueprint(UpdateBlueprintModel updateBlueprintModel) {
+        Blueprint blueprint = blueprintRepository.findById(updateBlueprintModel.getBlueprintId()).get();
+        blueprint.setBlueprintId(updateBlueprintModel.getBlueprintId());
+        blueprint.setBlueprintName(updateBlueprintModel.getBlueprintName());
+        blueprint.setDesignerName(updateBlueprintModel.getDesignerName());
+        blueprint.setEstimatedCost(updateBlueprintModel.getEstimateCost());
+        blueprint.setUpdatedBy(updateBlueprintModel.getUserId());
+        Date date = new Date();
+        blueprint.setUpdatedAt(date);
+        blueprintRepository.saveAndFlush(blueprint);
+    }
+
+    /* DELETE */
+    @Override
+    public boolean deleteBlueprint(long blueprintId) {
+        Blueprint blueprint = getById(blueprintId);
+
+        if (blueprint == null) {
+            return false;
+            /* Not found with Id */
+        }
+
+        blueprint.setIsDeleted(true);
+        blueprintRepository.saveAndFlush(blueprint);
+
+        return true;
     }
 }

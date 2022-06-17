@@ -6,7 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UpdateBlueprintModel {
-    private long blueprintId,userId;
+    /* Tạm đối sang Long, Double đẻ có thể nhập null, bị bể do đổi blueprint */
+    private Long blueprintId,userId;
     private String designerName, blueprintName;
-    private double estimateCost;
+    private Double estimateCost;
 }

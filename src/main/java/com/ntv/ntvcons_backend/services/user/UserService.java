@@ -4,6 +4,7 @@ public interface UserService {
     /* CREATE */
 
     /* READ */
+    boolean existsById(long userId) throws Exception;
 
     /* UPDATE */
 

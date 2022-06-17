@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateBluePrintModel {
+public class CreateBlueprintModel {
+    /* Tạm đối sang Long, Double đẻ có thể nhập null, bị bể do đổi blueprint */
     private String designerName, projectBlueprintName;
-    private double estimateCost;
+    private Double estimateCost;
 }
