@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,6 +29,17 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     /* CREATE */
     @Override
     public ReportType createReportType(ReportType newReportType) throws Exception {
+        String errorMsg = "";
+
+        /* Check duplicate */
+        if (reportTypeRepository.existsByReportTypeNameAndIsDeletedIsFalse(newReportType.getReportTypeName())){
+            errorMsg += "Already exists another ReportType with name: " + newReportType.getReportTypeName() +"\n";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
         return reportTypeRepository.saveAndFlush(newReportType);
     }
     @Override
@@ -85,9 +95,9 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     }
     @Override
     public ReportType getById(long reportTypeId) throws Exception {
-        Optional<ReportType> reportType = reportTypeRepository.findByReportTypeIdAndIsDeletedIsFalse(reportTypeId);
-
-        return reportType.orElse(null);
+        return reportTypeRepository
+                .findByReportTypeIdAndIsDeletedIsFalse(reportTypeId)
+                .orElse(null);
     }
     @Override
     public ReportTypeReadDTO getDTOById(long reportTypeId) throws Exception {
@@ -106,7 +116,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     }
     @Override
     public List<ReportType> getAllByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
-        List<ReportType> reportTypeList = reportTypeRepository.findAllByReportTypeIdInAndIsDeletedIsFalse(reportTypeIdCollection);
+        List<ReportType> reportTypeList =
+                reportTypeRepository.findAllByReportTypeIdInAndIsDeletedIsFalse(reportTypeIdCollection);
 
         if (reportTypeList.isEmpty()) {
             return null;
@@ -122,7 +133,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
             return null;
         }
 
-        return reportTypeList.stream().map(reportType -> modelMapper.map(reportType, ReportTypeReadDTO.class))
+        return reportTypeList.stream()
+                .map(reportType -> modelMapper.map(reportType, ReportTypeReadDTO.class))
                 .collect(Collectors.toList());
     }
     @Override
@@ -133,7 +145,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
             return null;
         }
 
-        return reportTypeList.stream().collect(Collectors.toMap(ReportType::getReportTypeId, Function.identity()));
+        return reportTypeList.stream()
+                .collect(Collectors.toMap(ReportType::getReportTypeId, Function.identity()));
     }
     @Override
     public Map<Long, ReportTypeReadDTO> mapReportTypeIdReportTypeDTOByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
@@ -143,12 +156,14 @@ public class ReportTypeServiceImpl implements ReportTypeService {
             return null;
         }
 
-        return reportTypeDTOList.stream().collect(Collectors.toMap(ReportTypeReadDTO::getReportTypeId, Function.identity()));
+        return reportTypeDTOList.stream()
+                .collect(Collectors.toMap(ReportTypeReadDTO::getReportTypeId, Function.identity()));
     }
 
     @Override
     public List<ReportType> getAllByReportTypeNameContains(String reportTypeName) throws Exception {
-        List<ReportType> reportTypeList = reportTypeRepository.findAllByReportTypeNameContainsAndIsDeletedIsFalse(reportTypeName);
+        List<ReportType> reportTypeList =
+                reportTypeRepository.findAllByReportTypeNameContainsAndIsDeletedIsFalse(reportTypeName);
 
         if (reportTypeList.isEmpty()) {
             return null;
@@ -164,18 +179,33 @@ public class ReportTypeServiceImpl implements ReportTypeService {
             return null;
         }
 
-        return reportTypeList.stream().map(reportType -> modelMapper.map(reportType, ReportTypeReadDTO.class))
+        return reportTypeList.stream()
+                .map(reportType -> modelMapper.map(reportType, ReportTypeReadDTO.class))
                 .collect(Collectors.toList());
     }
 
     /* UPDATE */
     @Override
     public ReportType updateReportType(ReportType updatedReportType) throws Exception {
-        Optional<ReportType> reportType = reportTypeRepository.findByReportTypeIdAndIsDeletedIsFalse(updatedReportType.getReportTypeId());
+        ReportType reportType = getById(updatedReportType.getReportTypeId());
 
-        if (!reportType.isPresent()) {
+        if (reportType == null) {
             return null;
             /* Not found by Id, return null */
+        }
+
+        String errorMsg = "";
+
+        /* Check duplicate */
+        if (reportTypeRepository
+                .existsByReportTypeNameAndReportTypeIdIsNotAndIsDeletedIsFalse(
+                        updatedReportType.getReportTypeName(),
+                        updatedReportType.getReportTypeId())) {
+            errorMsg += "Already exists another ReportType with name: " + updatedReportType.getReportTypeName() +"\n";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
         }
 
         return reportTypeRepository.saveAndFlush(updatedReportType);
@@ -196,16 +226,15 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     /* DELETE */
     @Override
     public boolean deleteReportType(long reportTypeId) throws Exception {
-        Optional<ReportType> reportType = reportTypeRepository.findByReportTypeIdAndIsDeletedIsFalse(reportTypeId);
+        ReportType reportType = getById(reportTypeId);
 
-        if (!reportType.isPresent()) {
+        if (reportType == null) {
             return false;
             /* Not found with Id */
         }
 
-        reportType.get().setIsDeleted(true);
-
-        reportTypeRepository.saveAndFlush(reportType.get());
+        reportType.setIsDeleted(true);
+        reportTypeRepository.saveAndFlush(reportType);
 
         return true;
     }

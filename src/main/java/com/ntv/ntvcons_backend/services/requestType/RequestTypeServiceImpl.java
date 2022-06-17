@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.services.requestType;
 
-import com.ntv.ntvcons_backend.dtos.requestType.*;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeCreateDTO;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
 import com.ntv.ntvcons_backend.entities.RequestType;
 import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
 import org.modelmapper.ModelMapper;
@@ -13,7 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +29,17 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     /* CREATE */
     @Override
     public RequestType createRequestType(RequestType newRequestType) throws Exception {
+        String errorMsg = "";
+
+        /* Check duplicate */
+        if (requestTypeRepository.existsByRequestTypeNameAndIsDeletedIsFalse(newRequestType.getRequestTypeName())) {
+            errorMsg += "Already exists another RequestType with name: " + newRequestType.getRequestTypeName() + "\n";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
         return requestTypeRepository.saveAndFlush(newRequestType);
     }
     @Override
@@ -76,11 +90,14 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     }
 
     @Override
+    public boolean existsById(long requestTypeId) throws Exception {
+        return requestTypeRepository.existsByRequestTypeIdAndIsDeletedIsFalse(requestTypeId);
+    }
+    @Override
     public RequestType getById(long requestTypeId) throws Exception {
-        Optional<RequestType> requestType =
-                requestTypeRepository.findByRequestTypeIdAndIsDeletedIsFalse(requestTypeId);
-
-        return requestType.orElse(null);
+        return requestTypeRepository
+                .findByRequestTypeIdAndIsDeletedIsFalse(requestTypeId)
+                .orElse(null);
     }
     @Override
     public RequestTypeReadDTO getDTOById(long requestTypeId) throws Exception {
@@ -93,6 +110,10 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         return modelMapper.map(requestType, RequestTypeReadDTO.class);
     }
 
+    @Override
+    public boolean existsAllByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
+        return requestTypeRepository.existsAllByRequestTypeIdInAndIsDeletedIsFalse(requestTypeIdCollection);
+    }
     @Override
     public List<RequestType> getAllByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
         List<RequestType> requestTypeList =
@@ -115,6 +136,28 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         return requestTypeList.stream()
                 .map(requestType -> modelMapper.map(requestType, RequestTypeReadDTO.class))
                 .collect(Collectors.toList());
+    }
+    @Override
+    public Map<Long, RequestType> mapRequestTypeIdRequestTypeByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
+        List<RequestType> requestTypeList = getAllByIdIn(requestTypeIdCollection);
+
+        if (requestTypeList == null) {
+            return null;
+        }
+
+        return requestTypeList.stream()
+                .collect(Collectors.toMap(RequestType::getRequestTypeId, Function.identity()));
+    }
+    @Override
+    public Map<Long, RequestTypeReadDTO> mapRequestTypeIdRequestTypeDTOByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
+        List<RequestTypeReadDTO> requestTypeDTOList = getAllDTOByIdIn(requestTypeIdCollection);
+
+        if (requestTypeDTOList == null) {
+            return null;
+        }
+
+        return requestTypeDTOList.stream()
+                .collect(Collectors.toMap(RequestTypeReadDTO::getRequestTypeId, Function.identity()));
     }
 
     @Override
@@ -144,12 +187,25 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     /* UPDATE */
     @Override
     public RequestType updateRequestType(RequestType updatedRequestType) throws Exception {
-        Optional<RequestType> requestType =
-                requestTypeRepository.findByRequestTypeIdAndIsDeletedIsFalse(updatedRequestType.getRequestTypeId());
+        RequestType requestType = getById(updatedRequestType.getRequestTypeId());
 
-        if (!requestType.isPresent()) {
+        if (requestType == null) {
             return null;
             /* Not found by Id, return null */
+        }
+
+        String errorMsg = "";
+
+        /* Check duplicate */
+        if (requestTypeRepository
+                .existsByRequestTypeNameAndRequestTypeIdIsNotAndIsDeletedIsFalse(
+                        updatedRequestType.getRequestTypeName(),
+                        updatedRequestType.getRequestTypeId())) {
+            errorMsg += "Already exists another RequestType with name: " + updatedRequestType.getRequestTypeName() + "\n";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
         }
 
         return requestTypeRepository.saveAndFlush(updatedRequestType);
@@ -170,17 +226,15 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     /* DELETE */
     @Override
     public boolean deleteRequestType(long requestTypeId) throws Exception {
-        Optional<RequestType> requestType =
-                requestTypeRepository.findByRequestTypeIdAndIsDeletedIsFalse(requestTypeId);
+        RequestType requestType = getById(requestTypeId);
 
-        if (!requestType.isPresent()) {
+        if (requestType == null) {
             return false;
             /* Not found with Id */
         }
 
-        requestType.get().setIsDeleted(true);
-
-        requestTypeRepository.saveAndFlush(requestType.get());
+        requestType.setIsDeleted(true);
+        requestTypeRepository.saveAndFlush(requestType);
 
         return true;
     }

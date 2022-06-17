@@ -16,11 +16,16 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
 
 
         /* Id */
+        boolean existsByRoleIdAndIsDeletedIsFalse(long roleId);
         Optional<Role> findByRoleIdAndIsDeletedIsFalse(long roleId);
+        boolean existsAllByRoleIdInAndIsDeletedIsFalse(Collection<Long> roleIdCollection);
         List<Role> findAllByRoleIdInAndIsDeletedIsFalse(Collection<Long> roleIdCollection);
-
+        /* Id & roleName */
+        /** Check duplicate roleName for update */
+        boolean existsByRoleNameAndRoleIdIsNotAndIsDeletedIsFalse(String roleName, long roleId);
 
         /* roleName */
+        boolean existsByRoleNameAndIsDeletedIsFalse(String roleName);
         Optional<Role> findByRoleNameAndIsDeletedIsFalse(String roleName);
         List<Role> findAllByRoleNameContainsAndIsDeletedIsFalse(String roleName);
 }

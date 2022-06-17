@@ -5,10 +5,7 @@ import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
-import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
-import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
-import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.entities.Report;
 import com.ntv.ntvcons_backend.repositories.ReportRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
@@ -53,6 +50,7 @@ public class ReportServiceImpl implements ReportService {
     public Report createReport(Report newReport) throws Exception {
         String errorMsg = "";
 
+        /* Check FK */
         /* TODO: verify exists projectId */
 //        if (!projectService.existsById(newReport.getProjectId())) {
 //            errorMsg += "No Project found with Id: " + newReport.getProjectId()

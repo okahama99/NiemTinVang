@@ -38,14 +38,25 @@ public class TaskReportServiceImpl implements TaskReportService {
     public TaskReport createTaskReport(TaskReport newTaskReport) throws Exception {
         String errorMsg = "";
 
+        /* Check FK */
         if (!reportService.existsById(newTaskReport.getReportId())) {
             errorMsg += "No Report found with Id: " + newTaskReport.getReportId()
                     + "\nWhich violate constraint: FK_TaskReport_Report\n";
         }
-
         if (!taskService.existsById(newTaskReport.getTaskId())) {
             errorMsg += "No Task found with Id: " + newTaskReport.getTaskId()
                     + "\nWhich violate constraint: FK_TaskReport_Task\n";
+        }
+
+        /* Check duplicate */
+        if (taskReportRepository
+                .existsByReportIdAndTaskIdAndTaskProgressAndIsDeletedIsFalse(
+                        newTaskReport.getReportId(),
+                        newTaskReport.getTaskId(),
+                        newTaskReport.getTaskProgress())) {
+            errorMsg += "Already exists another TaskReport with reportId: " + newTaskReport.getReportId()
+                    + " taskId: " + newTaskReport.getTaskId()
+                    + " taskProgress: " + newTaskReport.getTaskProgress() + "\n";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -80,6 +91,7 @@ public class TaskReportServiceImpl implements TaskReportService {
               taskIdSet.add(newTaskReport.getTaskId());
         }
 
+        /* CheckFK */
         if (!reportService.existsAllByIdIn(reportIdSet)) {
             errorMsg += "1 or more Report not found with Id"
                     + "\nWhich violate constraint: FK_ReportDetail_Report\n";
@@ -98,14 +110,29 @@ public class TaskReportServiceImpl implements TaskReportService {
     }
     @Override
     public List<TaskReportReadDTO> createBulkTaskReportByDTOList(List<TaskReportCreateDTO> newTaskReportDTOList) throws Exception {
+        Set<Long> taskIdSet = new HashSet<>();
+
         List<TaskReport> newTaskReportList = newTaskReportDTOList.stream()
-                .map(newTaskReportDTO -> modelMapper.map(newTaskReportDTO, TaskReport.class))
+                .map(newTaskReportDTO -> {
+                    /* Also while streaming */
+                    taskIdSet.add(newTaskReportDTO.getTaskId());
+
+                    return modelMapper.map(newTaskReportDTO, TaskReport.class);})
                 .collect(Collectors.toList());
 
         newTaskReportList = createBulkTaskReport(newTaskReportList);
 
+        /* Get associated Task */
+        Map<Long, TaskReadDTO> taskIdTaskDTOMap = taskService.mapTaskIdTaskDTOByIdIn(taskIdSet);
+
         return newTaskReportList.stream()
-                .map(newTaskReport -> modelMapper.map(newTaskReport, TaskReportReadDTO.class))
+                .map(newTaskReport -> {
+                    TaskReportReadDTO TaskReportDTO =
+                            modelMapper.map(newTaskReport, TaskReportReadDTO.class);
+
+                    TaskReportDTO.setTask(taskIdTaskDTOMap.get(newTaskReport.getTaskId()));
+
+                    return TaskReportDTO;})
                 .collect(Collectors.toList());
     }
 
@@ -210,7 +237,9 @@ public class TaskReportServiceImpl implements TaskReportService {
                 .map(taskReport -> {
                     TaskReportReadDTO taskReportDTO =
                             modelMapper.map(taskReport, TaskReportReadDTO.class);
+
                     taskReportDTO.setTask(taskIdTaskReadDTOMap.get(taskReport.getTaskId()));
+
                     return taskReportDTO;})
                 .collect(Collectors.toList());
     }
@@ -245,7 +274,9 @@ public class TaskReportServiceImpl implements TaskReportService {
                 .map(taskReport -> {
                     TaskReportReadDTO taskReportDTO =
                             modelMapper.map(taskReport, TaskReportReadDTO.class);
+
                     taskReportDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
+
                     return taskReportDTO;})
                 .collect(Collectors.toList());
     }
@@ -449,6 +480,7 @@ public class TaskReportServiceImpl implements TaskReportService {
 
         String errorMsg = "";
 
+        /* Check FK */
         if (!oldTaskReport.getReportId().equals(updatedTaskReport.getReportId())) {
             if (!reportService.existsById(updatedTaskReport.getReportId())) {
                 errorMsg += "No Report found with Id: " + updatedTaskReport.getReportId()
@@ -463,6 +495,18 @@ public class TaskReportServiceImpl implements TaskReportService {
             }
         }
 
+        /* Check duplicate */
+        if (taskReportRepository
+                .existsByReportIdAndTaskIdAndTaskProgressAndTaskReportIdIsNotAndIsDeletedIsFalse(
+                        updatedTaskReport.getReportId(),
+                        updatedTaskReport.getTaskId(),
+                        updatedTaskReport.getTaskProgress(),
+                        updatedTaskReport.getTaskReportId())) {
+            errorMsg += "Already exists another TaskReport with reportId: " + updatedTaskReport.getReportId()
+                    + " taskId: " + updatedTaskReport.getTaskId()
+                    + " taskProgress: " + updatedTaskReport.getTaskProgress() + "\n";
+        }
+
         if (!errorMsg.trim().isEmpty()) {
             throw new IllegalArgumentException(errorMsg);
         }
@@ -471,7 +515,98 @@ public class TaskReportServiceImpl implements TaskReportService {
     }
     @Override
     public TaskReportReadDTO updateTaskReportByDTO(TaskReportUpdateDTO updatedTaskReportDTO) throws Exception {
-        return null;
+        TaskReport updatedTaskReport = modelMapper.map(updatedTaskReportDTO, TaskReport.class);
+
+        updatedTaskReport = updateTaskReport(updatedTaskReport);
+
+        if (updatedTaskReport == null) {
+            return null;
+        }
+
+        TaskReportReadDTO taskReportDTO = modelMapper.map(updatedTaskReport, TaskReportReadDTO.class);
+
+        /* Get associated Task */
+        taskReportDTO.setTask(taskService.getDTOById(updatedTaskReport.getTaskId()));
+
+        return taskReportDTO;
+    }
+
+    @Override
+    public List<TaskReport> updateBulkTaskReport(List<TaskReport> updatedTaskReportList) throws Exception {
+        Set<Long> taskReportIdSet = new HashSet<>();
+        Set<Long> oldReportIdSet = new HashSet<>();
+        Set<Long> oldTaskIdSet = new HashSet<>();
+        Set<Long> updatedReportIdSet = new HashSet<>();
+        Set<Long> updatedTaskIdSet = new HashSet<>();
+
+        for (TaskReport updatedTaskReport: updatedTaskReportList) {
+            taskReportIdSet.add(updatedTaskReport.getTaskReportId());
+            updatedReportIdSet.add(updatedTaskReport.getReportId());
+            updatedTaskIdSet.add(updatedTaskReport.getTaskId());
+        }
+
+        for (TaskReport oldTaskReport : getAllByIdIn(taskReportIdSet)) {
+            oldReportIdSet.add(oldTaskReport.getReportId());
+            oldTaskIdSet.add(oldTaskReport.getTaskId());
+        }
+
+        /* Remove all unchanged reportId */
+        updatedReportIdSet.removeAll(oldReportIdSet);
+        updatedTaskIdSet.removeAll(oldTaskIdSet);
+
+        String errorMsg = "";
+
+        /* Check FK */
+        /* If there are updated reportId, need to recheck FK */
+        if (updatedReportIdSet.size() <= 0) {
+            if (!reportService.existsAllByIdIn(updatedReportIdSet)) {
+                errorMsg += "1 or more Report not found with Id"
+                        + "\nWhich violate constraint: FK_ReportDetail_Report\n";
+            }
+        }
+
+        /* If there are updated taskId, need to recheck FK */
+        if (updatedTaskIdSet.size()  <= 0) {
+            if (!taskService.existsAllByIdIn(updatedTaskIdSet)) {
+                errorMsg += "1 or more Task not found with Id"
+                        + "\nWhich violate constraint: FK_ReportDetail_Task\n";
+            }
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        return taskReportRepository.saveAllAndFlush(updatedTaskReportList);
+    }
+    @Override
+    public List<TaskReportReadDTO> updateBulkTaskReportByDTOList(List<TaskReportCreateDTO> updatedTaskReportDTOList) throws Exception {
+        Set<Long> taskIdSet = new HashSet<>();
+
+        List<TaskReport> updatedTaskReportList = updatedTaskReportDTOList.stream()
+                .map(updatedTaskReportDTO -> {
+                    /* Also while streaming */
+                    taskIdSet.add(updatedTaskReportDTO.getTaskId());
+
+                    return modelMapper.map(updatedTaskReportDTO, TaskReport.class);
+                })
+                .collect(Collectors.toList());
+
+
+        updatedTaskReportList = updateBulkTaskReport(updatedTaskReportList);
+
+        /* Get associated Task */
+        Map<Long, TaskReadDTO> taskIdTaskDTOMap = taskService.mapTaskIdTaskDTOByIdIn(taskIdSet);
+
+        return updatedTaskReportList.stream()
+                .map(updatedTaskReport -> {
+                    TaskReportReadDTO taskReportDTO =
+                            modelMapper.map(updatedTaskReport, TaskReportReadDTO.class);
+
+                    taskReportDTO.setTask(taskIdTaskDTOMap.get(updatedTaskReport.getTaskId()));
+
+                    return taskReportDTO;})
+                .collect(Collectors.toList());
     }
 
     /* DELETE */

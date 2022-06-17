@@ -47,6 +47,9 @@ public interface TaskReportService {
     TaskReport updateTaskReport(TaskReport updatedTaskReport) throws Exception;
     TaskReportReadDTO updateTaskReportByDTO(TaskReportUpdateDTO updatedTaskReportDTO) throws Exception;
 
+    List<TaskReport> updateBulkTaskReport(List<TaskReport> updatedTaskReportList) throws Exception;
+    List<TaskReportReadDTO> updateBulkTaskReportByDTOList(List<TaskReportCreateDTO> updatedTaskReportDTOList) throws Exception;
+
     /* DELETE */
     boolean deleteTaskReport(long taskReportId) throws Exception;
 

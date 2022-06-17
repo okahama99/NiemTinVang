@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.services.role;
 
-import com.ntv.ntvcons_backend.dtos.role.*;
+import com.ntv.ntvcons_backend.dtos.role.RoleCreateDTO;
+import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
+import com.ntv.ntvcons_backend.dtos.role.RoleUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
 import org.modelmapper.ModelMapper;
@@ -13,7 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +29,17 @@ public class RoleServiceImpl implements RoleService {
     /* CREATE */
     @Override
     public Role createRole(Role newRole) throws Exception {
+        String errorMsg = "";
+
+        /* Check duplicate */
+        if (roleRepository.existsByRoleNameAndIsDeletedIsFalse(newRole.getRoleName())) {
+            errorMsg += "Already exists another Role with name: " + newRole.getRoleName() + "\n";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
         return roleRepository.saveAndFlush(newRole);
     }
     @Override
@@ -76,10 +90,14 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public boolean existsById(long roleId) throws Exception {
+        return roleRepository.existsByRoleIdAndIsDeletedIsFalse(roleId);
+    }
+    @Override
     public Role getById(long roleId) throws Exception {
-        Optional<Role> role = roleRepository.findByRoleIdAndIsDeletedIsFalse(roleId);
-
-        return role.orElse(null);
+        return roleRepository
+                .findByRoleIdAndIsDeletedIsFalse(roleId)
+                .orElse(null);
     }
     @Override
     public RoleReadDTO getDTOById(long roleId) throws Exception {
@@ -93,8 +111,13 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public boolean existsAllByIdIn(Collection<Long> roleIdCollection) throws Exception {
+        return roleRepository.existsAllByRoleIdInAndIsDeletedIsFalse(roleIdCollection);
+    }
+    @Override
     public List<Role> getAllByIdIn(Collection<Long> roleIdCollection) throws Exception {
-        List<Role> roleList = roleRepository.findAllByRoleIdInAndIsDeletedIsFalse(roleIdCollection);
+        List<Role> roleList = 
+                roleRepository.findAllByRoleIdInAndIsDeletedIsFalse(roleIdCollection);
 
         if (roleList.isEmpty()) {
             return null;
@@ -110,13 +133,36 @@ public class RoleServiceImpl implements RoleService {
             return null;
         }
 
-        return roleList.stream().map(role -> modelMapper.map(role, RoleReadDTO.class))
+        return roleList.stream()
+                .map(role -> modelMapper.map(role, RoleReadDTO.class))
                 .collect(Collectors.toList());
+    }
+    @Override
+    public Map<Long, Role> mapRoleIdRoleByIdIn(Collection<Long> roleIdCollection) throws Exception {
+        List<Role> roleList = getAllByIdIn(roleIdCollection);
+
+        if (roleList == null) {
+            return null;
+        }
+
+        return roleList.stream()
+                .collect(Collectors.toMap(Role::getRoleId, Function.identity()));
+    }
+    @Override
+    public Map<Long, RoleReadDTO> mapRoleIdRoleDTOByIdIn(Collection<Long> roleIdCollection) throws Exception {
+        List<RoleReadDTO> roleDTOList = getAllDTOByIdIn(roleIdCollection);
+        if (roleDTOList == null) {
+            return null;
+        }
+
+        return roleDTOList.stream()
+                .collect(Collectors.toMap(RoleReadDTO::getRoleId, Function.identity()));
     }
 
     @Override
     public List<Role> getAllByRoleNameContains(String roleName) throws Exception {
-        List<Role> roleList = roleRepository.findAllByRoleNameContainsAndIsDeletedIsFalse(roleName);
+        List<Role> roleList =
+                roleRepository.findAllByRoleNameContainsAndIsDeletedIsFalse(roleName);
 
         if (roleList.isEmpty()) {
             return null;
@@ -140,11 +186,25 @@ public class RoleServiceImpl implements RoleService {
     /* UPDATE */
     @Override
     public Role updateRole(Role updatedRole) throws Exception {
-        Optional<Role> role = roleRepository.findByRoleIdAndIsDeletedIsFalse(updatedRole.getRoleId());
+        Role role = getById(updatedRole.getRoleId());
 
-        if (!role.isPresent()) {
+        if (role == null) {
             return null;
             /* Not found by Id, return null */
+        }
+
+        String errorMsg = "";
+
+        /* Check duplicate */
+        if (roleRepository
+                .existsByRoleNameAndRoleIdIsNotAndIsDeletedIsFalse(
+                        updatedRole.getRoleName(),
+                        updatedRole.getRoleId())) {
+            errorMsg += "Already exists another Role with name: " + updatedRole.getRoleName() + "\n";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
         }
 
         return roleRepository.saveAndFlush(updatedRole);
@@ -165,15 +225,15 @@ public class RoleServiceImpl implements RoleService {
     /* DELETE */
     @Override
     public boolean deleteRole(long roleId) throws Exception {
-        Optional<Role> role = roleRepository.findByRoleIdAndIsDeletedIsFalse(roleId);
+        Role role = getById(roleId);
 
-        if (!role.isPresent()) {
+        if (role == null) {
             return false;
             /* Not found with Id */
         }
 
-        role.get().setIsDeleted(true);
-        roleRepository.saveAndFlush(role.get());
+        role.setIsDeleted(true);
+        roleRepository.saveAndFlush(role);
 
         return true;
     }

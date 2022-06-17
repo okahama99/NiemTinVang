@@ -33,6 +33,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     public ReportDetail createReportDetail(ReportDetail newReportDetail) throws Exception {
         String errorMsg = "";
 
+        /* Check FK */
         if (!reportService.existsById(newReportDetail.getReportId())) {
             errorMsg += "No Report found with Id: " + newReportDetail.getReportId()
                     + "\nWhich violate constraint: FK_ReportDetail_Report\n";
@@ -271,12 +272,25 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     /* UPDATE */
     @Override
     public ReportDetail updateReportDetail(ReportDetail updatedReportDetail) throws Exception {
-        Optional<ReportDetail> reportDetail =
-                reportDetailRepository.findByReportDetailIdAndIsDeletedIsFalse(updatedReportDetail.getReportDetailId());
+        ReportDetail oldReportDetail = getById(updatedReportDetail.getReportDetailId());
 
-        if (!reportDetail.isPresent()) {
+        if (oldReportDetail == null) {
             return null;
             /* Not found by Id, return null */
+        }
+
+        String errorMsg = "";
+
+        /* Check FK */
+        if (!oldReportDetail.getReportId().equals(updatedReportDetail.getReportId())) {
+            if (!reportService.existsById(updatedReportDetail.getReportId())) {
+                errorMsg += "No Report found with Id: " + updatedReportDetail.getReportId()
+                        + "\nWhich violate constraint: FK_ReportDetail_Report\n";
+            }
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
         }
 
         return reportDetailRepository.saveAndFlush(updatedReportDetail);
@@ -292,6 +306,54 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         }
 
         return modelMapper.map(updatedReportDetail, ReportDetailReadDTO.class);
+    }
+
+    @Override
+    public List<ReportDetail> updateBulkReportDetail(Collection<ReportDetail> updatedReportDetailList) throws Exception {
+        Set<Long> reportDetailIdSet = new HashSet<>();
+        Set<Long> oldReportIdSet = new HashSet<>();
+        Set<Long> updatedReportIdSet = new HashSet<>();
+
+        for (ReportDetail updatedReportDetail : updatedReportDetailList) {
+            reportDetailIdSet.add(updatedReportDetail.getReportDetailId());
+            updatedReportIdSet.add(updatedReportDetail.getReportId());
+        }
+
+        for (ReportDetail oldReportDetail : getAllByIdIn(reportDetailIdSet)) {
+            oldReportIdSet.add(oldReportDetail.getReportId());
+        }
+
+        /* Remove all unchanged reportId */
+        updatedReportIdSet.removeAll(oldReportIdSet);
+
+        String errorMsg = "";
+
+        /* Check FK */
+        /* If there are updated reportId, need to recheck FK */
+        if (updatedReportIdSet.size() <= 0) {
+            if (!reportService.existsAllByIdIn(updatedReportIdSet)) {
+                errorMsg += "1 or more Report not found with Id"
+                        + "\nWhich violate constraint: FK_ReportDetail_Report\n";
+            }
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        return reportDetailRepository.saveAllAndFlush(updatedReportDetailList);
+    }
+    @Override
+    public List<ReportDetailReadDTO> updateBulkReportDetailByDTOList(Collection<ReportDetailCreateDTO> updatedReportDetailDTOList) throws Exception {
+        List<ReportDetail> updatedReportDetailList = updatedReportDetailDTOList.stream()
+                .map(updatedReportDetailDTO -> modelMapper.map(updatedReportDetailDTO, ReportDetail.class))
+                .collect(Collectors.toList());
+
+        updatedReportDetailList = updateBulkReportDetail(updatedReportDetailList);
+
+        return updatedReportDetailList.stream()
+                .map(updatedReportDetail -> modelMapper.map(updatedReportDetail, ReportDetailReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     /* DELETE */

@@ -20,9 +20,13 @@ public interface ReportTypeRepository extends JpaRepository<ReportType, Long> {
     Optional<ReportType> findByReportTypeIdAndIsDeletedIsFalse(long reportTypeId);
     boolean existsAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection);
     List<ReportType> findAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection);
+    /* Id & reportTypeName */
+    /** Check duplicate name for update */
+    boolean existsByReportTypeNameAndReportTypeIdIsNotAndIsDeletedIsFalse(String reportTypeName, long reportTypeId);
 
 
     /* reportTypeName */
+    boolean existsByReportTypeNameAndIsDeletedIsFalse(String reportTypeName);
     Optional<ReportType> findAllByReportTypeNameAndIsDeletedIsFalse(String reportTypeName);
     List<ReportType> findAllByReportTypeNameContainsAndIsDeletedIsFalse(String reportTypeName);
 }

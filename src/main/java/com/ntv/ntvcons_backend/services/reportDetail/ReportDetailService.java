@@ -38,6 +38,9 @@ public interface ReportDetailService { /* TODO: throws Exception for controller 
     ReportDetail updateReportDetail(ReportDetail updatedReportDetail) throws Exception;
     ReportDetailReadDTO updateReportDetailByDTO(ReportDetailUpdateDTO updatedReportDetailDTO) throws Exception;
 
+    List<ReportDetail> updateBulkReportDetail(Collection<ReportDetail> updatedReportDetailList) throws Exception;
+    List<ReportDetailReadDTO> updateBulkReportDetailByDTOList(Collection<ReportDetailCreateDTO> updatedReportDetailDTOList) throws Exception;
+
     /* DELETE */
     boolean deleteReportDetail(long reportDetailId) throws Exception;
 
