@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +20,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     boolean existsByProjectIdAndIsDeletedIsFalse(long projectId);
     Optional<Project> findByProjectIdAndIsDeletedIsFalse(long projectId);
     List<Project> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
+    Page<Project> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable pageable);
 
 
     /* projectName */
     Optional<Project> findByProjectNameAndIsDeletedIsFalse(String projectName);
+    Project getByProjectNameAndIsDeletedIsFalse(String projectName); /* Redundant, use above with .orElse() */
     List<Project> findAllByProjectNameContainsAndIsDeletedIsFalse(String projectName);
 
 
@@ -33,29 +35,29 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
 
     /* planStartDate */
-    List<Project> findAllByPlanStartDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Project> findAllByPlanStartDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Project> findAllByPlanStartDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Project> findAllByPlanStartDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Project> findAllByPlanStartDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Project> findAllByPlanStartDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
     /* planEndDate */
-    List<Project> findAllByPlanEndDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Project> findAllByPlanEndDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Project> findAllByPlanEndDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Project> findAllByPlanEndDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Project> findAllByPlanEndDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Project> findAllByPlanEndDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
     /* planStartDate & planEndDate in range */
     List<Project> findAllByPlanEndDateAfterAndPlanEndDateBeforeAndIsDeletedIsFalse
-            (Instant afterDate, Instant beforeDate);
+            (LocalDateTime afterDate, LocalDateTime beforeDate);
 
 
     /* actualStartDate */
-    List<Project> findAllByActualStartDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Project> findAllByActualStartDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Project> findAllByActualStartDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Project> findAllByActualStartDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Project> findAllByActualStartDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Project> findAllByActualStartDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
     /* actualEndDate */
-    List<Project> findAllByActualEndDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Project> findAllByActualEndDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Project> findAllByActualEndDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Project> findAllByActualEndDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Project> findAllByActualEndDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Project> findAllByActualEndDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
     /* actualStartDate & ActualEndDate in range */
     List<Project> findAllByActualEndDateAfterAndActualEndDateBeforeAndIsDeletedIsFalse
-            (Instant afterDate, Instant beforeDate);
+            (LocalDateTime afterDate, LocalDateTime beforeDate);
 
 
     /* estimatedCost */

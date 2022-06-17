@@ -2,6 +2,7 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -21,13 +22,17 @@ public class ProjectController {
     /* CREATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/v1/createProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createProject(/*@RequestBody ProjectCreateDTO projectDTO*/){
-//        String result = projectService.createProject(projectName, createProjectModel,
-//                createBluePrintModel, planStartDate, planEndDate,
-//                actualStartDate, actualEndDate, estimateCost, actualCost);
-//        return result;
-//        TODO: create project
-         return null;
+    public ResponseEntity<Object> createProject(@RequestBody CreateProjectModel createProjectModel){
+        if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
+            return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
+        } else {
+            boolean result = projectService.createProject(createProjectModel);
+
+            if (result) {
+                return ResponseEntity.ok().body("Tạo thành công.");
+            }
+            return ResponseEntity.badRequest().body("Tạo thất bại.");
+        }
     }
 
     /* READ */
@@ -55,20 +60,34 @@ public class ProjectController {
         }
     }
 
+    @GetMapping(value = "/v1/getAllById", produces = "application/json;charset=UTF-8")
+    public @ResponseBody
+    List<ProjectModel> getAllById(@RequestParam long projectId,
+                                  @RequestParam int pageNo,
+                                  @RequestParam int pageSize,
+                                  @RequestParam String sortBy,
+                                  @RequestParam boolean sortType) {
+        List<ProjectModel> projects = projectService.getAllById(projectId, pageNo, pageSize, sortBy, sortType);
+        return projects;
+    }
+
     /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/v1/updateProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProject(/*@RequestBody ProjectUpdateDTO projectDTO*/){
-//        String result = projectService.updateProject(projectModel);
-//        return result;
-//        TODO: update project
-        return null;
+    public ResponseEntity<Object> updateProject(@RequestBody ProjectModel projectModel) {
+        boolean result = projectService.updateProject(projectModel);
+
+        if(result) {
+            return ResponseEntity.ok().body("Cập nhật thành công.");
+        }
+
+        return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
 
     /* DELETE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/v1/deleteProject/{projectId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteProject(@PathVariable(name = "projectId") int projectId){
+    public ResponseEntity<Object> deleteProject(@PathVariable(name = "projectId") int projectId) {
         try {
             if (!projectService.deleteProject(projectId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Project found with Id: " + projectId);

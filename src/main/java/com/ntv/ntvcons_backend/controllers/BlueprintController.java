@@ -53,6 +53,13 @@ public class BlueprintController {
         }
     }
 
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = "/v1/checkDuplicate", produces = "application/json;charset=UTF-8")
+    public @ResponseBody String checkDuplicate(@RequestParam String blueprintName) {
+        String result = blueprintService.checkDuplicate(blueprintName);
+        return result;
+    }
+
     /* UPDATE */
     @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateBlueprint(@RequestBody UpdateBlueprintModel blueprint) {

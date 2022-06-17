@@ -23,9 +23,12 @@ public interface BlueprintService { /* TODO: throws Exception for controller to 
 
     List<Blueprint> getAllByBlueprintCostBetween(double from, double to);
 
+    String checkDuplicate(String blueprintName);
+
     /* UPDATE */
     void updateBlueprint(UpdateBlueprintModel updateBlueprintModel);
 
     /* DELETE */
+
     boolean deleteBlueprint(long blueprintId);
 }

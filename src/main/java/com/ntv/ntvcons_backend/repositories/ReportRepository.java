@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +41,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
 
     /* reportDate */
-    List<Report> findAllByReportDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Report> findAllByReportDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Report> findAllByReportDateBetweenAndIsDeletedIsFalse(Instant from, Instant to);
+    List<Report> findAllByReportDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Report> findAllByReportDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Report> findAllByReportDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
 }

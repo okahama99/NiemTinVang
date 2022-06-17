@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface BlueprintRepository extends JpaRepository<Blueprint, Long> {
     Page<Blueprint> findAllByIsDeletedIsFalse(Pageable pageable);
 
-    Blueprint getByBlueprintName(String bluePrintName);
+    Blueprint getByBlueprintNameAndIsDeletedIsFalse(String bluePrintName);
 
     /* Id */
     Optional<Blueprint> findByBlueprintIdAndIsDeletedIsFalse(long blueprintId);

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 
 @AllArgsConstructor
@@ -28,7 +28,7 @@ public class Post extends BaseEntity {
     private String postTitle;
 
     @Column(name = "createDate", nullable = false)
-    private Instant createDate;
+    private LocalDateTime createDate;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

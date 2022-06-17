@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 
 @AllArgsConstructor
@@ -31,10 +31,10 @@ public class TaskAssignment extends BaseEntity {
     private Long assigneeId;
 
     @Column(name = "assignDate", nullable = false)
-    private Instant assignDate;
+    private LocalDateTime assignDate;
 
     @Column(name = "removeDate")
-    private Instant removeDate;
+    private LocalDateTime removeDate;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

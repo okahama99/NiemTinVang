@@ -6,7 +6,7 @@ import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Report;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,8 +39,8 @@ public interface ReportService { /* TODO: throws Exception for controller to han
     List<Report> getAllByProjectIdAndReporterId(int projectId, int reporterId) throws Exception;
     List<ReportReadDTO> getAllDTOByProjectIdAndReporterId(int projectId, int reporterId) throws Exception;
 
-    List<Report> getAllByReportDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
-    List<ReportReadDTO> getAllDTOByReportDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception;
+    List<Report> getAllByReportDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
+    List<ReportReadDTO> getAllDTOByReportDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
 
     /* UPDATE */
     Report updateReport(Report updatedReport) throws Exception;

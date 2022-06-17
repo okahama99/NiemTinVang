@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -41,18 +41,18 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
 
     /* requestDatetime */
-    List<Request> findAllByRequestDateAfterAndIsDeletedIsFalse(Instant afterDatetime);
-    List<Request> findAllByRequestDateBeforeAndIsDeletedIsFalse(Instant beforeDatetime);
-    List<Request> findAllByRequestDateBetweenAndIsDeletedIsFalse(Instant fromDatetime, Instant toDatetime);
+    List<Request> findAllByRequestDateAfterAndIsDeletedIsFalse(LocalDateTime afterDatetime);
+    List<Request> findAllByRequestDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDatetime);
+    List<Request> findAllByRequestDateBetweenAndIsDeletedIsFalse(LocalDateTime fromDatetime, LocalDateTime toDatetime);
 
 
     /* isVerified */
     List<Request> findAllByIsVerifiedAndIsDeletedIsFalse(boolean isVerified);
 
     /* isVerified = true  & verifyDate */
-    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateAfterAndIsDeletedIsFalse(Instant afterDate);
-    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBeforeAndIsDeletedIsFalse(Instant beforeDate);
-    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBetweenAndIsDeletedIsFalse(Instant fromDate, Instant toDate);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBetweenAndIsDeletedIsFalse(LocalDateTime fromDate, LocalDateTime toDate);
 
     /* isVerified = true  & verifierId */
     List<Request> findAllByIsVerifiedIsTrueAndVerifierIdAndIsDeletedIsFalse(long verifierId);
@@ -63,9 +63,9 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     /* isVerified = true & isApproved & verifyDate */
     List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateAfterAndIsDeletedIsFalse
-            (boolean isApproved, Instant afterDate);
+            (boolean isApproved, LocalDateTime afterDate);
     List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateBeforeAndIsDeletedIsFalse
-            (boolean isApproved, Instant beforeDate);
+            (boolean isApproved, LocalDateTime beforeDate);
     List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateBetweenAndIsDeletedIsFalse
-            (boolean isApproved, Instant fromDate, Instant toDate);
+            (boolean isApproved, LocalDateTime fromDate, LocalDateTime toDate);
 }

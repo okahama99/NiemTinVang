@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,7 +20,7 @@ public class ReportUpdateDTO implements Serializable {
     private Long projectId;
     private Long reportTypeId;
     private Long reporterId;
-    private Instant reportDate;
+    private LocalDateTime reportDate;
     private String reportDesc;
 
     private List<ReportDetailCreateDTO> newReportDetailList;

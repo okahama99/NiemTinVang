@@ -3,13 +3,11 @@ package com.ntv.ntvcons_backend.entities.BlueprintModels;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
-
 @Getter
 @Setter
 public class UpdateBlueprintModel {
-    private long blueprintId,userId;
+    /* Tạm đối sang Long, Double đẻ có thể nhập null, bị bể do đổi blueprint */
+    private Long blueprintId,userId;
     private String designerName, blueprintName;
-    private double estimateCost;
-    private Date updatedAt;
+    private Double estimateCost;
 }

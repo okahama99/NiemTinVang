@@ -8,10 +8,11 @@ import java.util.Date;
 @Getter
 @Setter
 public class ShowBlueprintModel {
-    private long projectBlueprintId;
-    private String projectBlueprintName, image, designerName;
-    private double projectBlueprintCost;
+    /* Tạm đối sang Long, Double đẻ có thể nhập null, bị bể do đổi blueprint */
+    private Long projectBlueprintId;
+    private String projectBlueprintName, designerName;
+    private Double projectBlueprintCost;
     private Long createdBy, updatedBy;
     private Date createdAt, updatedAt;
-    private double totalPage;
+    private Double totalPage;
 }

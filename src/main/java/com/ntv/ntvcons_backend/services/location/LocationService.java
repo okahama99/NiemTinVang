@@ -31,4 +31,6 @@ public interface LocationService { /* TODO: throws Exception for controller to h
 
     /* DELETE */
     boolean deleteLocation(long locationId);
+
+    String checkDuplicate(String addressNumber);
 }

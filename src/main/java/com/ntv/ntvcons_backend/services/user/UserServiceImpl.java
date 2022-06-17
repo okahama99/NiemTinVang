@@ -23,4 +23,5 @@ public class UserServiceImpl implements UserService{
     /* UPDATE */
 
     /* DELETE */
+    // gọi service delete của projectmanager
 }

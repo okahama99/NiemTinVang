@@ -51,7 +51,14 @@ public class LocationController {
                     new ErrorResponse("Error searching for Location", e.getMessage()));
         }
     }
-    
+
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = "/v1/checkDuplicate", produces = "application/json;charset=UTF-8")
+    public @ResponseBody String checkDuplicate(@RequestParam String addressNumber) {
+        String result = locationService.checkDuplicate(addressNumber);
+        return result;
+    }
+
     /* UPDATE */
     @PutMapping(value = "/v1/updateLocation", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateLocation(@RequestBody UpdateLocationModel location) {
@@ -61,7 +68,7 @@ public class LocationController {
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/v1/deleteLocation/{locationId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteLocation(@PathVariable(name = "locationId") long locationId){
+    public ResponseEntity<Object> deleteLocation(@PathVariable(name = "locationId") long locationId) {
         try {
             if (!locationService.deleteLocation(locationId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Location found with Id: " + locationId);

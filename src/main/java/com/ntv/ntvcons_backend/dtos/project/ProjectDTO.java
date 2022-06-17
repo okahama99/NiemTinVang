@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -17,11 +17,11 @@ public class ProjectDTO implements Serializable {
     private String projectName;
     private LocationDTO location;
     private BlueprintDTO blueprint;
-    private Instant planStartDate;
-    private Instant planEndDate;
+    private LocalDateTime planStartDate;
+    private LocalDateTime planEndDate;
     private Double estimatedCost;
-    private Instant actualStartDate;
-    private Instant actualEndDate;
+    private LocalDateTime actualStartDate;
+    private LocalDateTime actualEndDate;
     private Double actualCost;
     private Boolean isDeleted = false;
 }

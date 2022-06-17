@@ -27,7 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -469,7 +469,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<Report> getAllByReportDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<Report> getAllByReportDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Report> reportList = new ArrayList<>();
 
         switch (searchOption) {
@@ -498,7 +498,7 @@ public class ReportServiceImpl implements ReportService {
         return reportList;
     }
     @Override
-    public List<ReportReadDTO> getAllDTOByReportDate(SearchOption searchOption, Instant fromDate, Instant toDate) throws Exception {
+    public List<ReportReadDTO> getAllDTOByReportDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Report> reportList = getAllByReportDate(searchOption, fromDate, toDate);
 
         if (reportList == null) {
