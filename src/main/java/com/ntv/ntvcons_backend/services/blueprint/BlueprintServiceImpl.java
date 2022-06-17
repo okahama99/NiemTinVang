@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -60,7 +61,7 @@ public class BlueprintServiceImpl implements BlueprintService {
                             model.setDesignerName(projectBlueprint.getDesignerName());
                             model.setCreatedAt(projectBlueprint.getCreatedAt());
                             model.setCreatedBy(projectBlueprint.getCreatedBy());
-                            model.setUpdatedAt(projectBlueprint.getCreatedAt());
+                            model.setUpdatedAt(projectBlueprint.getUpdatedAt());
                             model.setUpdatedBy(projectBlueprint.getUpdatedBy());
                             model.setTotalPage(totalPage);
 
@@ -115,7 +116,8 @@ public class BlueprintServiceImpl implements BlueprintService {
         blueprint.setDesignerName(updateBlueprintModel.getDesignerName());
         blueprint.setEstimatedCost(updateBlueprintModel.getEstimateCost());
         blueprint.setUpdatedBy(updateBlueprintModel.getUserId());
-        blueprint.setUpdatedAt(updateBlueprintModel.getUpdatedAt());
+        Date date = new Date();
+        blueprint.setUpdatedAt(date);
         blueprintRepository.saveAndFlush(blueprint);
     }
 
@@ -135,7 +137,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     public String checkDuplicate(String blueprintName)
     {
         String result = "No duplicate";
-        Blueprint checkDuplicate = blueprintRepository.getByBlueprintName(blueprintName);
+        Blueprint checkDuplicate = blueprintRepository.getByBlueprintNameAndIsDeletedIsFalse(blueprintName);
         if(checkDuplicate != null)
         {
             result = "Existed blueprint name";

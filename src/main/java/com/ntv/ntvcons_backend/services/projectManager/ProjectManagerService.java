@@ -1,13 +1,14 @@
 package com.ntv.ntvcons_backend.services.projectManager;
 
 import com.ntv.ntvcons_backend.entities.ProjectManager;
+import com.ntv.ntvcons_backend.entities.ProjectManagerModels.CreateProjectManagerModel;
 
 import java.util.Collection;
 import java.util.List;
 
 public interface ProjectManagerService {
     /* CREATE */
-    ProjectManager createProjectManager(int managerId, int projectId);
+    void createProjectManager(CreateProjectManagerModel createProjectManagerModel);
 
     /* READ */
     List<ProjectManager> getAll();
@@ -21,8 +22,8 @@ public interface ProjectManagerService {
     ProjectManager getById(int projectManagerId);
 
     /* UPDATE */
-    ProjectManager updateProjectManager(int projectManagerId, int managerId, int projectId);
+    boolean updateProjectManager(long projectManagerId, long userId);
 
     /* DELETE */
-    boolean deleteProjectManager(int projectManagerId);
+    boolean deleteProjectManager(long projectManagerId);
 }

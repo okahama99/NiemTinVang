@@ -1,11 +1,15 @@
 package com.ntv.ntvcons_backend.services.projectManager;
 
 import com.ntv.ntvcons_backend.entities.ProjectManager;
+import com.ntv.ntvcons_backend.entities.ProjectManagerModels.CreateProjectManagerModel;
 import com.ntv.ntvcons_backend.repositories.ProjectManagerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -15,8 +19,12 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
 
     /* CREATE */
     @Override
-    public ProjectManager createProjectManager(int managerId, int projectId) {
-        return null;
+    public void createProjectManager(CreateProjectManagerModel createProjectManagerModel) {
+        ProjectManager projectManager = new ProjectManager();
+        projectManager.setProjectId(createProjectManagerModel.getProjectId());
+        projectManager.setManagerId(createProjectManagerModel.getManagerId());
+        projectManager.setAssignDate(createProjectManagerModel.getAssignDate());
+        projectManagerRepository.saveAndFlush(projectManager);
     }
 
     /* READ */
@@ -47,13 +55,30 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
 
     /* UPDATE */
     @Override
-    public ProjectManager updateProjectManager(int projectManagerId, int managerId, int projectId) {
-        return null;
+    public boolean updateProjectManager(long projectManagerId, long userId) {
+        ProjectManager projectManager = projectManagerRepository.findById(projectManagerId).get();
+        if(projectManager!=null)
+        {
+            projectManager.setRemoveDate(LocalDateTime.now());
+            Date date = new Date();
+            projectManager.setUpdatedAt(date);
+            projectManager.setUpdatedBy(userId);
+            projectManagerRepository.saveAndFlush(projectManager);
+            return true;
+        }
+        return false;
     }
 
     /* DELETE */
     @Override
-    public boolean deleteProjectManager(int projectManagerId) {
+    public boolean deleteProjectManager(long projectManagerId) {
+        ProjectManager projectManager = projectManagerRepository.findById(projectManagerId).get();
+        if(projectManager!=null)
+        {
+            projectManager.setIsDeleted(true);
+            projectManagerRepository.saveAndFlush(projectManager);
+            return true;
+        }
         return false;
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -133,7 +134,8 @@ public class LocationServiceImpl implements LocationService {
           location.setProvince(updateLocationModel.getProvince());
           location.setCountry(updateLocationModel.getCountry());
           location.setCoordinate(updateLocationModel.getCoordinate());
-          location.setUpdatedAt(updateLocationModel.getUpdatedAt());
+          Date date = new Date();
+          location.setUpdatedAt(date);
           location.setUpdatedBy(updateLocationModel.getUserId());
           locationRepository.saveAndFlush(location);
 
@@ -155,7 +157,7 @@ public class LocationServiceImpl implements LocationService {
     public String checkDuplicate(String addressNumber)
     {
         String result = "No duplicate";
-        Location checkDuplicateLocation = locationRepository.getByAddressNumber(addressNumber);
+        Location checkDuplicateLocation = locationRepository.getByAddressNumberAndIsDeletedIsFalse(addressNumber);
         if(checkDuplicateLocation != null)
         {
             result = "Existed address number";

@@ -15,10 +15,10 @@ import java.util.Optional;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
     Page<Project> findAllByIsDeletedIsFalse(Pageable pageable);
 
+    Project getByProjectNameAndIsDeletedIsFalse(String projectName);
 
     /* Id */
-    Optional<Project> findByProjectIdAndIsDeletedIsFalse(long projectId);
-    List<Project> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
+    Page<Project> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable pageable);
 
 
     /* projectName */

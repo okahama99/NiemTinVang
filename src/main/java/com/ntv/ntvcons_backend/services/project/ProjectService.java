@@ -2,7 +2,7 @@ package com.ntv.ntvcons_backend.services.project;
 
 import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
-import com.ntv.ntvcons_backend.entities.projectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -15,7 +15,7 @@ public interface ProjectService {
     /* READ */
     List<ProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
 
-    List<Project> getAllByIdIn(Collection<Integer> projectIdCollection);
+    List<ProjectModel> getAllById(long projectId, int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<Project> getAllByNameContains(String projectName);
 
@@ -38,5 +38,7 @@ public interface ProjectService {
 
     /* DELETE */
     boolean deleteProject(long projectId);
+
+    boolean checkDuplicate(String projectName);
 
 }

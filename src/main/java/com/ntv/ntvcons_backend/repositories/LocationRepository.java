@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface LocationRepository extends JpaRepository<Location, Long> {
         Page<Location> findAllByIsDeletedIsFalse(Pageable pageable);
 
-        Location getByAddressNumber (String addressNumber);
+        Location getByAddressNumberAndIsDeletedIsFalse (String addressNumber);
 
         /* Id */
         Optional<Location> findByLocationIdAndIsDeletedIsFalse(long locationId);

@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
-import com.ntv.ntvcons_backend.entities.projectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,13 +19,17 @@ public class ProjectController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/createProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<?> createProject(@RequestBody CreateProjectModel createProjectModel){
-
-        boolean result = projectService.createProject(createProjectModel);
-        if(result)
+        if(projectService.checkDuplicate(createProjectModel.getProjectName()))
         {
-            return new ResponseEntity<>("Tạo thành công.",HttpStatus.OK);
+            return new ResponseEntity<>("Tên dự án đã tồn tại.",HttpStatus.BAD_REQUEST);
+        }else{
+            boolean result = projectService.createProject(createProjectModel);
+            if(result)
+            {
+                return new ResponseEntity<>("Tạo thành công.",HttpStatus.OK);
+            }
+            return new ResponseEntity<>("Tạo thất bại.",HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>("Tạo thất bại.",HttpStatus.BAD_REQUEST);
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -51,6 +55,18 @@ public class ProjectController {
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = "/getAllById", produces = "application/json;charset=UTF-8")
+    public @ResponseBody
+    List<ProjectModel> getAllById(   @RequestParam long projectId,
+                                     @RequestParam int pageNo,
+                                     @RequestParam int pageSize,
+                                     @RequestParam String sortBy,
+                                     @RequestParam boolean sortType) {
+        List<ProjectModel> projects = projectService.getAllById(projectId, pageNo, pageSize, sortBy, sortType);
+        return projects;
+    }
+
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/deleteProject/{projectId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<?> deleteProject(@PathVariable(name = "projectId") int projectId){
         if(projectService.deleteProject(projectId))
@@ -59,4 +75,6 @@ public class ProjectController {
         }
         return new ResponseEntity<>("Xóa thất bại.",HttpStatus.BAD_REQUEST);
     }
+
+
 }

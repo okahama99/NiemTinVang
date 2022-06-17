@@ -1,4 +1,4 @@
-package com.ntv.ntvcons_backend.entities.projectModels;
+package com.ntv.ntvcons_backend.entities.ProjectModels;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class CreateProjectModel {
+    private long userId;
     private String projectName;
     private LocalDateTime planStartDate,planEndDate,actualStartDate,actualEndDate;
     private double projectEstimateCost, projectActualCost;
