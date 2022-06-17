@@ -27,9 +27,6 @@ public class Project extends BaseEntity {
     @Column(name = "locationId", nullable = false)
     private Long locationId;
 
-    @Column(name = "blueprintId", nullable = false)
-    private Long blueprintId;
-
     @Column(name = "planStartDate", nullable = false)
     private LocalDateTime planStartDate;
 

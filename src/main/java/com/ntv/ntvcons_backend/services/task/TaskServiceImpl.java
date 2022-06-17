@@ -1,8 +1,9 @@
 package com.ntv.ntvcons_backend.services.task;
 
 import com.ntv.ntvcons_backend.constants.SearchOption;
-import com.ntv.ntvcons_backend.constants.SearchType;
-import com.ntv.ntvcons_backend.dtos.task.*;
+import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
+import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
+import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Task;
 import com.ntv.ntvcons_backend.repositories.TaskRepository;
 import org.modelmapper.ModelMapper;
@@ -14,10 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,16 +76,20 @@ public class TaskServiceImpl implements TaskService{
                         return taskReadDTO;})
                     .collect(Collectors.toList());
 
-        } else {
-            return null;
-        }
+        } 
+            
+        return null;
     }
 
     @Override
+    public boolean existsById(long taskId) throws Exception {
+        return taskRepository.existsByTaskIdAndIsDeletedIsFalse(taskId);
+    }
+    @Override
     public Task getById(long taskId) throws Exception {
-        Optional<Task> task = taskRepository.findByTaskIdAndIsDeletedIsFalse(taskId);
-
-        return task.orElse(null);
+        return taskRepository
+                .findByTaskIdAndIsDeletedIsFalse(taskId)
+                .orElse(null);
     }
     @Override
     public TaskReadDTO getDTOById(long taskId) throws Exception {
@@ -99,6 +102,10 @@ public class TaskServiceImpl implements TaskService{
         return modelMapper.map(task, TaskReadDTO.class);
     }
 
+    @Override
+    public boolean existsAllByIdIn(Collection<Long> taskIdCollection) throws Exception {
+        return taskRepository.existsAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection);
+    }
     @Override
     public List<Task> getAllByIdIn(Collection<Long> taskIdCollection) throws Exception {
         List<Task> taskList = taskRepository.findAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection);
@@ -117,10 +124,31 @@ public class TaskServiceImpl implements TaskService{
             return null;
         }
 
-        return taskList.stream().map(task -> modelMapper.map(task, TaskReadDTO.class))
+        return taskList.stream()
+                .map(task -> modelMapper.map(task, TaskReadDTO.class))
                 .collect(Collectors.toList());
     }
-    
+    @Override
+    public Map<Long, Task> mapTaskIdTaskByIdIn(Collection<Long> taskIdCollection) throws Exception {
+        List<Task> taskList = getAllByIdIn(taskIdCollection);
+
+        if (taskList == null) {
+            return new HashMap<>();
+        }
+
+        return taskList.stream().collect(Collectors.toMap(Task::getTaskId, Function.identity()));
+    }
+    @Override
+    public Map<Long, TaskReadDTO> mapTaskIdTaskDTOByIdIn(Collection<Long> taskIdCollection) throws Exception {
+        List<TaskReadDTO> taskDTOList = getAllDTOByIdIn(taskIdCollection);
+
+        if (taskDTOList == null) {
+            return new HashMap<>();
+        }
+
+        return taskDTOList.stream().collect(Collectors.toMap(TaskReadDTO::getTaskId, Function.identity()));
+    }
+
     @Override
     public List<Task> getAllByProjectId(long projectId) throws Exception {
         List<Task> taskList = taskRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
@@ -411,18 +439,17 @@ public class TaskServiceImpl implements TaskService{
     /* DELETE */
     @Override
     public boolean deleteTask(long taskId) throws Exception {
-        Optional<Task> task = taskRepository.findByTaskIdAndIsDeletedIsFalse(taskId);
+        Task task = getById(taskId);
 
-        if (!task.isPresent()) {
+        if (task == null) {
             return false;
             /* Not found with Id */
         }
 
-        /* TODO: also create EntityWrapper for task */
+        /* TODO: also delete EntityWrapper for task */
 
-        task.get().setIsDeleted(true);
-
-        taskRepository.saveAndFlush(task.get());
+        task.setIsDeleted(true);
+        taskRepository.saveAndFlush(task);
 
         return true;
     }

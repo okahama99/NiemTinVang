@@ -2,7 +2,7 @@ package com.ntv.ntvcons_backend.services.project;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.Blueprint;
-import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBluePrintModel;
+import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.Location;
 import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
@@ -66,19 +66,17 @@ public class ProjectServiceImpl implements ProjectService{
                 locationModel.setCoordinate(createProjectModel.getCoordinate());
                 locationService.createLocation(locationModel);
 
-                CreateBluePrintModel blueprintModel = new CreateBluePrintModel();
+                CreateBlueprintModel blueprintModel = new CreateBlueprintModel();
                 blueprintModel.setDesignerName(createProjectModel.getDesignerName());
                 blueprintModel.setProjectBlueprintName(createProjectModel.getProjectBlueprintName());
                 blueprintModel.setEstimateCost(createProjectModel.getBlueprintEstimateCost());
                 blueprintService.createProjectBlueprint(blueprintModel);
 
                 Location location = locationRepository.getByAddressNumberAndIsDeletedIsFalse(locationModel.getAddressNumber());
-                Blueprint blueprint = blueprintRepository.getByBlueprintNameAndIsDeletedIsFalse(blueprintModel.getProjectBlueprintName());
-
 
                 Project project = new Project();
                 project.setProjectName(createProjectModel.getProjectName());
-                project.setBlueprintId(blueprint.getBlueprintId());
+
                 project.setLocationId(location.getLocationId());
                 project.setPlanStartDate(createProjectModel.getPlanStartDate());
                 project.setPlanEndDate(createProjectModel.getPlanEndDate());
@@ -126,7 +124,7 @@ public class ProjectServiceImpl implements ProjectService{
                     model.setActualEndDate(project.getActualEndDate());
                     model.setProjectEstimateCost(project.getEstimatedCost());
                     model.setActualCost(project.getActualCost());
-                    model.setDelete(project.getIsDeleted());
+                    model.setIsDelete(project.getIsDeleted());
 
                     Optional<Location> location = locationRepository.findById(project.getLocationId());
                     if (location.isPresent()) { /* MISSING null check */
@@ -140,15 +138,20 @@ public class ProjectServiceImpl implements ProjectService{
                         model.setProvince(location.get().getProvince());
                         model.setCountry(location.get().getCountry());
                         model.setCoordinate(location.get().getCoordinate());
+                    } else {
+                        model.setLocationId(null);
+                        model.setAddressNumber(null);
+                        model.setStreet(null);
+                        model.setArea(null);
+                        model.setWard(null);
+                        model.setDistrict(null);
+                        model.setCity(null);
+                        model.setProvince(null);
+                        model.setCountry(null);
+                        model.setCoordinate(null);
                     }
 
-                    Optional<Blueprint> blueprint = blueprintRepository.findById(project.getBlueprintId());
-                    if (blueprint.isPresent()) { /* MISSING null check */
-                        model.setBlueprintId(project.getBlueprintId());
-                        model.setDesignerName(blueprint.get().getDesignerName());
-                        model.setBlueprintName(blueprint.get().getBlueprintName());
-                        model.setBlueprintEstimateCost(blueprint.get().getEstimatedCost());
-                    }
+                    /* Vì đỏi FK Blue print nên tạm bỏ qua*/
 
                     model.setCreatedAt(project.getCreatedAt());
                     model.setCreatedBy(project.getCreatedBy());
@@ -169,6 +172,37 @@ public class ProjectServiceImpl implements ProjectService{
         }
     }
 
+    @Override
+    public boolean existsById(long projectId) {
+        return projectRepository.existsByProjectIdAndIsDeletedIsFalse(projectId);
+    }
+    @Override
+    public Project getById(long projectId) {
+        return projectRepository
+                .findByProjectIdAndIsDeletedIsFalse(projectId)
+                .orElse(null);
+    }
+
+    @Override
+    public List<Project> getAllByIdIn(Collection<Long> projectIdCollection) {
+        return null;
+    }
+
+    @Override
+    public Project getByLocationId(long locationId) {
+        return null;
+    }
+
+    @Override
+    public boolean checkDuplicate(String projectName) {
+        Project checkDuplicateProject = projectRepository.getByProjectNameAndIsDeletedIsFalse(projectName);
+        if(checkDuplicateProject != null) {
+            return true;
+        }
+        return false;
+    }
+
+    /* get all gì? theo id thì là 1. Các entity con/phụ thuộc là chuyện khác */
     @Override
     public List<ProjectModel> getAllById(long projectId, int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
@@ -196,7 +230,7 @@ public class ProjectServiceImpl implements ProjectService{
                             model.setActualEndDate(project.getActualEndDate());
                             model.setProjectEstimateCost(project.getEstimatedCost());
                             model.setActualCost(project.getActualCost());
-                            model.setDelete(project.getIsDeleted());
+                            model.setIsDelete(project.getIsDeleted());
 
                             Location location = locationRepository.findById(project.getLocationId()).get();
                             model.setLocationId(project.getLocationId());
@@ -209,12 +243,6 @@ public class ProjectServiceImpl implements ProjectService{
                             model.setProvince(location.getProvince());
                             model.setCountry(location.getCountry());
                             model.setCoordinate(location.getCoordinate());
-
-                            Blueprint blueprint = blueprintRepository.findById(project.getBlueprintId()).get();
-                            model.setBlueprintId(project.getBlueprintId());
-                            model.setDesignerName(blueprint.getDesignerName());
-                            model.setBlueprintName(blueprint.getBlueprintName());
-                            model.setBlueprintEstimateCost(blueprint.getEstimatedCost());
 
                             model.setCreatedAt(project.getCreatedAt());
                             model.setCreatedBy(project.getCreatedBy());
@@ -241,7 +269,7 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
-    public List<Project> getAllByLocationIdIn(Collection<Integer> locationIdCollection) {
+    public List<Project> getAllByLocationIdIn(Collection<Long> locationIdCollection) {
         return null;
     }
 
@@ -260,26 +288,12 @@ public class ProjectServiceImpl implements ProjectService{
         return null;
     }
 
-    @Override
-    public Project getByLocationId(int locationId) {
-        return null;
-    }
-
-    @Override
-    public Project getByBlueprintId(int blueprintId) {
-        return null;
-    }
-
-    @Override
-    public Project getById(int projectId) {
-        return null;
-    }
-
     /* UPDATE */
     @Override
     public boolean updateProject(ProjectModel projectModel) {
-            Project project = projectRepository.findById(projectModel.getProjectId()).get();
-            if(project!=null) {
+            Project project = projectRepository.findById(projectModel.getProjectId()).orElse(null);
+            /* optional.get() mà null -> ra Exception, khỏi check null luôn  */
+            if(project != null) {
                 UpdateLocationModel locationModel = new UpdateLocationModel();
                 locationModel.setLocationId(projectModel.getLocationId());
                 locationModel.setAddressNumber(projectModel.getAddressNumber());
@@ -294,16 +308,7 @@ public class ProjectServiceImpl implements ProjectService{
                 locationModel.setUserId(projectModel.getUserId());
                 locationService.updateLocation(locationModel);
 
-                UpdateBlueprintModel blueprintModel = new UpdateBlueprintModel();
-                blueprintModel.setBlueprintId(projectModel.getBlueprintId());
-                blueprintModel.setBlueprintName(projectModel.getBlueprintName());
-                blueprintModel.setDesignerName(projectModel.getDesignerName());
-                blueprintModel.setEstimateCost(projectModel.getBlueprintEstimateCost());
-                blueprintModel.setUserId(projectModel.getUserId());
-                blueprintService.updateProjectBlueprint(blueprintModel);
-
                 project.setProjectName(projectModel.getProjectName());
-                project.setBlueprintId(projectModel.getBlueprintId());
                 project.setLocationId(projectModel.getLocationId());
                 project.setPlanStartDate(projectModel.getPlanStartDate());
                 project.setPlanEndDate(projectModel.getPlanEndDate());
@@ -322,23 +327,16 @@ public class ProjectServiceImpl implements ProjectService{
     /* DELETE */
     @Override
     public boolean deleteProject(long projectId) {
-        Project project = projectRepository.findById(projectId).get();
-        if(project!=null){
-            project.setIsDeleted(true);
-            projectRepository.saveAndFlush(project);
-            return true;
-        }
-        return false;
-    }
+        Project project = getById(projectId);
 
-    @Override
-    public boolean checkDuplicate(String projectName)
-    {
-        Project checkDuplicateProject = projectRepository.getByProjectNameAndIsDeletedIsFalse(projectName);
-        if(checkDuplicateProject != null)
-        {
-            return true;
+        if (project == null) {
+            return false;
+            /* Not found with Id */
         }
-        return false;
+
+        project.setIsDeleted(true);
+        projectRepository.saveAndFlush(project);
+
+        return true;
     }
 }

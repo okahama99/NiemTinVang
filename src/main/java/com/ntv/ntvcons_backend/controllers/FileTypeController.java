@@ -7,6 +7,7 @@ import com.ntv.ntvcons_backend.dtos.fileType.FileTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.fileType.FileTypeUpdateDTO;
 import com.ntv.ntvcons_backend.services.fileType.FileTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +18,13 @@ import java.util.List;
 @RequestMapping("/fileType")
 public class FileTypeController {
     @Autowired
-    FileTypeService fileTypeService;
+    private FileTypeService fileTypeService;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     //@PreAuthorize("hasFileType('ROLE_ADMIN')")
     @PostMapping(value = "/v1/createFileType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> insertFileType(@RequestBody FileTypeCreateDTO fileTypeDTO) {
+    public ResponseEntity<Object> createFileType(@RequestBody FileTypeCreateDTO fileTypeDTO) {
         try {
             FileTypeReadDTO newFileTypeDTO = fileTypeService.createFileTypeByDTO(fileTypeDTO);
 
@@ -36,7 +37,7 @@ public class FileTypeController {
 
     /* READ */
     //@PreAuthorize("hasFileType('ROLE_ADMIN')")
-    @GetMapping(value = "/v1/read/all", produces = "application/json;charset=UTF-8")
+    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
@@ -51,15 +52,20 @@ public class FileTypeController {
 
             return ResponseEntity.ok().body(fileTypeDTOList);
 
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for FileType", e.getMessage()));
         }
     }
 
-    @GetMapping(value = "/v1/read", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParams(@RequestParam String searchParam,
-                                              @RequestParam("searchType") SearchType searchType) {
+    //@PreAuthorize("hasFileType('ROLE_ADMIN')")
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam(name = "searchType") SearchType searchType) {
         try {
             List<FileTypeReadDTO> fileTypeDTOList;
 
@@ -83,20 +89,24 @@ public class FileTypeController {
                     break;
 
                 default:
-                    return ResponseEntity.badRequest().body("Wrong search type for entity FileType");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity FileType");
             }
 
             return ResponseEntity.ok().body(fileTypeDTOList);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "";
+            String errorMsg = "Error searching for FileType with ";
 
             switch (searchType) {
                 case FILE_TYPE_BY_NAME_CONTAINS:
-                    errorMsg += "Error searching for FileType with name contains: " + searchParam;
+                    errorMsg += "name contains: " + searchParam;
                     break;
 
                 case FILE_TYPE_BY_EXTENSION_CONTAINS:
-                    errorMsg += "Error searching for FileType with extension contains: " + searchParam;
+                    errorMsg += "extension contains: " + searchParam;
                     break;
             }
 
@@ -106,7 +116,7 @@ public class FileTypeController {
 
     /* UPDATE */
     //@PreAuthorize("hasFileType('ROLE_ADMIN')")
-    @PutMapping(value = "/v1/update", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateFileType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateFileType(@RequestBody FileTypeUpdateDTO fileTypeDTO) {
         try {
             FileTypeReadDTO updatedFileTypeDTO = fileTypeService.updateFileTypeByDTO(fileTypeDTO);
@@ -126,7 +136,7 @@ public class FileTypeController {
 
     /* DELETE */
     //@PreAuthorize("hasFileType('ROLE_ADMIN')")
-    @DeleteMapping(value = "/v1/delete/{fileTypeId}", produces = "application/json;charset=UTF-8")
+    @DeleteMapping(value = "/v1/deleteFileType/{fileTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteFileType(@PathVariable(name = "fileTypeId") long fileTypeId) {
         try {
             if (!fileTypeService.deleteFileType(fileTypeId)) {

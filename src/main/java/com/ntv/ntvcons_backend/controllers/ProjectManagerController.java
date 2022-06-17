@@ -7,13 +7,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/ProjectManager")
+@RequestMapping("/projectManager")
 public class ProjectManagerController {
     @Autowired
-    ProjectManagerService projectManagerService;
+    private ProjectManagerService projectManagerService;
 
+    /* ================================================ Ver 1 ================================================ */
+    /* CREATE */
+
+    /* READ */
+
+    /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping(value = "/updateProjectManager", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateProjectManager", produces = "application/json;charset=UTF-8")
     public ResponseEntity<?> updateProjectManager(@RequestParam long projectManagerId,
                                                   @RequestParam long userId){
         boolean result = projectManagerService.updateProjectManager(projectManagerId,userId);
@@ -23,4 +29,8 @@ public class ProjectManagerController {
         }
         return new ResponseEntity<>("Cập nhật thất bại.",HttpStatus.BAD_REQUEST);
     }
+
+    /* DELETE */
+
+    /* ================================================ Ver 1 ================================================ */
 }

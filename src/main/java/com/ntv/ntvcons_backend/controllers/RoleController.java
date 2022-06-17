@@ -1,9 +1,13 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.role.*;
+import com.ntv.ntvcons_backend.dtos.role.RoleCreateDTO;
+import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
+import com.ntv.ntvcons_backend.dtos.role.RoleUpdateDTO;
 import com.ntv.ntvcons_backend.services.role.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +23,12 @@ public class RoleController {
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping(value = "/v1/create", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> insertRole(@RequestBody RoleCreateDTO roleDTO){
+    @PostMapping(value = "/v1/createRole", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createRole(@RequestBody RoleCreateDTO roleDTO){
         try {
             RoleReadDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
 
             return ResponseEntity.ok().body(newRoleDTO);
-
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Role", e.getMessage()));
@@ -34,47 +37,74 @@ public class RoleController {
 
     /* READ */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = "/v1/read/all", produces = "application/json;charset=UTF-8")
+    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortType) {
         try {
-            List<RoleReadDTO> roleDTOList = roleService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+            List<RoleReadDTO> roleDTOList =
+                    roleService.getAllDTO(pageNo, pageSize, sortBy, sortType);
 
             if (roleDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found");
             }
 
             return ResponseEntity.ok().body(roleDTOList);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Role", e.getMessage()));
         }
     }
 
-    @GetMapping(value = "/v1/read", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParams(@RequestParam String roleName) {
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam(name = "searchType") SearchType searchType) {
         try {
-            List<RoleReadDTO> roleDTOList = roleService.getAllDTOByRoleNameContains(roleName);
+            List<RoleReadDTO> roleDTOList;
 
-            if (roleDTOList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Role found with name contains: " + roleName);
+            /* switch just in case expand later */
+            switch (searchType) {
+                case ROLE_BY_NAME_CONTAINS:
+                    roleDTOList = roleService.getAllDTOByRoleNameContains(searchParam);
+                    if (roleDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Role found with name contains: " + searchParam);
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Role");
             }
 
             return ResponseEntity.ok().body(roleDTOList);
+        }  catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for Role with name contains: " + roleName, e.getMessage()));
+            String errorMsg = "Error searching for Role with ";
+
+            /* switch just in case expand later */
+            switch (searchType) {
+                case REPORT_TYPE_BY_NAME_CONTAINS:
+                    errorMsg += "name contains: " + searchParam;
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
         }
     }
 
     /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping(value = "/v1/update", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateRole", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRole(@RequestBody RoleUpdateDTO roleDTO){
-       try {
+        try {
             RoleReadDTO updatedRoleDTO = roleService.updateRoleByDTO(roleDTO);
 
             if (updatedRoleDTO == null) {
@@ -85,17 +115,19 @@ public class RoleController {
             return ResponseEntity.ok().body(updatedRoleDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating Role with Id: " + roleDTO.getRoleId(), e.getMessage()));
+                    new ErrorResponse("Error updating Role with Id: " + roleDTO.getRoleId(),
+                            e.getMessage()));
         }
     }
 
     /* DELETE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping(value = "/v1/delete/{roleId}", produces = "application/json;charset=UTF-8")
+    @DeleteMapping(value = "/v1/deleteRole/{roleId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRole(@PathVariable(name = "roleId") long roleId){
         try {
             if (!roleService.deleteRole(roleId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found with Id: " + roleId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Role found with Id: " + roleId);
             }
 
             return ResponseEntity.ok().body("Deleted Role with Id: " + roleId);
@@ -105,6 +137,5 @@ public class RoleController {
         }
     }
     /* ================================================ Ver 1 ================================================ */
-
 
 }
