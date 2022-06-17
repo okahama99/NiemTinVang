@@ -15,11 +15,20 @@ public interface ProjectService {
     /* READ */
     List<ProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
 
+    boolean existsById(long projectId);
+    Project getById(long projectId);
+
+    List<Project> getAllByIdIn(Collection<Long> projectIdCollection);
+
+    Project getByLocationId(long locationId);
+
+    boolean checkDuplicate(String projectName);
+
     List<ProjectModel> getAllById(long projectId, int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<Project> getAllByNameContains(String projectName);
 
-    List<Project> getAllByLocationIdIn(Collection<Integer> locationIdCollection);
+    List<Project> getAllByLocationIdIn(Collection<Long> locationIdCollection);
 
     List<Project> getAllByStartDateBetween(Timestamp from, Timestamp to);
 
@@ -27,18 +36,9 @@ public interface ProjectService {
 
     List<Project> getAllByEstimateCostBetween(double from, double to);
 
-    Project getByLocationId(int locationId);
-
-    Project getByBlueprintId(int blueprintId);
-
-    Project getById(int projectId);
-
     /* UPDATE */
     boolean updateProject(ProjectModel projectModel);
 
     /* DELETE */
     boolean deleteProject(long projectId);
-
-    boolean checkDuplicate(String projectName);
-
 }

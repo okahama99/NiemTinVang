@@ -9,11 +9,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class CreateProjectModel {
-    private long userId;
+    /* Tạm đối sang Long, Double đẻ có thể nhập null, bị bể do đổi blueprint */
+    private Long userId;
     private String projectName;
     private LocalDateTime planStartDate,planEndDate,actualStartDate,actualEndDate;
-    private double projectEstimateCost, projectActualCost;
+    private Double projectEstimateCost, projectActualCost;
     private String designerName, projectBlueprintName;
-    private double blueprintEstimateCost;
+    private Double blueprintEstimateCost;
     private String addressNumber, street, area, ward, district, city, province, country, coordinate;
 }

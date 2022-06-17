@@ -1,61 +1,110 @@
 package com.ntv.ntvcons_backend.controllers;
 
-import com.ntv.ntvcons_backend.entities.ReportDetail;
-import com.ntv.ntvcons_backend.entities.ReportDetailModels.ShowReportDetailModel;
+import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
+import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
+import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailUpdateDTO;
 import com.ntv.ntvcons_backend.services.reportDetail.ReportDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
 @RestController
-@RequestMapping("/ReportDetail")
+@RequestMapping("/reportDetail")
 public class ReportDetailController {
     @Autowired
-    ReportDetailService reportDetailService;
+    private ReportDetailService reportDetailService;
 
+    /* ================================================ Ver 1 ================================================ */
+    /* CREATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping(value = "/createReportDetail", produces = "application/json;charset=UTF-8")
-    public HttpStatus createReportDetail(){
+    @PostMapping(value = "/v1/createReportDetail", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createReportDetail(@RequestBody ReportDetailCreateDTO reportDetailDTO){
+        try {
+            ReportDetailReadDTO newReportDetailDTO = reportDetailService.createReportDetailByDTO(reportDetailDTO);
 
-        ReportDetail result = reportDetailService.createReportDetail();
-        if(result!=null){
-            return HttpStatus.OK;
-        }
-        return HttpStatus.BAD_REQUEST;
-    }
-
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping(value = "/updateReport", produces = "application/json;charset=UTF-8")
-    public HttpStatus updateReport(@RequestBody ShowReportDetailModel showReportDetailModel){
-        boolean result = reportDetailService.updateReport(showReportDetailModel);
-        if(result){
-            return HttpStatus.OK;
-        }
-        return HttpStatus.BAD_REQUEST;
-    }
-
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = "/getAll", produces = "application/json;charset=UTF-8")
-    public @ResponseBody
-    List<ShowReportDetailModel> getAll(@RequestParam int pageNo,
-                              @RequestParam int pageSize,
-                              @RequestParam String sortBy,
-                              @RequestParam boolean sortType) {
-        List<ShowReportDetailModel> reports = reportDetailService.getAll(pageNo, pageSize, sortBy, sortType);
-        return reports;
-    }
-
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping(value = "/deleteReport/{reportDetailId}", produces = "application/json;charset=UTF-8")
-    public HttpStatus deleteReport(@PathVariable(name = "reportDetailId") int reportDetailId){
-        if(reportDetailService.deleteReport(reportDetailId))
-        {
-            return HttpStatus.OK;
-        }else{
-            return HttpStatus.BAD_REQUEST;
+            return ResponseEntity.ok().body(newReportDetailDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Report by Id, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating ReportDetail", e.getMessage()));
         }
     }
+
+    /* READ */
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAll(@RequestParam int pageNo,
+                                         @RequestParam int pageSize,
+                                         @RequestParam String sortBy,
+                                         @RequestParam boolean sortType) {
+        try {
+            List<ReportDetailReadDTO> reportDetailDTOList =
+                    reportDetailService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+
+            if (reportDetailDTOList == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found");
+            }
+
+            return ResponseEntity.ok().body(reportDetailDTOList);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error searching for Report", e.getMessage()));
+        }
+    }
+
+    /* UPDATE */
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping(value = "/v1/updateReportDetail", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateReportDetail(@RequestBody ReportDetailUpdateDTO reportDetailDTO){
+        try {
+            ReportDetailReadDTO updatedReportDetailDTO = reportDetailService.updateReportDetailByDTO(reportDetailDTO);
+
+            if (updatedReportDetailDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No ReportDetail found with Id: " + reportDetailDTO.getReportDetailId());
+            }
+
+            return ResponseEntity.ok().body(updatedReportDetailDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Report by Id (if changed), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error updating ReportDetail with Id: " + reportDetailDTO.getReportDetailId(),
+                            e.getMessage()));
+        }
+    }
+
+    /* DELETE */
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping(value = "/v1/deleteReportDetail/{reportDetailId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteReportDetail(@PathVariable(name = "reportDetailId") long reportDetailId){
+        try {
+            if (!reportDetailService.deleteReportDetail(reportDetailId)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No ReportDetail found with Id: " + reportDetailId);
+            }
+
+            return ResponseEntity.ok().body("Deleted ReportDetail with Id: " + reportDetailId);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error deleting ReportDetail with Id: " + reportDetailId, e.getMessage()));
+        }
+    }
+    /* ================================================ Ver 1 ================================================ */
+
 }

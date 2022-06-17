@@ -1,11 +1,13 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeUpdateDTO;
 import com.ntv.ntvcons_backend.services.reportType.ReportTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +23,8 @@ public class ReportTypeController {
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     //@PreAuthorize("hasReportType('ROLE_ADMIN')")
-    @PostMapping(value = "/v1/create", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> insertReportType(@RequestBody ReportTypeCreateDTO reportTypeDTO){
+    @PostMapping(value = "/v1/createReportType", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createReportType(@RequestBody ReportTypeCreateDTO reportTypeDTO){
         try {
             ReportTypeReadDTO newReportTypeDTO = reportTypeService.createReportTypeByDTO(reportTypeDTO);
 
@@ -35,7 +37,7 @@ public class ReportTypeController {
 
     /* READ */
     //@PreAuthorize("hasReportType('ROLE_ADMIN')")
-    @GetMapping(value = "/v1/read/all", produces = "application/json;charset=UTF-8")
+    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
@@ -49,34 +51,58 @@ public class ReportTypeController {
             }
 
             return ResponseEntity.ok().body(reportTypeDTOList);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for ReportType", e.getMessage()));
         }
     }
 
-    @GetMapping(value = "/v1/read", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParams(@RequestParam String reportTypeName) {
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam(name = "searchType") SearchType searchType) {
         try {
-            List<ReportTypeReadDTO> reportTypeDTOList =
-                    reportTypeService.getAllDTOByReportTypeNameContains(reportTypeName);
+            List<ReportTypeReadDTO> reportTypeDTOList;
 
-            if (reportTypeDTOList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No ReportType found with name contains: " + reportTypeName);
+            /* switch just in case expand later */
+            switch (searchType) {
+                case REPORT_TYPE_BY_NAME_CONTAINS:
+                    reportTypeDTOList = reportTypeService.getAllDTOByReportTypeNameContains(searchParam);
+                    if (reportTypeDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ReportType found with name contains: " + searchParam);
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ReportType");
             }
 
             return ResponseEntity.ok().body(reportTypeDTOList);
+        }  catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for ReportType with name contains: " + reportTypeName,
-                            e.getMessage()));
+            String errorMsg = "Error searching for ReportType with ";
+
+            /* switch just in case expand later */
+            switch (searchType) {
+                case REPORT_TYPE_BY_NAME_CONTAINS:
+                    errorMsg += "name contains: " + searchParam;
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
         }
     }
 
     /* UPDATE */
     //@PreAuthorize("hasReportType('ROLE_ADMIN')")
-    @PutMapping(value = "/v1/update", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateReportType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateReportType(@RequestBody ReportTypeUpdateDTO reportTypeDTO){
         try {
             ReportTypeReadDTO updatedReportTypeDTO = reportTypeService.updateReportTypeByDTO(reportTypeDTO);
@@ -96,11 +122,12 @@ public class ReportTypeController {
 
     /* DELETE */
     //@PreAuthorize("hasReportType('ROLE_ADMIN')")
-    @DeleteMapping(value = "/v1/delete/{reportTypeId}", produces = "application/json;charset=UTF-8")
+    @DeleteMapping(value = "/v1/deleteReportType/{reportTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteReportType(@PathVariable(name = "reportTypeId") long reportTypeId){
         try {
             if (!reportTypeService.deleteReportType(reportTypeId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ReportType found with Id: " + reportTypeId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No ReportType found with Id: " + reportTypeId);
             }
 
             return ResponseEntity.ok().body("Deleted ReportType with Id: " + reportTypeId);
@@ -110,6 +137,5 @@ public class ReportTypeController {
         }
     }
     /* ================================================ Ver 1 ================================================ */
-
 
 }

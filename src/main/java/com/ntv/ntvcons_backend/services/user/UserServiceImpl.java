@@ -7,12 +7,18 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserServiceImpl implements UserService{
-
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+
+
+
     /* CREATE */
 
     /* READ */
+    @Override
+    public boolean existsById(long userId) throws Exception {
+        return userRepository.existsByUserIdAndIsDeletedIsFalse(userId);
+    }
 
     /* UPDATE */
 

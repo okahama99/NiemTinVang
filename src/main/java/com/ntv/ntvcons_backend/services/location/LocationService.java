@@ -7,12 +7,14 @@ import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
 
 import java.util.List;
 
-public interface LocationService {
+public interface LocationService { /* TODO: throws Exception for controller to handle */
     /* CREATE */
     void createLocation(CreateLocationModel createLocationModel);
 
     /* READ */
     List<ShowLocationModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
+
+    Location getById(long locationId);
 
     List<Location> getAllByWardContains(String ward);
 
@@ -23,8 +25,6 @@ public interface LocationService {
     List<Location> getAllByProvinceContains(String province);
 
     Location getByCoordinate(String coordinate);
-
-    Location getById(int locationId);
 
     /* UPDATE */
     void updateLocation(UpdateLocationModel updateLocationModel);

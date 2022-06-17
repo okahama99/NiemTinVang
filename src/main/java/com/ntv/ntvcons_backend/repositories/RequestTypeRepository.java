@@ -16,11 +16,17 @@ public interface RequestTypeRepository extends JpaRepository<RequestType, Long> 
 
 
     /* Id */
+    boolean existsByRequestTypeIdAndIsDeletedIsFalse(long requestTypeId);
     Optional<RequestType> findByRequestTypeIdAndIsDeletedIsFalse(long requestTypeId);
+    boolean existsAllByRequestTypeIdInAndIsDeletedIsFalse(Collection<Long> requestTypeIdCollection);
     List<RequestType> findAllByRequestTypeIdInAndIsDeletedIsFalse(Collection<Long> requestTypeIdCollection);
+    /* Id & requestTypeName */
+    /** Check duplicate requestTypeName for update */
+    boolean existsByRequestTypeNameAndRequestTypeIdIsNotAndIsDeletedIsFalse(String requestTypeName, long requestTypeId);
 
 
     /* requestTypeName */
+    boolean existsByRequestTypeNameAndIsDeletedIsFalse(String requestTypeName);
     Optional<RequestType> findAllByRequestTypeNameAndIsDeletedIsFalse(String requestTypeName);
     List<RequestType> findAllByRequestTypeNameContainsAndIsDeletedIsFalse(String requestTypeName);
 }

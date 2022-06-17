@@ -7,6 +7,7 @@ import com.ntv.ntvcons_backend.entities.ReportType;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface ReportTypeService {
     /* CREATE */
@@ -17,11 +18,15 @@ public interface ReportTypeService {
     List<ReportType> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
     List<ReportTypeReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
 
+    boolean existsById(long reportTypeId) throws Exception;
     ReportType getById(long reportTypeId) throws Exception;
     ReportTypeReadDTO getDTOById(long reportTypeId) throws Exception;
 
+    boolean existsAllByIdIn(Collection<Long> reportTypeIdCollection) throws Exception;
     List<ReportType> getAllByIdIn(Collection<Long> reportTypeIdCollection) throws Exception;
     List<ReportTypeReadDTO> getAllDTOByIdIn(Collection<Long> reportTypeIdCollection) throws Exception;
+    Map<Long, ReportType> mapReportTypeIdReportTypeByIdIn(Collection<Long> reportTypeIdCollection) throws Exception;
+    Map<Long, ReportTypeReadDTO> mapReportTypeIdReportTypeDTOByIdIn(Collection<Long> reportTypeIdCollection) throws Exception;
 
     List<ReportType> getAllByReportTypeNameContains(String reportTypeName) throws Exception;
     List<ReportTypeReadDTO> getAllDTOByReportTypeNameContains(String reportTypeName) throws Exception;
