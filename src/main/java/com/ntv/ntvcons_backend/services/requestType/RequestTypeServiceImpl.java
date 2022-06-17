@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -84,9 +85,9 @@ public class RequestTypeServiceImpl implements RequestTypeService {
                         return requestTypeReadDTO;})
                     .collect(Collectors.toList());
 
-        } else {
-            return null;
-        }
+        } 
+            
+        return null;
     }
 
     @Override
@@ -142,7 +143,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         List<RequestType> requestTypeList = getAllByIdIn(requestTypeIdCollection);
 
         if (requestTypeList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         return requestTypeList.stream()
@@ -153,7 +154,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         List<RequestTypeReadDTO> requestTypeDTOList = getAllDTOByIdIn(requestTypeIdCollection);
 
         if (requestTypeDTOList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         return requestTypeDTOList.stream()

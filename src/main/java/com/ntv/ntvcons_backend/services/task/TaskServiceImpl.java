@@ -76,9 +76,9 @@ public class TaskServiceImpl implements TaskService{
                         return taskReadDTO;})
                     .collect(Collectors.toList());
 
-        } else {
-            return null;
-        }
+        } 
+            
+        return null;
     }
 
     @Override
@@ -133,7 +133,7 @@ public class TaskServiceImpl implements TaskService{
         List<Task> taskList = getAllByIdIn(taskIdCollection);
 
         if (taskList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         return taskList.stream().collect(Collectors.toMap(Task::getTaskId, Function.identity()));
@@ -143,7 +143,7 @@ public class TaskServiceImpl implements TaskService{
         List<TaskReadDTO> taskDTOList = getAllDTOByIdIn(taskIdCollection);
 
         if (taskDTOList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         return taskDTOList.stream().collect(Collectors.toMap(TaskReadDTO::getTaskId, Function.identity()));

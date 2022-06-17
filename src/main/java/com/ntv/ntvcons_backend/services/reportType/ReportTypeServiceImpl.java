@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -84,9 +85,9 @@ public class ReportTypeServiceImpl implements ReportTypeService {
                         return reportTypeReadDTO;})
                     .collect(Collectors.toList());
 
-        } else {
-            return null;
-        }
+        } 
+            
+        return null;
     }
 
     @Override
@@ -142,7 +143,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         List<ReportType> reportTypeList = getAllByIdIn(reportTypeIdCollection);
 
         if (reportTypeList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         return reportTypeList.stream()
@@ -153,7 +154,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         List<ReportTypeReadDTO> reportTypeDTOList = getAllDTOByIdIn(reportTypeIdCollection);
 
         if (reportTypeDTOList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         return reportTypeDTOList.stream()

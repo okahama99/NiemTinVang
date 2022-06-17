@@ -119,9 +119,9 @@ public class ReportDetailServiceImpl implements ReportDetailService {
                     })
                     .collect(Collectors.toList());
 
-        } else {
-            return null;
-        }
+        } 
+            
+        return null;
     }
 
     @Override
@@ -218,7 +218,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         List<ReportDetail> reportDetailList = getAllByReportIdIn(reportIdCollection);
 
         if (reportDetailList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         Map<Long, List<ReportDetail>> reportIdReportDetailListMap = new HashMap<>();
@@ -231,7 +231,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
             tmpReportDetailList = reportIdReportDetailListMap.get(tmpReportId);
 
             if (tmpReportDetailList == null) {
-                reportIdReportDetailListMap.put(tmpReportId, Collections.singletonList(reportDetail));
+                reportIdReportDetailListMap.put(tmpReportId, new ArrayList<>(Collections.singletonList(reportDetail)));
             } else {
                 tmpReportDetailList.add(reportDetail);
                 reportIdReportDetailListMap.put(tmpReportId, tmpReportDetailList);
@@ -246,7 +246,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         List<ReportDetailReadDTO> reportDetailDTOList = getAllDTOByReportIdIn(reportIdCollection);
 
         if (reportDetailDTOList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap = new HashMap<>();
@@ -259,7 +259,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
             tmpReportDetailDTOList = reportIdReportDetailDTOListMap.get(tmpReportId);
 
             if (tmpReportDetailDTOList == null) {
-                reportIdReportDetailDTOListMap.put(tmpReportId, Collections.singletonList(reportDetailDTO));
+                reportIdReportDetailDTOListMap.put(tmpReportId, new ArrayList<>(Collections.singletonList(reportDetailDTO)));
             } else {
                 tmpReportDetailDTOList.add(reportDetailDTO);
                 reportIdReportDetailDTOListMap.put(tmpReportId, tmpReportDetailDTOList);
@@ -344,7 +344,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         return reportDetailRepository.saveAllAndFlush(updatedReportDetailList);
     }
     @Override
-    public List<ReportDetailReadDTO> updateBulkReportDetailByDTOList(Collection<ReportDetailCreateDTO> updatedReportDetailDTOList) throws Exception {
+    public List<ReportDetailReadDTO> updateBulkReportDetailByDTOList(Collection<ReportDetailUpdateDTO> updatedReportDetailDTOList) throws Exception {
         List<ReportDetail> updatedReportDetailList = updatedReportDetailDTOList.stream()
                 .map(updatedReportDetailDTO -> modelMapper.map(updatedReportDetailDTO, ReportDetail.class))
                 .collect(Collectors.toList());

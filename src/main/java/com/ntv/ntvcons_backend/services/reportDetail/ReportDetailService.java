@@ -39,7 +39,7 @@ public interface ReportDetailService { /* TODO: throws Exception for controller 
     ReportDetailReadDTO updateReportDetailByDTO(ReportDetailUpdateDTO updatedReportDetailDTO) throws Exception;
 
     List<ReportDetail> updateBulkReportDetail(Collection<ReportDetail> updatedReportDetailList) throws Exception;
-    List<ReportDetailReadDTO> updateBulkReportDetailByDTOList(Collection<ReportDetailCreateDTO> updatedReportDetailDTOList) throws Exception;
+    List<ReportDetailReadDTO> updateBulkReportDetailByDTOList(Collection<ReportDetailUpdateDTO> updatedReportDetailDTOList) throws Exception;
 
     /* DELETE */
     boolean deleteReportDetail(long reportDetailId) throws Exception;

@@ -17,6 +17,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 
 
     /* Id */
+    boolean existsByProjectIdAndIsDeletedIsFalse(long projectId);
     Optional<Project> findByProjectIdAndIsDeletedIsFalse(long projectId);
     List<Project> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
 

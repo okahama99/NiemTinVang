@@ -176,9 +176,9 @@ public class TaskReportServiceImpl implements TaskReportService {
                         taskReportReadDTO.setTotalPage(totalPage);
                         return taskReportReadDTO;})
                     .collect(Collectors.toList());
-        } else {
-            return null;
-        }
+        } 
+            
+        return null;
     }
 
     @Override
@@ -324,7 +324,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         List<TaskReport> taskReportList = getAllByReportIdIn(reportIdCollection);
 
         if (taskReportList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         Map<Long, List<TaskReport>> reportIdTaskReportListMap = new HashMap<>();
@@ -337,7 +337,7 @@ public class TaskReportServiceImpl implements TaskReportService {
             tmpTaskReportList = reportIdTaskReportListMap.get(tmpReportId);
 
             if (tmpTaskReportList == null) {
-                reportIdTaskReportListMap.put(tmpReportId, Collections.singletonList(taskReport));
+                reportIdTaskReportListMap.put(tmpReportId, new ArrayList<>(Collections.singletonList(taskReport)));
             } else {
                 tmpTaskReportList.add(taskReport);
                 reportIdTaskReportListMap.put(tmpReportId, tmpTaskReportList);
@@ -351,7 +351,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         List<TaskReportReadDTO> taskReportDTOList = getAllDTOByReportIdIn(reportIdCollection);
 
         if (taskReportDTOList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap = new HashMap<>();
@@ -364,7 +364,7 @@ public class TaskReportServiceImpl implements TaskReportService {
             tmpTaskReportDTOList = reportIdTaskReportDTOListMap.get(tmpReportId);
 
             if (tmpTaskReportDTOList == null) {
-                reportIdTaskReportDTOListMap.put(tmpReportId, Collections.singletonList(taskReportDTO));
+                reportIdTaskReportDTOListMap.put(tmpReportId,new ArrayList<>(Collections.singletonList(taskReportDTO)));
             } else {
                 tmpTaskReportDTOList.add(taskReportDTO);
                 reportIdTaskReportDTOListMap.put(tmpReportId, tmpTaskReportDTOList);
@@ -445,7 +445,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         List<TaskReport> taskReportList = getAllByTaskIdIn(reportIdCollection);
 
         if (taskReportList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         Map<Long, List<TaskReport>> taskIdTaskReportListMap = new HashMap<>();
@@ -458,7 +458,7 @@ public class TaskReportServiceImpl implements TaskReportService {
             tmpTaskReportList = taskIdTaskReportListMap.get(tmpTaskId);
 
             if (tmpTaskReportList == null) {
-                taskIdTaskReportListMap.put(tmpTaskId, Collections.singletonList(taskReport));
+                taskIdTaskReportListMap.put(tmpTaskId, new ArrayList<>(Collections.singletonList(taskReport)));
             } else {
                 tmpTaskReportList.add(taskReport);
                 taskIdTaskReportListMap.put(tmpTaskId, tmpTaskReportList);
@@ -580,7 +580,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         return taskReportRepository.saveAllAndFlush(updatedTaskReportList);
     }
     @Override
-    public List<TaskReportReadDTO> updateBulkTaskReportByDTOList(List<TaskReportCreateDTO> updatedTaskReportDTOList) throws Exception {
+    public List<TaskReportReadDTO> updateBulkTaskReportByDTOList(List<TaskReportUpdateDTO> updatedTaskReportDTOList) throws Exception {
         Set<Long> taskIdSet = new HashSet<>();
 
         List<TaskReport> updatedTaskReportList = updatedTaskReportDTOList.stream()

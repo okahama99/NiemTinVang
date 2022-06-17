@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -84,9 +85,9 @@ public class RoleServiceImpl implements RoleService {
                         return roleReadDTO;})
                     .collect(Collectors.toList());
 
-        } else {
-            return null;
-        }
+        } 
+            
+        return null;
     }
 
     @Override
@@ -142,7 +143,7 @@ public class RoleServiceImpl implements RoleService {
         List<Role> roleList = getAllByIdIn(roleIdCollection);
 
         if (roleList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         return roleList.stream()
@@ -152,7 +153,7 @@ public class RoleServiceImpl implements RoleService {
     public Map<Long, RoleReadDTO> mapRoleIdRoleDTOByIdIn(Collection<Long> roleIdCollection) throws Exception {
         List<RoleReadDTO> roleDTOList = getAllDTOByIdIn(roleIdCollection);
         if (roleDTOList == null) {
-            return null;
+            return new HashMap<>();
         }
 
         return roleDTOList.stream()

@@ -146,6 +146,11 @@ public class ProjectServiceImpl implements ProjectService{
     }
 
     @Override
+    public boolean existsById(long projectId) {
+        return projectRepository.existsByProjectIdAndIsDeletedIsFalse(projectId);
+    }
+
+    @Override
     public Project getById(long projectId) {
         return projectRepository
                 .findByProjectIdAndIsDeletedIsFalse(projectId)

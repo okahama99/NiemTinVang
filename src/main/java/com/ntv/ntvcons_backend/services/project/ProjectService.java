@@ -19,6 +19,7 @@ public interface ProjectService {
     /* READ */
     List<ProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
 
+    boolean existsById(long projectId);
     Project getById(long projectId);
 
     List<Project> getAllByIdIn(Collection<Long> projectIdCollection);

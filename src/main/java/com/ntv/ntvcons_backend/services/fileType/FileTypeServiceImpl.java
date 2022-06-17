@@ -73,9 +73,9 @@ public class FileTypeServiceImpl implements FileTypeService{
                         return fileTypeReadDTO;})
                     .collect(Collectors.toList());
 
-        } else {
-            return null;
-        }
+        } 
+            
+        return null;
     }
 
     @Override

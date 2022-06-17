@@ -59,6 +59,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Report", e.getMessage()));
         }
