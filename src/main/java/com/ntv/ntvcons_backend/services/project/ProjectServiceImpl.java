@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProjectServiceImpl implements ProjectService{
@@ -127,23 +128,27 @@ public class ProjectServiceImpl implements ProjectService{
                     model.setActualCost(project.getActualCost());
                     model.setDelete(project.getIsDeleted());
 
-                    Location location = locationRepository.findById(project.getLocationId()).get();
-                    model.setLocationId(project.getLocationId());
-                    model.setAddressNumber(location.getAddressNumber());
-                    model.setStreet(location.getStreet());
-                    model.setArea(location.getArea());
-                    model.setWard(location.getWard());
-                    model.setDistrict(location.getDistrict());
-                    model.setCity(location.getCity());
-                    model.setProvince(location.getProvince());
-                    model.setCountry(location.getCountry());
-                    model.setCoordinate(location.getCoordinate());
+                    Optional<Location> location = locationRepository.findById(project.getLocationId());
+                    if (location.isPresent()) { /* MISSING null check */
+                        model.setLocationId(project.getLocationId());
+                        model.setAddressNumber(location.get().getAddressNumber());
+                        model.setStreet(location.get().getStreet());
+                        model.setArea(location.get().getArea());
+                        model.setWard(location.get().getWard());
+                        model.setDistrict(location.get().getDistrict());
+                        model.setCity(location.get().getCity());
+                        model.setProvince(location.get().getProvince());
+                        model.setCountry(location.get().getCountry());
+                        model.setCoordinate(location.get().getCoordinate());
+                    }
 
-                    Blueprint blueprint = blueprintRepository.findById(project.getBlueprintId()).get();
-                    model.setBlueprintId(project.getBlueprintId());
-                    model.setDesignerName(blueprint.getDesignerName());
-                    model.setBlueprintName(blueprint.getBlueprintName());
-                    model.setBlueprintEstimateCost(blueprint.getEstimatedCost());
+                    Optional<Blueprint> blueprint = blueprintRepository.findById(project.getBlueprintId());
+                    if (blueprint.isPresent()) { /* MISSING null check */
+                        model.setBlueprintId(project.getBlueprintId());
+                        model.setDesignerName(blueprint.get().getDesignerName());
+                        model.setBlueprintName(blueprint.get().getBlueprintName());
+                        model.setBlueprintEstimateCost(blueprint.get().getEstimatedCost());
+                    }
 
                     model.setCreatedAt(project.getCreatedAt());
                     model.setCreatedBy(project.getCreatedBy());

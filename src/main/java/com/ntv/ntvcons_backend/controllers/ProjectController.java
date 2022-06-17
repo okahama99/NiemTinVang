@@ -50,8 +50,13 @@ public class ProjectController {
                               @RequestParam int pageSize,
                               @RequestParam String sortBy,
                               @RequestParam boolean sortType) {
-        List<ProjectModel> projects = projectService.getAll(pageNo, pageSize, sortBy, sortType);
-        return projects;
+        try {
+            List<ProjectModel> projects = projectService.getAll(pageNo, pageSize, sortBy, sortType);
+            return projects;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
