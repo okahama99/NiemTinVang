@@ -38,10 +38,10 @@ public class ProjectController {
     /* READ */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getAll(@RequestBody int pageNo, 
-                                         @RequestBody int pageSize, 
-                                         @RequestBody String sortBy, 
-                                         @RequestBody boolean sortType) {
+    public ResponseEntity<Object> getAll(@RequestParam int pageNo,
+                                         @RequestParam int pageSize,
+                                         @RequestParam String sortBy,
+                                         @RequestParam boolean sortType) {
         try {
             List<ProjectModel> projects = projectService.getAll(pageNo, pageSize, sortBy, sortType);
 
