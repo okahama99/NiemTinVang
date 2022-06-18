@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -67,10 +69,21 @@ public class RoleController {
         try {
             List<RoleReadDTO> roleDTOList;
 
-            /* switch just in case expand later */
             switch (searchType) {
+                case ROLE_BY_ID:
+                    RoleReadDTO roleDTO = roleService.getDTOById(Long.parseLong(searchParam));
+
+                    if (roleDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Role found with name contains: " + searchParam);
+                    }
+
+                    roleDTOList = new ArrayList<>(Collections.singletonList(roleDTO));
+                    break;
+
                 case ROLE_BY_NAME_CONTAINS:
                     roleDTOList = roleService.getAllDTOByRoleNameContains(searchParam);
+
                     if (roleDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body("No Role found with name contains: " + searchParam);
@@ -82,15 +95,24 @@ public class RoleController {
             }
 
             return ResponseEntity.ok().body(roleDTOList);
-        }  catch (IllegalArgumentException iAE) {
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: " + searchType
+                                    + "\nExpecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for Role with ";
 
-            /* switch just in case expand later */
             switch (searchType) {
+                case REPORT_TYPE_BY_ID:
+                    errorMsg += "roleId: " + searchParam;
+                    break;
+
                 case REPORT_TYPE_BY_NAME_CONTAINS:
                     errorMsg += "name contains: " + searchParam;
                     break;
