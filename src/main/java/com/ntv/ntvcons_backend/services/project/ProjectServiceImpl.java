@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -82,10 +83,11 @@ public class ProjectServiceImpl implements ProjectService{
                 Project project = new Project();
                 project.setProjectName(createProjectModel.getProjectName());
                 project.setLocationId(location.getLocationId());
-                project.setPlanStartDate(createProjectModel.getPlanStartDate().atTime(LocalTime.now())); // convert from LocalDate to LocalDateTime
-                project.setPlanEndDate(createProjectModel.getPlanEndDate().atTime(LocalTime.now()));
-                project.setActualStartDate(createProjectModel.getActualStartDate().atTime(LocalTime.now()));
-                project.setActualEndDate(createProjectModel.getActualEndDate().atTime(LocalTime.now()));
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm");
+                project.setPlanStartDate(LocalDateTime.parse(createProjectModel.getPlanStartDate(),formatter));
+                project.setPlanEndDate(LocalDateTime.parse(createProjectModel.getPlanEndDate(),formatter));
+                project.setActualStartDate(LocalDateTime.parse(createProjectModel.getActualStartDate(),formatter));
+                project.setActualEndDate(LocalDateTime.parse(createProjectModel.getActualEndDate(),formatter));
                 project.setActualCost(createProjectModel.getProjectActualCost());
                 project.setEstimatedCost(createProjectModel.getProjectEstimateCost());
                 projectRepository.saveAndFlush(project);
@@ -348,8 +350,9 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ListUserIDAndName> getUserForDropdownSelection() {
         List<User> listUser = userRepository.findByIsDeletedFalse();
         List<ListUserIDAndName> list = new ArrayList<>();
-        ListUserIDAndName model = new ListUserIDAndName();
+        ListUserIDAndName model;
         for (User user : listUser) {
+            model = new ListUserIDAndName();
             model.setUserId(user.getUserId());
             model.setUserName(user.getUsername());
             list.add(model);
