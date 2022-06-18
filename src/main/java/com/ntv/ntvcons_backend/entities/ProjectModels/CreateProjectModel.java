@@ -3,7 +3,7 @@ package com.ntv.ntvcons_backend.entities.ProjectModels;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 
 @Getter
@@ -12,7 +12,7 @@ public class CreateProjectModel {
     /* Tạm đối sang Long, Double đẻ có thể nhập null, bị bể do đổi blueprint */
     private Long userId;
     private String projectName;
-    private LocalDateTime planStartDate,planEndDate,actualStartDate,actualEndDate;
+    private LocalDate planStartDate,planEndDate,actualStartDate,actualEndDate; // đổi qua LocalDate để FE dùng library đẩy data xuống
     private Double projectEstimateCost, projectActualCost;
     private String designerName, projectBlueprintName;
     private Double blueprintEstimateCost;

@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.services.project;
 import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -41,4 +42,6 @@ public interface ProjectService {
 
     /* DELETE */
     boolean deleteProject(long projectId);
+
+    List<ListUserIDAndName> getUserForDropdownSelection();
 }
