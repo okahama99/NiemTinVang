@@ -82,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService{
                 Project project = new Project();
                 project.setProjectName(createProjectModel.getProjectName());
                 project.setLocationId(location.getLocationId());
-                project.setPlanStartDate(createProjectModel.getPlanStartDate().atTime(LocalTime.now())); // convert from LocalDate to LocalDateTime
+                project.setPlanStartDate(createProjectModel.getPlanStartDate().atTime(LocalTime.now()));
                 project.setPlanEndDate(createProjectModel.getPlanEndDate().atTime(LocalTime.now()));
                 project.setActualStartDate(createProjectModel.getActualStartDate().atTime(LocalTime.now()));
                 project.setActualEndDate(createProjectModel.getActualEndDate().atTime(LocalTime.now()));
