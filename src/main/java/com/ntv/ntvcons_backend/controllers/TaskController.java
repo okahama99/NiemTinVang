@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -71,6 +73,17 @@ public class TaskController {
             List<TaskReadDTO> taskDTOList;
 
             switch (searchType) {
+                case TASK_BY_ID:
+                    TaskReadDTO taskDTO = taskService.getDTOById(Long.parseLong(searchParam));
+
+                    if (taskDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Task found with taskId: " + searchParam);
+                    }
+
+                    taskDTOList = new ArrayList<>(Collections.singletonList(taskDTO));
+                    break;
+
                 case TASK_BY_NAME_CONTAINS:
                     taskDTOList = taskService.getAllDTOByTaskNameContains(searchParam);
 
@@ -107,6 +120,10 @@ public class TaskController {
             String errorMsg = "Error searching for Task with ";
 
             switch (searchType) {
+                case TASK_BY_ID:
+                    errorMsg += "taskId: " + searchParam;
+                    break;
+
                 case TASK_BY_NAME_CONTAINS:
                     errorMsg += "name contains: " + searchParam;
                     break;

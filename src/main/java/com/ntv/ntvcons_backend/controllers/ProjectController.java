@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.controllers;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -98,6 +99,13 @@ public class ProjectController {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Project with Id: " + projectId, e.getMessage()));
         }
+    }
+
+    @GetMapping(value = "/v1/getUserForDropdown", produces = "application/json;charset=UTF-8")
+    public @ResponseBody
+    List<ListUserIDAndName> getUserForDropdown() {
+        List<ListUserIDAndName> listUser = projectService.getUserForDropdownSelection();
+        return listUser;
     }
     /* ================================================ Ver 1 ================================================ */
 

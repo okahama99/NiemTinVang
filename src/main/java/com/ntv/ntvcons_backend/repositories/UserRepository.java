@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
         Page<User> findAllByIsDeletedIsFalse(Pageable pageable);
 
+        List<User> findByIsDeletedFalse();
 
         /* Id */
         boolean existsByUserIdAndIsDeletedIsFalse(long userId);
