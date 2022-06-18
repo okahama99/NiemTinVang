@@ -1,6 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.post;
 
-import com.ntv.ntvcons_backend.dtos.user.UserDTO;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PostDTO implements Serializable {
     private Integer postId;
-    private UserDTO author;
+    private UserReadDTO author;
     private String postTitle;
     private LocalDateTime createDate;
     private Boolean isDeleted = false;

@@ -2,7 +2,7 @@ package com.ntv.ntvcons_backend.dtos.request;
 
 import com.ntv.ntvcons_backend.dtos.project.ProjectDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
-import com.ntv.ntvcons_backend.dtos.user.UserDTO;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,10 +17,10 @@ public class RequestDTO implements Serializable {
     private Integer requestId;
     private ProjectDTO projectId;
     private RequestTypeReadDTO requestType;
-    private UserDTO Requester;
+    private UserReadDTO Requester;
     private LocalDateTime requestDate;
     private String requestDesc;
-    private UserDTO verifier;
+    private UserReadDTO verifier;
     private Boolean isVerified;
     private LocalDateTime verifyDate;
     private String verifyNote;

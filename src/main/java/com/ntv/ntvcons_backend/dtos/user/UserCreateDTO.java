@@ -10,11 +10,11 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDTO implements Serializable {
-    private Integer userId;
-    private RoleReadDTO role;
+public class UserCreateDTO implements Serializable {
+    private Long roleId;
     private String username;
     private String phone;
     private String email;
-    private Boolean isDeleted = false;
+    /* TODO: to be replace with status */
+    private final Boolean isDeleted = false;
 }
