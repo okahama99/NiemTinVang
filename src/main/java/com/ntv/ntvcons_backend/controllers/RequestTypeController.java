@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -67,10 +69,21 @@ public class RequestTypeController {
         try {
             List<RequestTypeReadDTO> requestTypeDTOList;
 
-            /* switch just in case expand later */
             switch (searchType) {
+                case REQUEST_TYPE_BY_ID:
+                    RequestTypeReadDTO requestTypeDTO = requestTypeService.getDTOById(Long.parseLong(searchParam));
+
+                    if (requestTypeDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No RequestType found with name contains: " + searchParam);
+                    }
+
+                    requestTypeDTOList = new ArrayList<>(Collections.singletonList(requestTypeDTO));
+                    break;
+
                 case REQUEST_TYPE_BY_NAME_CONTAINS:
                     requestTypeDTOList = requestTypeService.getAllDTOByRequestTypeNameContains(searchParam);
+
                     if (requestTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body("No RequestType found with name contains: " + searchParam);
@@ -82,15 +95,24 @@ public class RequestTypeController {
             }
 
             return ResponseEntity.ok().body(requestTypeDTOList);
-        }  catch (IllegalArgumentException iAE) {
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: " + searchType
+                                    + "\nExpecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for RequestType with ";
 
-            /* switch just in case expand later */
             switch (searchType) {
+                case REQUEST_TYPE_BY_ID:
+                    errorMsg += "requestTypeId: " + searchParam;
+                    break;
+
                 case REQUEST_TYPE_BY_NAME_CONTAINS:
                     errorMsg += "name contains: " + searchParam;
                     break;

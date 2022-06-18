@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -73,6 +75,17 @@ public class ReportController {
             List<ReportReadDTO> reportDTOList;
 
             switch (searchType) {
+                case REPORT_BY_ID:
+                    ReportReadDTO reportDTO = reportService.getDTOById(Long.parseLong(searchParam));
+
+                    if (reportDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Report found with reportId: " + searchParam);
+                    }
+
+                    reportDTOList = new ArrayList<>(Collections.singletonList(reportDTO));
+                    break;
+
                 case REPORT_BY_PROJECT_ID:
                     reportDTOList = reportService.getAllDTOByProjectId(Long.parseLong(searchParam));
 
@@ -119,9 +132,13 @@ public class ReportController {
             String errorMsg = "Error searching for Report with ";
 
             switch (searchType) {
+                case REPORT_BY_ID:
+                    errorMsg += "reportId: " + searchParam;
+                    break;
+
                 case REPORT_BY_PROJECT_ID:
                     errorMsg += "projectId: " + searchParam;
-                break;
+                    break;
 
                 case REPORT_BY_REPORTER_ID:
                     errorMsg += "reporterId: " + searchParam;

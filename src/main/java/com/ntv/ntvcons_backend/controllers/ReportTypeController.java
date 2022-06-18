@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -67,10 +69,21 @@ public class ReportTypeController {
         try {
             List<ReportTypeReadDTO> reportTypeDTOList;
 
-            /* switch just in case expand later */
             switch (searchType) {
+                case REPORT_TYPE_BY_ID:
+                    ReportTypeReadDTO reportTypeDTO = reportTypeService.getDTOById(Long.parseLong(searchParam));
+
+                    if (reportTypeDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ReportType found with reportTypeId: " + searchParam);
+                    }
+
+                    reportTypeDTOList = new ArrayList<>(Collections.singletonList(reportTypeDTO));
+                    break;
+
                 case REPORT_TYPE_BY_NAME_CONTAINS:
                     reportTypeDTOList = reportTypeService.getAllDTOByReportTypeNameContains(searchParam);
+
                     if (reportTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body("No ReportType found with name contains: " + searchParam);
@@ -82,15 +95,24 @@ public class ReportTypeController {
             }
 
             return ResponseEntity.ok().body(reportTypeDTOList);
-        }  catch (IllegalArgumentException iAE) {
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: " + searchType
+                                    + "\nExpecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for ReportType with ";
 
-            /* switch just in case expand later */
             switch (searchType) {
+                case REPORT_TYPE_BY_ID:
+                    errorMsg += "reportTypeId: " + searchParam;
+                    break;
+
                 case REPORT_TYPE_BY_NAME_CONTAINS:
                     errorMsg += "name contains: " + searchParam;
                     break;

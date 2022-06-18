@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -70,6 +72,17 @@ public class FileTypeController {
             List<FileTypeReadDTO> fileTypeDTOList;
 
             switch (searchType) {
+                case FILE_TYPE_BY_ID:
+                    FileTypeReadDTO fileTypeDTO = fileTypeService.getDTOById(Long.parseLong(searchParam));
+
+                    if (fileTypeDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No FileType found with fileTypeId: " + searchParam);
+                    }
+
+                    fileTypeDTOList = new ArrayList<>(Collections.singletonList(fileTypeDTO));
+                    break;
+
                 case FILE_TYPE_BY_NAME_CONTAINS:
                     fileTypeDTOList = fileTypeService.getAllDTOByFileTypeNameContains(searchParam);
 
@@ -93,6 +106,12 @@ public class FileTypeController {
             }
 
             return ResponseEntity.ok().body(fileTypeDTOList);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: " + searchType
+                                    + "\nExpecting parameter of type: Long",
+                            nFE.getMessage()));
         } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
             return ResponseEntity.badRequest().body(
