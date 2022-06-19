@@ -77,7 +77,7 @@ public class ProjectController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/v1/updateProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProject(@RequestBody UpdateProjectModel updateProjectModel) {
-        boolean result = projectService.updateProject(projectModel);
+        boolean result = projectService.updateProject(updateProjectModel);
 
         if(result) {
             return ResponseEntity.ok().body("Cập nhật thành công.");
