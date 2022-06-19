@@ -1,15 +1,14 @@
 package com.ntv.ntvcons_backend.services.project;
 
 import com.google.common.base.Converter;
-import com.ntv.ntvcons_backend.entities.Blueprint;
-import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.entities.Location;
 import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
 import com.ntv.ntvcons_backend.entities.Project;
-import com.ntv.ntvcons_backend.entities.ProjectManagerModels.CreateProjectManagerModel;
-import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
@@ -19,6 +18,7 @@ import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,12 +29,17 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private ProjectRepository projectRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Autowired
     private LocationService locationService;
@@ -56,46 +61,45 @@ public class ProjectServiceImpl implements ProjectService{
 
     /* READ */
     @Override
-    public boolean createProject(CreateProjectModel createProjectModel) {
-                CreateLocationModel locationModel = new CreateLocationModel();
-                locationModel.setAddressNumber(createProjectModel.getAddressNumber());
-                locationModel.setStreet(createProjectModel.getStreet());
-                locationModel.setArea(createProjectModel.getArea());
-                locationModel.setWard(createProjectModel.getWard());
-                locationModel.setDistrict(createProjectModel.getDistrict());
-                locationModel.setCity(createProjectModel.getCity());
-                locationModel.setProvince(createProjectModel.getProvince());
-                locationModel.setCountry(createProjectModel.getCountry());
-                locationModel.setCoordinate(createProjectModel.getCoordinate());
-                locationService.createLocation(locationModel);
+    public boolean createProject(CreateProjectModel createProjectModel) throws Exception{
+        CreateLocationModel locationModel = new CreateLocationModel();
+        locationModel.setAddressNumber(createProjectModel.getAddressNumber());
+        locationModel.setStreet(createProjectModel.getStreet());
+        locationModel.setArea(createProjectModel.getArea());
+        locationModel.setWard(createProjectModel.getWard());
+        locationModel.setDistrict(createProjectModel.getDistrict());
+        locationModel.setCity(createProjectModel.getCity());
+        locationModel.setProvince(createProjectModel.getProvince());
+        locationModel.setCountry(createProjectModel.getCountry());
+        locationModel.setCoordinate(createProjectModel.getCoordinate());
+        locationService.createLocation(locationModel);
 
-                // TODO
-                // Sửa xong blueprint thì mở
-//                CreateBlueprintModel blueprintModel = new CreateBlueprintModel();
-//                blueprintModel.setDesignerName(createProjectModel.getDesignerName());
-//                blueprintModel.setProjectBlueprintName(createProjectModel.getProjectBlueprintName());
-//                blueprintModel.setEstimateCost(createProjectModel.getBlueprintEstimateCost());
-//                blueprintService.createProjectBlueprint(blueprintModel);
+        /* TODO: Sửa xong blueprint thì mở */
+//        CreateBlueprintModel blueprintModel = new CreateBlueprintModel();
+//        blueprintModel.setDesignerName(createProjectModel.getDesignerName());
+//        blueprintModel.setProjectBlueprintName(createProjectModel.getProjectBlueprintName());
+//        blueprintModel.setEstimateCost(createProjectModel.getBlueprintEstimateCost());
+//        blueprintService.createProjectBlueprint(blueprintModel);
 
-                Location location = locationRepository.getByAddressNumberAndIsDeletedIsFalse(locationModel.getAddressNumber());
+        Location location = locationRepository.getByAddressNumberAndIsDeletedIsFalse(locationModel.getAddressNumber());
 
-                Project project = new Project();
-                project.setProjectName(createProjectModel.getProjectName());
-                project.setLocationId(location.getLocationId());
-                project.setPlanStartDate(createProjectModel.getPlanStartDate().atTime(LocalTime.now())); // convert from LocalDate to LocalDateTime
-                project.setPlanEndDate(createProjectModel.getPlanEndDate().atTime(LocalTime.now()));
-                project.setActualStartDate(createProjectModel.getActualStartDate().atTime(LocalTime.now()));
-                project.setActualEndDate(createProjectModel.getActualEndDate().atTime(LocalTime.now()));
-                project.setActualCost(createProjectModel.getProjectActualCost());
-                project.setEstimatedCost(createProjectModel.getProjectEstimateCost());
-                projectRepository.saveAndFlush(project);
+        Project project = new Project();
+        project.setProjectName(createProjectModel.getProjectName());
+        project.setLocationId(location.getLocationId());
+        project.setPlanStartDate(createProjectModel.getPlanStartDate().atTime(LocalTime.now())); // convert from LocalDate to LocalDateTime
+        project.setPlanEndDate(createProjectModel.getPlanEndDate().atTime(LocalTime.now()));
+        project.setActualStartDate(createProjectModel.getActualStartDate().atTime(LocalTime.now()));
+        project.setActualEndDate(createProjectModel.getActualEndDate().atTime(LocalTime.now()));
+        project.setActualCost(createProjectModel.getProjectActualCost());
+        project.setEstimatedCost(createProjectModel.getProjectEstimateCost());
+        projectRepository.saveAndFlush(project);
 
-                CreateProjectManagerModel projectManagerModel = new CreateProjectManagerModel();
-                projectManagerModel.setProjectId(project.getProjectId());
-                projectManagerModel.setManagerId(createProjectModel.getUserId());
-                projectManagerModel.setAssignDate(LocalDateTime.now());
-                projectManagerService.createProjectManager(projectManagerModel);
-                return true;
+        ProjectManagerCreateDTO projectManagerDTO = new ProjectManagerCreateDTO();
+        projectManagerDTO.setProjectId(project.getProjectId());
+        projectManagerDTO.setManagerId(createProjectModel.getUserId());
+        projectManagerDTO.setAssignDate(LocalDateTime.now());
+        projectManagerService.createProjectManager(modelMapper.map(projectManagerDTO, ProjectManager.class));
+        return true;
     }
 
     /* READ */
@@ -187,6 +191,10 @@ public class ProjectServiceImpl implements ProjectService{
                 .orElse(null);
     }
 
+    @Override
+    public boolean existsAllByIdIn(Collection<Long> projectIdCollection) {
+        return projectRepository.existsAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+    }
     @Override
     public List<Project> getAllByIdIn(Collection<Long> projectIdCollection) {
         return null;

@@ -1,8 +1,8 @@
 package com.ntv.ntvcons_backend.services.project;
 
 import com.ntv.ntvcons_backend.entities.Project;
-import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 
 import java.sql.Timestamp;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface ProjectService {
     /* CREATE */
-    boolean createProject(CreateProjectModel createProjectModel);
+    boolean createProject(CreateProjectModel createProjectModel) throws Exception;
 
     /* READ */
     List<ProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
@@ -19,6 +19,7 @@ public interface ProjectService {
     boolean existsById(long projectId);
     Project getById(long projectId);
 
+    boolean existsAllByIdIn(Collection<Long> projectIdCollection);
     List<Project> getAllByIdIn(Collection<Long> projectIdCollection);
 
     Project getByLocationId(long locationId);

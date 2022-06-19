@@ -19,7 +19,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
         /* Id */
         boolean existsByUserIdAndIsDeletedIsFalse(long userId);
         Optional<User> findByUserIdAndIsDeletedIsFalse(long userId);
+        boolean existsAllByUserIdInAndIsDeletedIsFalse(Collection<Long> userIdCollection);
         List<User> findAllByUserIdInAndIsDeletedIsFalse(Collection<Long> userIdCollection);
+        /* username & phone & email */
+        boolean existsByUsernameAndPhoneAndEmailAndUserIdIsNotAndIsDeletedIsFalse
+                (String username, String phone, String email, long userId);
 
 
         /* username */
@@ -27,12 +31,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
         List<User> findByUsernameContainsAndIsDeletedIsFalse(String username);
 
 
-        /* username */
+        /* phone */
         Optional<User> findByPhoneAndIsDeletedIsFalse(String phone);
         List<User> findByPhoneContainsAndIsDeletedIsFalse(String phone);
 
 
-        /* username */
+        /* email */
         Optional<User> findByEmailAndIsDeletedIsFalse(String email);
         List<User> findByEmailContainsAndIsDeletedIsFalse(String email);
+        /* username & phone & email */
+        boolean existsByUsernameAndPhoneAndEmailAndIsDeletedIsFalse(String username, String phone, String email);
 }

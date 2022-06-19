@@ -24,15 +24,21 @@ public class ProjectController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/v1/createProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProject(@RequestBody CreateProjectModel createProjectModel){
-        if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
-            return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
-        } else {
-            boolean result = projectService.createProject(createProjectModel);
+        try {
+            if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
+                return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
+            } else {
+                boolean result = projectService.createProject(createProjectModel);
 
-            if (result) {
-                return ResponseEntity.ok().body("Tạo thành công.");
+                if (result) {
+                    return ResponseEntity.ok().body("Tạo thành công.");
+                }
+                return ResponseEntity.badRequest().body("Tạo thất bại.");
             }
-            return ResponseEntity.badRequest().body("Tạo thất bại.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
         }
     }
 

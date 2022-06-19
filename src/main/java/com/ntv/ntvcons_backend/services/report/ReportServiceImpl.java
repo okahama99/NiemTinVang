@@ -58,17 +58,17 @@ public class ReportServiceImpl implements ReportService {
         /* Check FK */
         if (!projectService.existsById(newReport.getProjectId())) {
             errorMsg += "No Project found with Id: " + newReport.getProjectId()
-                    + "\nWhich violate constraint: FK_Report_Project\n";
+                    + "Which violate constraint: FK_Report_Project. ";
         }
 
         if (!userService.existsById(newReport.getReporterId())) {
             errorMsg += "No User found with Id: " + newReport.getReporterId()
-                    + "\nWhich violate constraint: FK_Report_User\n";
+                    + "Which violate constraint: FK_Report_User. ";
         }
 
         if (!reportTypeService.existsById(newReport.getReportTypeId())) {
             errorMsg += "No ReportType found with Id: " + newReport.getReportTypeId()
-                    + "\nWhich violate constraint: FK_Report_ReportType\n";
+                    + "Which violate constraint: FK_Report_ReportType. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -553,21 +553,21 @@ public class ReportServiceImpl implements ReportService {
         if (!oldReport.getProjectId().equals(updatedReport.getProjectId())) {
             if (!projectService.existsById(updatedReport.getProjectId())) {
                 errorMsg += "No Project found with Id: " + updatedReport.getProjectId()
-                        + "\nWhich violate constraint: FK_Report_Project\n";
+                        + "Which violate constraint: FK_Report_Project. ";
             }
         }
 
         if (!oldReport.getReporterId().equals(updatedReport.getReporterId())) {
             if (!userService.existsById(updatedReport.getReporterId())) {
                 errorMsg += "No User found with Id: " + updatedReport.getReporterId()
-                        + "\nWhich violate constraint: FK_Report_Project\n";
+                        + "Which violate constraint: FK_Report_Project. ";
             }
         }
 
        if (!oldReport.getReportTypeId().equals(updatedReport.getReportTypeId())) {
            if (!reportTypeService.existsById(updatedReport.getReportTypeId())) {
                errorMsg += "No ReportType found with Id: " + updatedReport.getReportTypeId()
-                       + "\nWhich violate constraint: FK_Report_Project\n";
+                       + "Which violate constraint: FK_Report_Project. ";
            }
        }
 

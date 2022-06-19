@@ -41,11 +41,11 @@ public class TaskReportServiceImpl implements TaskReportService {
         /* Check FK */
         if (!reportService.existsById(newTaskReport.getReportId())) {
             errorMsg += "No Report found with Id: " + newTaskReport.getReportId()
-                    + "\nWhich violate constraint: FK_TaskReport_Report\n";
+                    + "Which violate constraint: FK_TaskReport_Report. ";
         }
         if (!taskService.existsById(newTaskReport.getTaskId())) {
             errorMsg += "No Task found with Id: " + newTaskReport.getTaskId()
-                    + "\nWhich violate constraint: FK_TaskReport_Task\n";
+                    + "Which violate constraint: FK_TaskReport_Task. ";
         }
 
         /* Check duplicate */
@@ -56,7 +56,7 @@ public class TaskReportServiceImpl implements TaskReportService {
                         newTaskReport.getTaskProgress())) {
             errorMsg += "Already exists another TaskReport with reportId: " + newTaskReport.getReportId()
                     + " taskId: " + newTaskReport.getTaskId()
-                    + " taskProgress: " + newTaskReport.getTaskProgress() + "\n";
+                    + " taskProgress: " + newTaskReport.getTaskProgress() + ". ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -94,12 +94,12 @@ public class TaskReportServiceImpl implements TaskReportService {
         /* CheckFK */
         if (!reportService.existsAllByIdIn(reportIdSet)) {
             errorMsg += "1 or more Report not found with Id"
-                    + "\nWhich violate constraint: FK_ReportDetail_Report\n";
+                    + "Which violate constraint: FK_ReportDetail_Report. ";
         }
 
         if (!taskService.existsAllByIdIn(taskIdSet)) {
             errorMsg += "1 or more Task not found with Id"
-                    + "\nWhich violate constraint: FK_ReportDetail_Task\n";
+                    + "Which violate constraint: FK_ReportDetail_Task. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -162,7 +162,7 @@ public class TaskReportServiceImpl implements TaskReportService {
             int totalPage = (int) Math.ceil((double) taskReportList.size() / pageSize);
 
             /* Get associated Task */
-            Map<Long, TaskReadDTO> taskIdTaskReadDTOMap =
+            Map<Long, TaskReadDTO> taskIdTaskDTOMap =
                     taskService.mapTaskIdTaskDTOByIdIn(
                             taskReportList.stream()
                                     .map(TaskReport::getTaskId)
@@ -172,8 +172,10 @@ public class TaskReportServiceImpl implements TaskReportService {
                     .map(taskReport -> {
                         TaskReportReadDTO taskReportReadDTO =
                                 modelMapper.map(taskReport, TaskReportReadDTO.class);
-                        taskReportReadDTO.setTask(taskIdTaskReadDTOMap.get(taskReport.getTaskId()));
+
+                        taskReportReadDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
                         taskReportReadDTO.setTotalPage(totalPage);
+
                         return taskReportReadDTO;})
                     .collect(Collectors.toList());
         } 
@@ -227,7 +229,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         }
 
         /* Get associated Task */
-        Map<Long, TaskReadDTO> taskIdTaskReadDTOMap =
+        Map<Long, TaskReadDTO> taskIdTaskDTOMap =
                 taskService.mapTaskIdTaskDTOByIdIn(
                         taskReportList.stream()
                                 .map(TaskReport::getTaskId)
@@ -238,7 +240,7 @@ public class TaskReportServiceImpl implements TaskReportService {
                     TaskReportReadDTO taskReportDTO =
                             modelMapper.map(taskReport, TaskReportReadDTO.class);
 
-                    taskReportDTO.setTask(taskIdTaskReadDTOMap.get(taskReport.getTaskId()));
+                    taskReportDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
 
                     return taskReportDTO;})
                 .collect(Collectors.toList());
@@ -290,10 +292,6 @@ public class TaskReportServiceImpl implements TaskReportService {
             return null;
         }
 
-        Map<Long, TaskReadDTO> taskIdTaskReadDTOMap =
-                taskService.mapTaskIdTaskDTOByIdIn(
-                        taskReportList.stream().map(TaskReport::getTaskId).collect(Collectors.toSet()));
-
         return taskReportList;
     }
     @Override
@@ -315,7 +313,9 @@ public class TaskReportServiceImpl implements TaskReportService {
                 .map(taskReport -> {
                     TaskReportReadDTO taskReportDTO =
                             modelMapper.map(taskReport, TaskReportReadDTO.class);
+
                     taskReportDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
+
                     return taskReportDTO;})
                 .collect(Collectors.toList());
     }
@@ -436,7 +436,9 @@ public class TaskReportServiceImpl implements TaskReportService {
                 .map(taskReport -> {
                     TaskReportReadDTO taskReportDTO =
                             modelMapper.map(taskReport, TaskReportReadDTO.class);
+
                     taskReportDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
+
                     return taskReportDTO;})
                 .collect(Collectors.toList());
     }
@@ -480,18 +482,18 @@ public class TaskReportServiceImpl implements TaskReportService {
 
         String errorMsg = "";
 
-        /* Check FK */
+        /* Check FK (if changed) */
         if (!oldTaskReport.getReportId().equals(updatedTaskReport.getReportId())) {
             if (!reportService.existsById(updatedTaskReport.getReportId())) {
                 errorMsg += "No Report found with Id: " + updatedTaskReport.getReportId()
-                        + "\nWhich violate constraint: FK_TaskReport_Report\n";
+                        + "Which violate constraint: FK_TaskReport_Report. ";
             }
         }
 
         if (!oldTaskReport.getTaskId().equals(updatedTaskReport.getTaskId())) {
             if (!taskService.existsById(updatedTaskReport.getTaskId())) {
                 errorMsg += "No Task found with Id: " + updatedTaskReport.getTaskId()
-                        + "\nWhich violate constraint: FK_TaskReport_Task\n";
+                        + "Which violate constraint: FK_TaskReport_Task. ";
             }
         }
 
@@ -504,7 +506,7 @@ public class TaskReportServiceImpl implements TaskReportService {
                         updatedTaskReport.getTaskReportId())) {
             errorMsg += "Already exists another TaskReport with reportId: " + updatedTaskReport.getReportId()
                     + " taskId: " + updatedTaskReport.getTaskId()
-                    + " taskProgress: " + updatedTaskReport.getTaskProgress() + "\n";
+                    + " taskProgress: " + updatedTaskReport.getTaskProgress() + ". ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -550,7 +552,7 @@ public class TaskReportServiceImpl implements TaskReportService {
             oldTaskIdSet.add(oldTaskReport.getTaskId());
         }
 
-        /* Remove all unchanged reportId */
+        /* Remove all unchanged reportId & taskId */
         updatedReportIdSet.removeAll(oldReportIdSet);
         updatedTaskIdSet.removeAll(oldTaskIdSet);
 
@@ -558,18 +560,18 @@ public class TaskReportServiceImpl implements TaskReportService {
 
         /* Check FK */
         /* If there are updated reportId, need to recheck FK */
-        if (updatedReportIdSet.size() <= 0) {
+        if (!updatedReportIdSet.isEmpty()) {
             if (!reportService.existsAllByIdIn(updatedReportIdSet)) {
                 errorMsg += "1 or more Report not found with Id"
-                        + "\nWhich violate constraint: FK_ReportDetail_Report\n";
+                        + "Which violate constraint: FK_ReportDetail_Report. ";
             }
         }
 
         /* If there are updated taskId, need to recheck FK */
-        if (updatedTaskIdSet.size()  <= 0) {
+        if (!updatedTaskIdSet.isEmpty()) {
             if (!taskService.existsAllByIdIn(updatedTaskIdSet)) {
                 errorMsg += "1 or more Task not found with Id"
-                        + "\nWhich violate constraint: FK_ReportDetail_Task\n";
+                        + "Which violate constraint: FK_ReportDetail_Task. ";
             }
         }
 

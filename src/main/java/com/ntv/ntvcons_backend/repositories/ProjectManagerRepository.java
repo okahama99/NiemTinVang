@@ -18,6 +18,10 @@ public interface ProjectManagerRepository extends JpaRepository<ProjectManager, 
     /* Id */
     Optional<ProjectManager> findByProjectManagerIdAndIsDeletedIsFalse(long projectManagerId);
     List<ProjectManager> findAllByProjectManagerIdInAndIsDeletedIsFalse(Collection<Long> projectManagerIdCollection);
+    /* Id & projectId & managerId */
+    /** Check duplicate projectId & managerId for update */
+    boolean existsByProjectIdAndManagerIdAndProjectManagerIdIsNotAndIsDeletedIsFalse
+            (long projectId, long managerId, long projectManagerId);
 
 
     /* projectId */
@@ -28,4 +32,6 @@ public interface ProjectManagerRepository extends JpaRepository<ProjectManager, 
     /* managerId */
     List<ProjectManager> findAllByManagerIdAndIsDeletedIsFalse(long managerId);
     List<ProjectManager> findAllByManagerIdInAndIsDeletedIsFalse(Collection<Long> managerIdCollection);
+    /* projectId & managerId */
+    boolean existsByProjectIdAndManagerIdAndIsDeletedIsFalse(long projectId, long managerId);
 }
