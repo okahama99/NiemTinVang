@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.services.project;
 import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 
 import java.sql.Timestamp;
@@ -38,7 +39,7 @@ public interface ProjectService {
     List<Project> getAllByEstimateCostBetween(double from, double to);
 
     /* UPDATE */
-    boolean updateProject(ProjectModel projectModel);
+    boolean updateProject(UpdateProjectModel updateProjectModel);
 
     /* DELETE */
     boolean deleteProject(long projectId);

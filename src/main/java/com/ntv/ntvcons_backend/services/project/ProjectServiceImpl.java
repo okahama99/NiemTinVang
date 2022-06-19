@@ -10,6 +10,7 @@ import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.ProjectManagerModels.CreateProjectManagerModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
@@ -296,34 +297,40 @@ public class ProjectServiceImpl implements ProjectService{
 
     /* UPDATE */
     @Override
-    public boolean updateProject(ProjectModel projectModel) {
-            Project project = projectRepository.findById(projectModel.getProjectId()).orElse(null);
+    public boolean updateProject(UpdateProjectModel updateProjectModel) {
+            Project project = projectRepository.findById(updateProjectModel.getProjectId()).orElse(null);
             /* optional.get() mà null -> ra Exception, khỏi check null luôn  */
             if(project != null) {
                 UpdateLocationModel locationModel = new UpdateLocationModel();
-                locationModel.setLocationId(projectModel.getLocationId());
-                locationModel.setAddressNumber(projectModel.getAddressNumber());
-                locationModel.setStreet(projectModel.getStreet());
-                locationModel.setArea(projectModel.getArea());
-                locationModel.setWard(projectModel.getWard());
-                locationModel.setDistrict(projectModel.getDistrict());
-                locationModel.setCity(projectModel.getCity());
-                locationModel.setProvince(projectModel.getProvince());
-                locationModel.setCountry(projectModel.getCountry());
-                locationModel.setCoordinate(projectModel.getCoordinate());
-                locationModel.setUserId(projectModel.getUserId());
+                locationModel.setLocationId(updateProjectModel.getLocationId());
+                locationModel.setAddressNumber(updateProjectModel.getAddressNumber());
+                locationModel.setStreet(updateProjectModel.getStreet());
+                locationModel.setArea(updateProjectModel.getArea());
+                locationModel.setWard(updateProjectModel.getWard());
+                locationModel.setDistrict(updateProjectModel.getDistrict());
+                locationModel.setCity(updateProjectModel.getCity());
+                locationModel.setProvince(updateProjectModel.getProvince());
+                locationModel.setCountry(updateProjectModel.getCountry());
+                locationModel.setCoordinate(updateProjectModel.getCoordinate());
+                locationModel.setUserId(updateProjectModel.getUserId());
                 locationService.updateLocation(locationModel);
 
-                project.setProjectName(projectModel.getProjectName());
-                project.setLocationId(projectModel.getLocationId());
-                project.setPlanStartDate(projectModel.getPlanStartDate());
-                project.setPlanEndDate(projectModel.getPlanEndDate());
-                project.setActualStartDate(projectModel.getActualStartDate());
-                project.setActualEndDate(projectModel.getActualEndDate());
-                project.setActualCost(projectModel.getActualCost());
-                project.setEstimatedCost(projectModel.getProjectEstimateCost());
-                project.setUpdatedAt(projectModel.getUpdatedAt());
-                project.setUpdatedBy(projectModel.getUserId());
+                project.setProjectName(updateProjectModel.getProjectName());
+                project.setLocationId(updateProjectModel.getLocationId());
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm");
+
+                project.setPlanStartDate(LocalDateTime.parse(updateProjectModel.getPlanStartDate(),formatter));
+                project.setPlanEndDate(LocalDateTime.parse(updateProjectModel.getPlanEndDate(),formatter));
+                project.setActualStartDate(LocalDateTime.parse(updateProjectModel.getActualStartDate(),formatter));
+                project.setActualEndDate(LocalDateTime.parse(updateProjectModel.getActualEndDate(),formatter));
+
+                project.setActualCost(updateProjectModel.getActualCost());
+                project.setEstimatedCost(updateProjectModel.getEstimateCost());
+
+                project.setUpdatedAt(new Date());
+
+                project.setUpdatedBy(updateProjectModel.getUserId());
                 projectRepository.saveAndFlush(project);
                 return true;
             }

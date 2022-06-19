@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.controllers;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +76,7 @@ public class ProjectController {
     /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/v1/updateProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProject(@RequestBody ProjectModel projectModel) {
+    public ResponseEntity<Object> updateProject(@RequestBody UpdateProjectModel updateProjectModel) {
         boolean result = projectService.updateProject(projectModel);
 
         if(result) {
