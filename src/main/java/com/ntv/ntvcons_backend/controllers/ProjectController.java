@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.controllers;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/project")
+@RequestMapping("/Project")
 public class ProjectController {
     @Autowired
     private ProjectService projectService;
@@ -81,8 +82,8 @@ public class ProjectController {
     /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/v1/updateProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProject(@RequestBody ProjectModel projectModel) {
-        boolean result = projectService.updateProject(projectModel);
+    public ResponseEntity<Object> updateProject(@RequestBody UpdateProjectModel updateProjectModel) {
+        boolean result = projectService.updateProject(updateProjectModel);
 
         if(result) {
             return ResponseEntity.ok().body("Cập nhật thành công.");

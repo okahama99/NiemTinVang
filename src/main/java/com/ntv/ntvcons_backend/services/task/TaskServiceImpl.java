@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,6 +28,8 @@ public class TaskServiceImpl implements TaskService{
     private TaskRepository taskRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Autowired
     private TaskReportService taskReportService;
     @Autowired
@@ -41,7 +44,23 @@ public class TaskServiceImpl implements TaskService{
     }
     @Override
     public TaskReadDTO createTaskByDTO(TaskCreateDTO newTaskDTO) throws Exception {
+        modelMapper.typeMap(TaskCreateDTO.class, Task.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Task::setPlanStartDate);
+                    mapper.skip(Task::setPlanEndDate);
+                    mapper.skip(Task::setActualStartDate);
+                    mapper.skip(Task::setActualEndDate);});
+
         Task newTask = modelMapper.map(newTaskDTO, Task.class);
+
+        newTask.setPlanStartDate(
+                LocalDateTime.parse(newTaskDTO.getPlanStartDate(), dateTimeFormatter));
+        newTask.setPlanEndDate(
+                LocalDateTime.parse(newTaskDTO.getPlanEndDate(), dateTimeFormatter));
+        newTask.setActualStartDate(
+                LocalDateTime.parse(newTaskDTO.getActualStartDate(), dateTimeFormatter));
+        newTask.setActualEndDate(
+                LocalDateTime.parse(newTaskDTO.getActualEndDate(), dateTimeFormatter));
 
         newTask = createTask(newTask);
 
@@ -72,16 +91,17 @@ public class TaskServiceImpl implements TaskService{
         List<Task> taskList = getAll(pageNo, pageSize, sortBy, sortType);
 
         if (taskList != null && !taskList.isEmpty()) {
-            int totalPage = (int) Math.ceil((double) taskList.size() / pageSize);
+            int totalPage = (int) Math.ceil(((double) taskList.size()) / pageSize);
 
             return taskList.stream()
                     .map(task -> {
                         TaskReadDTO taskReadDTO = 
                                 modelMapper.map(task, TaskReadDTO.class);
+
                         taskReadDTO.setTotalPage(totalPage);
+
                         return taskReadDTO;})
                     .collect(Collectors.toList());
-
         } 
             
         return null;
@@ -431,7 +451,23 @@ public class TaskServiceImpl implements TaskService{
     }
     @Override
     public TaskReadDTO updateTaskByDTO(TaskUpdateDTO updatedTaskDTO) throws Exception {
+        modelMapper.typeMap(TaskUpdateDTO.class, Task.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Task::setPlanStartDate);
+                    mapper.skip(Task::setPlanEndDate);
+                    mapper.skip(Task::setActualStartDate);
+                    mapper.skip(Task::setActualEndDate);});
+
         Task updatedTask = modelMapper.map(updatedTaskDTO, Task.class);
+
+        updatedTask.setPlanStartDate(
+                LocalDateTime.parse(updatedTaskDTO.getPlanStartDate(), dateTimeFormatter));
+        updatedTask.setPlanEndDate(
+                LocalDateTime.parse(updatedTaskDTO.getPlanEndDate(), dateTimeFormatter));
+        updatedTask.setActualStartDate(
+                LocalDateTime.parse(updatedTaskDTO.getActualStartDate(), dateTimeFormatter));
+        updatedTask.setActualEndDate(
+                LocalDateTime.parse(updatedTaskDTO.getActualEndDate(), dateTimeFormatter));
 
         updatedTask = updateTask(updatedTask);
 

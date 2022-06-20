@@ -24,8 +24,9 @@ public class NtvConsBackendApplication {
 		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration()
 				.setMatchingStrategy(MatchingStrategies.STRICT);
-		return modelMapper ;
+		return modelMapper;
 	}
+
 	@Bean
 	public DateTimeFormatter dateTimeFormatter() {
 		return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");

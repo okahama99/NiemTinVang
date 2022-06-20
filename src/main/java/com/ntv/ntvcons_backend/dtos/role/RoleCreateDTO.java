@@ -1,8 +1,10 @@
 package com.ntv.ntvcons_backend.dtos.role;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.io.Serializable;
 
@@ -12,6 +14,9 @@ import java.io.Serializable;
 public class RoleCreateDTO implements Serializable {
     private String roleName;
     private String roleDesc;
+
     /* TODO: to be replace with status */
+    @JsonIgnore /* No serialize/deserialize => no accept input */
+    @ApiModelProperty(hidden = true) /* No show on Swagger */
     private final Boolean isDeleted = false;
 }
