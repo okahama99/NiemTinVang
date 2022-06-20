@@ -6,7 +6,9 @@ import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
+import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.role.RoleService;
+import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,6 +30,10 @@ public class UserServiceImpl implements UserService{
     private ModelMapper modelMapper;
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private TaskAssignmentService taskAssignmentService;
+    @Autowired
+    private ProjectManagerService projectManagerService;
 
     /* CREATE */
     @Override
@@ -239,7 +245,11 @@ public class UserServiceImpl implements UserService{
             /* Not found by Id */
         }
 
+        /* Delete all associated taskAssignment */
+        taskAssignmentService.deleteAllByUserId(userId);
 
+        /* Delete all associated projectManager */
+        projectManagerService.deleteAllByUserId(userId);
 
         user.setIsDeleted(true);
         userRepository.saveAndFlush(user);

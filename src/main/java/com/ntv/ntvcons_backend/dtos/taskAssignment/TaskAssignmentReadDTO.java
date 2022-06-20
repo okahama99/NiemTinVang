@@ -2,7 +2,6 @@ package com.ntv.ntvcons_backend.dtos.taskAssignment;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;

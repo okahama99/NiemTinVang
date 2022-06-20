@@ -15,6 +15,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.DateFormatter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,13 +27,14 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     private TaskAssignmentRepository taskAssignmentRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private TaskService taskService;
-
 
     /* CREATE */
     @Override
@@ -78,11 +82,12 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     public List<TaskAssignment> createBulkTaskAssignment(List<TaskAssignment> newTaskAssignmentList) throws Exception {
         StringBuilder errorMsg = new StringBuilder();
 
-        Map<Long, Map<Long, Long>> taskIdAssignerIdAssigneeIdMapMap = new HashMap<>();
+        Map<Long, Map<Long, List<Long>>> taskIdAssignerIdAssigneeIdListMapMap = new HashMap<>();
         Set<Long> taskIdSet = new HashSet<>();
         Set<Long> assignerIdSet = new HashSet<>();
         Set<Long> assigneeIdSet = new HashSet<>();
-        Map<Long, Long> tmpAssignerIdAssigneeIdMap;
+        Map<Long, List<Long>> tmpAssignerIdAssigneeIdListMap;
+        List<Long> tmpAssigneeIdList;
         boolean isDuplicated = false;
 
         for (TaskAssignment newTaskAssignment : newTaskAssignmentList) {
@@ -91,34 +96,57 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
             assigneeIdSet.add(newTaskAssignment.getAssigneeId());
 
             /* Check duplicate 1 (within input) */
-            tmpAssignerIdAssigneeIdMap = taskIdAssignerIdAssigneeIdMapMap.get(newTaskAssignment.getTaskId());
-            if (tmpAssignerIdAssigneeIdMap == null) {
-                tmpAssignerIdAssigneeIdMap = new HashMap<>();
-                tmpAssignerIdAssigneeIdMap.put(newTaskAssignment.getAssignerId(), newTaskAssignment.getAssigneeId());
+            tmpAssignerIdAssigneeIdListMap =
+                    taskIdAssignerIdAssigneeIdListMapMap.get(newTaskAssignment.getTaskId());
 
-                taskIdAssignerIdAssigneeIdMapMap.put(newTaskAssignment.getTaskId(), tmpAssignerIdAssigneeIdMap;
+            if (tmpAssignerIdAssigneeIdListMap == null) {
+                tmpAssignerIdAssigneeIdListMap = new HashMap<>();
+
+                tmpAssignerIdAssigneeIdListMap.put(
+                        newTaskAssignment.getAssignerId(),
+                        new ArrayList<>(Collections.singletonList(newTaskAssignment.getAssigneeId())));
+
+                taskIdAssignerIdAssigneeIdListMapMap.put(
+                        newTaskAssignment.getTaskId(),
+                        tmpAssignerIdAssigneeIdListMap);
             } else {
-                if (tmpAssignerIdAssigneeIdMap.get(newTaskAssignment.getManagerId())) {
+                tmpAssigneeIdList =
+                        tmpAssignerIdAssigneeIdListMap.get(newTaskAssignment.getAssignerId());
+
+                if (tmpAssigneeIdList.contains(newTaskAssignment.getAssigneeId())) {
                     isDuplicated = true;
-                    errorMsg.append("Duplicate TaskAssignment relationship between with Project with Id: ")
-                            .append(newTaskAssignment.getProjectId())
-                            .append(" and User with Id: ")
-                            .append(newTaskAssignment.getManagerId()).append(". ");
+
+                    errorMsg.append("Duplicate TaskAssignment relationship between with Task with Id: ")
+                            .append(newTaskAssignment.getTaskId())
+                            .append(" and User (Assigner) with Id: ")
+                            .append(newTaskAssignment.getAssignerId())
+                            .append(" and User (Assignee) with Id: ")
+                            .append(newTaskAssignment.getAssigneeId()).append(". ");
                 } else {
-                    tmpAssignerIdAssigneeIdMap.add(newTaskAssignment.getManagerId());
-                    taskIdAssignerIdAssigneeIdMapMap.put(newTaskAssignment.getProjectId(), tmpAssignerIdAssigneeIdMap);
+                    tmpAssigneeIdList.add(newTaskAssignment.getAssigneeId());
+
+                    tmpAssignerIdAssigneeIdListMap.put(
+                            newTaskAssignment.getAssignerId(),
+                            tmpAssigneeIdList);
+
+                    taskIdAssignerIdAssigneeIdListMapMap.put(
+                            newTaskAssignment.getTaskId(),
+                            tmpAssignerIdAssigneeIdListMap);
                 }
             }
         }
 
-
         /* Check FK */
-        if (!projectService.existsAllByIdIn(taskIdSet)) {
-            errorMsg.append("1 or more Project not found with Id. Which violate constraint: FK_TaskAssignment_Project. ");
+        if (!taskService.existsAllByIdIn(taskIdSet)) {
+            errorMsg.append("1 or more Task not found with Id. Which violate constraint: FK_TaskAssignment_Task. ");
         }
 
         if (!userService.existsAllByIdIn(assignerIdSet)) {
-            errorMsg.append("1 or more User not found with Id. Which violate constraint: FK_TaskAssignment_User. ");
+            errorMsg.append("1 or more User (Assigner) not found with Id. Which violate constraint: FK_TaskAssignment_User_AssignerId. ");
+        }
+
+        if (!userService.existsAllByIdIn(assigneeIdSet)) {
+            errorMsg.append("1 or more User (Assignee) not found with Id. Which violate constraint: FK_TaskAssignment_User_AssigneeId. ");
         }
 
         /* Already has duplicated within input, no need to check with DB */
@@ -127,13 +155,16 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
             for (TaskAssignment newTaskAssignment : newTaskAssignmentList) {
                 /* TODO: bulk check instead of loop */
                 if (taskAssignmentRepository
-                        .existsByProjectIdAndManagerIdAndIsDeletedIsFalse(
-                                newTaskAssignment.getProjectId(),
-                                newTaskAssignment.getManagerId())) {
-                    errorMsg.append("Already exists another TaskAssignment relationship between with Project with Id: ")
-                            .append(newTaskAssignment.getProjectId())
-                            .append(" and User with Id: ")
-                            .append(newTaskAssignment.getManagerId()).append(". ");
+                        .existsByTaskIdAndAssignerIdAndAssigneeIdAndIsDeletedIsFalse(
+                                newTaskAssignment.getTaskId(),
+                                newTaskAssignment.getAssignerId(),
+                                newTaskAssignment.getAssigneeId())) {
+                    errorMsg.append("Already exists another TaskAssignment relationship between with Task with Id: ")
+                            .append(newTaskAssignment.getTaskId())
+                            .append(" and User (Assigner) with Id: ")
+                            .append(newTaskAssignment.getAssignerId())
+                            .append(" and User (Assignee) with Id: ")
+                            .append(newTaskAssignment.getAssigneeId()).append(". ");
                 }
             }
         }
@@ -222,17 +253,218 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     /* UPDATE */
     @Override
     public TaskAssignment updateTaskAssignment(TaskAssignment updatedTaskAssignment) throws Exception {
-        return null;
-    }
+        TaskAssignment oldTaskAssignment = getById(updatedTaskAssignment.getAssignmentId());
 
+        if (oldTaskAssignment == null) {
+            return null;
+        }
+
+        String errorMsg = "";
+
+        /* Check FK (if changed) */
+        if (!oldTaskAssignment.getTaskId().equals(updatedTaskAssignment.getTaskId())) {
+            if (!taskService.existsById(updatedTaskAssignment.getTaskId())) {
+                errorMsg += "No Task found with Id: " + updatedTaskAssignment.getTaskId()
+                        + "Which violate constraint: FK_TaskAssignment_Task. ";
+            }
+        }
+
+        if (!oldTaskAssignment.getAssignerId().equals(updatedTaskAssignment.getAssignerId())) {
+            if (!userService.existsById(updatedTaskAssignment.getAssignerId())) {
+                errorMsg += "No User (Assigner) found with Id: " + updatedTaskAssignment.getAssignerId()
+                        + "Which violate constraint: FK_TaskAssignment_User_AssignerId. ";
+            }
+        }
+
+        if (!oldTaskAssignment.getAssigneeId().equals(updatedTaskAssignment.getAssigneeId())) {
+            if (!userService.existsById(updatedTaskAssignment.getAssigneeId())) {
+                errorMsg += "No User (Assignee) found with Id: " + updatedTaskAssignment.getAssigneeId()
+                        + "Which violate constraint: FK_TaskAssignment_User_AssigneeId. ";
+            }
+        }
+
+        /* Check duplicate */
+        if (taskAssignmentRepository
+                .existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndIsDeletedIsFalse(
+                        updatedTaskAssignment.getTaskId(),
+                        updatedTaskAssignment.getAssignerId(),
+                        updatedTaskAssignment.getAssigneeId(),
+                        updatedTaskAssignment.getAssignmentId())) {
+            errorMsg += "Already exists another TaskAssignment relationship between with Task with Id: "
+                    + updatedTaskAssignment.getTaskId()
+                    + " and User (Assigner) with Id: "
+                    + updatedTaskAssignment.getAssignerId()
+                    + " and User (Assignee) with Id: "
+                    + updatedTaskAssignment.getAssigneeId() + ". ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        return taskAssignmentRepository.saveAndFlush(updatedTaskAssignment);
+    }
     @Override
     public TaskAssignmentReadDTO updateTaskAssignmentByDTO(TaskAssignmentUpdateDTO updatedTaskAssignmentDTO) throws Exception {
-        return null;
+        modelMapper.typeMap(TaskAssignmentUpdateDTO.class, TaskAssignment.class)
+                .addMappings(taskAssignmentUpdateDTO -> {
+                    taskAssignmentUpdateDTO.skip(TaskAssignment::setAssignDate);
+                    taskAssignmentUpdateDTO.skip(TaskAssignment::setRemoveDate);});
+
+        TaskAssignment updatedTaskAssignment = modelMapper.map(updatedTaskAssignmentDTO, TaskAssignment.class);
+
+        updatedTaskAssignment.setAssignDate(
+                LocalDateTime.parse(updatedTaskAssignmentDTO.getAssignDate(), dateTimeFormatter));
+        updatedTaskAssignment.setRemoveDate(
+                LocalDateTime.parse(updatedTaskAssignmentDTO.getRemoveDate(), dateTimeFormatter));
+
+        updatedTaskAssignment = updateTaskAssignment(updatedTaskAssignment);
+
+        if (updatedTaskAssignment == null) {
+            return null;
+        }
+
+        TaskAssignmentReadDTO taskAssignmentDTO =
+                modelMapper.map(updatedTaskAssignment, TaskAssignmentReadDTO.class);
+
+        /* Get associated User (Assigner) */
+        taskAssignmentDTO.setAssigner(userService.getDTOById(updatedTaskAssignment.getAssignerId()));
+
+        /* Get associated User (Assignee) */
+        taskAssignmentDTO.setAssignee(userService.getDTOById(updatedTaskAssignment.getAssigneeId()));
+
+        return taskAssignmentDTO;
     }
 
     @Override
     public List<TaskAssignment> updateBulkTaskAssignment(List<TaskAssignment> updatedTaskAssignmentList) throws Exception {
-        return null;
+        StringBuilder errorMsg = new StringBuilder();
+
+        Map<Long, Map<Long, List<Long>>> taskIdAssignerIdAssigneeIdListMapMap = new HashMap<>();
+        Set<Long> assignmentIdSet = new HashSet<>();
+        Set<Long> oldTaskIdSet = new HashSet<>();
+        Set<Long> oldAssignerIdSet = new HashSet<>();
+        Set<Long> oldAssigneeIdSet = new HashSet<>();
+        Set<Long> updatedTaskIdSet = new HashSet<>();
+        Set<Long> updatedAssignerIdSet = new HashSet<>();
+        Set<Long> updatedAssigneeIdSet = new HashSet<>();
+        Map<Long, List<Long>> tmpAssignerIdAssigneeIdListMap;
+        List<Long> tmpAssigneeIdList;
+        boolean isDuplicated = false;
+
+        for (TaskAssignment updatedTaskAssignment : updatedTaskAssignmentList) {
+            assignmentIdSet.add(updatedTaskAssignment.getAssignmentId());
+
+            updatedTaskIdSet.add(updatedTaskAssignment.getTaskId());
+            updatedAssignerIdSet.add(updatedTaskAssignment.getAssignerId());
+            updatedAssigneeIdSet.add(updatedTaskAssignment.getAssigneeId());
+
+            /* Check duplicate 1 (within input) */
+            tmpAssignerIdAssigneeIdListMap =
+                    taskIdAssignerIdAssigneeIdListMapMap.get(updatedTaskAssignment.getTaskId());
+
+            if (tmpAssignerIdAssigneeIdListMap == null) {
+                tmpAssignerIdAssigneeIdListMap = new HashMap<>();
+
+                tmpAssignerIdAssigneeIdListMap.put(
+                        updatedTaskAssignment.getAssignerId(),
+                        new ArrayList<>(Collections.singletonList(updatedTaskAssignment.getAssigneeId())));
+
+                taskIdAssignerIdAssigneeIdListMapMap.put(
+                        updatedTaskAssignment.getTaskId(),
+                        tmpAssignerIdAssigneeIdListMap);
+            } else {
+                tmpAssigneeIdList =
+                        tmpAssignerIdAssigneeIdListMap.get(updatedTaskAssignment.getAssignerId());
+
+                if (tmpAssigneeIdList.contains(updatedTaskAssignment.getAssigneeId())) {
+                    isDuplicated = true;
+
+                    errorMsg.append("Duplicate TaskAssignment relationship between with Task with Id: ")
+                            .append(updatedTaskAssignment.getTaskId())
+                            .append(" and User (Assigner) with Id: ")
+                            .append(updatedTaskAssignment.getAssignerId())
+                            .append(" and User (Assignee) with Id: ")
+                            .append(updatedTaskAssignment.getAssigneeId()).append(". ");
+                } else {
+                    tmpAssigneeIdList.add(updatedTaskAssignment.getAssigneeId());
+
+                    tmpAssignerIdAssigneeIdListMap.put(
+                            updatedTaskAssignment.getAssignerId(),
+                            tmpAssigneeIdList);
+
+                    taskIdAssignerIdAssigneeIdListMapMap.put(
+                            updatedTaskAssignment.getTaskId(),
+                            tmpAssignerIdAssigneeIdListMap);
+                }
+            }
+        }
+
+        List<TaskAssignment> oldTaskAssignmentList = getAllByIdIn(assignmentIdSet);
+
+        if (oldTaskAssignmentList == null) {
+            return null;
+        }
+
+        for (TaskAssignment oldTaskAssignment : oldTaskAssignmentList) {
+            oldTaskIdSet.add(oldTaskAssignment.getTaskId());
+            oldAssignerIdSet.add(oldTaskAssignment.getAssignerId());
+            oldAssigneeIdSet.add(oldTaskAssignment.getAssigneeId());
+        }
+
+        /* Remove all unchanged taskId & assignerId & assigneeId */
+        updatedTaskIdSet.removeAll(oldTaskIdSet);
+        updatedAssignerIdSet.removeAll(oldAssignerIdSet);
+        updatedAssigneeIdSet.removeAll(oldAssigneeIdSet);
+
+        /* Check FK (if changed) */
+        /* If there are updated taskId, need to recheck FK */
+        if (!updatedTaskIdSet.isEmpty()) {
+            if (!taskService.existsAllByIdIn(updatedTaskIdSet)) {
+                errorMsg.append("1 or more Task not found with Id. Which violate constraint: FK_TaskAssignment_Task. ");
+            }
+        }
+
+        /* If there are updated assignerId, need to recheck FK */
+        if (!updatedAssignerIdSet.isEmpty()) {
+            if (!userService.existsAllByIdIn(updatedAssignerIdSet)) {
+                errorMsg.append("1 or more User (Assigner) not found with Id. Which violate constraint: FK_TaskAssignment_User_AssignerId. ");
+            }
+        }
+
+        /* If there are updated assigneeId, need to recheck FK */
+        if (!updatedAssigneeIdSet.isEmpty()) {
+            if (!userService.existsAllByIdIn(updatedAssigneeIdSet)) {
+                errorMsg.append("1 or more User (Assignee) not found with Id. Which violate constraint: FK_TaskAssignment_User_AssigneeId. ");
+            }
+        }
+
+        /* Already has duplicated within input, no need to check with DB */
+        if (!isDuplicated) {
+            /* Check duplicate 2 (in DB) */
+            for (TaskAssignment updatedTaskAssignment : updatedTaskAssignmentList) {
+                /* TODO: bulk check instead of loop */
+                if (taskAssignmentRepository
+                        .existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndIsDeletedIsFalse(
+                                updatedTaskAssignment.getTaskId(),
+                                updatedTaskAssignment.getAssignerId(),
+                                updatedTaskAssignment.getAssigneeId(),
+                                updatedTaskAssignment.getAssignmentId())) {
+                    errorMsg.append("Already exists another TaskAssignment relationship between with Task with Id: ")
+                            .append(updatedTaskAssignment.getTaskId())
+                            .append(" and User (Assigner) with Id: ")
+                            .append(updatedTaskAssignment.getAssignerId())
+                            .append(" and User (Assignee) with Id: ")
+                            .append(updatedTaskAssignment.getAssigneeId()).append(". ");
+                }
+            }
+        }
+
+        if (!errorMsg.toString().trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg.toString());
+        }
+
+        return taskAssignmentRepository.saveAllAndFlush(updatedTaskAssignmentList);
     }
 
     /* DELETE */

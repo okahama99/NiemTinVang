@@ -308,11 +308,11 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             oldManagerIdSet.add(oldProjectManager.getManagerId());
         }
 
-        /* Remove all unchanged reportId & taskId */
+        /* Remove all unchanged projectId & managerId */
         updatedProjectIdSet.removeAll(oldProjectIdSet);
         updatedManagerIdSet.removeAll(oldManagerIdSet);
 
-        /* Check FK */
+        /* Check FK (if changed) */
         /* If there are updated projectId, need to recheck FK */
         if (!updatedProjectIdSet.isEmpty()) {
             if (!projectService.existsAllByIdIn(updatedProjectIdSet)) {

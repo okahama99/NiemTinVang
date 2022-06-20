@@ -6,6 +6,8 @@ import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Task;
 import com.ntv.ntvcons_backend.repositories.TaskRepository;
+import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
+import com.ntv.ntvcons_backend.services.taskReport.TaskReportService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,10 @@ public class TaskServiceImpl implements TaskService{
     private TaskRepository taskRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private TaskReportService taskReportService;
+    @Autowired
+    private TaskAssignmentService taskAssignmentService;
 
     /* CREATE */
     @Override
@@ -447,6 +453,12 @@ public class TaskServiceImpl implements TaskService{
         }
 
         /* TODO: also delete EntityWrapper for task */
+
+        /* Delete all associated taskReport */
+        taskReportService.deleteAllByTaskId(taskId);
+
+        /* Delete all associated taskAssignment */
+        taskAssignmentService.deleteAllByTaskId(taskId);
 
         task.setIsDeleted(true);
         taskRepository.saveAndFlush(task);

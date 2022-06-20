@@ -1,13 +1,12 @@
 package com.ntv.ntvcons_backend.dtos.taskAssignment;
 
-import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.minidev.json.annotate.JsonIgnore;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -17,9 +16,11 @@ public class TaskAssignmentUpdateDTO implements Serializable {
     private Long taskId;
     private Long assignerId;
     private Long assigneeId;
-    private LocalDateTime assignDate;
-    private LocalDateTime removeDate;
+    /** yyyy-MM-dd HH:mm */
+    private String assignDate;
+    private String removeDate;
 
-    @JsonIgnore
+    @JsonIgnore /* No serialize/deserialize */
+    @ApiModelProperty(hidden = true) /* No show on swagger */
     private final Boolean isDeleted = false;
 }
