@@ -11,6 +11,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.time.format.DateTimeFormatter;
+
 
 @SpringBootApplication
 @EnableJpaAuditing
@@ -20,8 +22,14 @@ public class NtvConsBackendApplication {
 	@Bean
 	public ModelMapper modelMapper() {
 		ModelMapper modelMapper = new ModelMapper();
-		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-		return modelMapper ;
+		modelMapper.getConfiguration()
+				.setMatchingStrategy(MatchingStrategies.STRICT);
+		return modelMapper;
+	}
+
+	@Bean
+	public DateTimeFormatter dateTimeFormatter() {
+		return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 	}
 
 	public static void main(String[] args) {

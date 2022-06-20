@@ -37,22 +37,18 @@ import java.util.*;
 public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private ProjectRepository projectRepository;
-
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Autowired
     private LocationService locationService;
-
     @Autowired
     private LocationRepository locationRepository;
-
     @Autowired
     private BlueprintService blueprintService;
-
     @Autowired
     private BlueprintRepository blueprintRepository;
-
     @Autowired
     private ProjectManagerService projectManagerService;
-
     @Autowired
     private UserRepository userRepository;
 
@@ -84,11 +80,16 @@ public class ProjectServiceImpl implements ProjectService{
                 Project project = new Project();
                 project.setProjectName(createProjectModel.getProjectName());
                 project.setLocationId(location.getLocationId());
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm");
-                project.setPlanStartDate(LocalDateTime.parse(createProjectModel.getPlanStartDate(),formatter));
-                project.setPlanEndDate(LocalDateTime.parse(createProjectModel.getPlanEndDate(),formatter));
-                project.setActualStartDate(LocalDateTime.parse(createProjectModel.getActualStartDate(),formatter));
-                project.setActualEndDate(LocalDateTime.parse(createProjectModel.getActualEndDate(),formatter));
+
+                project.setPlanStartDate(
+                        LocalDateTime.parse(createProjectModel.getPlanStartDate(),dateTimeFormatter));
+                project.setPlanEndDate(
+                        LocalDateTime.parse(createProjectModel.getPlanEndDate(),dateTimeFormatter));
+                project.setActualStartDate(
+                        LocalDateTime.parse(createProjectModel.getActualStartDate(),dateTimeFormatter));
+                project.setActualEndDate(
+                        LocalDateTime.parse(createProjectModel.getActualEndDate(),dateTimeFormatter));
+
                 project.setActualCost(createProjectModel.getProjectActualCost());
                 project.setEstimatedCost(createProjectModel.getProjectEstimateCost());
                 projectRepository.saveAndFlush(project);
@@ -158,7 +159,7 @@ public class ProjectServiceImpl implements ProjectService{
                         model.setCoordinate(null);
                     }
 
-                    /* Vì đỏi FK Blue print nên tạm bỏ qua*/
+                    /* Vì đỏi FK Blueprint nên tạm bỏ qua*/
 
                     model.setCreatedAt(project.getCreatedAt());
                     model.setCreatedBy(project.getCreatedBy());
@@ -318,12 +319,15 @@ public class ProjectServiceImpl implements ProjectService{
                 project.setProjectName(updateProjectModel.getProjectName());
                 project.setLocationId(updateProjectModel.getLocationId());
 
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm");
 
-                project.setPlanStartDate(LocalDateTime.parse(updateProjectModel.getPlanStartDate(),formatter));
-                project.setPlanEndDate(LocalDateTime.parse(updateProjectModel.getPlanEndDate(),formatter));
-                project.setActualStartDate(LocalDateTime.parse(updateProjectModel.getActualStartDate(),formatter));
-                project.setActualEndDate(LocalDateTime.parse(updateProjectModel.getActualEndDate(),formatter));
+                project.setPlanStartDate(
+                        LocalDateTime.parse(updateProjectModel.getPlanStartDate(),dateTimeFormatter));
+                project.setPlanEndDate(
+                        LocalDateTime.parse(updateProjectModel.getPlanEndDate(),dateTimeFormatter));
+                project.setActualStartDate(
+                        LocalDateTime.parse(updateProjectModel.getActualStartDate(),dateTimeFormatter));
+                project.setActualEndDate(
+                        LocalDateTime.parse(updateProjectModel.getActualEndDate(),dateTimeFormatter));
 
                 project.setActualCost(updateProjectModel.getActualCost());
                 project.setEstimatedCost(updateProjectModel.getEstimateCost());

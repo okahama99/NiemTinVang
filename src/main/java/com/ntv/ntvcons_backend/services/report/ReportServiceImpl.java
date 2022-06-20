@@ -28,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,8 @@ public class ReportServiceImpl implements ReportService {
     private ReportRepository reportRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private ProjectService projectService;
@@ -81,7 +84,12 @@ public class ReportServiceImpl implements ReportService {
     }
     @Override
     public ReportReadDTO createReportByDTO(ReportCreateDTO newReportDTO) throws Exception {
+        modelMapper.typeMap(ReportCreateDTO.class, Report.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Report::setReportDate);});
+
         Report newReport = modelMapper.map(newReportDTO, Report.class);
+        newReport.setReportDate(LocalDateTime.parse(newReportDTO.getReportDate(), dateTimeFormatter));
 
         newReport = createReport(newReport);
 
@@ -579,7 +587,14 @@ public class ReportServiceImpl implements ReportService {
     }
     @Override
     public ReportReadDTO updateReportByDTO(ReportUpdateDTO updatedReportDTO) throws Exception {
+        modelMapper.typeMap(ReportUpdateDTO.class, Report.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Report::setReportDate);});
+
         Report updatedReport = modelMapper.map(updatedReportDTO, Report.class);
+
+        updatedReport.setReportDate(
+                LocalDateTime.parse(updatedReportDTO.getReportDate(), dateTimeFormatter));
 
         updatedReport = updateReport(updatedReport);
 
@@ -676,5 +691,4 @@ public class ReportServiceImpl implements ReportService {
 
         return true;
     }
-
 }
