@@ -16,6 +16,8 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
         Location getByAddressNumberAndIsDeletedIsFalse (String addressNumber);
 
+        Location getByCoordinateAndIsDeletedIsFalse (String addressNumber);
+
         /* Id */
         Optional<Location> findByLocationIdAndIsDeletedIsFalse(long locationId);
         List<Location> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Long> locationIdCollection);

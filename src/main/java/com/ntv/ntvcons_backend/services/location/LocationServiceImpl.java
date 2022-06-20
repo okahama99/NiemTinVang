@@ -173,4 +173,14 @@ public class LocationServiceImpl implements LocationService {
         }
         return result;
     }
+
+    @Override
+    public boolean checkCoordinate(String coordinate) {
+        Location checkDuplicateLocation = locationRepository.getByCoordinateAndIsDeletedIsFalse(coordinate);
+        if(checkDuplicateLocation != null)
+        {
+            return true;
+        }
+        return false;
+    }
 }

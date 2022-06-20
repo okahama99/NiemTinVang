@@ -5,6 +5,7 @@ import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
+import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -18,7 +19,10 @@ import java.util.List;
 @RequestMapping("/Project")
 public class ProjectController {
     @Autowired
-    private ProjectService projectService;
+    ProjectService projectService;
+
+    @Autowired
+    LocationService locationService;
     
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -28,12 +32,17 @@ public class ProjectController {
         if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
             return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
         } else {
-            boolean result = projectService.createProject(createProjectModel);
+            if(!locationService.checkCoordinate(createProjectModel.getCoordinate()))
+            {
+                boolean result = projectService.createProject(createProjectModel);
 
-            if (result) {
-                return ResponseEntity.ok().body("Tạo thành công.");
+                if (result) {
+                    return ResponseEntity.ok().body("Tạo thành công.");
+                }
+                return ResponseEntity.badRequest().body("Tạo thất bại.");
+            }else{
+                return ResponseEntity.badRequest().body("Coordinate đã tồn tại.");
             }
-            return ResponseEntity.badRequest().body("Tạo thất bại.");
         }
     }
 

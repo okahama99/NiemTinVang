@@ -20,9 +20,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +42,9 @@ public class RequestServiceImpl implements RequestService{
     @Autowired
     private RequestTypeRepository requestTypeRepository;
 
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
+
     @Override
     public boolean createRequest(CreateRequestModel createRequestModel) {
         Request request = new Request();
@@ -50,10 +52,10 @@ public class RequestServiceImpl implements RequestService{
         request.setRequesterId(createRequestModel.getRequesterId());
         request.setRequestTypeId(createRequestModel.getRequestTypeId());
         request.setRequestDesc(createRequestModel.getRequestDesc());
-        Instant instant = createRequestModel.getRequestDate().toInstant(ZoneOffset.UTC);
-        request.setCreatedAt(Date.from(instant));
+        ZonedDateTime zdt = (LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter)).atZone(ZoneId.systemDefault());
+        request.setCreatedAt(Date.from(zdt.toInstant()));
         request.setCreatedBy(createRequestModel.getRequesterId());
-        request.setRequestDate(createRequestModel.getRequestDate());
+        request.setRequestDate(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
         requestRepository.saveAndFlush(request);
         return true;
     }
@@ -76,14 +78,14 @@ public class RequestServiceImpl implements RequestService{
 
                         @Override
                         protected ShowRequestModel doForward(Request request) {
+                            ShowRequestModel model = new ShowRequestModel();
                             Optional<Project> project = projectRepository.findById(request.getProjectId());
                             Optional<User> requester = userRepository.findById(request.getRequesterId());
-                            Optional<User> verifier = userRepository.findById(request.getVerifierId());
+
                             Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
-                            ShowRequestModel model = new ShowRequestModel();
+
                             model.setRequestId(request.getRequestId());
                             model.setProjectId(request.getProjectId());
-
                             if(project.isPresent()){
                                 model.setProjectName(project.get().getProjectName());
                             }else{
@@ -107,13 +109,19 @@ public class RequestServiceImpl implements RequestService{
                             model.setRequestDate(request.getRequestDate());
                             model.setRequestDesc(request.getRequestDesc());
 
-                            model.setVerifierId(request.getVerifierId());
-                            if(verifier.isPresent()){
-                                model.setVerifierName(verifier.get().getUsername());
+                            if(request.getVerifierId() !=null)
+                            {
+                                model.setVerifierId(request.getVerifierId());
+                                Optional<User> verifier = userRepository.findById(request.getVerifierId());
+                                if(verifier.isPresent()){
+                                    model.setVerifierName(verifier.get().getUsername());
+                                }else{
+                                    model.setVerifierName(null);
+                                }
                             }else{
-                                model.setVerifierName(null);
+                                model.setVerifierId(null);
+                                model.setVerifierName("");
                             }
-
                             model.setVerifyDate(request.getVerifyDate());
                             model.setVerifyNote(request.getVerifyNote());
                             model.setIsVerified(request.getIsVerified());

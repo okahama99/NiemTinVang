@@ -10,5 +10,5 @@ import java.time.LocalDateTime;
 public class CreateRequestModel {
     private Long projectId, requesterId, requestTypeId;
     private String requestDesc;
-    private LocalDateTime requestDate;
+    private String requestDate;
 }

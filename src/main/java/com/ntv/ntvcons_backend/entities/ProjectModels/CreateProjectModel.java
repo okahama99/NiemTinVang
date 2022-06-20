@@ -15,7 +15,11 @@ public class CreateProjectModel {
     //private LocalDateTime planStartDate,planEndDate,actualStartDate,actualEndDate;
     private String planStartDate,planEndDate,actualStartDate,actualEndDate; // đổi qua String để FE đẩy data xuống
     private Double projectEstimateCost, projectActualCost;
-    private String designerName, projectBlueprintName;
-    private Double blueprintEstimateCost;
+    private String designerName;
     private String addressNumber, street, area, ward, district, city, province, country, coordinate;
+
+    // TODO
+    // mở blueprint thì chỉnh lại
+    // private String projectBlueprintName;
+    // private Double blueprintEstimateCost;
 }
