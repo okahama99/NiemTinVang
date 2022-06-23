@@ -22,12 +22,16 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     boolean existsAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
     List<Project> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
     Page<Project> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable pageable);
+    /* Id & projectName */
+    boolean existsByProjectNameAndProjectIdIsNotAndIsDeletedIsFalse(String projectName, long projectId);
 
 
     /* projectName */
     Optional<Project> findByProjectNameAndIsDeletedIsFalse(String projectName);
     Project getByProjectNameAndIsDeletedIsFalse(String projectName); /* Redundant, use above with .orElse() */
     List<Project> findAllByProjectNameContainsAndIsDeletedIsFalse(String projectName);
+    /* projectName */
+    boolean existsByProjectNameAndIsDeletedIsFalse(String projectName);
 
 
     /* locationId */

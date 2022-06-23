@@ -39,12 +39,12 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         /* Check FK */
         if (!projectService.existsById(newProjectManager.getProjectId())) {
             errorMsg += "No Project found with Id: " + newProjectManager.getProjectId()
-                    + "Which violate constraint: FK_ProjectManager_Project. ";
+                    + ". Which violate constraint: FK_ProjectManager_Project. ";
         }
 
         if (!userService.existsById(newProjectManager.getManagerId())) {
             errorMsg += "No User found with Id: " + newProjectManager.getManagerId()
-                    + "Which violate constraint: FK_ProjectManager_User. ";
+                    + ". Which violate constraint: FK_ProjectManager_User. ";
         }
 
         /* Check duplicate */
@@ -211,14 +211,14 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         if (!oldProjectManager.getProjectId().equals(updatedProjectManager.getProjectId())) {
             if (!projectService.existsById(updatedProjectManager.getProjectId())) {
                 errorMsg += "No Project found with Id: " + updatedProjectManager.getProjectId()
-                        + "Which violate constraint: FK_ProjectManager_Project. ";
+                        + ". Which violate constraint: FK_ProjectManager_Project. ";
             }
         }
 
         if (!oldProjectManager.getManagerId().equals(updatedProjectManager.getManagerId())) {
             if (!userService.existsById(updatedProjectManager.getManagerId())) {
                 errorMsg += "No User found with Id: " + updatedProjectManager.getManagerId()
-                        + "Which violate constraint: FK_ProjectManager_User. ";
+                        + ". Which violate constraint: FK_ProjectManager_User. ";
             }
         }
 

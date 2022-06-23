@@ -21,6 +21,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByTaskIdAndIsDeletedIsFalse(long taskId);
     boolean existsAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
     List<Task> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
+    /* Id & projectId & taskName */
+    /** Check duplicate projectId & taskName for update */
+    boolean existsByProjectIdAndTaskNameAndTaskIdIsNotAndIsDeletedIsFalse(long projectId, String taskName, long taskId);
 
 
     /* projectId */
@@ -31,6 +34,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     /* taskName */
     Optional<Task> findByTaskNameAndIsDeletedIsFalse(String taskName);
     List<Task> findAllByTaskNameContainsAndIsDeletedIsFalse(String taskName);
+    /* projectId & taskName */
+    boolean existsByProjectIdAndTaskNameAndIsDeletedIsFalse(long projectId, String taskName);
 
 
     /* planStartDate */

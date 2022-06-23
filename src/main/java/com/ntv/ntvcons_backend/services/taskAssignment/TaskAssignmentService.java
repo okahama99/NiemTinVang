@@ -20,7 +20,9 @@ public interface TaskAssignmentService {
 
     List<TaskAssignment> getAllByIdIn(Collection<Long> taskAssignmentIdCollection) throws Exception;
 
-    List<TaskAssignment> getAllByTaskId(long taskId) throws Exception;
+    /** Task 1 - 1 TaskAssignment */
+    TaskAssignment getByTaskId(long taskId) throws Exception;
+    TaskAssignmentReadDTO getDTOByTaskId(long taskId) throws Exception;
 
     List<TaskAssignment> getAllByAssignerId(long assignerId) throws Exception;
 
@@ -39,5 +41,5 @@ public interface TaskAssignmentService {
     boolean deleteAllByUserId(long userId) throws Exception;
 
     /** Cascade when delete Task */
-    boolean deleteAllByTaskId(long taskId) throws Exception;
+    boolean deleteByTaskId(long taskId) throws Exception;
 }

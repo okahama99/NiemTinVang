@@ -20,14 +20,14 @@ public class Blueprint extends BaseEntity {
     @Column(name = "blueprintId", nullable = false)
     private Long blueprintId;
 
-    @Column(name = "designerName", nullable = false)
-    private String designerName;
+    @Column(name = "blueprintName", nullable = false, length = 100)
+    private String blueprintName;
 
     @Column(name = "projectId", nullable = false)
     private Long projectId; //reverse FK connection, 1 - 1 connection
 
-    @Column(name = "blueprintName", nullable = false, length = 100)
-    private String blueprintName;
+    @Column(name = "designerName", nullable = false)
+    private String designerName;
 
     @Column(name = "estimatedCost", nullable = false)
     private Double estimatedCost;

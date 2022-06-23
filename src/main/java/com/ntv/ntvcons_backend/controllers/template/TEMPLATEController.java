@@ -1,18 +1,7 @@
 package com.ntv.ntvcons_backend.controllers.template;
 
-import com.ntv.ntvcons_backend.constants.SearchType;
-import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-//import com.ntv.ntvcons_backend.dtos.temPlate.TEMPLATECreateDTO;
-//import com.ntv.ntvcons_backend.dtos.temPlate.TEMPLATEReadDTO;
-//import com.ntv.ntvcons_backend.dtos.temPlate.TEMPLATEUpdateDTO;
-//import com.ntv.ntvcons_backend.services.temPlate.TEMPLATEService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mapping.PropertyReferenceException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/temPlate")

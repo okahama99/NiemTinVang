@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.DateFormatter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -44,17 +43,17 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
         /* Check FK */
         if (!taskService.existsById(newTaskAssignment.getTaskId())) {
             errorMsg += "No Task found with Id: " + newTaskAssignment.getTaskId()
-                    + "Which violate constraint: FK_TaskAssignment_Task. ";
+                    + ". Which violate constraint: FK_TaskAssignment_Task. ";
         }
 
         if (!userService.existsById(newTaskAssignment.getAssignerId())) {
             errorMsg += "No User (Assigner) found with Id: " + newTaskAssignment.getAssignerId()
-                    + "Which violate constraint: FK_TaskAssignment_User_AssignerId. ";
+                    + ". Which violate constraint: FK_TaskAssignment_User_AssignerId. ";
         }
 
         if (!userService.existsById(newTaskAssignment.getAssigneeId())) {
             errorMsg += "No User (Assignee) found with Id: " + newTaskAssignment.getAssigneeId()
-                    + "Which violate constraint: FK_TaskAssignment_User_AssigneeId. ";
+                    + ". Which violate constraint: FK_TaskAssignment_User_AssigneeId. ";
         }
 
         /* Check duplicate */
@@ -215,15 +214,29 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     }
 
     @Override
-    public List<TaskAssignment> getAllByTaskId(long taskId) throws Exception {
-        List<TaskAssignment> taskAssignmentList =
-                taskAssignmentRepository.findAllByTaskIdAndIsDeletedIsFalse(taskId);
+    public TaskAssignment getByTaskId(long taskId) throws Exception {
+        return taskAssignmentRepository
+                .findByTaskIdAndIsDeletedIsFalse(taskId)
+                .orElse(null);
+    }
+    @Override
+    public TaskAssignmentReadDTO getDTOByTaskId(long taskId) throws Exception {
+        TaskAssignment taskAssignment = getByTaskId(taskId);
 
-        if (!taskAssignmentList.isEmpty()) {
+        if (taskAssignment == null) {
             return null;
         }
 
-        return taskAssignmentList;
+        TaskAssignmentReadDTO taskAssignmentDTO =
+                modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
+
+        /* Get associated User (Assigner) */
+        taskAssignmentDTO.setAssigner(userService.getDTOById(taskAssignment.getAssignerId()));
+
+        /* Get associated User (Assignee) */
+        taskAssignmentDTO.setAssignee(userService.getDTOById(taskAssignment.getAssigneeId()));
+
+        return taskAssignmentDTO;
     }
 
     @Override
@@ -265,21 +278,21 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
         if (!oldTaskAssignment.getTaskId().equals(updatedTaskAssignment.getTaskId())) {
             if (!taskService.existsById(updatedTaskAssignment.getTaskId())) {
                 errorMsg += "No Task found with Id: " + updatedTaskAssignment.getTaskId()
-                        + "Which violate constraint: FK_TaskAssignment_Task. ";
+                        + ". Which violate constraint: FK_TaskAssignment_Task. ";
             }
         }
 
         if (!oldTaskAssignment.getAssignerId().equals(updatedTaskAssignment.getAssignerId())) {
             if (!userService.existsById(updatedTaskAssignment.getAssignerId())) {
                 errorMsg += "No User (Assigner) found with Id: " + updatedTaskAssignment.getAssignerId()
-                        + "Which violate constraint: FK_TaskAssignment_User_AssignerId. ";
+                        + ". Which violate constraint: FK_TaskAssignment_User_AssignerId. ";
             }
         }
 
         if (!oldTaskAssignment.getAssigneeId().equals(updatedTaskAssignment.getAssigneeId())) {
             if (!userService.existsById(updatedTaskAssignment.getAssigneeId())) {
                 errorMsg += "No User (Assignee) found with Id: " + updatedTaskAssignment.getAssigneeId()
-                        + "Which violate constraint: FK_TaskAssignment_User_AssigneeId. ";
+                        + ". Which violate constraint: FK_TaskAssignment_User_AssigneeId. ";
             }
         }
 
@@ -505,19 +518,15 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     }
 
     @Override
-    public boolean deleteAllByTaskId(long taskId) throws Exception {
-        List<TaskAssignment> taskAssignmentList = getAllByTaskId(taskId);
+    public boolean deleteByTaskId(long taskId) throws Exception {
+        TaskAssignment taskAssignment = getByTaskId(taskId);
 
-        if (taskAssignmentList == null) {
+        if (taskAssignment == null) {
             return false;
         }
 
-        taskAssignmentList =
-                taskAssignmentList.stream()
-                        .peek(taskAssignment -> taskAssignment.setIsDeleted(true))
-                        .collect(Collectors.toList());
-
-        taskAssignmentRepository.saveAllAndFlush(taskAssignmentList);
+        taskAssignment.setIsDeleted(true);
+        taskAssignmentRepository.saveAndFlush(taskAssignment);
 
         return true;
     }

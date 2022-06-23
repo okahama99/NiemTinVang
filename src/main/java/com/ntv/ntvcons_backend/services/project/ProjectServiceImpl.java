@@ -1,16 +1,21 @@
 package com.ntv.ntvcons_backend.services.project;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
+import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
+import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
+import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
-import com.ntv.ntvcons_backend.entities.Location;
+import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
+import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
+import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
+import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
+import com.ntv.ntvcons_backend.entities.*;
 import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
-import com.ntv.ntvcons_backend.entities.Project;
-import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
-import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
 import com.ntv.ntvcons_backend.repositories.LocationRepository;
@@ -19,6 +24,12 @@ import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
+import com.ntv.ntvcons_backend.services.report.ReportService;
+import com.ntv.ntvcons_backend.services.request.RequestService;
+import com.ntv.ntvcons_backend.services.task.TaskService;
+import com.ntv.ntvcons_backend.services.user.UserService;
+import org.modelmapper.Condition;
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,9 +40,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjectServiceImpl implements ProjectService{
@@ -50,13 +61,21 @@ public class ProjectServiceImpl implements ProjectService{
     @Autowired
     private BlueprintRepository blueprintRepository;
     @Autowired
-    private ProjectManagerService projectManagerService;
+    private UserService userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ProjectManagerService projectManagerService;
+    @Autowired
+    private TaskService taskService;
+    @Autowired
+    private ReportService reportService;
+    @Autowired
+    private RequestService requestService;
 
     /* READ */
     @Override
-    public boolean createProject(CreateProjectModel createProjectModel) {
+    public boolean createProject(CreateProjectModel createProjectModel) throws Exception {
                 CreateLocationModel locationModel = new CreateLocationModel();
                 locationModel.setAddressNumber(createProjectModel.getAddressNumber());
                 locationModel.setStreet(createProjectModel.getStreet());
@@ -99,9 +118,87 @@ public class ProjectServiceImpl implements ProjectService{
         ProjectManagerCreateDTO projectManagerDTO = new ProjectManagerCreateDTO();
         projectManagerDTO.setProjectId(project.getProjectId());
         projectManagerDTO.setManagerId(createProjectModel.getUserId());
-        projectManagerDTO.setAssignDate(LocalDateTime.now());
+        projectManagerDTO.setAssignDate(LocalDateTime.now().format(dateTimeFormatter));
         projectManagerService.createProjectManager(modelMapper.map(projectManagerDTO, ProjectManager.class));
         return true;
+    }
+
+    @Override
+    public Project createProject(Project newProject) throws Exception {
+        /* TODO: also create EntityWrapper for project */
+
+        String errorMsg = "";
+
+        /* Check FK */
+        if (!userService.existsById(newProject.getCreatedBy())) {
+            errorMsg += "No User (CreatedBy) found with Id: " + newProject.getCreatedBy()
+                    + ". Which violate constraint: FK_Project_User_CreatedBy. ";
+        }
+        if (locationService.existsById(newProject.getLocationId())) {
+            /* Should not happen, Location are 1st created in createProjectByDTO before this are executed */
+            errorMsg += "No Location found with Id: " + newProject.getLocationId()
+                    + ". Which violate constraint: FK_Project_Location. ";
+        }
+
+        /* Check duplicate */
+        if (projectRepository
+                .existsByProjectNameAndIsDeletedIsFalse(
+                        newProject.getProjectName())) {
+            errorMsg += "Already exists another Project with name: " + newProject.getProjectName() + ". ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        return projectRepository.saveAndFlush(newProject);
+    }
+    @Override
+    public ProjectReadDTO createProjectByDTO(ProjectCreateDTO newProjectDTO) throws Exception {
+        modelMapper.typeMap(ProjectCreateDTO.class, Project.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Project::setPlanStartDate);
+                    mapper.skip(Project::setPlanEndDate);
+                    mapper.skip(Project::setActualStartDate);
+                    mapper.skip(Project::setActualEndDate);});
+
+        Project newProject = modelMapper.map(newProjectDTO, Project.class);
+
+        if (newProjectDTO.getPlanStartDate() != null) {
+            newProject.setPlanStartDate(
+                    LocalDateTime.parse(newProjectDTO.getPlanStartDate(), dateTimeFormatter));
+        }
+
+        if (newProjectDTO.getPlanEndDate() != null) {
+            newProject.setPlanEndDate(
+                    LocalDateTime.parse(newProjectDTO.getPlanEndDate(), dateTimeFormatter));
+        }
+
+        if (newProjectDTO.getActualStartDate() != null) {
+            newProject.setActualStartDate(
+                    LocalDateTime.parse(newProjectDTO.getActualStartDate(), dateTimeFormatter));
+        }
+
+        if (newProjectDTO.getActualEndDate() != null) {
+            newProject.setActualEndDate(
+                    LocalDateTime.parse(newProjectDTO.getActualEndDate(), dateTimeFormatter));
+        }
+
+        /* Create Location first (to get locationId) */
+        LocationReadDTO locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation());
+        newProject.setLocationId(locationDTO.getLocationId());
+
+        newProject = createProject(newProject);
+
+        ProjectReadDTO projectDTO = modelMapper.map(newProject, ProjectReadDTO.class);
+
+        /* TODO: Get associated Blueprint */
+//        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(newProject.getProjectId()));
+
+        /* Set associated Location */
+        projectDTO.setLocation(locationDTO);
+
+        return projectDTO;
     }
 
     /* READ */
@@ -345,6 +442,119 @@ public class ProjectServiceImpl implements ProjectService{
                 return true;
             }
             return false;
+    }
+
+    @Override
+    public Project updateProject(Project updatedProject) throws Exception {
+        Project oldProject = getById(updatedProject.getProjectId());
+
+        if (oldProject == null) {
+            return null;
+        }
+
+        String errorMsg = "";
+
+        /* Check FK (if changed) */
+        if (!userService.existsById(updatedProject.getUpdatedBy())) {
+            errorMsg += "No User (UpdatedBy) found with Id: " + updatedProject.getUpdatedBy()
+                    + ". Which violate constraint: FK_Project_User_UpdatedBy. ";
+        }
+        if (updatedProject.getLocationId() != null) {
+            if (!oldProject.getLocationId().equals(updatedProject.getLocationId())) {
+                if (locationService.existsById(updatedProject.getLocationId())) {
+                    /* Should not happen, location are already validated beforehand */
+                    errorMsg += "No Location found with Id: " + updatedProject.getLocationId()
+                            + ". Which violate constraint: FK_Project_Location. ";
+                }
+            }
+        } else {
+            oldProject.setLocationId(oldProject.getLocationId());
+        }
+
+        /* Check duplicate */
+        if (projectRepository
+                .existsByProjectNameAndProjectIdIsNotAndIsDeletedIsFalse(
+                        updatedProject.getProjectName(),
+                        updatedProject.getProjectId())) {
+            errorMsg += "Already exists another Project with name: " + updatedProject.getProjectName() + ". ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        return projectRepository.saveAndFlush(updatedProject);
+    }
+    @Override
+    public ProjectReadDTO updateProjectByDTO(ProjectUpdateDTO updatedProjectDTO) throws Exception {
+        modelMapper.typeMap(ProjectUpdateDTO.class, Project.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Project::setPlanStartDate);
+                    mapper.skip(Project::setPlanEndDate);
+                    mapper.skip(Project::setActualStartDate);
+                    mapper.skip(Project::setActualEndDate);});
+
+        Project updatedProject = modelMapper.map(updatedProjectDTO, Project.class);
+
+        if (updatedProjectDTO.getPlanStartDate() != null) {
+            updatedProject.setPlanStartDate(
+                    LocalDateTime.parse(updatedProjectDTO.getPlanStartDate(), dateTimeFormatter));
+        }
+
+        if (updatedProjectDTO.getPlanEndDate() != null) {
+            updatedProject.setPlanEndDate(
+                    LocalDateTime.parse(updatedProjectDTO.getPlanEndDate(), dateTimeFormatter));
+        }
+
+        if (updatedProjectDTO.getActualStartDate() != null) {
+            updatedProject.setActualStartDate(
+                    LocalDateTime.parse(updatedProjectDTO.getActualStartDate(), dateTimeFormatter));
+        }
+
+        if (updatedProjectDTO.getActualEndDate() != null) {
+            updatedProject.setActualEndDate(
+                    LocalDateTime.parse(updatedProjectDTO.getActualEndDate(), dateTimeFormatter));
+        }
+
+        /* Update Location if changed / Get associated Location  */
+        LocationReadDTO locationDTO;
+        if (updatedProjectDTO.getLocation() != null) {
+            locationDTO = locationService.updateLocationByDTO(updatedProjectDTO.getLocation());
+            if (locationDTO == null) {
+                /* Not found location with Id, NEED TO STOP */
+                throw new IllegalArgumentException("Invalid locationId, No location found with Id to update");
+            }
+
+            updatedProject.setLocationId(locationDTO.getLocationId());
+
+            updatedProject = updateProject(updatedProject);
+        } else {
+            updatedProject = updateProject(updatedProject);
+
+            locationDTO = locationService.getDTOById(updatedProject.getLocationId());
+        }
+
+        if (updatedProject == null) {
+            return null;
+            /* Not found with Id */
+        }
+
+        ProjectReadDTO projectDTO = modelMapper.map(updatedProject, ProjectReadDTO.class);
+
+        /* Set associated Location */
+        projectDTO.setLocation(locationDTO);
+
+        /* TODO: Get associated Blueprint */
+//        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(updatedProject.getProjectId()));
+
+        projectDTO.setTaskList(taskService.getAllDTOByProjectId(updatedProject.getProjectId()));
+
+        projectDTO.setReportList(reportService.getAllDTOByProjectId(updatedProject.getProjectId()));
+
+        /* TODO: Get associated Request */
+//        projectDTO.setRequestList(requestService.getDTOByProjectId(updatedProject.getProjectId()));
+
+        return projectDTO;
     }
 
     /* DELETE */

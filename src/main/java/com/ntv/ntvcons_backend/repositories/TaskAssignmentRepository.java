@@ -25,7 +25,7 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
 
 
     /* taskId */
-    List<TaskAssignment> findAllByTaskIdAndIsDeletedIsFalse(long taskId);
+    Optional<TaskAssignment> findByTaskIdAndIsDeletedIsFalse(long taskId);
     List<TaskAssignment> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
 
 

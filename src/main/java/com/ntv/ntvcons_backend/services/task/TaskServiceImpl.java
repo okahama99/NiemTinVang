@@ -6,10 +6,12 @@ import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Task;
 import com.ntv.ntvcons_backend.repositories.TaskRepository;
+import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
 import com.ntv.ntvcons_backend.services.taskReport.TaskReportService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,9 @@ public class TaskServiceImpl implements TaskService{
     private ModelMapper modelMapper;
     @Autowired
     private DateTimeFormatter dateTimeFormatter;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private ProjectService projectService;
     @Autowired
     private TaskReportService taskReportService;
     @Autowired
@@ -39,6 +44,27 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public Task createTask(Task newTask) throws Exception {
         /* TODO: also create EntityWrapper for task */
+
+        String errorMsg = "";
+
+        /* Check FK */
+        if (!projectService.existsById(newTask.getProjectId())) {
+            errorMsg += "No Project found with Id: " + newTask.getProjectId()
+                    + ". Which violate constraint: FK_Task_Project. ";
+        }
+
+        /* Check duplicate */
+        if (taskRepository
+                .existsByProjectIdAndTaskNameAndIsDeletedIsFalse(
+                        newTask.getProjectId(),
+                        newTask.getTaskName())) {
+            errorMsg += "Already exists another Task with projectId: " + newTask.getProjectId()
+                    + " taskName: " + newTask.getTaskName() + ". ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
 
         return taskRepository.saveAndFlush(newTask);
     }
@@ -64,7 +90,12 @@ public class TaskServiceImpl implements TaskService{
 
         newTask = createTask(newTask);
 
-        return modelMapper.map(newTask, TaskReadDTO.class);
+        TaskReadDTO taskDTO = modelMapper.map(newTask, TaskReadDTO.class);
+
+        /* Get associated TaskAssignment */
+        taskDTO.setTaskAssignment(taskAssignmentService.getDTOByTaskId(newTask.getTaskId()));
+
+        return taskDTO;
     }
 
     /* READ */
@@ -494,7 +525,7 @@ public class TaskServiceImpl implements TaskService{
         taskReportService.deleteAllByTaskId(taskId);
 
         /* Delete all associated taskAssignment */
-        taskAssignmentService.deleteAllByTaskId(taskId);
+        taskAssignmentService.deleteByTaskId(taskId);
 
         task.setIsDeleted(true);
         taskRepository.saveAndFlush(task);

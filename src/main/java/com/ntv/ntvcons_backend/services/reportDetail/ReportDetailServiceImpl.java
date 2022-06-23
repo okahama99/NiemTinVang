@@ -36,7 +36,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         /* Check FK */
         if (!reportService.existsById(newReportDetail.getReportId())) {
             errorMsg += "No Report found with Id: " + newReportDetail.getReportId()
-                    + "Which violate constraint: FK_ReportDetail_Report. ";
+                    + ". Which violate constraint: FK_ReportDetail_Report. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -63,7 +63,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
                         .map(ReportDetail::getReportId)
                         .collect(Collectors.toSet()))) {
             errorMsg += "1 or more Report not found with Id"
-                    + "Which violate constraint: FK_ReportDetail_Report. ";
+                    + ". Which violate constraint: FK_ReportDetail_Report. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -285,7 +285,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         if (!oldReportDetail.getReportId().equals(updatedReportDetail.getReportId())) {
             if (!reportService.existsById(updatedReportDetail.getReportId())) {
                 errorMsg += "No Report found with Id: " + updatedReportDetail.getReportId()
-                        + "Which violate constraint: FK_ReportDetail_Report. ";
+                        + ". Which violate constraint: FK_ReportDetail_Report. ";
             }
         }
 
@@ -333,7 +333,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         if (updatedReportIdSet.size() <= 0) {
             if (!reportService.existsAllByIdIn(updatedReportIdSet)) {
                 errorMsg += "1 or more Report not found with Id"
-                        + "Which violate constraint: FK_ReportDetail_Report. ";
+                        + ". Which violate constraint: FK_ReportDetail_Report. ";
             }
         }
 

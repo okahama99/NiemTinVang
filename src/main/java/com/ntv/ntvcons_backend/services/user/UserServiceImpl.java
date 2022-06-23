@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService{
         /* Check FK */
         if (!roleService.existsById(newUser.getRoleId())) {
             errorMsg += "No Role found with Id: " + newUser.getRoleId()
-                    + "Which violate constraint: FK_User_Role. ";
+                    + ". Which violate constraint: FK_User_Role. ";
         }
 
         /* Check duplicate */
@@ -199,7 +199,7 @@ public class UserServiceImpl implements UserService{
         if (!oldUser.getRoleId().equals(updatedUser.getRoleId())) {
             if (!roleService.existsById(updatedUser.getRoleId())) {
                 errorMsg += "No Role found with Id: " + updatedUser.getRoleId()
-                        + "Which violate constraint: FK_User_Role. ";
+                        + ". Which violate constraint: FK_User_Role. ";
             }
         }
 

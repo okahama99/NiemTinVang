@@ -1,12 +1,8 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
-import com.ntv.ntvcons_backend.entities.TaskAssignment;
-import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

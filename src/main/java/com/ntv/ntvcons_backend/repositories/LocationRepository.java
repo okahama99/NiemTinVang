@@ -16,9 +16,13 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
         Location getByAddressNumberAndIsDeletedIsFalse (String addressNumber);
 
+
         /* Id */
+        boolean existsByLocationIdAndIsDeletedIsFalse(long locationId);
         Optional<Location> findByLocationIdAndIsDeletedIsFalse(long locationId);
         List<Location> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Long> locationIdCollection);
+        /* Id & coordinate */
+        boolean existsByCoordinateAndLocationIdIsNotAndIsDeletedIsFalse(String coordinate, long locationId);
 
 
         /* Top down */
@@ -57,6 +61,7 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
 
         /* coordinate */
+        boolean existsByCoordinateAndIsDeletedIsFalse(String coordinate);
         Optional<Location> findByCoordinateAndIsDeletedIsFalse(String coordinate);
         List<Location> findAllByCoordinateContainsAndIsDeletedIsFalse(String coordinate);
         List<Location> findAllByCoordinateInAndIsDeletedIsFalse(Collection<String> coordinateCollection);

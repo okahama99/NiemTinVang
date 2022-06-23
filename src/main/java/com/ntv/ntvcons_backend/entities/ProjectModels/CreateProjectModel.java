@@ -3,8 +3,6 @@ package com.ntv.ntvcons_backend.entities.ProjectModels;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 
 @Getter
 @Setter

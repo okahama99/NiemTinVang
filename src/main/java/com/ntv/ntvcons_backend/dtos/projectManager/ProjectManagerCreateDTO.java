@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +13,8 @@ import java.time.LocalDateTime;
 public class ProjectManagerCreateDTO implements Serializable {
     private Long projectId;
     private Long managerId;
-    private LocalDateTime assignDate;
-    private LocalDateTime removeDate;
+    private String assignDate;
+    private String removeDate;
 
     @JsonIgnore
     private final Boolean isDeleted = false;
