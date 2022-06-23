@@ -45,7 +45,7 @@ public class Location extends BaseEntity {
     @Column(name = "country", length = 100)
     private String country;
 
-    @Column(name = "coordinate", nullable = false, length = 100, unique = true)
+    @Column(name = "coordinate", nullable = false, length = 100)
     private String coordinate;
 
     @Column(name = "isDeleted", nullable = false)

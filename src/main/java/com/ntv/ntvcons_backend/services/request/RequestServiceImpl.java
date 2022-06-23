@@ -52,8 +52,7 @@ public class RequestServiceImpl implements RequestService{
         request.setRequesterId(createRequestModel.getRequesterId());
         request.setRequestTypeId(createRequestModel.getRequestTypeId());
         request.setRequestDesc(createRequestModel.getRequestDesc());
-        ZonedDateTime zdt = (LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter)).atZone(ZoneId.systemDefault());
-        request.setCreatedAt(Date.from(zdt.toInstant()));
+        request.setCreatedAt(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
         request.setCreatedBy(createRequestModel.getRequesterId());
         request.setRequestDate(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
         requestRepository.saveAndFlush(request);
@@ -158,8 +157,7 @@ public class RequestServiceImpl implements RequestService{
             request.setRequesterId(updateRequestModel.getRequesterId());
             request.setRequestTypeId(updateRequestModel.getRequestTypeId());
             request.setRequestDesc(updateRequestModel.getRequestDesc());
-            Date date = new Date();
-            request.setUpdatedAt(date);
+            request.setUpdatedAt(LocalDateTime.now());
             request.setUpdatedBy(updateRequestModel.getRequesterId());
             requestRepository.saveAndFlush(request);
             return true;

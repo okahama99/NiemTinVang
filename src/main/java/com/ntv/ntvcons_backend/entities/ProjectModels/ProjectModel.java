@@ -16,6 +16,6 @@ public class ProjectModel {
     private Double projectEstimateCost, actualCost, blueprintEstimateCost;
     private Boolean isDelete;
     private Long createdBy, updatedBy;
-    private Date createdAt, updatedAt;
+    private LocalDateTime createdAt, updatedAt;
     private Double totalPage;
 }

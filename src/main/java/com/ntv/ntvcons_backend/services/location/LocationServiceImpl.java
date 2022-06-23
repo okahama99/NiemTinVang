@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -138,8 +139,7 @@ public class LocationServiceImpl implements LocationService {
           location.setProvince(updateLocationModel.getProvince());
           location.setCountry(updateLocationModel.getCountry());
           location.setCoordinate(updateLocationModel.getCoordinate());
-          Date date = new Date();
-          location.setUpdatedAt(date);
+          location.setUpdatedAt(LocalDateTime.now());
           location.setUpdatedBy(updateLocationModel.getUserId());
           locationRepository.saveAndFlush(location);
 

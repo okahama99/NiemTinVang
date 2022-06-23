@@ -60,8 +60,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         if(projectManager!=null)
         {
             projectManager.setRemoveDate(LocalDateTime.now());
-            Date date = new Date();
-            projectManager.setUpdatedAt(date);
+            projectManager.setUpdatedAt(LocalDateTime.now());
             projectManager.setUpdatedBy(userId);
             projectManagerRepository.saveAndFlush(projectManager);
             return true;

@@ -332,7 +332,7 @@ public class ProjectServiceImpl implements ProjectService{
                 project.setActualCost(updateProjectModel.getActualCost());
                 project.setEstimatedCost(updateProjectModel.getEstimateCost());
 
-                project.setUpdatedAt(new Date());
+                project.setUpdatedAt(LocalDateTime.now());
 
                 project.setUpdatedBy(updateProjectModel.getUserId());
                 projectRepository.saveAndFlush(project);

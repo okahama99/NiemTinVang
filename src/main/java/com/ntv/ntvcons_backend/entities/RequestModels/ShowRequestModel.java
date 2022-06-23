@@ -15,6 +15,6 @@ public class ShowRequestModel {
     private Boolean isVerified, isApproved;
 
     private Long createdBy, updatedBy;
-    private Date createdAt, updatedAt;
+    private LocalDateTime createdAt, updatedAt;
     private Double totalPage;
 }

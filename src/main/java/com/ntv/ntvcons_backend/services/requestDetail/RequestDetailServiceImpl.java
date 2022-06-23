@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,8 +40,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
             requestDetail.setItemDesc(createRequestDetailModel.getItemDesc());
             requestDetail.setItemPrice(createRequestDetailModel.getItemPrice());
             requestDetail.setItemUnit(createRequestDetailModel.getItemUnit());
-            Date date = new Date();
-            requestDetail.setCreatedAt(date);
+            requestDetail.setCreatedAt(LocalDateTime.now());
             requestDetail.setCreatedBy(request.get().getRequesterId());
             requestDetailRepository.saveAndFlush(requestDetail);
             return true;
