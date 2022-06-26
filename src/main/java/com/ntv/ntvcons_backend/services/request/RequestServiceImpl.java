@@ -3,6 +3,9 @@ package com.ntv.ntvcons_backend.services.request;
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.Request;
+import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
+import com.ntv.ntvcons_backend.entities.RequestDetailModels.RequestDetailModel;
+import com.ntv.ntvcons_backend.entities.RequestDetailModels.UpdateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
@@ -13,6 +16,7 @@ import com.ntv.ntvcons_backend.repositories.ProjectRepository;
 import com.ntv.ntvcons_backend.repositories.RequestRepository;
 import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
+import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -45,6 +49,9 @@ public class RequestServiceImpl implements RequestService{
     @Autowired
     private DateTimeFormatter dateTimeFormatter;
 
+    @Autowired
+    RequestDetailService requestDetailService;
+
     @Override
     public boolean createRequest(CreateRequestModel createRequestModel) {
         Request request = new Request();
@@ -56,6 +63,15 @@ public class RequestServiceImpl implements RequestService{
         request.setCreatedBy(createRequestModel.getRequesterId());
         request.setRequestDate(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
         requestRepository.saveAndFlush(request);
+        for (RequestDetailModel requestDetailModel : createRequestModel.getModelList()) {
+            CreateRequestDetailModel createRequestDetailModel = new CreateRequestDetailModel();
+            createRequestDetailModel.setRequestId(request.getRequestId());
+            createRequestDetailModel.setItemDesc(requestDetailModel.getItemDesc());
+            createRequestDetailModel.setItemAmount(requestDetailModel.getItemAmount());
+            createRequestDetailModel.setItemPrice(requestDetailModel.getItemPrice());
+            createRequestDetailModel.setItemUnit(requestDetailModel.getItemUnit());
+            requestDetailService.createRequest(createRequestDetailModel);
+        }
         return true;
     }
 
@@ -159,6 +175,9 @@ public class RequestServiceImpl implements RequestService{
             request.setRequestDesc(updateRequestModel.getRequestDesc());
             request.setUpdatedAt(LocalDateTime.now());
             request.setUpdatedBy(updateRequestModel.getRequesterId());
+            for (UpdateRequestDetailModel updateRequestDetailModel : updateRequestModel.getUpdateRequestDetailModels()) {
+                requestDetailService.updateRequestDetail(updateRequestDetailModel);
+            }
             requestRepository.saveAndFlush(request);
             return true;
         }

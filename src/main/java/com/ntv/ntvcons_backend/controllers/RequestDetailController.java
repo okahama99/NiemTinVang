@@ -21,17 +21,6 @@ public class RequestDetailController {
     @Autowired
     RequestDetailService requestDetailService;
 
-    /* CREATE */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping(value = "/v1/createRequestDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRequestDetail(@RequestBody CreateRequestDetailModel createRequestDetailModel){
-        boolean result = requestDetailService.createRequest(createRequestDetailModel);
-        if (result) {
-            return ResponseEntity.ok().body("Tạo thành công.");
-        }
-        return ResponseEntity.badRequest().body("Tạo thất bại.");
-    }
-
     /* READ */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/v1/getAllRequestDetail", produces = "application/json;charset=UTF-8")
@@ -62,19 +51,6 @@ public class RequestDetailController {
     List<RequestDetail> getAllById(@RequestParam Long requestId) {
         List<RequestDetail> requestDetail = requestDetailService.getRequestDetailByRequestId(requestId);
         return requestDetail;
-    }
-
-    /* UPDATE */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping(value = "/v1/updateRequestDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRequestDetail(@RequestBody UpdateRequestDetailModel updateRequestDetailModel) {
-        boolean result = requestDetailService.updateRequestDetail(updateRequestDetailModel);
-
-        if(result) {
-            return ResponseEntity.ok().body("Cập nhật thành công.");
-        }
-
-        return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
 
     /* DELETE */
