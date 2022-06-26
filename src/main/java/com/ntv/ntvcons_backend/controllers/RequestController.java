@@ -57,6 +57,31 @@ public class RequestController {
         }
     }
 
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = "/v1/getByProjectId", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByProjectId(@RequestParam Long projectId,
+                                         @RequestParam int pageNo,
+                                         @RequestParam int pageSize,
+                                         @RequestParam String sortBy,
+                                         @RequestParam boolean sortType) {
+        try {
+            List<ShowRequestModel> requests = requestService.getByProjectId(projectId, pageNo, pageSize, sortBy, sortType);
+
+            if (requests == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found");
+            }
+
+            return ResponseEntity.ok().body(requests);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error searching for Request", e.getMessage()));
+        }
+    }
+
 //    @GetMapping(value = "/v1/getAllById", produces = "application/json;charset=UTF-8")
 //    public @ResponseBody
 //    List<ProjectModel> getAllById(@RequestParam long projectId,
@@ -107,5 +132,18 @@ public class RequestController {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Request with Id: " + requestId, e.getMessage()));
         }
+    }
+
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping(value = "/v1/approveRequest", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> approveRequest(@RequestParam Long requestId,
+                                                 @RequestParam Boolean decision) {
+        boolean result = requestService.approveUpdate(requestId,decision);
+
+        if(result) {
+            return ResponseEntity.ok().body("Cập nhật thành công.");
+        }
+
+        return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
 }

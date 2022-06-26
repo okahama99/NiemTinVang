@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,14 +62,17 @@ public class RequestServiceImpl implements RequestService{
         request.setCreatedBy(createRequestModel.getRequesterId());
         request.setRequestDate(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
         requestRepository.saveAndFlush(request);
-        for (RequestDetailModel requestDetailModel : createRequestModel.getModelList()) {
-            CreateRequestDetailModel createRequestDetailModel = new CreateRequestDetailModel();
-            createRequestDetailModel.setRequestId(request.getRequestId());
-            createRequestDetailModel.setItemDesc(requestDetailModel.getItemDesc());
-            createRequestDetailModel.setItemAmount(requestDetailModel.getItemAmount());
-            createRequestDetailModel.setItemPrice(requestDetailModel.getItemPrice());
-            createRequestDetailModel.setItemUnit(requestDetailModel.getItemUnit());
-            requestDetailService.createRequest(createRequestDetailModel);
+        if(createRequestModel.getModelList() != null)
+        {
+            for (RequestDetailModel requestDetailModel : createRequestModel.getModelList()) {
+                CreateRequestDetailModel createRequestDetailModel = new CreateRequestDetailModel();
+                createRequestDetailModel.setRequestId(request.getRequestId());
+                createRequestDetailModel.setItemDesc(requestDetailModel.getItemDesc());
+                createRequestDetailModel.setItemAmount(requestDetailModel.getItemAmount());
+                createRequestDetailModel.setItemPrice(requestDetailModel.getItemPrice());
+                createRequestDetailModel.setItemUnit(requestDetailModel.getItemUnit());
+                requestDetailService.createRequest(createRequestDetailModel);
+            }
         }
         return true;
     }
@@ -155,6 +157,92 @@ public class RequestServiceImpl implements RequestService{
                             return null;
                         }
                     });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowRequestModel>();
+        }
+    }
+
+    @Override
+    public List<ShowRequestModel> getByProjectId(Long projectId, int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<Request> pagingResult = requestRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId,paging);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowRequestModel> modelResult = pagingResult.map(new Converter<Request, ShowRequestModel>() {
+
+                @Override
+                protected ShowRequestModel doForward(Request request) {
+                    ShowRequestModel model = new ShowRequestModel();
+                    Optional<Project> project = projectRepository.findById(request.getProjectId());
+                    Optional<User> requester = userRepository.findById(request.getRequesterId());
+
+                    Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
+
+                    model.setRequestId(request.getRequestId());
+                    model.setProjectId(request.getProjectId());
+                    if(project.isPresent()){
+                        model.setProjectName(project.get().getProjectName());
+                    }else{
+                        model.setProjectName(null);
+                    }
+
+                    model.setRequesterId(request.getRequesterId());
+                    if(requester.isPresent()){
+                        model.setRequesterName(requester.get().getUsername());
+                    }else{
+                        model.setRequesterName(null);
+                    }
+
+                    model.setRequestTypeId(request.getRequestTypeId());
+                    if(requestType.isPresent()){
+                        model.setRequestTypeName(requestType.get().getRequestTypeName());
+                    }else{
+                        model.setRequestTypeName(null);
+                    }
+
+                    model.setRequestDate(request.getRequestDate());
+                    model.setRequestDesc(request.getRequestDesc());
+
+                    if(request.getVerifierId() !=null)
+                    {
+                        model.setVerifierId(request.getVerifierId());
+                        Optional<User> verifier = userRepository.findById(request.getVerifierId());
+                        if(verifier.isPresent()){
+                            model.setVerifierName(verifier.get().getUsername());
+                        }else{
+                            model.setVerifierName(null);
+                        }
+                    }else{
+                        model.setVerifierId(null);
+                        model.setVerifierName("");
+                    }
+                    model.setVerifyDate(request.getVerifyDate());
+                    model.setVerifyNote(request.getVerifyNote());
+                    model.setIsVerified(request.getIsVerified());
+                    model.setIsApproved(request.getIsApproved());
+
+                    model.setCreatedAt(request.getCreatedAt());
+                    model.setCreatedBy(request.getCreatedBy());
+                    model.setUpdatedAt(request.getCreatedAt());
+                    model.setUpdatedBy(request.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Request doBackward(ShowRequestModel showRequestModel) {
+                    return null;
+                }
+            });
             return modelResult.getContent();
         }else{
             return new ArrayList<ShowRequestModel>();

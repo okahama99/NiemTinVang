@@ -14,4 +14,5 @@ public class CreateRequestModel {
     private String requestDate;
     private List<RequestDetailModel> modelList;
 
+
 }
