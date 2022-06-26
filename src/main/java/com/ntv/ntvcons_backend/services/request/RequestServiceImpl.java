@@ -175,6 +175,12 @@ public class RequestServiceImpl implements RequestService{
             request.setRequestDesc(updateRequestModel.getRequestDesc());
             request.setUpdatedAt(LocalDateTime.now());
             request.setUpdatedBy(updateRequestModel.getRequesterId());
+            if(updateRequestModel.getCreateRequestDetailModels() != null)
+            {
+                for (CreateRequestDetailModel createRequestDetailModel : updateRequestModel.getCreateRequestDetailModels()) {
+                    requestDetailService.createRequest(createRequestDetailModel);
+                }
+            }
             for (UpdateRequestDetailModel updateRequestDetailModel : updateRequestModel.getUpdateRequestDetailModels()) {
                 requestDetailService.updateRequestDetail(updateRequestDetailModel);
             }
