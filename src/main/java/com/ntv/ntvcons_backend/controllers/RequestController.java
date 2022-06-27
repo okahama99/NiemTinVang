@@ -5,6 +5,8 @@ import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestVerifierModel;
+import com.ntv.ntvcons_backend.repositories.ProjectRepository;
+import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
 import com.ntv.ntvcons_backend.services.request.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -20,16 +22,31 @@ public class RequestController {
     @Autowired
     private RequestService requestService;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
+    @Autowired
+    private RequestTypeRepository requestTypeRepository;
+
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/v1/createRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequest(@RequestBody CreateRequestModel createRequestModel){
-            boolean result = requestService.createRequest(createRequestModel);
-            if (result) {
-                return ResponseEntity.ok().body("Tạo thành công.");
+            if(!projectRepository.existsById(createRequestModel.getProjectId())){
+                return ResponseEntity.ok().body("ProjectId không tồn tại.");
+            }else{
+                if(!requestTypeRepository.existsById(createRequestModel.getRequestTypeId())){
+                    return ResponseEntity.ok().body("RequestTypeId không tồn tại.");
+                }else{
+                    boolean result = requestService.createRequest(createRequestModel);
+                    if (result) {
+                        return ResponseEntity.ok().body("Tạo thành công.");
+                    }
+                    return ResponseEntity.badRequest().body("Tạo thất bại.");
+                }
             }
-            return ResponseEntity.badRequest().body("Tạo thất bại.");
+
     }
 
     /* READ */

@@ -1,8 +1,7 @@
 package com.ntv.ntvcons_backend.services.request;
 
 import com.google.common.base.Converter;
-import com.ntv.ntvcons_backend.entities.Project;
-import com.ntv.ntvcons_backend.entities.Request;
+import com.ntv.ntvcons_backend.entities.*;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.RequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.UpdateRequestDetailModel;
@@ -10,12 +9,7 @@ import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestVerifierModel;
-import com.ntv.ntvcons_backend.entities.RequestType;
-import com.ntv.ntvcons_backend.entities.User;
-import com.ntv.ntvcons_backend.repositories.ProjectRepository;
-import com.ntv.ntvcons_backend.repositories.RequestRepository;
-import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
-import com.ntv.ntvcons_backend.repositories.UserRepository;
+import com.ntv.ntvcons_backend.repositories.*;
 import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,6 +44,9 @@ public class RequestServiceImpl implements RequestService{
 
     @Autowired
     RequestDetailService requestDetailService;
+
+    @Autowired
+    RequestDetailRepository requestDetailRepository;
 
     @Override
     public boolean createRequest(CreateRequestModel createRequestModel) {
@@ -98,6 +95,7 @@ public class RequestServiceImpl implements RequestService{
                             ShowRequestModel model = new ShowRequestModel();
                             Optional<Project> project = projectRepository.findById(request.getProjectId());
                             Optional<User> requester = userRepository.findById(request.getRequesterId());
+                            List<RequestDetail> detail = requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(request.getRequestId());
 
                             Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
 
@@ -139,6 +137,14 @@ public class RequestServiceImpl implements RequestService{
                                 model.setVerifierId(null);
                                 model.setVerifierName("");
                             }
+
+                            if(detail != null)
+                            {
+                                model.setRequestDetailList(detail);
+                            }else{
+                                model.setRequestDetailList(null);
+                            }
+
                             model.setVerifyDate(request.getVerifyDate());
                             model.setVerifyNote(request.getVerifyNote());
                             model.setIsVerified(request.getIsVerified());
@@ -184,6 +190,7 @@ public class RequestServiceImpl implements RequestService{
                     ShowRequestModel model = new ShowRequestModel();
                     Optional<Project> project = projectRepository.findById(request.getProjectId());
                     Optional<User> requester = userRepository.findById(request.getRequesterId());
+                    List<RequestDetail> detail = requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(request.getRequestId());
 
                     Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
 
@@ -225,6 +232,14 @@ public class RequestServiceImpl implements RequestService{
                         model.setVerifierId(null);
                         model.setVerifierName("");
                     }
+
+                    if(detail != null)
+                    {
+                        model.setRequestDetailList(detail);
+                    }else{
+                        model.setRequestDetailList(null);
+                    }
+
                     model.setVerifyDate(request.getVerifyDate());
                     model.setVerifyNote(request.getVerifyNote());
                     model.setIsVerified(request.getIsVerified());
