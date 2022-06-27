@@ -49,7 +49,7 @@ public class ReportController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortType) {
         try {
-            List<ReportReadDTO> reportDTOList = reportService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+            List<ReportReadDTO> reportDTOList = reportService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortType);
 
             if (reportDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found");

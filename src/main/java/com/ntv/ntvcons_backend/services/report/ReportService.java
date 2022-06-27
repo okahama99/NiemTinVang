@@ -5,6 +5,7 @@ import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Report;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -16,8 +17,8 @@ public interface ReportService { /* TODO: throws Exception for controller to han
     ReportReadDTO createReportByDTO(ReportCreateDTO newReportDTO) throws Exception;
 
     /* READ */
-    List<Report> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
-    List<ReportReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
+    Page<Report> getPageAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
+    List<ReportReadDTO> getAllDTOInPaging(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
 
     boolean existsById(long reportId) throws Exception;
     Report getById(long reportId) throws Exception;
