@@ -22,8 +22,9 @@ public class ReportReadDTO implements Serializable {
     private Long projectId;
     private ReportTypeReadDTO reportType;
     private Long reporterId;
-    private LocalDateTime reportDate;
+    private String reportName;
     private String reportDesc;
+    private LocalDateTime reportDate;
 
     private List<ReportDetailReadDTO> reportDetailList;
     private List<TaskReportReadDTO> taskReportList;
