@@ -8,12 +8,12 @@ import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
+import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,7 +23,10 @@ import java.util.List;
 @RequestMapping("/Project")
 public class ProjectController {
     @Autowired
-    private ProjectService projectService;
+    ProjectService projectService;
+
+    @Autowired
+    LocationService locationService;
     
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -34,15 +37,18 @@ public class ProjectController {
             if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
                 return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
             } else {
+                if(!locationService.checkCoordinate(createProjectModel.getCoordinate()))
+                {
+                    boolean result = projectService.createProject(createProjectModel);
 
-                boolean result = projectService.createProject(createProjectModel);
-
-                if (result) {
-                    return ResponseEntity.ok().body("Tạo thành công.");
+                    if (result) {
+                        return ResponseEntity.ok().body("Tạo thành công.");
+                    }
+                    return ResponseEntity.badRequest().body("Tạo thất bại.");
+                }else{
+                    return ResponseEntity.badRequest().body("Coordinate đã tồn tại.");
                 }
-                return ResponseEntity.badRequest().body("Tạo thất bại.");
             }
-
         } catch (IllegalArgumentException iAE) {
             /* Catch invalid input */
             return ResponseEntity.badRequest().body(

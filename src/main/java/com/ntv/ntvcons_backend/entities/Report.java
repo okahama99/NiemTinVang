@@ -30,11 +30,14 @@ public class Report extends BaseEntity {
     @Column(name = "reporterId", nullable = false)
     private Long reporterId;
 
-    @Column(name = "reportDate", nullable = false)
-    private LocalDateTime reportDate;
+    @Column(name = "reportName", nullable = false, length = 100)
+    private String reportName;
 
     @Column(name = "reportDesc", nullable = false, length = 100)
     private String reportDesc;
+
+    @Column(name = "reportDate", nullable = false)
+    private LocalDateTime reportDate;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

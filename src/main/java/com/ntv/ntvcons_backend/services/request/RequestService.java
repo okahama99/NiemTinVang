@@ -12,6 +12,8 @@ public interface RequestService {
     boolean createRequest(CreateRequestModel createRequestModel);
     /* READ */
     List<ShowRequestModel> getAllAvailableRequest(int pageNo, int pageSize, String sortBy, boolean sortType);
+
+    List<ShowRequestModel> getByProjectId(Long projectId, int pageNo, int pageSize, String sortBy, boolean sortType);
     /* UPDATE */
     boolean updateRequest(UpdateRequestModel updateRequestModel);
 

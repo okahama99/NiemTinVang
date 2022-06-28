@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Setter
 public class UpdateRequestVerifierModel {
     private Long requestId, verifierId;
-    private LocalDateTime verifyDate;
+    private String verifyDate;
     private String verifierNote;
     private Boolean isVerified;
 }

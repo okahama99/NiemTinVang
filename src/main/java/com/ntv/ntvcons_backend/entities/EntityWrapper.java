@@ -21,6 +21,9 @@ public class EntityWrapper extends BaseEntity {
     @Column(name = "entityWrapperId", nullable = false)
     private Long entityWrapperId;
 
+    @Column(name = "postId", unique = true)
+    private Long postId;
+
     @Column(name = "projectId", unique = true)
     private Long projectId;
 
@@ -30,17 +33,14 @@ public class EntityWrapper extends BaseEntity {
     @Column(name = "requestId", unique = true)
     private Long requestId;
 
-    @Column(name = "postId", unique = true)
-    private Long postId;
+    @Column(name = "taskId", unique = true)
+    private Long taskId;
 
     @Column(name = "userId", unique = true)
     private Long userId;
 
     @Column(name = "workerId", unique = true)
     private Long workerId;
-
-    @Column(name = "taskId", unique = true)
-    private Long taskId;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;

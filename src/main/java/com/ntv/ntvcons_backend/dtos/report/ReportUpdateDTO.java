@@ -21,9 +21,10 @@ public class ReportUpdateDTO implements Serializable {
     private Long projectId;
     private Long reportTypeId;
     private Long reporterId;
+    private String reportName;
+    private String reportDesc;
     /** yyyy-MM-dd HH:mm */
     private String reportDate;
-    private String reportDesc;
 
     private List<ReportDetailCreateDTO> newReportDetailList;
     private List<TaskReportCreateDTO> newTaskReportList;

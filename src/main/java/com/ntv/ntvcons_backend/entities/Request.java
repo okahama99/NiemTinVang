@@ -36,11 +36,11 @@ public class Request extends BaseEntity {
     @Column(name = "requestDesc", nullable = false, length = 100)
     private String requestDesc;
 
-    @Column(name = "verifierId")
-    private Long verifierId;
-
     @Column(name = "isVerified", nullable = false)
     private Boolean isVerified = false;
+
+    @Column(name = "verifierId")
+    private Long verifierId;
 
     @Column(name = "verifyDate")
     private LocalDateTime verifyDate;

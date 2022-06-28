@@ -22,10 +22,12 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
 
     /* projectId */
-    List<Request> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
+    Page<Request> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable pageable);
     List<Request> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
+
     /* projectId & isVerified */
     List<Request> findAllByProjectIdAndIsVerifiedAndIsDeletedIsFalse(long projectId, boolean isVerified);
+
     /* projectId & isVerified = true & isApproved (Approval required Verification) */
     List<Request> findAllByProjectIdAndIsVerifiedIsTrueAndIsApprovedAndIsDeletedIsFalse(long projectId, boolean isApproved);
 
