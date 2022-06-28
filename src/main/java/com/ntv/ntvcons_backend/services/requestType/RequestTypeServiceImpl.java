@@ -34,7 +34,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
 
         /* Check duplicate */
         if (requestTypeRepository.existsByRequestTypeNameAndIsDeletedIsFalse(newRequestType.getRequestTypeName())) {
-            errorMsg += "Already exists another RequestType with name: " + newRequestType.getRequestTypeName() + ". ";
+            errorMsg += "Already exists another RequestType with name: '" + newRequestType.getRequestTypeName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -202,7 +202,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
                 .existsByRequestTypeNameAndRequestTypeIdIsNotAndIsDeletedIsFalse(
                         updatedRequestType.getRequestTypeName(),
                         updatedRequestType.getRequestTypeId())) {
-            errorMsg += "Already exists another RequestType with name: " + updatedRequestType.getRequestTypeName() + ". ";
+            errorMsg += "Already exists another RequestType with name: '" + updatedRequestType.getRequestTypeName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {

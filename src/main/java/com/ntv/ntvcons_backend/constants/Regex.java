@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.constants;
 
 public class Regex {
+    /** yyyy=MM-dd HH:mm */
     public static final String DATETIME_REGEX_1 =
             /* 0000 - 9999 */
             "^([0-9]{4})-(" +
@@ -12,5 +13,8 @@ public class Regex {
                     "((02)-(0[1-9]|[1-2][0-9])))" +
                     /* 00:00 - 23:59 */
                     "\\s([0-1][0-9]|2[0-3]):([0-5][0-9])$";
+
+    /** 0 + (9-14) digits */
+    public static final String PHONE_REGEX_1 = "^(0)([0-9]{9,14})$";
 
 }

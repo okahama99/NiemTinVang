@@ -38,13 +38,13 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
 
         /* Check FK */
         if (!projectService.existsById(newProjectManager.getProjectId())) {
-            errorMsg += "No Project found with Id: " + newProjectManager.getProjectId()
-                    + ". Which violate constraint: FK_ProjectManager_Project. ";
+            errorMsg += "No Project found with Id: '" + newProjectManager.getProjectId()
+                    + "'. Which violate constraint: FK_ProjectManager_Project. ";
         }
 
         if (!userService.existsById(newProjectManager.getManagerId())) {
-            errorMsg += "No User found with Id: " + newProjectManager.getManagerId()
-                    + ". Which violate constraint: FK_ProjectManager_User. ";
+            errorMsg += "No User found with Id: '" + newProjectManager.getManagerId()
+                    + "'. Which violate constraint: FK_ProjectManager_User. ";
         }
 
         /* Check duplicate */
@@ -52,10 +52,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                 .existsByProjectIdAndManagerIdAndIsDeletedIsFalse(
                         newProjectManager.getProjectId(),
                         newProjectManager.getManagerId())) {
-            errorMsg += "Already exists another ProjectManager relationship between with Project with Id: "
+            errorMsg += "Already exists another ProjectManager relationship between with Project with Id: '"
                     + newProjectManager.getProjectId()
-                    + " and User with Id: "
-                    + newProjectManager.getManagerId() + ". ";
+                    + "' and User with Id: '"
+                    + newProjectManager.getManagerId() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -88,10 +88,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             } else {
                 if (tmpManagerIdList.contains(newProjectManager.getManagerId())) {
                     isDuplicated = true;
-                    errorMsg.append("Duplicate ProjectManager relationship between with Project with Id: ")
+                    errorMsg.append("Duplicate ProjectManager relationship between with Project with Id: '")
                             .append(newProjectManager.getProjectId())
-                            .append(" and User with Id: ")
-                            .append(newProjectManager.getManagerId()).append(". ");
+                            .append("' and User with Id: '")
+                            .append(newProjectManager.getManagerId()).append("'. ");
                 } else {
                        tmpManagerIdList.add(newProjectManager.getManagerId());
                        projectIdManagerIdMap.put(newProjectManager.getProjectId(), tmpManagerIdList);
@@ -118,10 +118,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                                 .existsByProjectIdAndManagerIdAndIsDeletedIsFalse(
                                         newProjectManager.getProjectId(),
                                         newProjectManager.getManagerId())) {
-                    errorMsg.append("Already exists another ProjectManager relationship between with Project with Id: ")
+                    errorMsg.append("Already exists another ProjectManager relationship between with Project with Id: '")
                             .append(newProjectManager.getProjectId())
-                            .append(" and User with Id: ")
-                            .append(newProjectManager.getManagerId()).append(". ");
+                            .append("' and User with Id: '")
+                            .append(newProjectManager.getManagerId()).append("'. ");
                 }
             }
         }
@@ -210,15 +210,15 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         /* Check FK (if changed) */
         if (!oldProjectManager.getProjectId().equals(updatedProjectManager.getProjectId())) {
             if (!projectService.existsById(updatedProjectManager.getProjectId())) {
-                errorMsg += "No Project found with Id: " + updatedProjectManager.getProjectId()
-                        + ". Which violate constraint: FK_ProjectManager_Project. ";
+                errorMsg += "No Project found with Id: '" + updatedProjectManager.getProjectId()
+                        + "'. Which violate constraint: FK_ProjectManager_Project. ";
             }
         }
 
         if (!oldProjectManager.getManagerId().equals(updatedProjectManager.getManagerId())) {
             if (!userService.existsById(updatedProjectManager.getManagerId())) {
-                errorMsg += "No User found with Id: " + updatedProjectManager.getManagerId()
-                        + ". Which violate constraint: FK_ProjectManager_User. ";
+                errorMsg += "No User found with Id: '" + updatedProjectManager.getManagerId()
+                        + "'. Which violate constraint: FK_ProjectManager_User. ";
             }
         }
 
@@ -228,10 +228,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                         updatedProjectManager.getProjectId(),
                         updatedProjectManager.getManagerId(),
                         updatedProjectManager.getProjectManagerId())) {
-            errorMsg += "Already exists another ProjectManager relationship between with Project with Id: "
+            errorMsg += "Already exists another ProjectManager relationship between with Project with Id: '"
                     + updatedProjectManager.getProjectId()
-                    + " and User with Id: "
-                    + updatedProjectManager.getManagerId() + ". ";
+                    + "' and User with Id: '"
+                    + updatedProjectManager.getManagerId() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -286,10 +286,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             } else {
                 if (tmpManagerIdList.contains(updatedProjectManager.getManagerId())) {
                     isDuplicated = true;
-                    errorMsg.append("Duplicate ProjectManager relationship between with Project with Id: ")
+                    errorMsg.append("Duplicate ProjectManager relationship between with Project with Id: '")
                             .append(updatedProjectManager.getProjectId())
-                            .append(" and User with Id: ")
-                            .append(updatedProjectManager.getManagerId()).append(". ");
+                            .append("' and User with Id: '")
+                            .append(updatedProjectManager.getManagerId()).append("'. ");
                 } else {
                     tmpManagerIdList.add(updatedProjectManager.getManagerId());
                     projectIdManagerIdMap.put(updatedProjectManager.getProjectId(), tmpManagerIdList);
@@ -337,10 +337,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                                 updatedProjectManager.getProjectId(),
                                 updatedProjectManager.getManagerId(),
                                 updatedProjectManager.getProjectManagerId())) {
-                    errorMsg.append("Already exists another ProjectManager relationship between with Project with Id: ")
+                    errorMsg.append("Already exists another ProjectManager relationship between with Project with Id: '")
                             .append(updatedProjectManager.getProjectId())
-                            .append(" and User with Id: ")
-                            .append(updatedProjectManager.getManagerId()).append(". ");
+                            .append("' and User with Id: '")
+                            .append(updatedProjectManager.getManagerId()).append("'. ");
                 }
             }
         }

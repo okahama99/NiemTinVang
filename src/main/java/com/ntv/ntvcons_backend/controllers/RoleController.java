@@ -63,8 +63,8 @@ public class RoleController {
         }
     }
 
-    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                              @RequestParam(name = "searchType") SearchType searchType) {
         try {
             List<RoleReadDTO> roleDTOList;
@@ -75,7 +75,7 @@ public class RoleController {
 
                     if (roleDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Role found with name contains: " + searchParam);
+                                .body("No Role found with roleId: '" + searchParam + "'. ");
                     }
 
                     roleDTOList = new ArrayList<>(Collections.singletonList(roleDTO));
@@ -86,7 +86,7 @@ public class RoleController {
 
                     if (roleDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Role found with name contains: " + searchParam);
+                                .body("No Role found with name contains: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -98,8 +98,8 @@ public class RoleController {
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
-                            "Invalid parameter type for searchType: " + searchType
-                                    + "\nExpecting parameter of type: Long",
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
         } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
@@ -109,12 +109,12 @@ public class RoleController {
             String errorMsg = "Error searching for Role with ";
 
             switch (searchType) {
-                case REPORT_TYPE_BY_ID:
-                    errorMsg += "roleId: " + searchParam;
+                case ROLE_BY_ID:
+                    errorMsg += "roleId: '" + searchParam + "'. ";
                     break;
 
-                case REPORT_TYPE_BY_NAME_CONTAINS:
-                    errorMsg += "name contains: " + searchParam;
+                case ROLE_BY_NAME_CONTAINS:
+                    errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
             }
 
@@ -131,13 +131,13 @@ public class RoleController {
 
             if (updatedRoleDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Role found with Id: " + roleDTO.getRoleId());
+                        .body("No Role found with Id: '" + roleDTO.getRoleId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedRoleDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating Role with Id: " + roleDTO.getRoleId(),
+                    new ErrorResponse("Error updating Role with Id: '" + roleDTO.getRoleId() + "'. ",
                             e.getMessage()));
         }
     }
@@ -149,13 +149,13 @@ public class RoleController {
         try {
             if (!roleService.deleteRole(roleId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Role found with Id: " + roleId);
+                        .body("No Role found with Id: '" + roleId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted Role with Id: " + roleId);
+            return ResponseEntity.ok().body("Deleted Role with Id: '" + roleId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting Role with Id: " + roleId, e.getMessage()));
+                    new ErrorResponse("Error deleting Role with Id: '" + roleId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

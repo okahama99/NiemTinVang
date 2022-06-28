@@ -1,16 +1,13 @@
 package com.ntv.ntvcons_backend.dtos.location;
 
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
-import org.checkerframework.checker.index.qual.Positive;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
-import java.io.Serializable;
 
 @Data
 @AllArgsConstructor

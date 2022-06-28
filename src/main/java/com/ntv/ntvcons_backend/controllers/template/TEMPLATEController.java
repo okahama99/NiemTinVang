@@ -11,13 +11,17 @@ public class TEMPLATEController {
 //
 //    /* ================================================ Ver 1 ================================================ */
 //    /* CREATE */
-//    //@PreAuthorize("hasRole('ROLE_ADMIN')")
 //    @PostMapping(value = "/v1/createTEMPLATE", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> createTEMPLATE(@RequestBody TEMPLATECreateDTO temPlateDTO){
+//    public ResponseEntity<Object> createTEMPLATE(@Valid @RequestBody TEMPLATECreateDTO temPlateDTO){
 //        try {
 //            TEMPLATEReadDTO newTEMPLATEDTO = temPlateService.createTEMPLATEByDTO(temPlateDTO);
 //
 //            return ResponseEntity.ok().body(newTEMPLATEDTO);
+//
+//        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+//            /* Catch not found .../... by respective Id, which violate FK constraint */
+//            return ResponseEntity.badRequest().body(
+//                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
 //        } catch (Exception e) {
 //            return ResponseEntity.internalServerError().body(
 //                    new ErrorResponse("Error creating TEMPLATE", e.getMessage()));
@@ -25,7 +29,6 @@ public class TEMPLATEController {
 //    }
 //
 //    /* READ */
-//    //@PreAuthorize("hasRole('ROLE_ADMIN')")
 //    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
 //    public ResponseEntity<Object> getAll(@RequestParam int pageNo,
 //                                         @RequestParam int pageSize,
@@ -50,8 +53,8 @@ public class TEMPLATEController {
 //        }
 //    }
 //
-//    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+//    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+//    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
 //                                             @RequestParam(name = "searchType") SearchType searchType) {
 //        try {
 //            List<TEMPLATEReadDTO> temPlateDTOList;
@@ -61,15 +64,15 @@ public class TEMPLATEController {
 //                    temPlateDTOList = temPlateService.getAllDTOByTEMPLATENameContains(searchParam);
 //                    if (temPlateDTOList == null) {
 //                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                                .body("No TEMPLATE found with name contains: " + searchParam);
+//                                .body("No TEMPLATE found with name contains: '" + searchParam + "'. ");
 //                    }
 //                    break;
 //                case TEMPLATE_BY_PROJECT_ID:
 //                    temPlateDTOList = temPlateService.getAllDTOByProjectId(Long.parseLong(searchParam));
 //
-//                    if (reportDTOList == null) {
+//                    if (temPlateDTOList == null) {
 //                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                                .body("No TEMPLATE found with projectId: " + searchParam);
+//                                .body("No TEMPLATE found with projectId: '" + searchParam + "'. ");
 //                    }
 //                    break;
 //                default:
@@ -80,8 +83,8 @@ public class TEMPLATEController {
 //        } catch (NumberFormatException nFE) {
 //            return ResponseEntity.badRequest().body(
 //                  new ErrorResponse(
-//                          "Invalid parameter type for searchType: " + searchType
-//                              + "\nExpecting parameter of type: Long",
+//                          "Invalid parameter type for searchType: '" + searchType
+//                              + "'. Expecting parameter of type: Long",
 //                          nFE.getMessage()));
 //        } catch (IllegalArgumentException iAE) {
 //            /* Catch invalid searchType */
@@ -91,8 +94,12 @@ public class TEMPLATEController {
 //            String errorMsg = "Error searching for TEMPLATE with ";
 //
 //            switch (searchType) {
-//                case REPORT_TYPE_BY_NAME_CONTAINS:
-//                    errorMsg += "name contains: " + searchParam;
+//                case TEMPLATE_BY_NAME_CONTAINS:
+//                    errorMsg += "name contains: '" + searchParam + "'. ";
+//                    break;
+//
+//                case TEMPLATE_BY_PROJECT_ID:
+//                    errorMsg += "projectId: '" + searchParam + "'. ";
 //                    break;
 //            }
 //
@@ -101,39 +108,37 @@ public class TEMPLATEController {
 //    }
 //
 //    /* UPDATE */
-//    //@PreAuthorize("hasRole('ROLE_ADMIN')")
 //    @PutMapping(value = "/v1/updateTEMPLATE", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> updateTEMPLATE(@RequestBody TEMPLATEUpdateDTO temPlateDTO){
+//    public ResponseEntity<Object> updateTEMPLATE(@Valid @RequestBody TEMPLATEUpdateDTO temPlateDTO){
 //        try {
 //            TEMPLATEReadDTO updatedTEMPLATEDTO = temPlateService.updateTEMPLATEByDTO(temPlateDTO);
 //
 //            if (updatedTEMPLATEDTO == null) {
 //                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body("No TEMPLATE found with Id: " + temPlateDTO.getTEMPLATEId());
+//                        .body("No TEMPLATE found with Id: '" + temPlateDTO.getTEMPLATEId() + "'. ");
 //            }
 //
 //            return ResponseEntity.ok().body(updatedTEMPLATEDTO);
 //        } catch (Exception e) {
 //            return ResponseEntity.internalServerError().body(
-//                    new ErrorResponse("Error updating TEMPLATE with Id: " + temPlateDTO.getTEMPLATEId(),
+//                    new ErrorResponse("Error updating TEMPLATE with Id: '" + temPlateDTO.getTEMPLATEId() + "'. ",
 //                            e.getMessage()));
 //        }
 //    }
 //
 //    /* DELETE */
-//    //@PreAuthorize("hasRole('ROLE_ADMIN')")
 //    @DeleteMapping(value = "/v1/deleteTEMPLATE/{temPlateId}", produces = "application/json;charset=UTF-8")
 //    public ResponseEntity<Object> deleteTEMPLATE(@PathVariable(name = "temPlateId") long temPlateId){
 //        try {
 //            if (!temPlateService.deleteTEMPLATE(temPlateId)) {
 //                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body("No TEMPLATE found with Id: " + temPlateId);
+//                        .body("No TEMPLATE found with Id: '" + temPlateId + "'. ");
 //            }
 //
-//            return ResponseEntity.ok().body("Deleted TEMPLATE with Id: " + temPlateId);
+//            return ResponseEntity.ok().body("Deleted TEMPLATE with Id: '" + temPlateId + "'. ");
 //        } catch (Exception e) {
 //            return ResponseEntity.internalServerError().body(
-//                    new ErrorResponse("Error deleting TEMPLATE with Id: " + temPlateId, e.getMessage()));
+//                    new ErrorResponse("Error deleting TEMPLATE with Id: '" + temPlateId + "'. ", e.getMessage()));
 //        }
 //    }
 //    /* ================================================ Ver 1 ================================================ */

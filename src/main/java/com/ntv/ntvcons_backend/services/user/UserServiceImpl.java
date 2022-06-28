@@ -18,8 +18,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,19 +44,25 @@ public class UserServiceImpl implements UserService{
 
         /* Check FK */
         if (!roleService.existsById(newUser.getRoleId())) {
-            errorMsg += "No Role found with Id: " + newUser.getRoleId()
-                    + ". Which violate constraint: FK_User_Role. ";
+            errorMsg += "No Role found with Id: '" + newUser.getRoleId()
+                    + "'. Which violate constraint: FK_User_Role. ";
+        }
+        if (newUser.getCreatedBy() != null) {
+            if (!userRepository.existsByUserIdAndIsDeletedIsFalse(newUser.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newUser.getCreatedBy()
+                        + "'. Which violate constraint: FK_User_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
         if (userRepository
-                .existsByUsernameAndPhoneAndEmailAndIsDeletedIsFalse(
+                .existsByUsernameOrPhoneOrEmailAndIsDeletedIsFalse(
                         newUser.getUsername(),
                         newUser.getPhone(),
                         newUser.getEmail())) {
-            errorMsg += "Already exists another User with username: " + newUser.getUsername()
-                    + " phone: " + newUser.getPhone()
-                    + " email: " + newUser.getEmail() + ". ";
+            errorMsg += "Already exists another User with username: '" + newUser.getUsername()
+                    + "', phone: '" + newUser.getPhone()
+                    + "', email: '" + newUser.getEmail() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -79,7 +87,7 @@ public class UserServiceImpl implements UserService{
 
     /* READ */
     @Override
-    public List<User> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
+    public Page<User> getPageAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
         Pageable paging;
         if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
@@ -93,35 +101,41 @@ public class UserServiceImpl implements UserService{
             return null;
         }
 
-        return userPage.getContent();
+        return userPage;
     }
     @Override
-    public List<UserReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        List<User> userList = getAll(pageNo, pageSize, sortBy, sortType);
-        
-        if (userList != null && !userList.isEmpty()) {
-            int totalPage = (int) Math.ceil((double) userList.size() / pageSize);
+    public List<UserReadDTO> getAllDTOInPaging(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
+        Page<User> userPage = getPageAll(pageNo, pageSize, sortBy, sortType);
 
-            /* Get associated User */
-            Map<Long, RoleReadDTO> roleIdRoleDTOMap =
-                    roleService.mapRoleIdRoleDTOByIdIn(
-                            userList.stream()
-                                    .map(User::getRoleId)
-                                    .collect(Collectors.toSet()));
-
-            return userList.stream()
-                    .map(user -> {
-                        UserReadDTO userReadDTO =
-                                modelMapper.map(user, UserReadDTO.class);
-
-                        userReadDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
-                        userReadDTO.setTotalPage(totalPage);
-
-                        return userReadDTO;})
-                    .collect(Collectors.toList());
+        if (userPage == null) {
+             return null;
         }
-        
-        return null;
+
+        List<User> userList = userPage.getContent();
+
+        if (userList.isEmpty()) {
+            return null;
+        }
+
+        int totalPage = userPage.getTotalPages();
+
+        /* Get associated Role */
+        Map<Long, RoleReadDTO> roleIdRoleDTOMap =
+                roleService.mapRoleIdRoleDTOByIdIn(
+                        userList.stream()
+                                .map(User::getRoleId)
+                                .collect(Collectors.toSet()));
+
+        return userList.stream()
+                .map(user -> {
+                    UserReadDTO userReadDTO =
+                            modelMapper.map(user, UserReadDTO.class);
+
+                    userReadDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
+                    userReadDTO.setTotalPage(totalPage);
+
+                    return userReadDTO;})
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -143,7 +157,12 @@ public class UserServiceImpl implements UserService{
             /* Not found with Id */
         }
 
-        return modelMapper.map(user, UserReadDTO.class);
+        UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
+
+        /* Get associated Role */
+        userDTO.setRole(roleService.getDTOById(user.getRoleId()));
+
+        return userDTO;
     }
 
     @Override
@@ -184,8 +203,51 @@ public class UserServiceImpl implements UserService{
                     return userDTO;})
                 .collect(Collectors.toList());
     }
+    @Override
+    public Map<Long, UserReadDTO> mapUserIdUserDTOByIdIn(Collection<Long> userIdCollection) throws Exception {
+        List<UserReadDTO> userDTOList = getAllDTOByIdIn(userIdCollection);
 
-    /* UPDATE */ @Override
+        if (userDTOList == null) {
+            return new HashMap<>();
+        }
+
+        return userDTOList.stream()
+                .collect(Collectors.toMap(UserReadDTO::getUserId, Function.identity()));
+    }
+
+    @Override
+    public List<User> getAllByRoleId(long roleId) throws Exception {
+        List<User> userList = userRepository.findAllByRoleIdAndIsDeletedIsFalse(roleId);
+
+        if (userList.isEmpty()) {
+            return null;
+        }
+
+        return userList;
+    }
+    @Override
+    public List<UserReadDTO> getAllDTOByRoleId(long roleId) throws Exception {
+        List<User> userList = getAllByRoleId(roleId);
+
+        if (userList == null) {
+            return null;
+        }
+
+        /* Get associated Role */
+        RoleReadDTO roleDTO = roleService.getDTOById(roleId);
+
+        return userList.stream()
+                .map(user -> {
+                    UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
+
+                    userDTO.setRole(roleDTO);
+
+                    return userDTO;})
+                .collect(Collectors.toList());
+    }
+
+    /* UPDATE */
+    @Override
     public User updateUser(User updatedUser) throws Exception {
         User oldUser = getById(updatedUser.getUserId());
 
@@ -198,21 +260,29 @@ public class UserServiceImpl implements UserService{
         /* Check FK (if changed) */
         if (!oldUser.getRoleId().equals(updatedUser.getRoleId())) {
             if (!roleService.existsById(updatedUser.getRoleId())) {
-                errorMsg += "No Role found with Id: " + updatedUser.getRoleId()
-                        + ". Which violate constraint: FK_User_Role. ";
+                errorMsg += "No Role found with Id: '" + updatedUser.getRoleId()
+                        + "'. Which violate constraint: FK_User_Role. ";
+            }
+        }
+        if (oldUser.getUpdatedBy() != null) {
+            if (!oldUser.getUpdatedBy().equals(updatedUser.getUpdatedBy())) {
+                if (!userRepository.existsByUserIdAndIsDeletedIsFalse(updatedUser.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedUser.getUpdatedBy()
+                            + "'. Which violate constraint: FK_User_User_UpdatedBy. ";
+                }
             }
         }
 
         /* Check duplicate */
         if (userRepository
-                .existsByUsernameAndPhoneAndEmailAndUserIdIsNotAndIsDeletedIsFalse(
+                .existsByUsernameOrPhoneOrEmailAndUserIdIsNotAndIsDeletedIsFalse(
                         updatedUser.getUsername(),
                         updatedUser.getPhone(),
                         updatedUser.getEmail(),
-                        updatedUser.getRoleId())) {
-            errorMsg += "Already exists another User with username: " + updatedUser.getUsername()
-                    + " phone: " + updatedUser.getPhone()
-                    + " email: " + updatedUser.getEmail() + ". ";
+                        updatedUser.getUserId())) {
+            errorMsg += "Already exists another User with username: '" + updatedUser.getUsername()
+                    + "', phone: '" + updatedUser.getPhone()
+                    + "', email: '" + updatedUser.getEmail() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -237,7 +307,7 @@ public class UserServiceImpl implements UserService{
 
     /* DELETE */
     @Override
-    public boolean deletedUser(long userId) throws Exception {
+    public boolean deleteUser(long userId) throws Exception {
         User user = getById(userId);
 
         if (user == null) {

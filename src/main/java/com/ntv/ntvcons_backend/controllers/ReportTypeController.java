@@ -63,8 +63,8 @@ public class ReportTypeController {
         }
     }
 
-    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                              @RequestParam(name = "searchType") SearchType searchType) {
         try {
             List<ReportTypeReadDTO> reportTypeDTOList;
@@ -75,7 +75,7 @@ public class ReportTypeController {
 
                     if (reportTypeDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No ReportType found with reportTypeId: " + searchParam);
+                                .body("No ReportType found with reportTypeId: '" + searchParam + "'. ");
                     }
 
                     reportTypeDTOList = new ArrayList<>(Collections.singletonList(reportTypeDTO));
@@ -86,7 +86,7 @@ public class ReportTypeController {
 
                     if (reportTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No ReportType found with name contains: " + searchParam);
+                                .body("No ReportType found with name contains: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -98,8 +98,8 @@ public class ReportTypeController {
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
-                            "Invalid parameter type for searchType: " + searchType
-                                    + "\nExpecting parameter of type: Long",
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
         } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
@@ -110,11 +110,11 @@ public class ReportTypeController {
 
             switch (searchType) {
                 case REPORT_TYPE_BY_ID:
-                    errorMsg += "reportTypeId: " + searchParam;
+                    errorMsg += "reportTypeId: '" + searchParam + "'. ";
                     break;
 
                 case REPORT_TYPE_BY_NAME_CONTAINS:
-                    errorMsg += "name contains: " + searchParam;
+                    errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
             }
 
@@ -131,13 +131,13 @@ public class ReportTypeController {
 
             if (updatedReportTypeDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No ReportType found with Id: " + reportTypeDTO.getReportTypeId());
+                        .body("No ReportType found with Id: '" + reportTypeDTO.getReportTypeId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedReportTypeDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating ReportType with Id: " + reportTypeDTO.getReportTypeId(),
+                    new ErrorResponse("Error updating ReportType with Id: '" + reportTypeDTO.getReportTypeId() + "'. ",
                             e.getMessage()));
         }
     }
@@ -149,13 +149,13 @@ public class ReportTypeController {
         try {
             if (!reportTypeService.deleteReportType(reportTypeId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No ReportType found with Id: " + reportTypeId);
+                        .body("No ReportType found with Id: '" + reportTypeId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted ReportType with Id: " + reportTypeId);
+            return ResponseEntity.ok().body("Deleted ReportType with Id: '" + reportTypeId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting ReportType with Id: " + reportTypeId, e.getMessage()));
+                    new ErrorResponse("Error deleting ReportType with Id: '" + reportTypeId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

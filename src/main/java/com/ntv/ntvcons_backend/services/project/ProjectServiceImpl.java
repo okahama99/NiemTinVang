@@ -131,20 +131,20 @@ public class ProjectServiceImpl implements ProjectService{
 
         /* Check FK */
         if (!userService.existsById(newProject.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: " + newProject.getCreatedBy()
-                    + ". Which violate constraint: FK_Project_User_CreatedBy. ";
+            errorMsg += "No User (CreatedBy) found with Id: '" + newProject.getCreatedBy()
+                    + "'. Which violate constraint: FK_Project_User_CreatedBy. ";
         }
         if (locationService.existsById(newProject.getLocationId())) {
             /* Should not happen, Location are 1st created in createProjectByDTO before this are executed */
-            errorMsg += "No Location found with Id: " + newProject.getLocationId()
-                    + ". Which violate constraint: FK_Project_Location. ";
+            errorMsg += "No Location found with Id: '" + newProject.getLocationId()
+                    + "'. Which violate constraint: FK_Project_Location. ";
         }
 
         /* Check duplicate */
         if (projectRepository
                 .existsByProjectNameAndIsDeletedIsFalse(
                         newProject.getProjectName())) {
-            errorMsg += "Already exists another Project with name: " + newProject.getProjectName() + ". ";
+            errorMsg += "Already exists another Project with name: '" + newProject.getProjectName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -435,7 +435,7 @@ public class ProjectServiceImpl implements ProjectService{
                 project.setActualCost(updateProjectModel.getActualCost());
                 project.setEstimatedCost(updateProjectModel.getEstimateCost());
 
-                project.setUpdatedAt(new Date());
+                project.setUpdatedAt(LocalDateTime.now());
 
                 project.setUpdatedBy(updateProjectModel.getUserId());
                 projectRepository.saveAndFlush(project);
@@ -456,15 +456,15 @@ public class ProjectServiceImpl implements ProjectService{
 
         /* Check FK (if changed) */
         if (!userService.existsById(updatedProject.getUpdatedBy())) {
-            errorMsg += "No User (UpdatedBy) found with Id: " + updatedProject.getUpdatedBy()
-                    + ". Which violate constraint: FK_Project_User_UpdatedBy. ";
+            errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProject.getUpdatedBy()
+                    + "'. Which violate constraint: FK_Project_User_UpdatedBy. ";
         }
         if (updatedProject.getLocationId() != null) {
             if (!oldProject.getLocationId().equals(updatedProject.getLocationId())) {
                 if (locationService.existsById(updatedProject.getLocationId())) {
                     /* Should not happen, location are already validated beforehand */
-                    errorMsg += "No Location found with Id: " + updatedProject.getLocationId()
-                            + ". Which violate constraint: FK_Project_Location. ";
+                    errorMsg += "No Location found with Id: '" + updatedProject.getLocationId()
+                            + "'. Which violate constraint: FK_Project_Location. ";
                 }
             }
         } else {
@@ -476,7 +476,7 @@ public class ProjectServiceImpl implements ProjectService{
                 .existsByProjectNameAndProjectIdIsNotAndIsDeletedIsFalse(
                         updatedProject.getProjectName(),
                         updatedProject.getProjectId())) {
-            errorMsg += "Already exists another Project with name: " + updatedProject.getProjectName() + ". ";
+            errorMsg += "Already exists another Project with name: '" + updatedProject.getProjectName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {

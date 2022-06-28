@@ -50,8 +50,7 @@ public class RequestServiceImpl implements RequestService{
         request.setRequesterId(createRequestModel.getRequesterId());
         request.setRequestTypeId(createRequestModel.getRequestTypeId());
         request.setRequestDesc(createRequestModel.getRequestDesc());
-        Instant instant = createRequestModel.getRequestDate().toInstant(ZoneOffset.UTC);
-        request.setCreatedAt(Date.from(instant));
+        request.setCreatedAt(createRequestModel.getRequestDate());
         request.setCreatedBy(createRequestModel.getRequesterId());
         request.setRequestDate(createRequestModel.getRequestDate());
         requestRepository.saveAndFlush(request);
@@ -150,8 +149,7 @@ public class RequestServiceImpl implements RequestService{
             request.setRequesterId(updateRequestModel.getRequesterId());
             request.setRequestTypeId(updateRequestModel.getRequestTypeId());
             request.setRequestDesc(updateRequestModel.getRequestDesc());
-            Date date = new Date();
-            request.setUpdatedAt(date);
+            request.setUpdatedAt(LocalDateTime.now());
             request.setUpdatedBy(updateRequestModel.getRequesterId());
             requestRepository.saveAndFlush(request);
             return true;

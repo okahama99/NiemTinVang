@@ -24,15 +24,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     /* postTitle */
     Optional<Post> findByPostTitleAndIsDeletedIsFalse(String postTitle);
     List<Post> findAllByPostTitleContainsAndIsDeletedIsFalse(String postTitleCollection);
-
-
-    /* authorId */
-    List<Post> findAllByAuthorIdAndIsDeletedIsFalse(long authorId);
-    List<Post> findAllByAuthorIdInAndIsDeletedIsFalse(Collection<Long> authorIdCollection);
-
-
-    /* createDate */
-    List<Post> findAllByCreateDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
-    List<Post> findAllByCreateDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
-    List<Post> findAllByCreateDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
 }

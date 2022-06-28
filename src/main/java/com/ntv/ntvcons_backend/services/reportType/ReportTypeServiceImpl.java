@@ -34,7 +34,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
         /* Check duplicate */
         if (reportTypeRepository.existsByReportTypeNameAndIsDeletedIsFalse(newReportType.getReportTypeName())){
-            errorMsg += "Already exists another ReportType with name: " + newReportType.getReportTypeName() +". ";
+            errorMsg += "Already exists another ReportType with name: '" + newReportType.getReportTypeName() +"'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -202,7 +202,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
                 .existsByReportTypeNameAndReportTypeIdIsNotAndIsDeletedIsFalse(
                         updatedReportType.getReportTypeName(),
                         updatedReportType.getReportTypeId())) {
-            errorMsg += "Already exists another ReportType with name: " + updatedReportType.getReportTypeName() +". ";
+            errorMsg += "Already exists another ReportType with name: '" + updatedReportType.getReportTypeName() +"'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {

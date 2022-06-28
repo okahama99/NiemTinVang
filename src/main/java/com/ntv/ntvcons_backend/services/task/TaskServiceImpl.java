@@ -49,8 +49,8 @@ public class TaskServiceImpl implements TaskService{
 
         /* Check FK */
         if (!projectService.existsById(newTask.getProjectId())) {
-            errorMsg += "No Project found with Id: " + newTask.getProjectId()
-                    + ". Which violate constraint: FK_Task_Project. ";
+            errorMsg += "No Project found with Id: '" + newTask.getProjectId()
+                    + "'. Which violate constraint: FK_Task_Project. ";
         }
 
         /* Check duplicate */
@@ -58,8 +58,8 @@ public class TaskServiceImpl implements TaskService{
                 .existsByProjectIdAndTaskNameAndIsDeletedIsFalse(
                         newTask.getProjectId(),
                         newTask.getTaskName())) {
-            errorMsg += "Already exists another Task with projectId: " + newTask.getProjectId()
-                    + " taskName: " + newTask.getTaskName() + ". ";
+            errorMsg += "Already exists another Task with projectId: '" + newTask.getProjectId()
+                    + "', taskName: '" + newTask.getTaskName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {

@@ -1,24 +1,32 @@
 package com.ntv.ntvcons_backend.dtos.taskAssignment;
 
-import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
-import io.swagger.annotations.ApiModelProperty;
+import com.ntv.ntvcons_backend.constants.Regex;
+import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Positive;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TaskAssignmentCreateDTO implements Serializable {
+public class TaskAssignmentCreateDTO extends BaseCreateDTO {
+    @Positive
+    @NotNull(message = "taskId REQUIRED for create")
     private Long taskId;
-    private UserReadDTO assigner;
-    private UserReadDTO assignee;
-    private String assignDate;
 
-    @JsonIgnore /* No serialize/deserialize */
-    @ApiModelProperty(hidden = true) /* No show on swagger */
-    private final Boolean isDeleted = false;
+    @Positive
+    @NotNull(message = "userId (assignerId) REQUIRED for create")
+    private Long assignerId;
+
+    @Positive
+    @NotNull(message = "userId (assigneeId) REQUIRED for create")
+    private Long assigneeId;
+
+    /** yyyy-MM-dd HH:mm */
+    @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
+    private String assignDate;
 }

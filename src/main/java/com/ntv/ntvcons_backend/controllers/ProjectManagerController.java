@@ -34,13 +34,13 @@ public class ProjectManagerController {
 
             if (updatedProjectManagerDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No ProjectManager found with Id: " + projectManagerDTO.getProjectManagerId());
+                        .body("No ProjectManager found with Id: '" + projectManagerDTO.getProjectManagerId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedProjectManagerDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating ProjectManager with Id: " + projectManagerDTO.getProjectManagerId(),
+                    new ErrorResponse("Error updating ProjectManager with Id: '" + projectManagerDTO.getProjectManagerId() + "'. ",
                             e.getMessage()));
         }
     }

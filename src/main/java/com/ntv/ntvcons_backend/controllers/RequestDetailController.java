@@ -83,13 +83,13 @@ public class RequestDetailController {
     public ResponseEntity<Object> deleteRequestDetail(@PathVariable(name = "requestDetailId") Long requestDetailId) {
         try {
             if (!requestDetailService.deleteRequestDetail(requestDetailId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No RequestDetail found with Id: " + requestDetailId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No RequestDetail found with Id: '" + requestDetailId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted RequestDetail with Id: " + requestDetailId);
+            return ResponseEntity.ok().body("Deleted RequestDetail with Id: '" + requestDetailId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting RequestDetail with Id: " + requestDetailId, e.getMessage()));
+                    new ErrorResponse("Error deleting RequestDetail with Id: '" + requestDetailId + "'. ", e.getMessage()));
         }
     }
 }

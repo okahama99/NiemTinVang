@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -125,8 +126,7 @@ public class BlueprintServiceImpl implements BlueprintService {
         blueprint.setDesignerName(updateBlueprintModel.getDesignerName());
         blueprint.setEstimatedCost(updateBlueprintModel.getEstimateCost());
         blueprint.setUpdatedBy(updateBlueprintModel.getUserId());
-        Date date = new Date();
-        blueprint.setUpdatedAt(date);
+        blueprint.setUpdatedAt(LocalDateTime.now());
         blueprintRepository.saveAndFlush(blueprint);
     }
 

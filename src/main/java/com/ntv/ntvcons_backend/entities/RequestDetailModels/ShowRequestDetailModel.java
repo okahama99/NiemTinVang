@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.entities.RequestDetailModels;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -13,6 +14,6 @@ public class ShowRequestDetailModel {
     private Double itemAmount, itemPrice;
 
     private Long createdBy, updatedBy;
-    private Date createdAt, updatedAt;
+    private LocalDateTime createdAt, updatedAt;
     private Double totalPage;
 }

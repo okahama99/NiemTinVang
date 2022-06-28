@@ -129,7 +129,7 @@ public class ProjectController {
 
             if (updatedProjectDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Project found with Id: " + projectDTO.getProjectId());
+                        .body("No Project found with Id: '" + projectDTO.getProjectId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedProjectDTO);
@@ -149,13 +149,13 @@ public class ProjectController {
     public ResponseEntity<Object> deleteProject(@PathVariable(name = "projectId") int projectId) {
         try {
             if (!projectService.deleteProject(projectId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Project found with Id: " + projectId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Project found with Id: '" + projectId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted Project with Id: " + projectId);
+            return ResponseEntity.ok().body("Deleted Project with Id: '" + projectId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting Project with Id: " + projectId, e.getMessage()));
+                    new ErrorResponse("Error deleting Project with Id: '" + projectId + "'. ", e.getMessage()));
         }
     }
 

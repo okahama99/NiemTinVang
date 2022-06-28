@@ -58,7 +58,7 @@ public class LocationServiceImpl implements LocationService {
         /* Check duplicate */
         if (locationRepository
                 .existsByCoordinateAndIsDeletedIsFalse(newLocation.getCoordinate())) {
-            errorMsg += "Already exists another Location with coordinate: " + newLocation.getCoordinate() + ". ";
+            errorMsg += "Already exists another Location with coordinate: '" + newLocation.getCoordinate() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -194,8 +194,7 @@ public class LocationServiceImpl implements LocationService {
           location.setProvince(updateLocationModel.getProvince());
           location.setCountry(updateLocationModel.getCountry());
           location.setCoordinate(updateLocationModel.getCoordinate());
-          Date date = new Date();
-          location.setUpdatedAt(date);
+          location.setUpdatedAt(LocalDateTime.now());
           location.setUpdatedBy(updateLocationModel.getUserId());
           locationRepository.saveAndFlush(location);
 
@@ -217,7 +216,7 @@ public class LocationServiceImpl implements LocationService {
                     .existsByCoordinateAndLocationIdIsNotAndIsDeletedIsFalse(
                             updatedLocation.getCoordinate(),
                             updatedLocation.getLocationId())) {
-                errorMsg += "Already exists another Location with coordinate: " + updatedLocation.getCoordinate() + ". ";
+                errorMsg += "Already exists another Location with coordinate: '" + updatedLocation.getCoordinate() + "'. ";
             }
         }
 

@@ -21,14 +21,11 @@ public class Post extends BaseEntity {
     @Column(name = "postId", nullable = false)
     private Long postId;
 
-    @Column(name = "authorId", nullable = false)
-    private Long authorId;
+    @Column(name = "authorName", nullable = false)
+    private Long authorName;
 
     @Column(name = "postTitle", nullable = false, length = 100)
     private String postTitle;
-
-    @Column(name = "createDate", nullable = false)
-    private LocalDateTime createDate;
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;
