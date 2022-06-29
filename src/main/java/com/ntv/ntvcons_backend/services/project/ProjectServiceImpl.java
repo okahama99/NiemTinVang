@@ -468,7 +468,7 @@ public class ProjectServiceImpl implements ProjectService{
                 }
             }
         } else {
-            oldProject.setLocationId(oldProject.getLocationId());
+            updatedProject.setLocationId(oldProject.getLocationId());
         }
 
         /* Check duplicate */
@@ -482,6 +482,9 @@ public class ProjectServiceImpl implements ProjectService{
         if (!errorMsg.trim().isEmpty()) {
             throw new IllegalArgumentException(errorMsg);
         }
+
+        updatedProject.setCreatedBy(oldProject.getCreatedBy());
+        updatedProject.setCreatedAt(oldProject.getCreatedAt());
 
         return projectRepository.saveAndFlush(updatedProject);
     }

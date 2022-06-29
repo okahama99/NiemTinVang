@@ -144,6 +144,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error Updating Project", e.getMessage()));
         }
