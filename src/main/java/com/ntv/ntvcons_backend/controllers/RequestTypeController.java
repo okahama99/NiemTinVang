@@ -63,8 +63,8 @@ public class RequestTypeController {
         }
     }
 
-    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                              @RequestParam(name = "searchType") SearchType searchType) {
         try {
             List<RequestTypeReadDTO> requestTypeDTOList;
@@ -75,7 +75,7 @@ public class RequestTypeController {
 
                     if (requestTypeDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No RequestType found with name contains: " + searchParam);
+                                .body("No RequestType found with name contains: '" + searchParam + "'. ");
                     }
 
                     requestTypeDTOList = new ArrayList<>(Collections.singletonList(requestTypeDTO));
@@ -86,7 +86,7 @@ public class RequestTypeController {
 
                     if (requestTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No RequestType found with name contains: " + searchParam);
+                                .body("No RequestType found with name contains: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -98,8 +98,8 @@ public class RequestTypeController {
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
-                            "Invalid parameter type for searchType: " + searchType
-                                    + "\nExpecting parameter of type: Long",
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
         } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
@@ -110,11 +110,11 @@ public class RequestTypeController {
 
             switch (searchType) {
                 case REQUEST_TYPE_BY_ID:
-                    errorMsg += "requestTypeId: " + searchParam;
+                    errorMsg += "requestTypeId: '" + searchParam + "'. ";
                     break;
 
                 case REQUEST_TYPE_BY_NAME_CONTAINS:
-                    errorMsg += "name contains: " + searchParam;
+                    errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
             }
 
@@ -131,13 +131,13 @@ public class RequestTypeController {
 
             if (updatedRequestTypeDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No RequestType found with Id: " + requestTypeDTO.getRequestTypeId());
+                        .body("No RequestType found with Id: '" + requestTypeDTO.getRequestTypeId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedRequestTypeDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating RequestType with Id: " + requestTypeDTO.getRequestTypeId(),
+                    new ErrorResponse("Error updating RequestType with Id: '" + requestTypeDTO.getRequestTypeId() + "'. ",
                             e.getMessage()));
         }
     }
@@ -149,13 +149,13 @@ public class RequestTypeController {
         try {
             if (!requestTypeService.deleteRequestType(requestTypeId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No RequestType found with Id: " + requestTypeId);
+                        .body("No RequestType found with Id: '" + requestTypeId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted RequestType with Id: " + requestTypeId);
+            return ResponseEntity.ok().body("Deleted RequestType with Id: '" + requestTypeId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting RequestType with Id: " + requestTypeId, e.getMessage()));
+                    new ErrorResponse("Error deleting RequestType with Id: '" + requestTypeId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

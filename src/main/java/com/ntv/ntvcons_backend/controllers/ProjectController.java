@@ -1,8 +1,11 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
+import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
+import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
+import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.services.location.LocationService;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -29,20 +33,47 @@ public class ProjectController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/v1/createProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProject(@RequestBody CreateProjectModel createProjectModel){
-        if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
-            return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
-        } else {
-            if(!locationService.checkCoordinate(createProjectModel.getCoordinate()))
-            {
-                boolean result = projectService.createProject(createProjectModel);
+        try {
+            if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
+                return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
+            } else {
+                if(!locationService.checkCoordinate(createProjectModel.getCoordinate()))
+                {
+                    boolean result = projectService.createProject(createProjectModel);
 
-                if (result) {
-                    return ResponseEntity.ok().body("Tạo thành công.");
+                    if (result) {
+                        return ResponseEntity.ok().body("Tạo thành công.");
+                    }
+                    return ResponseEntity.badRequest().body("Tạo thất bại.");
+                }else{
+                    return ResponseEntity.badRequest().body("Coordinate đã tồn tại.");
                 }
-                return ResponseEntity.badRequest().body("Tạo thất bại.");
-            }else{
-                return ResponseEntity.badRequest().body("Coordinate đã tồn tại.");
             }
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+        }
+    }
+
+    /** Alternate create project by Thanh, with check FK */
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = "/v1.1/createProject", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createProjectAlt1(@Valid @RequestBody ProjectCreateDTO projectDTO){
+        try {
+            ProjectReadDTO newProjectDTO = projectService.createProjectByDTO(projectDTO);
+
+            return ResponseEntity.ok().body(newProjectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
         }
     }
 
@@ -95,19 +126,42 @@ public class ProjectController {
         return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
 
+    /** Alternate update project by Thanh, with check FK */
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping(value = "/v1.1/updateProject", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateProjectAlt1(@Valid @RequestBody ProjectUpdateDTO projectDTO){
+        try {
+            ProjectReadDTO updatedProjectDTO = projectService.updateProjectByDTO(projectDTO);
+
+            if (updatedProjectDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Project found with Id: '" + projectDTO.getProjectId() + "'. ");
+            }
+
+            return ResponseEntity.ok().body(updatedProjectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error Updating Project", e.getMessage()));
+        }
+    }
+
     /* DELETE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/v1/deleteProject/{projectId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteProject(@PathVariable(name = "projectId") int projectId) {
         try {
             if (!projectService.deleteProject(projectId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Project found with Id: " + projectId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Project found with Id: '" + projectId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted Project with Id: " + projectId);
+            return ResponseEntity.ok().body("Deleted Project with Id: '" + projectId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting Project with Id: " + projectId, e.getMessage()));
+                    new ErrorResponse("Error deleting Project with Id: '" + projectId + "'. ", e.getMessage()));
         }
     }
 

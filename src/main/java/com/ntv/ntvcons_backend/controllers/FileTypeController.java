@@ -65,8 +65,8 @@ public class FileTypeController {
     }
 
     //@PreAuthorize("hasFileType('ROLE_ADMIN')")
-    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                              @RequestParam(name = "searchType") SearchType searchType) {
         try {
             List<FileTypeReadDTO> fileTypeDTOList;
@@ -77,27 +77,45 @@ public class FileTypeController {
 
                     if (fileTypeDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with fileTypeId: " + searchParam);
+                                .body("No FileType found with fileTypeId: '" + searchParam + "'. ");
                     }
 
                     fileTypeDTOList = new ArrayList<>(Collections.singletonList(fileTypeDTO));
                     break;
+
+//                case FILE_TYPE_BY_NAME:
+//                    fileTypeDTOList = fileTypeService.getDTOByFileTypeName(searchParam);
+//
+//                    if (fileTypeDTOList == null) {
+//                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                                .body("No FileType found with name contains: '" + searchParam + "'. ");
+//                    }
+//                    break;
 
                 case FILE_TYPE_BY_NAME_CONTAINS:
                     fileTypeDTOList = fileTypeService.getAllDTOByFileTypeNameContains(searchParam);
 
                     if (fileTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with name contains: " + searchParam);
+                                .body("No FileType found with name contains: '" + searchParam + "'. ");
                     }
                     break;
+
+//                case FILE_TYPE_BY_EXTENSION:
+//                    fileTypeDTOList = fileTypeService.getDTOByFileTypeExtension(searchParam);
+//
+//                    if (fileTypeDTOList == null) {
+//                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                                .body("No FileType found with name contains: '" + searchParam + "'. ");
+//                    }
+//                    break;
 
                 case FILE_TYPE_BY_EXTENSION_CONTAINS:
                     fileTypeDTOList = fileTypeService.getAllDTOByFileTypeExtensionContains(searchParam);
 
                     if (fileTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with name contains: " + searchParam);
+                                .body("No FileType found with name contains: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -109,8 +127,8 @@ public class FileTypeController {
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
-                            "Invalid parameter type for searchType: " + searchType
-                                    + "\nExpecting parameter of type: Long",
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
         } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
@@ -120,12 +138,20 @@ public class FileTypeController {
             String errorMsg = "Error searching for FileType with ";
 
             switch (searchType) {
+                case FILE_TYPE_BY_ID:
+                    errorMsg += "fileTypeId: '" + searchParam + "'. ";
+                    break;
+
+                case FILE_TYPE_BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
+                    break;
+
                 case FILE_TYPE_BY_NAME_CONTAINS:
-                    errorMsg += "name contains: " + searchParam;
+                    errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
 
                 case FILE_TYPE_BY_EXTENSION_CONTAINS:
-                    errorMsg += "extension contains: " + searchParam;
+                    errorMsg += "extension contains: '" + searchParam + "'. ";
                     break;
             }
 
@@ -142,13 +168,13 @@ public class FileTypeController {
 
             if (updatedFileTypeDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No FileType found with Id: " + fileTypeDTO.getFileTypeId());
+                        .body("No FileType found with Id: '" + fileTypeDTO.getFileTypeId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedFileTypeDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating FileType with Id: " + fileTypeDTO.getFileTypeId(),
+                    new ErrorResponse("Error updating FileType with Id: '" + fileTypeDTO.getFileTypeId() + "'. ",
                             e.getMessage()));
         }
     }
@@ -160,13 +186,13 @@ public class FileTypeController {
         try {
             if (!fileTypeService.deleteFileType(fileTypeId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No FileType found with Id: " + fileTypeId);
+                        .body("No FileType found with Id: '" + fileTypeId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted FileType with Id: " + fileTypeId);
+            return ResponseEntity.ok().body("Deleted FileType with Id: '" + fileTypeId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting FileType with Id: " + fileTypeId, e.getMessage()));
+                    new ErrorResponse("Error deleting FileType with Id: '" + fileTypeId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

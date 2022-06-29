@@ -19,10 +19,13 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
     /* Id */
     Optional<TaskAssignment> findByAssignmentIdAndIsDeletedIsFalse(long assignmentId);
     List<TaskAssignment> findAllByAssignmentIdInAndIsDeletedIsFalse(Collection<Long> assignmentIdCollection);
+    /* Id & taskId & assignerId & assigneeId */
+    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndIsDeletedIsFalse
+            (long taskId, long assignerId, long assigneeId, long assignmentId);
 
 
     /* taskId */
-    List<TaskAssignment> findAllByTaskIdAndIsDeletedIsFalse(long taskId);
+    Optional<TaskAssignment> findByTaskIdAndIsDeletedIsFalse(long taskId);
     List<TaskAssignment> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
 
 
@@ -34,6 +37,8 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
     /* assigneeId */
     List<TaskAssignment> findAllByAssigneeIdAndIsDeletedIsFalse(long assigneeId);
     List<TaskAssignment> findAllByAssigneeIdInAndIsDeletedIsFalse(Collection<Long> assigneeIdCollection);
+    /* taskId & assignerId & assigneeId */
+    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndIsDeletedIsFalse(long taskId, long assignerId, long assigneeId);
 
 
     /* assignDate */

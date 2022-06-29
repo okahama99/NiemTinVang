@@ -74,7 +74,7 @@ public class ReportDetailController {
 
             if (updatedReportDetailDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No ReportDetail found with Id: " + reportDetailDTO.getReportDetailId());
+                        .body("No ReportDetail found with Id: '" + reportDetailDTO.getReportDetailId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedReportDetailDTO);
@@ -84,7 +84,7 @@ public class ReportDetailController {
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating ReportDetail with Id: " + reportDetailDTO.getReportDetailId(),
+                    new ErrorResponse("Error updating ReportDetail with Id: '" + reportDetailDTO.getReportDetailId() + "'. ",
                             e.getMessage()));
         }
     }
@@ -96,13 +96,13 @@ public class ReportDetailController {
         try {
             if (!reportDetailService.deleteReportDetail(reportDetailId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No ReportDetail found with Id: " + reportDetailId);
+                        .body("No ReportDetail found with Id: '" + reportDetailId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted ReportDetail with Id: " + reportDetailId);
+            return ResponseEntity.ok().body("Deleted ReportDetail with Id: '" + reportDetailId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting ReportDetail with Id: " + reportDetailId, e.getMessage()));
+                    new ErrorResponse("Error deleting ReportDetail with Id: '" + reportDetailId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

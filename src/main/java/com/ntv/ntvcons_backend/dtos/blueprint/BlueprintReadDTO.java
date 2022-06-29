@@ -1,19 +1,17 @@
 package com.ntv.ntvcons_backend.dtos.blueprint;
 
-import com.ntv.ntvcons_backend.dtos.user.UserDTO;
+import com.ntv.ntvcons_backend.dtos.BaseReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BlueprintDTO implements Serializable {
-    private Integer blueprintId;
+public class BlueprintReadDTO extends BaseReadDTO {
+    private Long blueprintId;
+    private Long projectId;
+    private String designerName;
     private String blueprintName;
-    private UserDTO designer;
     private Double estimatedCost;
-    private Boolean isDeleted = false;
 }
