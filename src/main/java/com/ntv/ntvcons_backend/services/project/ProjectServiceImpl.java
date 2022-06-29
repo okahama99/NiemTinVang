@@ -134,7 +134,7 @@ public class ProjectServiceImpl implements ProjectService{
             errorMsg += "No User (CreatedBy) found with Id: '" + newProject.getCreatedBy()
                     + "'. Which violate constraint: FK_Project_User_CreatedBy. ";
         }
-        if (locationService.existsById(newProject.getLocationId())) {
+        if (!locationService.existsById(newProject.getLocationId())) {
             /* Should not happen, Location are 1st created in createProjectByDTO before this are executed */
             errorMsg += "No Location found with Id: '" + newProject.getLocationId()
                     + "'. Which violate constraint: FK_Project_Location. ";
@@ -461,7 +461,7 @@ public class ProjectServiceImpl implements ProjectService{
         }
         if (updatedProject.getLocationId() != null) {
             if (!oldProject.getLocationId().equals(updatedProject.getLocationId())) {
-                if (locationService.existsById(updatedProject.getLocationId())) {
+                if (!locationService.existsById(updatedProject.getLocationId())) {
                     /* Should not happen, location are already validated beforehand */
                     errorMsg += "No Location found with Id: '" + updatedProject.getLocationId()
                             + "'. Which violate constraint: FK_Project_Location. ";
