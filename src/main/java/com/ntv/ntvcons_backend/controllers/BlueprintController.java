@@ -73,13 +73,13 @@ public class BlueprintController {
     public ResponseEntity<Object> deleteBlueprint(@PathVariable(name = "blueprintId") long blueprintId) {
         try {
             if (!blueprintService.deleteBlueprint(blueprintId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Blueprint found with Id: " + blueprintId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Blueprint found with Id: '" + blueprintId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted Blueprint with Id: " + blueprintId);
+            return ResponseEntity.ok().body("Deleted Blueprint with Id: '" + blueprintId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting Blueprint with Id: " + blueprintId, e.getMessage()));
+                    new ErrorResponse("Error deleting Blueprint with Id: '" + blueprintId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

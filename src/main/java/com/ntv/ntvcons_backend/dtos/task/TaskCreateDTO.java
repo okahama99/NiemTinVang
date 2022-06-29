@@ -1,9 +1,5 @@
 package com.ntv.ntvcons_backend.dtos.task;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.ntv.ntvcons_backend.dtos.project.ProjectDTO;
-import com.ntv.ntvcons_backend.dtos.user.UserDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +7,6 @@ import lombok.NoArgsConstructor;
 import net.minidev.json.annotate.JsonIgnore;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor

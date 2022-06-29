@@ -65,9 +65,9 @@ public class TaskController {
         }
     }
 
-    /* TODO: search by date (plan, actual); separate func or mod this one */
-    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+    /* TODO"'. " search by date (plan, actual); separate func or mod this one */
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                              @RequestParam(name = "searchType") SearchType searchType) {
         try {
             List<TaskReadDTO> taskDTOList;
@@ -78,7 +78,7 @@ public class TaskController {
 
                     if (taskDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Task found with taskId: " + searchParam);
+                                .body("No Task found with taskId: '" + searchParam + "'. ");
                     }
 
                     taskDTOList = new ArrayList<>(Collections.singletonList(taskDTO));
@@ -89,7 +89,7 @@ public class TaskController {
 
                     if (taskDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Task found with name contains: " + searchParam);
+                                .body("No Task found with name contains: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -98,7 +98,7 @@ public class TaskController {
 
                     if (taskDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Task found with projectId: " + searchParam);
+                                .body("No Task found with projectId: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -110,8 +110,8 @@ public class TaskController {
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
-                            "Invalid parameter type for searchType: " + searchType
-                                    + "\nExpecting parameter of type: Long",
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
         } catch (IllegalArgumentException iAE) {
             return ResponseEntity.badRequest().body(
@@ -121,15 +121,15 @@ public class TaskController {
 
             switch (searchType) {
                 case TASK_BY_ID:
-                    errorMsg += "taskId: " + searchParam;
+                    errorMsg += "taskId: '" + searchParam + "'. ";
                     break;
 
                 case TASK_BY_NAME_CONTAINS:
-                    errorMsg += "name contains: " + searchParam;
+                    errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
 
                 case TASK_BY_PROJECT_ID:
-                    errorMsg += "projectId: " + searchParam;
+                    errorMsg += "projectId: '" + searchParam + "'. ";
                     break;
             }
 
@@ -145,7 +145,7 @@ public class TaskController {
 
             if (updatedTaskDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Task found with Id: " + taskDTO.getTaskId());
+                        .body("No Task found with Id: '" + taskDTO.getTaskId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedTaskDTO);
@@ -155,7 +155,7 @@ public class TaskController {
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating Task with Id: " + taskDTO.getTaskId(), e.getMessage()));
+                    new ErrorResponse("Error updating Task with Id: '" + taskDTO.getTaskId() + "'. ", e.getMessage()));
         }
     }
 
@@ -164,13 +164,13 @@ public class TaskController {
     public ResponseEntity<Object> deleteTask(@PathVariable(name = "taskId") long taskId) {
         try {
             if (!taskService.deleteTask(taskId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Task found with Id: " + taskId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Task found with Id: '" + taskId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted Task with Id: " + taskId);
+            return ResponseEntity.ok().body("Deleted Task with Id: '" + taskId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting Task with Id: " + taskId, e.getMessage()));
+                    new ErrorResponse("Error deleting Task with Id: '" + taskId + "'. ", e.getMessage()));
         }
 
     }

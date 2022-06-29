@@ -68,8 +68,8 @@ public class ReportController {
     }
     
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByParam(@RequestParam String searchParam, 
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam, 
                                              @RequestParam(name = "searchType") SearchType searchType) {
         try {
             List<ReportReadDTO> reportDTOList;
@@ -80,7 +80,7 @@ public class ReportController {
 
                     if (reportDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Report found with reportId: " + searchParam);
+                                .body("No Report found with reportId: '" + searchParam + "'. ");
                     }
 
                     reportDTOList = new ArrayList<>(Collections.singletonList(reportDTO));
@@ -91,7 +91,7 @@ public class ReportController {
 
                     if (reportDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Report found with projectId: " + searchParam);
+                                .body("No Report found with projectId: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -100,7 +100,7 @@ public class ReportController {
 
                     if (reportDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Report found with reporterId: " + searchParam);
+                                .body("No Report found with reporterId: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -109,7 +109,7 @@ public class ReportController {
 
                     if (reportDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Report found with reportTypeId: " + searchParam);
+                                .body("No Report found with reportTypeId: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -121,8 +121,8 @@ public class ReportController {
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
-                            "Invalid parameter type for searchType: " + searchType 
-                                    + "\nExpecting parameter of type: Long", 
+                            "Invalid parameter type for searchType: '" + searchType 
+                                    + "'. Expecting parameter of type: Long", 
                             nFE.getMessage()));
         } catch (IllegalArgumentException iAE) {
             /* Catch invalid searchType */
@@ -133,19 +133,19 @@ public class ReportController {
 
             switch (searchType) {
                 case REPORT_BY_ID:
-                    errorMsg += "reportId: " + searchParam;
+                    errorMsg += "reportId: '" + searchParam + "'. ";
                     break;
 
                 case REPORT_BY_PROJECT_ID:
-                    errorMsg += "projectId: " + searchParam;
+                    errorMsg += "projectId: '" + searchParam + "'. ";
                     break;
 
                 case REPORT_BY_REPORTER_ID:
-                    errorMsg += "reporterId: " + searchParam;
+                    errorMsg += "reporterId: '" + searchParam + "'. ";
                     break;
 
                 case REPORT_BY_REPORT_TYPE_ID:
-                    errorMsg += "reportTypeId: " + searchParam;
+                    errorMsg += "reportTypeId: '" + searchParam + "'. ";
                     break;
             }
 
@@ -170,7 +170,7 @@ public class ReportController {
 
             if (updatedReportDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Report found with Id: " + reportDTO.getReportId());
+                        .body("No Report found with Id: '" + reportDTO.getReportId() + "'. ");
             }
 
             return ResponseEntity.ok().body(updatedReportDTO);
@@ -180,7 +180,7 @@ public class ReportController {
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating Report with Id: " + reportDTO.getReportId(),
+                    new ErrorResponse("Error updating Report with Id: '" + reportDTO.getReportId() + "'. ",
                             e.getMessage()));
         }
     }
@@ -191,13 +191,13 @@ public class ReportController {
     public ResponseEntity<Object> deleteReport(@PathVariable(name = "reportId") long reportId){
         try {
             if (!reportService.deleteReport(reportId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found with Id: " + reportId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found with Id: '" + reportId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted Report with Id: " + reportId);
+            return ResponseEntity.ok().body("Deleted Report with Id: '" + reportId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting Report with Id: " + reportId, e.getMessage()));
+                    new ErrorResponse("Error deleting Report with Id: '" + reportId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

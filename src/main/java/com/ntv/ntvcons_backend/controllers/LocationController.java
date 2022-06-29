@@ -71,13 +71,13 @@ public class LocationController {
     public ResponseEntity<Object> deleteLocation(@PathVariable(name = "locationId") long locationId) {
         try {
             if (!locationService.deleteLocation(locationId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Location found with Id: " + locationId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Location found with Id: '" + locationId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted Location with Id: " + locationId);
+            return ResponseEntity.ok().body("Deleted Location with Id: '" + locationId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting Location with Id: " + locationId, e.getMessage()));
+                    new ErrorResponse("Error deleting Location with Id: '" + locationId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

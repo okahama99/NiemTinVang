@@ -1,6 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.worker;
 
-import com.ntv.ntvcons_backend.dtos.location.LocationDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +15,6 @@ public class WorkerDTO implements Serializable {
     private String fullName;
     private String citizenId;
     private String socialSecurityCode;
-    private LocationDTO address;
+    private LocationReadDTO address;
     private Boolean isDeleted = false;
 }

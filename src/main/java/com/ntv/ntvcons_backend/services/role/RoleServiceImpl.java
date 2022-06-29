@@ -34,7 +34,7 @@ public class RoleServiceImpl implements RoleService {
 
         /* Check duplicate */
         if (roleRepository.existsByRoleNameAndIsDeletedIsFalse(newRole.getRoleName())) {
-            errorMsg += "Already exists another Role with name: " + newRole.getRoleName() + "\n";
+            errorMsg += "Already exists another Role with name: '" + newRole.getRoleName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -201,7 +201,7 @@ public class RoleServiceImpl implements RoleService {
                 .existsByRoleNameAndRoleIdIsNotAndIsDeletedIsFalse(
                         updatedRole.getRoleName(),
                         updatedRole.getRoleId())) {
-            errorMsg += "Already exists another Role with name: " + updatedRole.getRoleName() + "\n";
+            errorMsg += "Already exists another Role with name: '" + updatedRole.getRoleName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {

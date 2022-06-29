@@ -1,7 +1,8 @@
 package com.ntv.ntvcons_backend.services.requestDetail;
 
 import com.google.common.base.Converter;
-import com.ntv.ntvcons_backend.entities.*;
+import com.ntv.ntvcons_backend.entities.Request;
+import com.ntv.ntvcons_backend.entities.RequestDetail;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.ShowRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.UpdateRequestDetailModel;
@@ -39,6 +40,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
             requestDetail.setItemDesc(createRequestDetailModel.getItemDesc());
             requestDetail.setItemPrice(createRequestDetailModel.getItemPrice());
             requestDetail.setItemUnit(createRequestDetailModel.getItemUnit());
+
             requestDetail.setCreatedAt(LocalDateTime.now());
             requestDetail.setCreatedBy(request.get().getRequesterId());
             requestDetailRepository.saveAndFlush(requestDetail);

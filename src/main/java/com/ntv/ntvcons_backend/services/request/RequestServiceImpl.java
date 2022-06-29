@@ -55,7 +55,9 @@ public class RequestServiceImpl implements RequestService{
         request.setRequesterId(createRequestModel.getRequesterId());
         request.setRequestTypeId(createRequestModel.getRequestTypeId());
         request.setRequestDesc(createRequestModel.getRequestDesc());
+
         request.setCreatedAt(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
+
         request.setCreatedBy(createRequestModel.getRequesterId());
         request.setRequestDate(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
         requestRepository.saveAndFlush(request);

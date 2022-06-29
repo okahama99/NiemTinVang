@@ -141,13 +141,13 @@ public class RequestController {
     public ResponseEntity<Object> deleteRequest(@PathVariable(name = "requestId") Long requestId) {
         try {
             if (!requestService.deleteRequest(requestId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found with Id: " + requestId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found with Id: '" + requestId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted Request with Id: " + requestId);
+            return ResponseEntity.ok().body("Deleted Request with Id: '" + requestId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting Request with Id: " + requestId, e.getMessage()));
+                    new ErrorResponse("Error deleting Request with Id: '" + requestId + "'. ", e.getMessage()));
         }
     }
 
