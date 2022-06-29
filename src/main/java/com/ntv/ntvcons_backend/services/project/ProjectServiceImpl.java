@@ -184,8 +184,14 @@ public class ProjectServiceImpl implements ProjectService{
                     LocalDateTime.parse(newProjectDTO.getActualEndDate(), dateTimeFormatter));
         }
 
+        LocationReadDTO locationDTO;
         /* Create Location first (to get locationId) */
-        LocationReadDTO locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation());
+        if (newProjectDTO.getLocation().getIsNewLocation()) {
+            locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation().getNewLocation());
+        } else { /* Or use existing Location */
+            locationDTO = locationService.getDTOById(newProjectDTO.getLocation().getExistingLocationId());
+        }
+        /* Set locationId because createProject() check FK */
         newProject.setLocationId(locationDTO.getLocationId());
 
         newProject = createProject(newProject);
@@ -520,6 +526,7 @@ public class ProjectServiceImpl implements ProjectService{
         LocationReadDTO locationDTO;
         if (updatedProjectDTO.getLocation() != null) {
             locationDTO = locationService.updateLocationByDTO(updatedProjectDTO.getLocation());
+
             if (locationDTO == null) {
                 /* Not found location with Id, NEED TO STOP */
                 throw new IllegalArgumentException("Invalid locationId, No location found with Id to update");
