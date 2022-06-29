@@ -21,11 +21,7 @@ public class Post extends BaseEntity {
     @Column(name = "postId", nullable = false)
     private Long postId;
 
-<<<<<<< HEAD
-    @Column(name = "authorName", nullable = false)
-=======
     @Column(name = "authorName", nullable = false, length = 100)
->>>>>>> master
     private Long authorName;
 
     @Column(name = "postTitle", nullable = false, length = 100)
