@@ -164,10 +164,9 @@ public class ProjectServiceImpl implements ProjectService{
 
         Project newProject = modelMapper.map(newProjectDTO, Project.class);
 
-        if (newProjectDTO.getPlanStartDate() != null) {
-            newProject.setPlanStartDate(
-                    LocalDateTime.parse(newProjectDTO.getPlanStartDate(), dateTimeFormatter));
-        }
+        /* Already check not null */
+        newProject.setPlanStartDate(
+                LocalDateTime.parse(newProjectDTO.getPlanStartDate(), dateTimeFormatter));
 
         if (newProjectDTO.getPlanEndDate() != null) {
             newProject.setPlanEndDate(
@@ -184,19 +183,48 @@ public class ProjectServiceImpl implements ProjectService{
                     LocalDateTime.parse(newProjectDTO.getActualEndDate(), dateTimeFormatter));
         }
 
-        /* Create Location first (to get locationId) */
-        LocationReadDTO locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation());
+        LocationReadDTO locationDTO;
+        switch (newProjectDTO.getLocation().getCreateOption()) {
+            case CREATE_NEW_LOCATION:
+                if (newProjectDTO.getLocation().getNewLocation() == null) {
+                    throw new IllegalArgumentException("Missing REQUIRED newLocation");
+                }
+
+                /* Create Location first (to get locationId) */
+                locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation().getNewLocation());
+                break;
+
+            case SELECT_EXISTING_LOCATION:
+                if (newProjectDTO.getLocation().getExistingLocationId() == null) {
+                    throw new IllegalArgumentException("Missing REQUIRED existingLocationId");
+                }
+
+                /* Get associated Location */
+                locationDTO = locationService.getDTOById(newProjectDTO.getLocation().getExistingLocationId());
+
+                if (locationDTO == null) {
+                    /* Not found location with Id, NEED TO STOP */
+                    throw new IllegalArgumentException("No location found with Id: '"
+                            + newProjectDTO.getLocation().getExistingLocationId() +"'. ");
+                }
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid createOption used");
+        }
+
+        /* Set locationId because createProject() check FK */
         newProject.setLocationId(locationDTO.getLocationId());
 
         newProject = createProject(newProject);
 
         ProjectReadDTO projectDTO = modelMapper.map(newProject, ProjectReadDTO.class);
 
-        /* TODO: Get associated Blueprint */
-//        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(newProject.getProjectId()));
-
         /* Set associated Location */
         projectDTO.setLocation(locationDTO);
+
+        /* TODO: Create or seet associated Blueprint */
+//        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(newProject.getProjectId()));
 
         return projectDTO;
     }
@@ -455,9 +483,18 @@ public class ProjectServiceImpl implements ProjectService{
         String errorMsg = "";
 
         /* Check FK (if changed) */
-        if (!userService.existsById(updatedProject.getUpdatedBy())) {
-            errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProject.getUpdatedBy()
-                    + "'. Which violate constraint: FK_Project_User_UpdatedBy. ";
+        if (oldProject.getUpdatedBy() != null) {
+            if (!oldProject.getUpdatedBy().equals(updatedProject.getUpdatedBy())) {
+                if (!userService.existsById(updatedProject.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProject.getUpdatedBy()
+                            + "'. Which violate constraint: FK_Project_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (!userService.existsById(updatedProject.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProject.getUpdatedBy()
+                        + "'. Which violate constraint: FK_Project_User_UpdatedBy. ";
+            }
         }
         if (updatedProject.getLocationId() != null) {
             if (!oldProject.getLocationId().equals(updatedProject.getLocationId())) {
@@ -499,10 +536,8 @@ public class ProjectServiceImpl implements ProjectService{
 
         Project updatedProject = modelMapper.map(updatedProjectDTO, Project.class);
 
-        if (updatedProjectDTO.getPlanStartDate() != null) {
-            updatedProject.setPlanStartDate(
-                    LocalDateTime.parse(updatedProjectDTO.getPlanStartDate(), dateTimeFormatter));
-        }
+        updatedProject.setPlanStartDate(
+                LocalDateTime.parse(updatedProjectDTO.getPlanStartDate(), dateTimeFormatter));
 
         if (updatedProjectDTO.getPlanEndDate() != null) {
             updatedProject.setPlanEndDate(
@@ -522,18 +557,58 @@ public class ProjectServiceImpl implements ProjectService{
         /* Update Location if changed / Get associated Location  */
         LocationReadDTO locationDTO;
         if (updatedProjectDTO.getLocation() != null) {
-            locationDTO = locationService.updateLocationByDTO(updatedProjectDTO.getLocation());
-            if (locationDTO == null) {
-                /* Not found location with Id, NEED TO STOP */
-                throw new IllegalArgumentException("Invalid locationId, No location found with Id to update");
+            switch (updatedProjectDTO.getLocation().getUpdateOption()) {
+                case CREATE_NEW_LOCATION:
+                    if (updatedProjectDTO.getLocation().getNewLocation() == null) {
+                        throw new IllegalArgumentException("Missing REQUIRED newLocation");
+                    }
+
+                    /* Create Location first (to get locationId) */
+                    locationDTO = locationService.createLocationByDTO(updatedProjectDTO.getLocation().getNewLocation());
+                    break;
+
+                case SELECT_NEW_EXISTING_LOCATION:
+                    if (updatedProjectDTO.getLocation().getExistingLocationId() == null) {
+                        throw new IllegalArgumentException("Missing REQUIRED existingLocationId");
+                    }
+
+                    /* Get associated Location */
+                    locationDTO = locationService.getDTOById(updatedProjectDTO.getLocation().getExistingLocationId());
+
+                    if (locationDTO == null) {
+                        /* Not found location with Id, NEED TO STOP */
+                        throw new IllegalArgumentException("No location found with Id: '"
+                                + updatedProjectDTO.getLocation().getExistingLocationId() +"'. ");
+                    }
+                    break;
+
+                case UPDATE_EXISTING_LOCATION_USED:
+                    if (updatedProjectDTO.getLocation().getExistingLocationId() == null) {
+                        throw new IllegalArgumentException("Missing REQUIRED existingLocationId");
+                    }
+
+                    /* Get associated Location */
+                    locationDTO =
+                            locationService.updateLocationByDTO(updatedProjectDTO.getLocation().getUpdatedLocation());
+
+                    if (locationDTO == null) {
+                        /* Not found location with Id, NEED TO STOP */
+                        throw new IllegalArgumentException("Invalid locationId, No location found with Id to update");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid updateOption used");
             }
 
+            /* Set locationId because updateProject() check FK */
             updatedProject.setLocationId(locationDTO.getLocationId());
 
             updatedProject = updateProject(updatedProject);
         } else {
             updatedProject = updateProject(updatedProject);
 
+            /* Get associated Location */
             locationDTO = locationService.getDTOById(updatedProject.getLocationId());
         }
 
