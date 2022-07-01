@@ -14,6 +14,8 @@ public interface RequestService {
     List<ShowRequestModel> getAllAvailableRequest(int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<ShowRequestModel> getByProjectId(Long projectId, int pageNo, int pageSize, String sortBy, boolean sortType);
+
+    ShowRequestModel getByRequestId(Long requestId);
     /* UPDATE */
     boolean updateRequest(UpdateRequestModel updateRequestModel);
 

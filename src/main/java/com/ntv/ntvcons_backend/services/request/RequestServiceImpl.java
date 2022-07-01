@@ -267,6 +267,74 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
+    public ShowRequestModel getByRequestId(Long requestId) {
+        Optional<Request> request = requestRepository.findByRequestIdAndIsDeletedIsFalse(requestId);
+        ShowRequestModel model = new ShowRequestModel();
+        if(request!=null) {
+            Optional<Project> project = projectRepository.findById(request.get().getProjectId());
+            Optional<User> requester = userRepository.findById(request.get().getRequesterId());
+            List<RequestDetail> detail = requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(request.get().getRequestId());
+
+            Optional<RequestType> requestType = requestTypeRepository.findById(request.get().getRequestTypeId());
+
+            model.setRequestId(request.get().getRequestId());
+            model.setProjectId(request.get().getProjectId());
+            if (project.isPresent()) {
+                model.setProjectName(project.get().getProjectName());
+            } else {
+                model.setProjectName(null);
+            }
+
+            model.setRequesterId(request.get().getRequesterId());
+            if (requester.isPresent()) {
+                model.setRequesterName(requester.get().getUsername());
+            } else {
+                model.setRequesterName(null);
+            }
+
+            model.setRequestTypeId(request.get().getRequestTypeId());
+            if (requestType.isPresent()) {
+                model.setRequestTypeName(requestType.get().getRequestTypeName());
+            } else {
+                model.setRequestTypeName(null);
+            }
+
+            model.setRequestDate(request.get().getRequestDate());
+            model.setRequestDesc(request.get().getRequestDesc());
+
+            if (request.get().getVerifierId() != null) {
+                model.setVerifierId(request.get().getVerifierId());
+                Optional<User> verifier = userRepository.findById(request.get().getVerifierId());
+                if (verifier.isPresent()) {
+                    model.setVerifierName(verifier.get().getUsername());
+                } else {
+                    model.setVerifierName(null);
+                }
+            } else {
+                model.setVerifierId(null);
+                model.setVerifierName("");
+            }
+
+            if (detail != null) {
+                model.setRequestDetailList(detail);
+            } else {
+                model.setRequestDetailList(null);
+            }
+
+            model.setVerifyDate(request.get().getVerifyDate());
+            model.setVerifyNote(request.get().getVerifyNote());
+            model.setIsVerified(request.get().getIsVerified());
+            model.setIsApproved(request.get().getIsApproved());
+
+            model.setCreatedAt(request.get().getCreatedAt());
+            model.setCreatedBy(request.get().getCreatedBy());
+            model.setUpdatedAt(request.get().getCreatedAt());
+            model.setUpdatedBy(request.get().getUpdatedBy());
+        }
+        return model;
+    }
+
+    @Override
     public boolean updateRequest(UpdateRequestModel updateRequestModel) {
         Request request = requestRepository.findById(updateRequestModel.getRequestId()).orElse(null);
         Optional<Project> project = projectRepository.findById(request.getProjectId());

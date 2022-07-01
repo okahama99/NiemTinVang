@@ -99,16 +99,26 @@ public class RequestController {
         }
     }
 
-//    @GetMapping(value = "/v1/getAllById", produces = "application/json;charset=UTF-8")
-//    public @ResponseBody
-//    List<ProjectModel> getAllById(@RequestParam long projectId,
-//                                  @RequestParam int pageNo,
-//                                  @RequestParam int pageSize,
-//                                  @RequestParam String sortBy,
-//                                  @RequestParam boolean sortType) {
-//        List<ProjectModel> projects = projectService.getAllById(projectId, pageNo, pageSize, sortBy, sortType);
-//        return projects;
-//    }
+    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = "/v1/getByRequestId", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByRequestId(@RequestParam Long requestId) {
+        try {
+            ShowRequestModel requests = requestService.getByRequestId(requestId);
+
+            if (requests == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found");
+            }
+
+            return ResponseEntity.ok().body(requests);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error searching for Request", e.getMessage()));
+        }
+    }
 
     /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
