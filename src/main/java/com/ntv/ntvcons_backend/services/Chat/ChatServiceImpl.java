@@ -1,7 +1,9 @@
-package com.ntv.ntvcons_backend.Chat;
+package com.ntv.ntvcons_backend.services.Chat;
 
 import com.ntv.ntvcons_backend.Enum.Status;
 import com.ntv.ntvcons_backend.entities.ChatModels.ChatRoomModel;
+import com.ntv.ntvcons_backend.entities.ChatModels.ListChatRoomModel;
+import com.ntv.ntvcons_backend.entities.ChatModels.MessageModel;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @Service
 public class ChatServiceImpl implements ChatService{

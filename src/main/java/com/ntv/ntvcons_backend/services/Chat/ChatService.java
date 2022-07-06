@@ -1,4 +1,4 @@
-package com.ntv.ntvcons_backend.Chat;
+package com.ntv.ntvcons_backend.services.Chat;
 
 
 import com.ntv.ntvcons_backend.entities.ChatModels.ListChatRoomModel;
