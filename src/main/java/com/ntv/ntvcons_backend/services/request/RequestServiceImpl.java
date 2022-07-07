@@ -55,6 +55,7 @@ public class RequestServiceImpl implements RequestService{
         request.setRequesterId(createRequestModel.getRequesterId());
         request.setRequestTypeId(createRequestModel.getRequestTypeId());
         request.setRequestDesc(createRequestModel.getRequestDesc());
+        request.setRequestName(createRequestModel.getRequestName());
 
         request.setCreatedAt(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
 
@@ -102,6 +103,7 @@ public class RequestServiceImpl implements RequestService{
                             Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
 
                             model.setRequestId(request.getRequestId());
+                            model.setRequestName(request.getRequestName());
                             model.setProjectId(request.getProjectId());
                             if(project.isPresent()){
                                 model.setProjectName(project.get().getProjectName());
@@ -197,6 +199,7 @@ public class RequestServiceImpl implements RequestService{
                     Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
 
                     model.setRequestId(request.getRequestId());
+                    model.setRequestName(request.getRequestName());
                     model.setProjectId(request.getProjectId());
                     if(project.isPresent()){
                         model.setProjectName(project.get().getProjectName());
@@ -278,6 +281,7 @@ public class RequestServiceImpl implements RequestService{
             Optional<RequestType> requestType = requestTypeRepository.findById(request.get().getRequestTypeId());
 
             model.setRequestId(request.get().getRequestId());
+            model.setRequestName(request.get().getRequestName());
             model.setProjectId(request.get().getProjectId());
             if (project.isPresent()) {
                 model.setProjectName(project.get().getProjectName());
@@ -344,16 +348,11 @@ public class RequestServiceImpl implements RequestService{
         {
             request.setProjectId(updateRequestModel.getProjectId());
             request.setRequesterId(updateRequestModel.getRequesterId());
+            request.setRequestName(updateRequestModel.getRequestName());
             request.setRequestTypeId(updateRequestModel.getRequestTypeId());
             request.setRequestDesc(updateRequestModel.getRequestDesc());
             request.setUpdatedAt(LocalDateTime.now());
             request.setUpdatedBy(updateRequestModel.getRequesterId());
-            if(updateRequestModel.getCreateRequestDetailModels() != null)
-            {
-                for (CreateRequestDetailModel createRequestDetailModel : updateRequestModel.getCreateRequestDetailModels()) {
-                    requestDetailService.createRequest(createRequestDetailModel);
-                }
-            }
             for (UpdateRequestDetailModel updateRequestDetailModel : updateRequestModel.getUpdateRequestDetailModels()) {
                 requestDetailService.updateRequestDetail(updateRequestDetailModel);
             }

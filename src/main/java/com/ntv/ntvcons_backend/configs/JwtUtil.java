@@ -64,7 +64,6 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .claim("role", userPrincipal.getAuthorities())
                 .claim("id", userPrincipal.getUserID())
-                //.claim("avatar", user.getAvatar()) //TODO : Xong db thì mở
                 .claim("userName", user.getUsername())
                 .claim("email", user.getEmail())
                 .claim("phone", user.getPhone())

@@ -10,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Controller
 @RequestMapping("/user")
@@ -27,6 +26,7 @@ public class UserController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
+    @PreAuthorize("hasAnyRole('Admin','Staff')")
     @PostMapping(value = "/v1/createUser", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createUser(@Valid @RequestBody UserCreateDTO userDTO){
         try {
@@ -44,6 +44,7 @@ public class UserController {
     }
 
     /* READ */
+    @PreAuthorize("hasAnyRole('Admin','Staff')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -68,6 +69,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('Admin','Staff')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                              @RequestParam(name = "searchType") SearchType searchType) {
@@ -181,6 +183,7 @@ public class UserController {
     }
 
     /* UPDATE */
+    @PreAuthorize("hasAnyRole('Admin','Staff')")
     @PutMapping(value = "/v1/updateUser", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UserUpdateDTO userDTO){
         try {
@@ -204,6 +207,7 @@ public class UserController {
     }
 
     /* DELETE */
+    @PreAuthorize("hasAnyRole('Admin','Staff')")
     @DeleteMapping(value = "/v1/deleteUser/{userId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteUser(@PathVariable(name = "userId") long userId){
         try {
@@ -219,5 +223,4 @@ public class UserController {
         }
     }
     /* ================================================ Ver 1 ================================================ */
-
 }

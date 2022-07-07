@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class ListChatRoomModel {
-    private String newestMessage, userName, avatar;
+public class ListChatGroupModel {
+    private String newestMessage, userName;
     private double totalPage;
     private Long userId;
 }

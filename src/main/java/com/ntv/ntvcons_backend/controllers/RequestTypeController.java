@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class RequestTypeController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @PostMapping(value = "/v1/createRequestType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequestType(@RequestBody RequestTypeCreateDTO requestTypeDTO){
         try {
@@ -38,7 +39,7 @@ public class RequestTypeController {
     }
 
     /* READ */
-    //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin','Engineer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -63,6 +64,7 @@ public class RequestTypeController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('Admin','Engineer')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                              @RequestParam(name = "searchType") SearchType searchType) {
@@ -123,7 +125,7 @@ public class RequestTypeController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @PutMapping(value = "/v1/updateRequestType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequestType(@RequestBody RequestTypeUpdateDTO requestTypeDTO){
         try {
@@ -143,7 +145,7 @@ public class RequestTypeController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value = "/v1/deleteRequestType/{requestTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRequestType(@PathVariable(name = "requestTypeId") long requestTypeId){
         try {

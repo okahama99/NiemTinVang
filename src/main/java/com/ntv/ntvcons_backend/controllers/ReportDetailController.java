@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class ReportDetailController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Engineer')")
     @PostMapping(value = "/v1/createReportDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createReportDetail(@RequestBody ReportDetailCreateDTO reportDetailDTO){
         try {
@@ -40,7 +41,7 @@ public class ReportDetailController {
     }
 
     /* READ */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -66,7 +67,7 @@ public class ReportDetailController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Engineer')")
     @PutMapping(value = "/v1/updateReportDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateReportDetail(@RequestBody ReportDetailUpdateDTO reportDetailDTO){
         try {
@@ -90,7 +91,7 @@ public class ReportDetailController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Engineer','Admin')")
     @DeleteMapping(value = "/v1/deleteReportDetail/{reportDetailId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteReportDetail(@PathVariable(name = "reportDetailId") long reportDetailId){
         try {

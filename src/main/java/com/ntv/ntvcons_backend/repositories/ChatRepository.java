@@ -1,17 +1,17 @@
 package com.ntv.ntvcons_backend.repositories;
 
-import com.ntv.ntvcons_backend.entities.ChatRoom;
-import com.ntv.ntvcons_backend.entities.Message;
+import com.ntv.ntvcons_backend.Enum.Status;
+import com.ntv.ntvcons_backend.entities.ChatMessage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.stereotype.Repository;
 
-public interface ChatRepository extends PagingAndSortingRepository<Message, Long> {
+@Repository
+public interface ChatRepository extends PagingAndSortingRepository<ChatMessage, Long> {
 
-    Page<Message> findByChatRoom(ChatRoom chatRoom, Pageable pageable);
+    Page<ChatMessage> findByChatGroupIdAndStatus(Long chatGroupId, Status status, Pageable pageable);
 
-    @Query(value = "select m from Message m where m.chatRoom = :chatRoom and ( m.userSeen is null or m.userSeen not like %:userid% )")
-    Page<Message> findByChatRoomAndUserSeenNotContainingOrUserSeenNull(ChatRoom chatRoom, String userid, Pageable pageable);
+    Page<ChatMessage> findByChatGroupIdAndStatusIsNot(Long chatRoom, Status status, Pageable pageable);
 
 }

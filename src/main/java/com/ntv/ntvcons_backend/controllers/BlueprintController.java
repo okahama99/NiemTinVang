@@ -23,7 +23,7 @@ public class BlueprintController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasAnyRole('Admin','User','Customer')")
+    @PreAuthorize("hasAnyRole('Admin','Staff')")
     @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createBlueprint(@RequestBody CreateBlueprintModel blueprint) {
         /* TODO: create blueprint */
@@ -31,7 +31,7 @@ public class BlueprintController {
     }
 
     /* READ */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin','Staff','Customer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -55,7 +55,7 @@ public class BlueprintController {
         }
     }
 
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+
     @GetMapping(value = "/v1/checkDuplicate", produces = "application/json;charset=UTF-8")
     public @ResponseBody String checkDuplicate(@RequestParam String blueprintName) {
         String result = blueprintService.checkDuplicate(blueprintName);
@@ -63,6 +63,7 @@ public class BlueprintController {
     }
 
     /* UPDATE */
+    @PreAuthorize("hasAnyRole('Admin','Staff')")
     @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateBlueprint(@RequestBody UpdateBlueprintModel blueprint) {
         /* TODO: update blueprint */
@@ -70,7 +71,7 @@ public class BlueprintController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value = "/v1/deleteBlueprint/{blueprintId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteBlueprint(@PathVariable(name = "blueprintId") long blueprintId) {
         try {

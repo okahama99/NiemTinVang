@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,6 +26,7 @@ public class TaskAssignmentController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @PostMapping(value = "/v1/createTaskAssignment", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createTaskAssignment(@Valid @RequestBody TaskAssignmentCreateDTO taskAssignmentDTO){
         try {
@@ -43,6 +45,7 @@ public class TaskAssignmentController {
     }
 
     /* READ */
+    @PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -67,6 +70,7 @@ public class TaskAssignmentController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                              @RequestParam(name = "searchType") SearchType searchType) {
@@ -143,6 +147,7 @@ public class TaskAssignmentController {
     }
 
     /* UPDATE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @PutMapping(value = "/v1/updateTaskAssignment", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateTaskAssignment(@Valid @RequestBody TaskAssignmentUpdateDTO taskAssignmentDTO){
         try {
@@ -163,6 +168,7 @@ public class TaskAssignmentController {
     }
 
     /* DELETE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value = "/v1/deleteTaskAssignment/{assignmentId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteTaskAssignment(@PathVariable(name = "assignmentId") long assignmentId){
         try {

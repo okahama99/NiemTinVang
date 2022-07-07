@@ -7,11 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class ChatRoomModel {
-    private String chatRoomId;
+public class ChatGroupModel {
+    private String chatGroupId;
     private Long userId1, userId2;
 
-    public ChatRoomModel() {
+    public ChatGroupModel() {
 
     }
 }
