@@ -25,27 +25,25 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
         List<Location> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Long> locationIdCollection);
         /* Id & coordinate */
         boolean existsByCoordinateAndLocationIdIsNotAndIsDeletedIsFalse(String coordinate, long locationId);
+        /* Id & Top down */
+        boolean existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndLocationIdIsNotAndIsDeletedIsFalse
+                (String country, String province, String city, String district,
+                 String ward, String area, String Street, String addressNumber, long locationId);
 
 
         /* Top down */
         List<Location> findAllByCountryAndIsDeletedIsFalse
                 (String country);
-
         List<Location> findAllByCountryAndProvinceAndIsDeletedIsFalse
                 (String country, String province);
-
         List<Location> findAllByCountryAndProvinceAndCityAndIsDeletedIsFalse
                 (String country, String province, String city);
-
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndIsDeletedIsFalse
                 (String country, String province, String city, String district);
-
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndIsDeletedIsFalse
                 (String country, String province, String city, String district, String ward);
-
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndStreetAndIsDeletedIsFalse
                 (String country, String province, String city, String district, String ward, String Street);
-
         Optional<Location> findByCountryAndProvinceAndCityAndDistrictAndWardAndStreetAndAddressNumberAndIsDeletedIsFalse
                 (String country, String province, String city, String district,
                  String ward, String Street, String addressNumber);
@@ -53,11 +51,12 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
         /* Top down with area */
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndIsDeletedIsFalse
                 (String country, String province, String city, String district, String ward, String area);
-
         List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndIsDeletedIsFalse
                 (String country, String province, String city, String district, String ward, String area, String Street);
-
         Optional<Location> findByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndIsDeletedIsFalse
+                (String country, String province, String city, String district,
+                 String ward, String area, String Street, String addressNumber);
+        boolean existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndIsDeletedIsFalse
                 (String country, String province, String city, String district,
                  String ward, String area, String Street, String addressNumber);
 

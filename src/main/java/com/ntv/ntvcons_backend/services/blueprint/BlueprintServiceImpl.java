@@ -1,12 +1,20 @@
 package com.ntv.ntvcons_backend.services.blueprint;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
+import com.ntv.ntvcons_backend.services.project.ProjectService;
+import com.ntv.ntvcons_backend.services.user.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -14,15 +22,22 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class BlueprintServiceImpl implements BlueprintService {
     @Autowired
     private BlueprintRepository blueprintRepository;
+    @Autowired
+    private ModelMapper modelMapper;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private ProjectService projectService;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private UserService userService;
 
     /* CREATE */
     @Override
@@ -32,6 +47,46 @@ public class BlueprintServiceImpl implements BlueprintService {
         blueprint.setDesignerName(createBluePrintModel.getDesignerName());
         blueprint.setEstimatedCost(createBluePrintModel.getEstimateCost());
         blueprintRepository.saveAndFlush(blueprint);
+    }
+
+    @Override
+    public Blueprint createBlueprint(Blueprint newBlueprint) throws Exception {
+        String errorMsg = "";
+
+        /* Check FK */
+        if (!projectService.existsById(newBlueprint.getProjectId())) {
+            errorMsg += "No Project found with Id: '" + newBlueprint.getProjectId()
+                    + "'. Which violate constraint: FK_Blueprint_Project. ";
+        }
+        if (!userService.existsById(newBlueprint.getCreatedBy())) {
+            errorMsg += "No User (CreatedBy) found with Id: '" + newBlueprint.getCreatedBy()
+                    + "'. Which violate constraint: FK_Blueprint_User_CreatedBy. ";
+        }
+
+        /* Check duplicate */
+        if (blueprintRepository
+                .existsByProjectIdOrBlueprintNameAndIsDeletedIsFalse(
+                        newBlueprint.getProjectId(),
+                        newBlueprint.getBlueprintName())) {
+            errorMsg += "Already exists another Blueprint with projectId: '" + newBlueprint.getProjectId()
+                    + "'. Or with blueprintName: '" + newBlueprint.getBlueprintName() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        /* TODO: create EntityWrapper for blueprint */
+
+        return blueprintRepository.saveAndFlush(newBlueprint);
+    }
+    @Override
+    public BlueprintReadDTO createBlueprintByDTO(BlueprintCreateDTO newBlueprintDTO) throws Exception {
+        Blueprint newBlueprint = modelMapper.map(newBlueprintDTO, Blueprint.class);
+
+        newBlueprint = createBlueprint(newBlueprint);
+
+        return modelMapper.map(newBlueprint, BlueprintReadDTO.class);
     }
 
     /* READ */
@@ -53,17 +108,17 @@ public class BlueprintServiceImpl implements BlueprintService {
                     pagingResult.map(new Converter<Blueprint, ShowBlueprintModel>() {
 
                         @Override
-                        protected ShowBlueprintModel doForward(Blueprint projectBlueprint) {
+                        protected ShowBlueprintModel doForward(Blueprint blueprint) {
                             ShowBlueprintModel model = new ShowBlueprintModel();
 
-                            model.setProjectBlueprintId(projectBlueprint.getBlueprintId());
-                            model.setProjectBlueprintName(projectBlueprint.getBlueprintName());
-                            model.setProjectBlueprintCost(projectBlueprint.getEstimatedCost());
-                            model.setDesignerName(projectBlueprint.getDesignerName());
-                            model.setCreatedAt(projectBlueprint.getCreatedAt());
-                            model.setCreatedBy(projectBlueprint.getCreatedBy());
-                            model.setUpdatedAt(projectBlueprint.getUpdatedAt());
-                            model.setUpdatedBy(projectBlueprint.getUpdatedBy());
+                            model.setProjectBlueprintId(blueprint.getBlueprintId());
+                            model.setProjectBlueprintName(blueprint.getBlueprintName());
+                            model.setProjectBlueprintCost(blueprint.getEstimatedCost());
+                            model.setDesignerName(blueprint.getDesignerName());
+                            model.setCreatedAt(blueprint.getCreatedAt());
+                            model.setCreatedBy(blueprint.getCreatedBy());
+                            model.setUpdatedAt(blueprint.getUpdatedAt());
+                            model.setUpdatedBy(blueprint.getUpdatedBy());
                             model.setTotalPage(totalPage);
 
                             return model;
@@ -83,25 +138,357 @@ public class BlueprintServiceImpl implements BlueprintService {
     }
 
     @Override
-    public Blueprint getById(long projectBlueprintId) {
+    public Page<Blueprint> getPageAll(Pageable paging) throws Exception {
+        Page<Blueprint> blueprintPage = blueprintRepository.findAllByIsDeletedIsFalse(paging);
+
+        if (blueprintPage.isEmpty()) {
+            return null;
+        }
+
+        return blueprintPage;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
+        Page<Blueprint> blueprintPage = getPageAll(paging);
+
+        if (blueprintPage == null ) {
+            return null;
+        }
+
+        List<Blueprint> blueprintList = blueprintPage.getContent();
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        int totalPage = blueprintPage.getTotalPages();
+
+        return blueprintPage.stream()
+                .map(blueprint -> {
+                    BlueprintReadDTO blueprintDTO =
+                            modelMapper.map(blueprint, BlueprintReadDTO.class);
+
+                    blueprintDTO.setTotalPage(totalPage);
+
+                    return blueprintDTO;})
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Blueprint getById(long blueprintId) throws Exception {
         return blueprintRepository
-                .findByBlueprintIdAndIsDeletedIsFalse(projectBlueprintId)
+                .findByBlueprintIdAndIsDeletedIsFalse(blueprintId)
                 .orElse(null);
     }
-
     @Override
-    public List<Blueprint> getAllByIdIn(Collection<Integer> projectBlueprintIdCollection) {
-        return null;
+    public BlueprintReadDTO getDTOById(long blueprintId) throws Exception {
+        Blueprint blueprint = getById(blueprintId);
+
+        if (blueprint == null) {
+            return null;
+        }
+
+        return modelMapper.map(blueprint, BlueprintReadDTO.class);
     }
 
     @Override
-    public List<Blueprint> getAllByBlueprintNameContains(String projectBlueprintName) {
-        return null;
+    public List<Blueprint> getAllByIdIn(Collection<Long> blueprintIdCollection) throws Exception {
+        List<Blueprint> blueprintList = 
+                blueprintRepository.findAllByBlueprintIdInAndIsDeletedIsFalse(blueprintIdCollection);
+        
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        return blueprintList;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOByIdIn(Collection<Long> blueprintIdCollection) throws Exception {
+        List<Blueprint> blueprintList = getAllByIdIn(blueprintIdCollection);
+
+        if (blueprintList == null) {
+            return null;
+        }
+
+        return blueprintList.stream()
+                .map(blueprint -> modelMapper.map(blueprint, BlueprintReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Blueprint> getAllByBlueprintCostBetween(double from, double to) {
-        return null;
+    public Blueprint getByProjectId(long projectId) throws Exception {
+        return blueprintRepository
+                .findByProjectIdAndIsDeletedIsFalse(projectId)
+                .orElse(null);
+
+    }
+    @Override
+    public BlueprintReadDTO getDTOByProjectId(long projectId) throws Exception {
+        Blueprint blueprint = getByProjectId(projectId);
+
+        if (blueprint == null) {
+            return null;
+        }
+
+        return modelMapper.map(blueprint, BlueprintReadDTO.class);
+    }
+
+    @Override
+    public List<Blueprint> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Blueprint> blueprintList =
+                blueprintRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        return blueprintList;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Blueprint> blueprintList = getAllByProjectIdIn(projectIdCollection);
+
+        if (blueprintList == null) {
+            return null;
+        }
+
+        return blueprintList.stream()
+                .map(blueprint -> modelMapper.map(blueprint, BlueprintReadDTO.class))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public Map<Long, BlueprintReadDTO> mapProjectIdBlueprintDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<BlueprintReadDTO> blueprintDTOList = getAllDTOByProjectIdIn(projectIdCollection);
+
+        if (blueprintDTOList == null) {
+            return new HashMap<>();
+        }
+
+        return blueprintDTOList.stream().collect(Collectors.toMap(BlueprintReadDTO::getProjectId, Function.identity()));
+    }
+
+    @Override
+    public Blueprint getByBlueprintName(String blueprintName) {
+        return blueprintRepository
+                .findByBlueprintNameAndIsDeletedIsFalse(blueprintName)
+                .orElse(null);
+    }
+    @Override
+    public BlueprintReadDTO getDTOByBlueprintName(String blueprintName) {
+        Blueprint blueprint = getByBlueprintName(blueprintName);
+
+        if (blueprint == null) {
+            return null;
+        }
+
+        return modelMapper.map(blueprint, BlueprintReadDTO.class);
+    }
+
+    @Override
+    public List<Blueprint> getAllByBlueprintNameContains(String blueprintName) {
+        List<Blueprint> blueprintList =
+                blueprintRepository.findAllByBlueprintNameContainsAndIsDeletedIsFalse(blueprintName);
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        return blueprintList;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOByBlueprintNameContains(String blueprintName) {
+        List<Blueprint> blueprintList = getAllByBlueprintNameContains(blueprintName);
+
+        if (blueprintList == null) {
+            return null;
+        }
+
+        return blueprintList.stream()
+                .map(blueprint -> modelMapper.map(blueprint, BlueprintReadDTO.class))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public Page<Blueprint> getPageAllByBlueprintNameContains(Pageable paging, String blueprintName) {
+        Page<Blueprint> blueprintPage =
+                blueprintRepository.findAllByBlueprintNameContainsAndIsDeletedIsFalse(blueprintName, paging);
+
+        if (blueprintPage.isEmpty()) {
+            return null;
+        }
+
+        return blueprintPage;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOInPagingByBlueprintNameContains(Pageable paging, String blueprintName) {
+        Page<Blueprint> blueprintPage = getPageAllByBlueprintNameContains(paging, blueprintName);
+
+        if (blueprintPage == null) {
+            return null;
+        }
+
+        List<Blueprint> blueprintList = blueprintPage.getContent();
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        int totalPage = blueprintPage.getTotalPages();
+
+        return blueprintPage.stream()
+                .map(blueprint -> {
+                    BlueprintReadDTO blueprintDTO =
+                            modelMapper.map(blueprint, BlueprintReadDTO.class);
+
+                    blueprintDTO.setTotalPage(totalPage);
+
+                    return blueprintDTO;})
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Blueprint> getAllByDesignerName(String designerName) {
+        List<Blueprint> blueprintList =
+                blueprintRepository.findAllByDesignerNameAndIsDeletedIsFalse(designerName);
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        return blueprintList;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOByDesignerName(String designerName) {
+        List<Blueprint> blueprintList = getAllByDesignerName(designerName);
+
+        if (blueprintList == null) {
+            return null;
+        }
+
+        return blueprintList.stream()
+                .map(blueprint -> modelMapper.map(blueprint, BlueprintReadDTO.class))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public Page<Blueprint> getPageAllByDesignerName(Pageable paging, String designerName) {
+        Page<Blueprint> blueprintPage =
+                blueprintRepository.findAllByDesignerNameAndIsDeletedIsFalse(designerName, paging);
+
+        if (blueprintPage.isEmpty()) {
+            return null;
+        }
+
+        return blueprintPage;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOInPagingByDesignerName(Pageable paging, String designerName) {
+        Page<Blueprint> blueprintPage = getPageAllByDesignerName(paging, designerName);
+
+        if (blueprintPage == null) {
+            return null;
+        }
+
+        List<Blueprint> blueprintList = blueprintPage.getContent();
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        int totalPage = blueprintPage.getTotalPages();
+
+        return blueprintPage.stream()
+                .map(blueprint -> {
+                    BlueprintReadDTO blueprintDTO =
+                            modelMapper.map(blueprint, BlueprintReadDTO.class);
+
+                    blueprintDTO.setTotalPage(totalPage);
+
+                    return blueprintDTO;})
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Blueprint> getAllByDesignerNameContains(String designerName) {
+        List<Blueprint> blueprintList =
+                blueprintRepository.findAllByDesignerNameContainsAndIsDeletedIsFalse(designerName);
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        return blueprintList;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOByDesignerNameContains(String designerName) {
+        List<Blueprint> blueprintList = getAllByDesignerNameContains(designerName);
+
+        if (blueprintList == null) {
+            return null;
+        }
+
+        return blueprintList.stream()
+                .map(blueprint -> modelMapper.map(blueprint, BlueprintReadDTO.class))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public Page<Blueprint> getPageAllByDesignerNameContains(Pageable paging, String designerName) {
+        Page<Blueprint> blueprintPage =
+                blueprintRepository.findAllByDesignerNameContainsAndIsDeletedIsFalse(designerName, paging);
+
+        if (blueprintPage.isEmpty()) {
+            return null;
+        }
+
+        return blueprintPage;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOInPagingByDesignerNameContains(Pageable paging, String designerName) {
+        Page<Blueprint> blueprintPage = getPageAllByDesignerNameContains(paging, designerName);
+
+        if (blueprintPage == null) {
+            return null;
+        }
+
+        List<Blueprint> blueprintList = blueprintPage.getContent();
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        int totalPage = blueprintPage.getTotalPages();
+
+        return blueprintPage.stream()
+                .map(blueprint -> {
+                    BlueprintReadDTO blueprintDTO =
+                            modelMapper.map(blueprint, BlueprintReadDTO.class);
+
+                    blueprintDTO.setTotalPage(totalPage);
+
+                    return blueprintDTO;})
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Blueprint> getAllByEstimatedCostBetween(double from, double to) {
+        List<Blueprint> blueprintList =
+                blueprintRepository.findAllByEstimatedCostBetweenAndIsDeletedIsFalse(from, to);
+
+        if (blueprintList.isEmpty()) {
+            return null;
+        }
+
+        return blueprintList;
+    }
+    @Override
+    public List<BlueprintReadDTO> getAllDTOByEstimatedCostBetween(double from, double to) {
+        List<Blueprint> blueprintList = getAllByEstimatedCostBetween(from, to);
+
+        if (blueprintList == null) {
+            return null;
+        }
+
+        return blueprintList.stream()
+                .map(blueprint -> modelMapper.map(blueprint, BlueprintReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -130,9 +517,72 @@ public class BlueprintServiceImpl implements BlueprintService {
         blueprintRepository.saveAndFlush(blueprint);
     }
 
+    @Override
+    public Blueprint updateBlueprint(Blueprint updatedBlueprint) throws Exception {
+        Blueprint oldBlueprint = getById(updatedBlueprint.getBlueprintId());
+
+        if (oldBlueprint == null) {
+            return null;
+        }
+
+        String errorMsg = "";
+
+        /* Check FK (if changed) */
+        if (!oldBlueprint.getProjectId().equals(updatedBlueprint.getProjectId())) {
+            if (!projectService.existsById(updatedBlueprint.getProjectId())) {
+                errorMsg += "No Project found with Id: '" + updatedBlueprint.getProjectId()
+                        + "'. Which violate constraint: FK_Blueprint_Project. ";
+            }
+        }
+        if (oldBlueprint.getUpdatedBy() != null) {
+            if (!oldBlueprint.getUpdatedBy().equals(updatedBlueprint.getUpdatedBy())) {
+                if (!userService.existsById(updatedBlueprint.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedBlueprint.getUpdatedBy()
+                            + "'. Which violate constraint: FK_Blueprint_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (!userService.existsById(updatedBlueprint.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedBlueprint.getUpdatedBy()
+                        + "'. Which violate constraint: FK_Blueprint_User_UpdatedBy. ";
+            }
+        }
+
+        /* Check duplicate */
+        if (blueprintRepository
+                .existsByProjectIdOrBlueprintNameAndBlueprintIdIsNotAndIsDeletedIsFalse(
+                        updatedBlueprint.getProjectId(),
+                        updatedBlueprint.getBlueprintName(),
+                        updatedBlueprint.getBlueprintId())) {
+            errorMsg += "Already exists another Blueprint with projectId: '" + updatedBlueprint.getProjectId()
+                    + "'. Or with blueprintName: '" + updatedBlueprint.getBlueprintName() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg);
+        }
+
+        updatedBlueprint.setCreatedAt(oldBlueprint.getCreatedAt());
+        updatedBlueprint.setCreatedBy(oldBlueprint.getCreatedBy());
+
+        return blueprintRepository.saveAndFlush(updatedBlueprint);
+    }
+    @Override
+    public BlueprintReadDTO updateBlueprintByDTO(BlueprintUpdateDTO updatedBlueprintDTO) throws Exception {
+        Blueprint updatedBlueprint = modelMapper.map(updatedBlueprintDTO, Blueprint.class);
+
+        updatedBlueprint = updateBlueprint(updatedBlueprint);
+
+        if (updatedBlueprint == null) {
+            return null;
+        }
+
+        return modelMapper.map(updatedBlueprint, BlueprintReadDTO.class);
+    }
+
     /* DELETE */
     @Override
-    public boolean deleteBlueprint(long blueprintId) {
+    public boolean deleteBlueprint(long blueprintId) throws Exception {
         Blueprint blueprint = getById(blueprintId);
 
         if (blueprint == null) {
@@ -142,6 +592,40 @@ public class BlueprintServiceImpl implements BlueprintService {
 
         blueprint.setIsDeleted(true);
         blueprintRepository.saveAndFlush(blueprint);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteByProjectId(long projectId) throws Exception {
+        Blueprint blueprint = getByProjectId(projectId);
+
+        if (blueprint == null) {
+            return false;
+            /* Not found with Id */
+        }
+
+        blueprint.setIsDeleted(true);
+        blueprintRepository.saveAndFlush(blueprint);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Blueprint> blueprintList = getAllByProjectIdIn(projectIdCollection);
+
+        if (blueprintList == null) {
+            return false;
+            /* Not found with Id */
+        }
+
+        blueprintList =
+                blueprintList.stream()
+                        .peek(blueprint -> blueprint.setIsDeleted(true))
+                        .collect(Collectors.toList());
+
+        blueprintRepository.saveAllAndFlush(blueprintList);
 
         return true;
     }

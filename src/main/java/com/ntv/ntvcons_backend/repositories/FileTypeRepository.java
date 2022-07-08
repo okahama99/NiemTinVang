@@ -18,15 +18,24 @@ public interface FileTypeRepository extends JpaRepository<FileType, Long> {
     /* Id */
     Optional<FileType> findByFileTypeIdAndIsDeletedIsFalse(long fileTypeId);
     List<FileType> findAllByFileTypeIdInAndIsDeletedIsFalse(Collection<Long> fileTypeIdCollection);
+    Page<FileType> findAllByFileTypeIdInAndIsDeletedIsFalse(Collection<Long> fileTypeIdCollection, Pageable pageable);
+    /* Id & fileTypeName & fileTypeExtension */
+    boolean existsByFileTypeNameOrFileTypeExtensionAndFileTypeIdIsNotAndIsDeletedIsFalse
+            (String fileTypeName, String fileTypeExtension, long fileTypeId);
 
 
     /* fileTypeName */
     Optional<FileType> findByFileTypeNameAndIsDeletedIsFalse(String fileTypeName);
     List<FileType> findAllByFileTypeNameContainsAndIsDeletedIsFalse(String fileTypeName);
+    Page<FileType> findAllByFileTypeNameContainsAndIsDeletedIsFalse(String fileTypeName, Pageable pageable);
 
 
     /* fileTypeExtension */
     Optional<FileType> findByFileTypeExtensionAndIsDeletedIsFalse(String fileTypeExtension);
     List<FileType> findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(String fileTypeExtension);
+    Page<FileType> findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(String fileTypeExtension, Pageable pageable);
     List<FileType> findAllByFileTypeExtensionInAndIsDeletedIsFalse(Collection<String> fileTypeExtensionCollection);
+    Page<FileType> findAllByFileTypeExtensionInAndIsDeletedIsFalse(Collection<String> fileTypeExtensionCollection, Pageable pageable);
+    /* fileTypeName & fileTypeExtension */
+    boolean existsByFileTypeNameOrFileTypeExtensionAndIsDeletedIsFalse(String fileTypeName, String fileTypeExtension);
 }

@@ -14,8 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -48,10 +46,10 @@ public class UserController {
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
             List<UserReadDTO> userDTOList =
-                    userService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortType);
+                    userService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (userDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No User found");
@@ -68,25 +66,26 @@ public class UserController {
         }
     }
 
+
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.USER searchType) {
+        // TODO:
+        return null;
+    }
+
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                             @RequestParam(name = "searchType") SearchType searchType) {
+                                                @RequestParam SearchType.ALL_USER searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
         try {
             List<UserReadDTO> userDTOList;
 
             switch (searchType) {
-                case USER_BY_ID:
-                    UserReadDTO userDTO = userService.getDTOById(Long.parseLong(searchParam));
-                    
-                    if (userDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with userId: '" + searchParam + "'. ");
-                    }
-
-                    userDTOList = new ArrayList<>(Collections.singletonList(userDTO));
-                    break;
-
-                case USER_BY_ROLE_ID:
+                case BY_ROLE_ID:
                     userDTOList = userService.getAllDTOByRoleId(Long.parseLong(searchParam));
 
                     if (userDTOList == null) {
@@ -95,35 +94,7 @@ public class UserController {
                     }
                     break;
 
-//                TODO:
-//                 case USER_BY_USERNAME:
-//                    userDTOList = userService.getAllDTOByUsername(searchParam);
-//
-//                    if (userDTOList == null) {
-//                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                                .body("No User found with username: '" + searchParam + "'. ");
-//                    }
-//                    break;
-//
-//                case USER_BY_USERNAME_CONTAINS:
-//                    userDTOList = userService.getAllDTOByUsernameContains(searchParam);
-//
-//                    if (userDTOList == null) {
-//                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                                .body("No User found with username contains: '" + searchParam + "'. ");
-//                    }
-//                    break;
-//
-//                case USER_BY_PHONE:
-//                    userDTOList = userService.getAllDTOByPhone(searchParam);
-//
-//                    if (userDTOList == null) {
-//                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                                .body("No User found with phone: '" + searchParam + "'. ");
-//                    }
-//                    break;
-//
-//                case USER_BY_PHONE_CONTAINS:
+//                case BY_PHONE_CONTAINS:
 //                    userDTOList = userService.getAllDTOByPhoneContains(searchParam);
 //
 //                    if (userDTOList == null) {
@@ -151,27 +122,15 @@ public class UserController {
             String errorMsg = "Error searching for User with ";
 
             switch (searchType) {
-                case USER_BY_ID:
-                    errorMsg += "userId: '" + searchParam + "'. ";
-                    break;
-
-                case USER_BY_ROLE_ID:
+                case BY_ROLE_ID:
                     errorMsg += "roleId: '" + searchParam + "'. ";
                     break;
 
-//                case USER_BY_USERNAME:
-//                    errorMsg += "username: '" + searchParam + "'. ";
-//                    break;
-//
-//                case USER_BY_USERNAME_CONTAINS:
+//                case BY_USERNAME_CONTAINS:
 //                    errorMsg += "username contains: '" + searchParam + "'. ";
 //                    break;
 //
-//                case USER_BY_PHONE:
-//                    errorMsg += "phone: '" + searchParam + "'. ";
-//                    break;
-//
-//                case USER_BY_PHONE_CONTAINS:
+//                case BY_PHONE_CONTAINS:
 //                    errorMsg += "phone contains: '" + searchParam + "'. ";
 //                    break;
             }

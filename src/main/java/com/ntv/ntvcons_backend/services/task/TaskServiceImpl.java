@@ -73,9 +73,7 @@ public class TaskServiceImpl implements TaskService{
         modelMapper.typeMap(TaskCreateDTO.class, Task.class)
                 .addMappings(mapper -> {
                     mapper.skip(Task::setPlanStartDate);
-                    mapper.skip(Task::setPlanEndDate);
-                    mapper.skip(Task::setActualStartDate);
-                    mapper.skip(Task::setActualEndDate);});
+                    mapper.skip(Task::setPlanEndDate);});
 
         Task newTask = modelMapper.map(newTaskDTO, Task.class);
 
@@ -83,10 +81,6 @@ public class TaskServiceImpl implements TaskService{
                 LocalDateTime.parse(newTaskDTO.getPlanStartDate(), dateTimeFormatter));
         newTask.setPlanEndDate(
                 LocalDateTime.parse(newTaskDTO.getPlanEndDate(), dateTimeFormatter));
-        newTask.setActualStartDate(
-                LocalDateTime.parse(newTaskDTO.getActualStartDate(), dateTimeFormatter));
-        newTask.setActualEndDate(
-                LocalDateTime.parse(newTaskDTO.getActualEndDate(), dateTimeFormatter));
 
         newTask = createTask(newTask);
 
@@ -227,6 +221,57 @@ public class TaskServiceImpl implements TaskService{
         return taskList.stream()
                 .map(task -> modelMapper.map(task, TaskReadDTO.class))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Task> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Task> taskList = taskRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+
+        if (taskList.isEmpty()) {
+            return null;
+        }
+
+        return taskList;
+    }
+    @Override
+    public List<TaskReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Task> taskList = getAllByProjectIdIn(projectIdCollection);
+
+        if (taskList == null) {
+            return null;
+        }
+
+        return taskList.stream()
+                .map(task -> modelMapper.map(task, TaskReadDTO.class))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public Map<Long, List<TaskReadDTO>> mapProjectIdTaskDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<TaskReadDTO> taskDTOList = getAllDTOByProjectIdIn(projectIdCollection);
+
+        if (taskDTOList == null) {
+            return new HashMap<>();
+        }
+
+        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap = new HashMap<>();
+
+        long tmpProjectId;
+        List<TaskReadDTO> tmpTaskDTOList;
+
+        for (TaskReadDTO taskDTO : taskDTOList) {
+            tmpProjectId = taskDTO.getProjectId();
+            tmpTaskDTOList = projectIdTaskDTOListMap.get(tmpProjectId);
+
+            if (tmpTaskDTOList == null) {
+                projectIdTaskDTOListMap.put(tmpProjectId, new ArrayList<>(Collections.singletonList(taskDTO)));
+            } else {
+                tmpTaskDTOList.add(taskDTO);
+
+                projectIdTaskDTOListMap.put(tmpProjectId, tmpTaskDTOList);
+            }
+        }
+
+        return projectIdTaskDTOListMap;
     }
 
     @Override

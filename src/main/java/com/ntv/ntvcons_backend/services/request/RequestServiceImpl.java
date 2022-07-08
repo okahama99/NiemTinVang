@@ -1,6 +1,9 @@
 package com.ntv.ntvcons_backend.services.request;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
+import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
+import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.entities.*;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.RequestDetailModel;
@@ -11,7 +14,11 @@ import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestVerifierModel;
 import com.ntv.ntvcons_backend.repositories.*;
 import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
+import com.ntv.ntvcons_backend.services.requestType.RequestTypeService;
+import com.ntv.ntvcons_backend.services.user.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,31 +27,30 @@ import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RequestServiceImpl implements RequestService{
-
     @Autowired
     private RequestRepository requestRepository;
-
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ProjectRepository projectRepository;
-
-    @Autowired
-    private RequestTypeRepository requestTypeRepository;
-
+    private ModelMapper modelMapper;
     @Autowired
     private DateTimeFormatter dateTimeFormatter;
-
+    @Autowired
+    private UserRepository userRepository;
+    @Lazy
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ProjectRepository projectRepository;
+    @Autowired
+    private RequestTypeRepository requestTypeRepository;
+    @Autowired
+    private RequestTypeService requestTypeService;
     @Autowired
     RequestDetailService requestDetailService;
-
     @Autowired
     RequestDetailRepository requestDetailRepository;
 
@@ -264,6 +270,130 @@ public class RequestServiceImpl implements RequestService{
         }else{
             return new ArrayList<ShowRequestModel>();
         }
+    }
+
+    @Override
+    public List<Request> getAllByProjectId(long projectId) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByProjectId(long projectId) throws Exception {
+        List<Request> requestList = getAllByProjectId(projectId);
+
+        if (requestList == null) {
+            return null;
+        }
+
+        Set<Long> requestIdSet = new HashSet<>();
+        Set<Long> requestTypeIdSet = new HashSet<>();
+
+        for (Request request : requestList) {
+            requestIdSet.add(request.getRequestId());
+            requestTypeIdSet.add(request.getRequestTypeId());
+        }
+
+        /* Get associated RequestType */
+        Map<Long, RequestTypeReadDTO> requestTypeIdRequestTypeDTOMap =
+                requestTypeService.mapRequestTypeIdRequestTypeDTOByIdIn(requestTypeIdSet);
+
+        /* Get associated RequestDetail */
+        Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
+                requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
+
+        return requestList.stream()
+                .map(request -> {
+                    RequestReadDTO requestDTO =
+                            modelMapper.map(request, RequestReadDTO.class);
+
+                    requestDTO.setRequestType(requestTypeIdRequestTypeDTOMap.get(request.getRequestTypeId()));
+
+                    requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(request.getRequestId()));
+
+                    return requestDTO;})
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Request> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Request> requestList = getAllByProjectIdIn(projectIdCollection);
+
+        if (requestList == null) {
+            return null;
+        }
+
+        Set<Long> requestIdSet = new HashSet<>();
+        Set<Long> requestTypeIdSet = new HashSet<>();
+
+        for (Request request : requestList) {
+            requestIdSet.add(request.getRequestId());
+            requestTypeIdSet.add(request.getRequestTypeId());
+        }
+
+        /* Get associated RequestType */
+        Map<Long, RequestTypeReadDTO> requestTypeIdRequestTypeDTOMap =
+                requestTypeService.mapRequestTypeIdRequestTypeDTOByIdIn(requestTypeIdSet);
+
+        /* Get associated RequestDetail */
+        Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
+                requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
+
+        return requestList.stream()
+                .map(request -> {
+                    RequestReadDTO requestDTO =
+                            modelMapper.map(request, RequestReadDTO.class);
+
+                    requestDTO.setRequestType(requestTypeIdRequestTypeDTOMap.get(request.getRequestTypeId()));
+
+                    requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(request.getRequestId()));
+
+                    return requestDTO;})
+                .collect(Collectors.toList());
+    }
+    @Override
+    public Map<Long, List<RequestReadDTO>> mapProjectIdRequestDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<RequestReadDTO> requestDTOList = getAllDTOByProjectIdIn(projectIdCollection);
+
+        if (requestDTOList == null) {
+            return new HashMap<>();
+        }
+
+        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap = new HashMap<>();
+
+        long tmpProjectId;
+        List<RequestReadDTO> tmpRequestDTOList;
+
+        for (RequestReadDTO requestDTO : requestDTOList) {
+            tmpProjectId = requestDTO.getProjectId();
+            tmpRequestDTOList = projectIdRequestDTOListMap.get(tmpProjectId);
+
+            if (tmpRequestDTOList == null) {
+                projectIdRequestDTOListMap.put(tmpProjectId, new ArrayList<>(Collections.singletonList(requestDTO)));
+            } else {
+                tmpRequestDTOList.add(requestDTO);
+
+                projectIdRequestDTOListMap.put(tmpProjectId, tmpRequestDTOList);
+            }
+        }
+
+        return projectIdRequestDTOListMap;
     }
 
     @Override

@@ -1,23 +1,22 @@
-package com.ntv.ntvcons_backend.dtos.reportDetail;
+package com.ntv.ntvcons_backend.dtos.requestDetail;
 
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReportDetailUpdateDTO extends BaseUpdateDTO {
-    @PositiveOrZero
+public class RequestDetailUpdateDTO extends BaseUpdateDTO {
+    @Positive
     @NotNull(message = "Id REQUIRED for update")
     private Long reportDetailId;
 

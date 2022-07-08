@@ -2,6 +2,7 @@ package com.ntv.ntvcons_backend.dtos.project;
 
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateOptionDTO;
 import io.swagger.annotations.ApiModelProperty;
@@ -29,7 +30,8 @@ public class ProjectUpdateDTO extends BaseUpdateDTO {
 
     private LocationUpdateOptionDTO location;
 
-//    private BlueprintUpdateDTO blueprint;
+    /*TODO: implement update blueprint in projectService*/
+    private BlueprintUpdateDTO blueprint;
 
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */

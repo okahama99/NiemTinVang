@@ -28,5 +28,6 @@ public class TaskAssignmentCreateDTO extends BaseCreateDTO {
 
     /** yyyy-MM-dd HH:mm */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
+    @NotNull(message = "assignDate REQUIRED for create")
     private String assignDate;
 }

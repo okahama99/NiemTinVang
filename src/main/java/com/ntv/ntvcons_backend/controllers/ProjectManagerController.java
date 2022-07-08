@@ -1,16 +1,17 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/projectManager")
@@ -20,13 +21,44 @@ public class ProjectManagerController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
+    @PostMapping(value = "/v1/createProjectManager", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createProjectManager(@Valid @RequestBody ProjectManagerCreateDTO projectManagerDTO) {
+        // TODO:
+        return null;
+    }
 
     /* READ */
+    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAll(@RequestParam int pageNo,
+                                         @RequestParam int pageSize,
+                                         @RequestParam String sortBy,
+                                         @RequestParam boolean sortTypeAsc) {
+        // TODO:
+        return null;
+    }
+    
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.PROJECT_MANAGER searchType) {
+        // TODO:
+        return null;
+    }
 
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
+                                                @RequestParam SearchType.ALL_PROJECT_MANAGER searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
+        // TODO:
+        return null;
+    }
+    
     /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/v1/updateProjectManager", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProjectManager(@RequestBody ProjectManagerUpdateDTO projectManagerDTO){
+    public ResponseEntity<Object> updateProjectManager(@Valid @RequestBody ProjectManagerUpdateDTO projectManagerDTO){
         try {
 
             ProjectManagerReadDTO updatedProjectManagerDTO =
@@ -46,6 +78,11 @@ public class ProjectManagerController {
     }
 
     /* DELETE */
+    @DeleteMapping(value = "/v1/deleteProjectManager/{projectManagerId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteProjectManager(@PathVariable(name = "projectManagerId") long projectManagerId){
+        // TODO:
+        return null;
+    }
 
     /* ================================================ Ver 1 ================================================ */
 }

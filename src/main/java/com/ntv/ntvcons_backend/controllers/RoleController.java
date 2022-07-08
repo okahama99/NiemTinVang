@@ -12,8 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -26,7 +25,7 @@ public class RoleController {
     /* CREATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/v1/createRole", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRole(@RequestBody RoleCreateDTO roleDTO){
+    public ResponseEntity<Object> createRole(@Valid @RequestBody RoleCreateDTO roleDTO){
         try {
             RoleReadDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
 
@@ -43,10 +42,10 @@ public class RoleController {
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
             List<RoleReadDTO> roleDTOList =
-                    roleService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+                    roleService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (roleDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found");
@@ -63,25 +62,25 @@ public class RoleController {
         }
     }
 
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.ROLE searchType) {
+        // TODO:
+        return null;
+    }
+
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                             @RequestParam(name = "searchType") SearchType searchType) {
+                                                @RequestParam SearchType.ALL_ROLE searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
         try {
             List<RoleReadDTO> roleDTOList;
 
             switch (searchType) {
-                case ROLE_BY_ID:
-                    RoleReadDTO roleDTO = roleService.getDTOById(Long.parseLong(searchParam));
-
-                    if (roleDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Role found with roleId: '" + searchParam + "'. ");
-                    }
-
-                    roleDTOList = new ArrayList<>(Collections.singletonList(roleDTO));
-                    break;
-
-                case ROLE_BY_NAME_CONTAINS:
+                case BY_NAME_CONTAINS:
                     roleDTOList = roleService.getAllDTOByRoleNameContains(searchParam);
 
                     if (roleDTOList == null) {
@@ -109,11 +108,7 @@ public class RoleController {
             String errorMsg = "Error searching for Role with ";
 
             switch (searchType) {
-                case ROLE_BY_ID:
-                    errorMsg += "roleId: '" + searchParam + "'. ";
-                    break;
-
-                case ROLE_BY_NAME_CONTAINS:
+                case BY_NAME_CONTAINS:
                     errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
             }
@@ -125,7 +120,7 @@ public class RoleController {
     /* UPDATE */
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/v1/updateRole", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRole(@RequestBody RoleUpdateDTO roleDTO){
+    public ResponseEntity<Object> updateRole(@Valid @RequestBody RoleUpdateDTO roleDTO){
         try {
             RoleReadDTO updatedRoleDTO = roleService.updateRoleByDTO(roleDTO);
 

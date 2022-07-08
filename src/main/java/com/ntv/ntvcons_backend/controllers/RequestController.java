@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
@@ -14,17 +16,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/Request")
+@RequestMapping("/request")
 public class RequestController {
     @Autowired
     private RequestService requestService;
-
     @Autowired
     private ProjectRepository projectRepository;
-
     @Autowired
     private RequestTypeRepository requestTypeRepository;
 
@@ -33,20 +34,26 @@ public class RequestController {
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = "/v1/createRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequest(@RequestBody CreateRequestModel createRequestModel){
-            if(!projectRepository.existsById(createRequestModel.getProjectId())){
-                return ResponseEntity.ok().body("ProjectId không tồn tại.");
+        if(!projectRepository.existsById(createRequestModel.getProjectId())){
+            return ResponseEntity.ok().body("ProjectId không tồn tại.");
+        }else{
+            if(!requestTypeRepository.existsById(createRequestModel.getRequestTypeId())){
+                return ResponseEntity.ok().body("RequestTypeId không tồn tại.");
             }else{
-                if(!requestTypeRepository.existsById(createRequestModel.getRequestTypeId())){
-                    return ResponseEntity.ok().body("RequestTypeId không tồn tại.");
-                }else{
-                    boolean result = requestService.createRequest(createRequestModel);
-                    if (result) {
-                        return ResponseEntity.ok().body("Tạo thành công.");
-                    }
-                    return ResponseEntity.badRequest().body("Tạo thất bại.");
+                boolean result = requestService.createRequest(createRequestModel);
+                if (result) {
+                    return ResponseEntity.ok().body("Tạo thành công.");
                 }
+                return ResponseEntity.badRequest().body("Tạo thất bại.");
             }
+        }
 
+    }
+    
+    @PostMapping(value = "/v1.1/createRequest", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createRequestAlt1(@Valid @RequestBody RequestCreateDTO requestDTO) {
+        // TODO:
+        return null;
     }
 
     /* READ */
@@ -55,9 +62,9 @@ public class RequestController {
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
-            List<ShowRequestModel> requests = requestService.getAllAvailableRequest(pageNo, pageSize, sortBy, sortType);
+            List<ShowRequestModel> requests = requestService.getAllAvailableRequest(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (requests == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found");
@@ -74,15 +81,42 @@ public class RequestController {
         }
     }
 
+    @GetMapping(value = "/v1.1/getAll", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllAlt1(@RequestParam int pageNo, 
+                                             @RequestParam int pageSize, 
+                                             @RequestParam String sortBy, 
+                                             @RequestParam boolean sortTypeAsc) {
+        // TODO:
+        return null;
+    }
+
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.REQUEST searchType) {
+        // TODO:
+        return null;
+    }
+
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
+                                                @RequestParam SearchType.ALL_REQUEST searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
+        // TODO:
+        return null;
+    }
+
     //@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/v1/getByProjectId", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByProjectId(@RequestParam Long projectId,
                                          @RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
-            List<ShowRequestModel> requests = requestService.getByProjectId(projectId, pageNo, pageSize, sortBy, sortType);
+            List<ShowRequestModel> requests = requestService.getByProjectId(projectId, pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (requests == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found");

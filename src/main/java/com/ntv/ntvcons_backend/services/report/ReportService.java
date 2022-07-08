@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface ReportService { /* TODO: throws Exception for controller to handle */
     /* CREATE */
@@ -30,6 +31,10 @@ public interface ReportService { /* TODO: throws Exception for controller to han
 
     List<Report> getAllByProjectId(long projectId) throws Exception;
     List<ReportReadDTO> getAllDTOByProjectId(long projectId) throws Exception;
+
+    List<Report> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+    List<ReportReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+    Map<Long, List<ReportReadDTO>> mapProjectIdReportDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
 
     List<Report> getAllByReporterId(long reporterId) throws Exception;
     List<ReportReadDTO> getAllDTOByReporterId(long reporterId) throws Exception;

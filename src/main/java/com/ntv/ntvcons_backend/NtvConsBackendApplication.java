@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend;
 
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.SpringApplication;
@@ -29,6 +30,11 @@ public class NtvConsBackendApplication {
 	@Bean
 	public DateTimeFormatter dateTimeFormatter() {
 		return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+	}
+
+	@Bean
+	public ThanhUtil thanhUtil() {
+		return new ThanhUtil();
 	}
 
 	public static void main(String[] args) {
