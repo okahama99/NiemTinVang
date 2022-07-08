@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -31,7 +32,7 @@ public class RequestDetailController {
     }
 
     /* READ */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Engineer','Admin','Customer','Staff')")
     @GetMapping(value = "/v1/getAllRequestDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllRequestDetail(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -55,6 +56,7 @@ public class RequestDetailController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('Engineer','Admin','Customer','Staff')")
     @GetMapping(value = "/v1/getAllById", produces = "application/json;charset=UTF-8")
     public @ResponseBody
     List<RequestDetail> getAllById(@RequestParam Long requestId) {
@@ -97,7 +99,7 @@ public class RequestDetailController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Engineer','Admin')")
     @DeleteMapping(value = "/v1/deleteRequestDetail/{requestDetailId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRequestDetail(@PathVariable(name = "requestDetailId") long requestDetailId) {
         try {

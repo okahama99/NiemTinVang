@@ -30,6 +30,9 @@ public class Request extends BaseEntity {
     @Column(name = "requesterId", nullable = false)
     private Long requesterId;
 
+    @Column(name = "requestName")
+    private String requestName;
+
     @Column(name = "requestDate", nullable = false)
     private LocalDateTime requestDate;
 

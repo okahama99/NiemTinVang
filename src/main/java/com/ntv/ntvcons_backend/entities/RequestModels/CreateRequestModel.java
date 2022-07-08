@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 public class CreateRequestModel {
     private Long projectId, requesterId, requestTypeId;
-    private String requestDesc;
+    private String requestDesc, requestName;
     private String requestDate;
     private List<RequestDetailModel> modelList;
 

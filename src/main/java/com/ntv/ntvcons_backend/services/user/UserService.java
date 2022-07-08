@@ -37,4 +37,6 @@ public interface UserService {
 
     /* DELETE */
     boolean deleteUser(long userId) throws Exception;
+
+    // ============================================================ //
 }

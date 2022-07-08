@@ -12,7 +12,7 @@ import java.util.List;
 @Setter
 public class ShowRequestModel {
     private Long requestId, projectId, requesterId, requestTypeId, verifierId;
-    private String requestDesc, verifyNote, requesterName, requestTypeName, verifierName, projectName;
+    private String requestName, requestDesc, verifyNote, requesterName, requestTypeName, verifierName, projectName;
     private LocalDateTime requestDate, verifyDate;
     private Boolean isVerified, isApproved;
 
