@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 
@@ -25,7 +27,7 @@ public class ReportDetailController {
     /* CREATE */
     @PreAuthorize("hasAnyRole('Engineer')")
     @PostMapping(value = "/v1/createReportDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createReportDetail(@RequestBody ReportDetailCreateDTO reportDetailDTO){
+    public ResponseEntity<Object> createReportDetail(@Valid @RequestBody ReportDetailCreateDTO reportDetailDTO){
         try {
             ReportDetailReadDTO newReportDetailDTO = reportDetailService.createReportDetailByDTO(reportDetailDTO);
 
@@ -46,10 +48,10 @@ public class ReportDetailController {
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
             List<ReportDetailReadDTO> reportDetailDTOList =
-                    reportDetailService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+                    reportDetailService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (reportDetailDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found");
@@ -65,11 +67,29 @@ public class ReportDetailController {
                     new ErrorResponse("Error searching for Report", e.getMessage()));
         }
     }
+    
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.REPORT_DETAIL searchType) {
+        // TODO:
+        return null;
+    }
 
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
+                                                @RequestParam SearchType.REPORT_DETAIL searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
+        // TODO:
+        return null;
+    }
+    
     /* UPDATE */
     @PreAuthorize("hasAnyRole('Engineer')")
     @PutMapping(value = "/v1/updateReportDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateReportDetail(@RequestBody ReportDetailUpdateDTO reportDetailDTO){
+    public ResponseEntity<Object> updateReportDetail(@Valid @RequestBody ReportDetailUpdateDTO reportDetailDTO){
         try {
             ReportDetailReadDTO updatedReportDetailDTO = reportDetailService.updateReportDetailByDTO(reportDetailDTO);
 

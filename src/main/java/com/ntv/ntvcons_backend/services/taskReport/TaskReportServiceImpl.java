@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.services.taskReport;
 
-import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
@@ -71,12 +70,7 @@ public class TaskReportServiceImpl implements TaskReportService {
 
         newTaskReport = createTaskReport(newTaskReport);
 
-        TaskReportReadDTO taskReportDTO = modelMapper.map(newTaskReport, TaskReportReadDTO.class);
-
-        /* Get associated Task */
-        taskReportDTO.setTask(taskService.getDTOById(newTaskReport.getTaskId()));
-
-        return taskReportDTO;
+        return modelMapper.map(newTaskReport, TaskReportReadDTO.class);
     }
 
     @Override
@@ -113,26 +107,13 @@ public class TaskReportServiceImpl implements TaskReportService {
         Set<Long> taskIdSet = new HashSet<>();
 
         List<TaskReport> newTaskReportList = newTaskReportDTOList.stream()
-                .map(newTaskReportDTO -> {
-                    /* Also while streaming */
-                    taskIdSet.add(newTaskReportDTO.getTaskId());
-
-                    return modelMapper.map(newTaskReportDTO, TaskReport.class);})
+                .map(newTaskReportDTO -> modelMapper.map(newTaskReportDTO, TaskReport.class))
                 .collect(Collectors.toList());
 
         newTaskReportList = createBulkTaskReport(newTaskReportList);
 
-        /* Get associated Task */
-        Map<Long, TaskReadDTO> taskIdTaskDTOMap = taskService.mapTaskIdTaskDTOByIdIn(taskIdSet);
-
         return newTaskReportList.stream()
-                .map(newTaskReport -> {
-                    TaskReportReadDTO TaskReportDTO =
-                            modelMapper.map(newTaskReport, TaskReportReadDTO.class);
-
-                    TaskReportDTO.setTask(taskIdTaskDTOMap.get(newTaskReport.getTaskId()));
-
-                    return TaskReportDTO;})
+                .map(newTaskReport -> modelMapper.map(newTaskReport, TaskReportReadDTO.class))
                 .collect(Collectors.toList());
     }
 
@@ -161,19 +142,11 @@ public class TaskReportServiceImpl implements TaskReportService {
         if (taskReportList != null && !taskReportList.isEmpty()) {
             int totalPage = (int) Math.ceil((double) taskReportList.size() / pageSize);
 
-            /* Get associated Task */
-            Map<Long, TaskReadDTO> taskIdTaskDTOMap =
-                    taskService.mapTaskIdTaskDTOByIdIn(
-                            taskReportList.stream()
-                                    .map(TaskReport::getTaskId)
-                                    .collect(Collectors.toSet()));
-
             return taskReportList.stream()
                     .map(taskReport -> {
                         TaskReportReadDTO taskReportReadDTO =
                                 modelMapper.map(taskReport, TaskReportReadDTO.class);
 
-                        taskReportReadDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
                         taskReportReadDTO.setTotalPage(totalPage);
 
                         return taskReportReadDTO;})
@@ -201,12 +174,7 @@ public class TaskReportServiceImpl implements TaskReportService {
             return null;
         }
 
-        TaskReportReadDTO taskReportDTO = modelMapper.map(taskReport, TaskReportReadDTO.class);
-
-        /* Get associated Task */
-        taskReportDTO.setTask(taskService.getDTOById(taskReport.getTaskId()));
-
-        return taskReportDTO;
+        return modelMapper.map(taskReport, TaskReportReadDTO.class);
     }
 
     @Override
@@ -228,21 +196,8 @@ public class TaskReportServiceImpl implements TaskReportService {
             return null;
         }
 
-        /* Get associated Task */
-        Map<Long, TaskReadDTO> taskIdTaskDTOMap =
-                taskService.mapTaskIdTaskDTOByIdIn(
-                        taskReportList.stream()
-                                .map(TaskReport::getTaskId)
-                                .collect(Collectors.toSet()));
-
         return taskReportList.stream()
-                .map(taskReport -> {
-                    TaskReportReadDTO taskReportDTO =
-                            modelMapper.map(taskReport, TaskReportReadDTO.class);
-
-                    taskReportDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
-
-                    return taskReportDTO;})
+                .map(taskReport -> modelMapper.map(taskReport, TaskReportReadDTO.class))
                 .collect(Collectors.toList());
     }
 
@@ -265,21 +220,8 @@ public class TaskReportServiceImpl implements TaskReportService {
             return null;
         }
 
-        /* Get associated Task */
-        Map<Long, TaskReadDTO> taskIdTaskDTOMap =
-                taskService.mapTaskIdTaskDTOByIdIn(
-                        taskReportList.stream()
-                                .map(TaskReport::getTaskId)
-                                .collect(Collectors.toSet()));
-
         return taskReportList.stream()
-                .map(taskReport -> {
-                    TaskReportReadDTO taskReportDTO =
-                            modelMapper.map(taskReport, TaskReportReadDTO.class);
-
-                    taskReportDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
-
-                    return taskReportDTO;})
+                .map(taskReport -> modelMapper.map(taskReport, TaskReportReadDTO.class))
                 .collect(Collectors.toList());
     }
 
@@ -302,21 +244,8 @@ public class TaskReportServiceImpl implements TaskReportService {
             return null;
         }
 
-        /* Get associated Task */
-        Map<Long, TaskReadDTO> taskIdTaskDTOMap =
-                taskService.mapTaskIdTaskDTOByIdIn(
-                        taskReportList.stream()
-                                .map(TaskReport::getTaskId)
-                                .collect(Collectors.toSet()));
-
         return taskReportList.stream()
-                .map(taskReport -> {
-                    TaskReportReadDTO taskReportDTO =
-                            modelMapper.map(taskReport, TaskReportReadDTO.class);
-
-                    taskReportDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
-
-                    return taskReportDTO;})
+                .map(taskReport -> modelMapper.map(taskReport, TaskReportReadDTO.class))
                 .collect(Collectors.toList());
     }
     @Override
@@ -356,17 +285,18 @@ public class TaskReportServiceImpl implements TaskReportService {
 
         Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap = new HashMap<>();
 
-        List<TaskReportReadDTO> tmpTaskReportDTOList;
         long tmpReportId;
+        List<TaskReportReadDTO> tmpTaskReportDTOList;
 
         for (TaskReportReadDTO taskReportDTO : taskReportDTOList) {
             tmpReportId = taskReportDTO.getReportId();
             tmpTaskReportDTOList = reportIdTaskReportDTOListMap.get(tmpReportId);
 
             if (tmpTaskReportDTOList == null) {
-                reportIdTaskReportDTOListMap.put(tmpReportId,new ArrayList<>(Collections.singletonList(taskReportDTO)));
+                reportIdTaskReportDTOListMap.put(tmpReportId, new ArrayList<>(Collections.singletonList(taskReportDTO)));
             } else {
                 tmpTaskReportDTOList.add(taskReportDTO);
+
                 reportIdTaskReportDTOListMap.put(tmpReportId, tmpTaskReportDTOList);
             }
         }
@@ -393,15 +323,8 @@ public class TaskReportServiceImpl implements TaskReportService {
             return null;
         }
 
-        /* Get associated Task */
-        TaskReadDTO taskDTO = taskService.getDTOById(taskId);
-
         return taskReportList.stream()
-                .map(taskReport -> {
-                    TaskReportReadDTO taskReportDTO =
-                            modelMapper.map(taskReport, TaskReportReadDTO.class);
-                    taskReportDTO.setTask(taskDTO);
-                    return taskReportDTO;})
+                .map(taskReport -> modelMapper.map(taskReport, TaskReportReadDTO.class))
                 .collect(Collectors.toList());
     }
 
@@ -424,22 +347,8 @@ public class TaskReportServiceImpl implements TaskReportService {
             return null;
         }
 
-        /* Get associated Task */
-        Map<Long, TaskReadDTO> taskIdTaskDTOMap =
-                taskService.mapTaskIdTaskDTOByIdIn(
-                        taskReportList.stream()
-                                .map(TaskReport::getTaskId)
-                                .collect(Collectors.toSet()));
-        /* NOT using taskIdCollection because chance not all taskId has TaskReport */
-
         return taskReportList.stream()
-                .map(taskReport -> {
-                    TaskReportReadDTO taskReportDTO =
-                            modelMapper.map(taskReport, TaskReportReadDTO.class);
-
-                    taskReportDTO.setTask(taskIdTaskDTOMap.get(taskReport.getTaskId()));
-
-                    return taskReportDTO;})
+                .map(taskReport -> modelMapper.map(taskReport, TaskReportReadDTO.class))
                 .collect(Collectors.toList());
     }
     @Override
@@ -525,12 +434,7 @@ public class TaskReportServiceImpl implements TaskReportService {
             return null;
         }
 
-        TaskReportReadDTO taskReportDTO = modelMapper.map(updatedTaskReport, TaskReportReadDTO.class);
-
-        /* Get associated Task */
-        taskReportDTO.setTask(taskService.getDTOById(updatedTaskReport.getTaskId()));
-
-        return taskReportDTO;
+        return modelMapper.map(updatedTaskReport, TaskReportReadDTO.class);
     }
 
     @Override
@@ -586,28 +490,13 @@ public class TaskReportServiceImpl implements TaskReportService {
         Set<Long> taskIdSet = new HashSet<>();
 
         List<TaskReport> updatedTaskReportList = updatedTaskReportDTOList.stream()
-                .map(updatedTaskReportDTO -> {
-                    /* Also while streaming */
-                    taskIdSet.add(updatedTaskReportDTO.getTaskId());
-
-                    return modelMapper.map(updatedTaskReportDTO, TaskReport.class);
-                })
+                .map(updatedTaskReportDTO -> modelMapper.map(updatedTaskReportDTO, TaskReport.class))
                 .collect(Collectors.toList());
-
 
         updatedTaskReportList = updateBulkTaskReport(updatedTaskReportList);
 
-        /* Get associated Task */
-        Map<Long, TaskReadDTO> taskIdTaskDTOMap = taskService.mapTaskIdTaskDTOByIdIn(taskIdSet);
-
         return updatedTaskReportList.stream()
-                .map(updatedTaskReport -> {
-                    TaskReportReadDTO taskReportDTO =
-                            modelMapper.map(updatedTaskReport, TaskReportReadDTO.class);
-
-                    taskReportDTO.setTask(taskIdTaskDTOMap.get(updatedTaskReport.getTaskId()));
-
-                    return taskReportDTO;})
+                .map(updatedTaskReport -> modelMapper.map(updatedTaskReport, TaskReportReadDTO.class))
                 .collect(Collectors.toList());
     }
 

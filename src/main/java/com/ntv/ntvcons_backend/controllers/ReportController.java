@@ -13,8 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -27,7 +26,7 @@ public class ReportController {
     /* CREATE */
     @PreAuthorize("hasAnyRole('Engineer')")
     @PostMapping(value = "/v1/createReport", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createReport(@RequestBody ReportCreateDTO reportDTO){
+    public ResponseEntity<Object> createReport(@Valid @RequestBody ReportCreateDTO reportDTO){
         try {
             ReportReadDTO newReportDTO = reportService.createReportByDTO(reportDTO);
 
@@ -48,9 +47,9 @@ public class ReportController {
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
-            List<ReportReadDTO> reportDTOList = reportService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortType);
+            List<ReportReadDTO> reportDTOList = reportService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (reportDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found");
@@ -68,26 +67,26 @@ public class ReportController {
         }
     }
 
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.REPORT searchType) {
+        // TODO:
+        return null;
+    }
+
     @PreAuthorize("hasAnyRole('Engineer','Staff','Customer','Admin')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam, 
-                                             @RequestParam(name = "searchType") SearchType searchType) {
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
+                                                @RequestParam SearchType.ALL_REPORT searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
         try {
             List<ReportReadDTO> reportDTOList;
 
             switch (searchType) {
-                case REPORT_BY_ID:
-                    ReportReadDTO reportDTO = reportService.getDTOById(Long.parseLong(searchParam));
-
-                    if (reportDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Report found with reportId: '" + searchParam + "'. ");
-                    }
-
-                    reportDTOList = new ArrayList<>(Collections.singletonList(reportDTO));
-                    break;
-
-                case REPORT_BY_PROJECT_ID:
+                case BY_PROJECT_ID:
                     reportDTOList = reportService.getAllDTOByProjectId(Long.parseLong(searchParam));
 
                     if (reportDTOList == null) {
@@ -96,7 +95,7 @@ public class ReportController {
                     }
                     break;
 
-                case REPORT_BY_REPORTER_ID:
+                case BY_REPORTER_ID:
                     reportDTOList = reportService.getAllDTOByReporterId(Long.parseLong(searchParam));
 
                     if (reportDTOList == null) {
@@ -105,7 +104,7 @@ public class ReportController {
                     }
                     break;
 
-                case REPORT_BY_REPORT_TYPE_ID:
+                case BY_REPORT_TYPE_ID:
                     reportDTOList = reportService.getAllDTOByReportTypeId(Long.parseLong(searchParam));
 
                     if (reportDTOList == null) {
@@ -125,27 +124,23 @@ public class ReportController {
                             "Invalid parameter type for searchType: '" + searchType 
                                     + "'. Expecting parameter of type: Long", 
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy || searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for Report with ";
 
             switch (searchType) {
-                case REPORT_BY_ID:
-                    errorMsg += "reportId: '" + searchParam + "'. ";
-                    break;
-
-                case REPORT_BY_PROJECT_ID:
+                case BY_PROJECT_ID:
                     errorMsg += "projectId: '" + searchParam + "'. ";
                     break;
 
-                case REPORT_BY_REPORTER_ID:
+                case BY_REPORTER_ID:
                     errorMsg += "reporterId: '" + searchParam + "'. ";
                     break;
 
-                case REPORT_BY_REPORT_TYPE_ID:
+                case BY_REPORT_TYPE_ID:
                     errorMsg += "reportTypeId: '" + searchParam + "'. ";
                     break;
             }
@@ -154,18 +149,10 @@ public class ReportController {
         }
     }
 
-    /* TODO: example projectId & reporterId, projectId & reportTypeId,...
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = "/v1/getByMultiParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByMultiParam(@RequestBody Object searchParams,
-                                                  @RequestParam(name = "searchType") SearchType searchType) {
-        return null;
-    }*/
-
     /* UPDATE */
     @PreAuthorize("hasAnyRole('Engineer')")
     @PutMapping(value = "/v1/updateReport", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateReport(@RequestBody ReportUpdateDTO reportDTO){
+    public ResponseEntity<Object> updateReport(@Valid @RequestBody ReportUpdateDTO reportDTO){
         try {
             ReportReadDTO updatedReportDTO = reportService.updateReportByDTO(reportDTO);
 

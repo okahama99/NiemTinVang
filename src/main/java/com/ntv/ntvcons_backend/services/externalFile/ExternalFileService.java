@@ -1,6 +1,6 @@
 package com.ntv.ntvcons_backend.services.externalFile;
 
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.entities.ExternalFile;
 
 import java.util.Collection;
@@ -13,7 +13,7 @@ public interface ExternalFileService {
     /* READ */
     ExternalFile checkDuplicateByFileName(String fileName);
 
-    List<ExternalFileDTO> getAllWithPagingAndSorting
+    List<ExternalFileReadDTO> getAllWithPagingAndSorting
             (int pageNo, int pageSize, String sortBy, boolean sortType);
 
     List<ExternalFile> getAllByFileTypeId(int fileTypeId);

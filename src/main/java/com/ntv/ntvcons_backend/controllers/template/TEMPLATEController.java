@@ -33,10 +33,10 @@ public class TEMPLATEController {
 //    public ResponseEntity<Object> getAll(@RequestParam int pageNo,
 //                                         @RequestParam int pageSize,
 //                                         @RequestParam String sortBy,
-//                                         @RequestParam boolean sortType) {
+//                                         @RequestParam boolean sortTypeAsc) {
 //        try {
 //            List<TEMPLATEReadDTO> temPlateDTOList =
-//                    temPlateService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+//                    temPlateService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
 //
 //            if (temPlateDTOList == null) {
 //                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No TEMPLATE found");
@@ -55,7 +55,11 @@ public class TEMPLATEController {
 //
 //    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
 //    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-//                                             @RequestParam(name = "searchType") SearchType searchType) {
+//                                                @RequestParam SearchType searchType,
+//                                                @RequestParam int pageNo,
+//                                                @RequestParam int pageSize,
+//                                                @RequestParam String sortBy,
+//                                                @RequestParam boolean sortTypeAsc) {
 //        try {
 //            List<TEMPLATEReadDTO> temPlateDTOList;
 //

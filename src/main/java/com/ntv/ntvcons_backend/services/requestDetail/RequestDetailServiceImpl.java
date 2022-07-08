@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.services.requestDetail;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import com.ntv.ntvcons_backend.entities.Request;
 import com.ntv.ntvcons_backend.entities.RequestDetail;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
@@ -8,6 +9,7 @@ import com.ntv.ntvcons_backend.entities.RequestDetailModels.ShowRequestDetailMod
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.UpdateRequestDetailModel;
 import com.ntv.ntvcons_backend.repositories.RequestDetailRepository;
 import com.ntv.ntvcons_backend.repositories.RequestRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,19 +18,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RequestDetailServiceImpl implements RequestDetailService {
-
     @Autowired
     private RequestDetailRepository requestDetailRepository;
-
     @Autowired
     private RequestRepository requestRepository;
+    @Autowired
+    private ModelMapper modelMapper;
 
+    /* CREATE */
     @Override
     public boolean createRequest(CreateRequestDetailModel createRequestDetailModel) {
         Optional<Request> request = requestRepository.findById(createRequestDetailModel.getRequestId());
@@ -49,6 +51,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         return false;
     }
 
+    /* READ */
     @Override
     public List<ShowRequestDetailModel> getAllAvailableRequestDetail(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
@@ -100,6 +103,84 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     }
 
     @Override
+    public List<RequestDetail> getAllByRequestId(long requestId) {
+        List<RequestDetail> requestDetailList =
+                requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(requestId);
+
+        if (requestDetailList.isEmpty()) {
+            return null;
+        }
+
+        return requestDetailList;
+    }
+    @Override
+    public List<RequestDetailReadDTO> getAllDTOByRequestId(long requestId) {
+        List<RequestDetail> requestDetailList = getAllByRequestId(requestId);
+
+        if (requestDetailList == null) {
+            return null;
+        }
+
+        return requestDetailList.stream()
+                .map(requestDetail -> modelMapper.map(requestDetail, RequestDetailReadDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<RequestDetail> getAllByRequestIdIn(Collection<Long> requestIdCollection) {
+        List<RequestDetail> requestDetailList =
+                requestDetailRepository.findAllByRequestIdInAndIsDeletedIsFalse(requestIdCollection);
+
+        if (requestDetailList.isEmpty()) {
+            return null;
+        }
+
+        return requestDetailList;
+    }
+    @Override
+    public List<RequestDetailReadDTO> getAllDTOByRequestIdIn(Collection<Long> requestIdCollection) {
+        List<RequestDetail> requestDetailList = getAllByRequestIdIn(requestIdCollection);
+
+        if (requestDetailList == null) {
+            return null;
+        }
+
+        return requestDetailList.stream()
+                .map(requestDetail -> modelMapper.map(requestDetail, RequestDetailReadDTO.class))
+                .collect(Collectors.toList());
+    }
+    @Override
+    public Map<Long, List<RequestDetailReadDTO>> mapRequestIdRequestDetailDTOListByRequestIdIn(Collection<Long> requestIdCollection) {
+        List<RequestDetailReadDTO> requestDetailDTOList = getAllDTOByRequestIdIn(requestIdCollection);
+
+        if (requestDetailDTOList == null) {
+            return new HashMap<>();
+        }
+
+        Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap = new HashMap<>();
+
+        long tmpRequestId;
+        List<RequestDetailReadDTO> tmpRequestDetailDTOList;
+
+        for (RequestDetailReadDTO requestDetailDTO : requestDetailDTOList) {
+            tmpRequestId = requestDetailDTO.getRequestId();
+            tmpRequestDetailDTOList = requestIdRequestDetailDTOListMap.get(tmpRequestId);
+
+            if (tmpRequestDetailDTOList == null) {
+                requestIdRequestDetailDTOListMap
+                        .put(tmpRequestId, new ArrayList<>(Collections.singletonList(requestDetailDTO)));
+            } else {
+                tmpRequestDetailDTOList.add(requestDetailDTO);
+
+                requestIdRequestDetailDTOListMap.put(tmpRequestId, requestDetailDTOList);
+            }
+        }
+
+        return requestIdRequestDetailDTOListMap;
+    }
+
+    /* UPDATE */
+    @Override
     public boolean updateRequestDetail(UpdateRequestDetailModel updateRequestDetailModel) {
         Optional<RequestDetail> requestDetail = requestDetailRepository.findByRequestDetailIdAndIsDeletedIsFalse(updateRequestDetailModel.getRequestDetailId());
         if(requestDetail != null)
@@ -114,6 +195,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         return false;
     }
 
+    /* DELETE */
     @Override
     public boolean deleteRequestDetail(Long requestDetailId) {
         RequestDetail requestDetail = requestDetailRepository.findById(requestDetailId).orElse(null);
@@ -124,12 +206,4 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         }
         return false;
     }
-    /* CREATE */
-
-    /* READ */
-
-    /* UPDATE */
-
-    /* DELETE */
-
 }

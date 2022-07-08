@@ -1,8 +1,10 @@
 package com.ntv.ntvcons_backend.dtos.project;
 
 import com.ntv.ntvcons_backend.dtos.BaseReadDTO;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
+import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +21,7 @@ public class ProjectReadDTO extends BaseReadDTO {
     private String projectName;
 
     private LocationReadDTO location;
-//    private BlueprintReadDTO blueprint;
+    private BlueprintReadDTO blueprint;
 
     private LocalDateTime planStartDate;
     private LocalDateTime planEndDate;
@@ -31,5 +33,5 @@ public class ProjectReadDTO extends BaseReadDTO {
 
     private List<TaskReadDTO> taskList;
     private List<ReportReadDTO> reportList;
-//    private List<RequestDTO> requestList;
+    private List<RequestReadDTO> requestList;
 }

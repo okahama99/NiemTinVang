@@ -50,5 +50,4 @@ public class Location extends BaseEntity {
 
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;
-
 }

@@ -21,6 +21,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     Optional<Report> findByReportIdAndIsDeletedIsFalse(long reportId);
     boolean existsAllByReportIdInAndIsDeletedIsFalse(Collection<Long> reportIdCollection);
     List<Report> findAllByReportIdInAndIsDeletedIsFalse(Collection<Long> reportIdCollection);
+    /* Id & reportName */
+    boolean existsByReportNameAndReportIdIsNotAndIsDeletedIsFalse(String reportName, long reportId);
 
 
     /* reportTypeId */
@@ -38,6 +40,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findAllByReporterIdInAndIsDeletedIsFalse(Collection<Long> reporterIdCollection);
     /* projectId & reporterId */
     List<Report> findAllByProjectIdAndReporterIdAndIsDeletedIsFalse(long projectId, long reporterId);
+
+
+    /* reportName */
+    Report findByReportNameAndIsDeletedIsFalse(String reportName);
+    List<Report> findAllByReportNameContainsAndIsDeletedIsFalse(String reportName);
+    /* reportName */
+    boolean existsByReportNameAndIsDeletedIsFalse(String reportName);
 
 
     /* reportDate */

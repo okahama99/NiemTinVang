@@ -1,21 +1,31 @@
 package com.ntv.ntvcons_backend.dtos.projectManager;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ntv.ntvcons_backend.constants.Regex;
+import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Positive;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectManagerCreateDTO implements Serializable {
+public class ProjectManagerCreateDTO extends BaseCreateDTO {
+    @Positive
+    @NotNull(message = "projectId REQUIRED for create")
     private Long projectId;
-    private Long managerId;
-    private String assignDate;
-    private String removeDate;
 
-    @JsonIgnore
-    private final Boolean isDeleted = false;
+    @Positive
+    @NotNull(message = "userId (managerId) REQUIRED for create")
+    private Long managerId;
+
+    /** yyyy-MM-dd HH:mm */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
+    @NotNull(message = "assignDate REQUIRED for create")
+    private String assignDate;
 }

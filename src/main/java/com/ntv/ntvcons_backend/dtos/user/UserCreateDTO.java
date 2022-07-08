@@ -14,17 +14,17 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserCreateDTO implements Serializable {
+public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO */
     @Positive
     @NotNull(message = "roleId REQUIRED for create")
     private Long roleId;
 
-    @NotNull(message = "username REQUIRED for create")
     @Size(max = 50, message = "username max length: 100 characters")
+    @NotNull(message = "username REQUIRED for create")
     private String username;
 
-    @NotNull(message = "phone REQUIRED for create")
     @Pattern(regexp = Regex.PHONE_REGEX_1, message = "Need to match pattern '0 + (9-14) digits'")
+    @NotNull(message = "phone REQUIRED for create")
     private String phone;
 
     @Email
