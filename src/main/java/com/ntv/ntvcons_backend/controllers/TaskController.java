@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
@@ -25,8 +25,9 @@ public class TaskController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @PostMapping(value = "/v1/createTask", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createTask(@RequestBody TaskCreateDTO taskDTO) {
+    public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO) {
         try {
             TaskReadDTO newTaskDTO = taskService.createTaskByDTO(taskDTO);
 
@@ -42,13 +43,14 @@ public class TaskController {
     }
 
     /* READ */
+    @PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
-            List<TaskReadDTO> taskDTOList = taskService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+            List<TaskReadDTO> taskDTOList = taskService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (taskDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Task found");
@@ -65,26 +67,26 @@ public class TaskController {
         }
     }
 
-    /* TODO"'. " search by date (plan, actual); separate func or mod this one */
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.TASK searchType) {
+        // TODO:
+        return null;
+    }
+
+    @PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                             @RequestParam(name = "searchType") SearchType searchType) {
+                                                @RequestParam SearchType.ALL_TASK searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
         try {
             List<TaskReadDTO> taskDTOList;
 
             switch (searchType) {
-                case TASK_BY_ID:
-                    TaskReadDTO taskDTO = taskService.getDTOById(Long.parseLong(searchParam));
-
-                    if (taskDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Task found with taskId: '" + searchParam + "'. ");
-                    }
-
-                    taskDTOList = new ArrayList<>(Collections.singletonList(taskDTO));
-                    break;
-
-                case TASK_BY_NAME_CONTAINS:
+                case BY_NAME_CONTAINS:
                     taskDTOList = taskService.getAllDTOByTaskNameContains(searchParam);
 
                     if (taskDTOList == null) {
@@ -93,7 +95,7 @@ public class TaskController {
                     }
                     break;
 
-                case TASK_BY_PROJECT_ID:
+                case BY_PROJECT_ID:
                     taskDTOList = taskService.getAllDTOByProjectId(Long.parseLong(searchParam));
 
                     if (taskDTOList == null) {
@@ -120,15 +122,11 @@ public class TaskController {
             String errorMsg = "Error searching for Task with ";
 
             switch (searchType) {
-                case TASK_BY_ID:
-                    errorMsg += "taskId: '" + searchParam + "'. ";
-                    break;
-
-                case TASK_BY_NAME_CONTAINS:
+                case BY_NAME_CONTAINS:
                     errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
 
-                case TASK_BY_PROJECT_ID:
+                case BY_PROJECT_ID:
                     errorMsg += "projectId: '" + searchParam + "'. ";
                     break;
             }
@@ -138,8 +136,9 @@ public class TaskController {
     }
 
     /* UPDATE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @PutMapping(value = "/v1/updateTask", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateTask(@RequestBody TaskUpdateDTO taskDTO) {
+    public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO) {
         try {
             TaskReadDTO updatedTaskDTO = taskService.updateTaskByDTO(taskDTO);
 
@@ -160,6 +159,7 @@ public class TaskController {
     }
 
     /* DELETE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value ="/v1/deleteTask/{taskId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteTask(@PathVariable(name = "taskId") long taskId) {
         try {

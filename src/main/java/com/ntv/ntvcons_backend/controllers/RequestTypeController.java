@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -24,9 +24,9 @@ public class RequestTypeController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @PostMapping(value = "/v1/createRequestType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRequestType(@RequestBody RequestTypeCreateDTO requestTypeDTO){
+    public ResponseEntity<Object> createRequestType(@Valid @RequestBody RequestTypeCreateDTO requestTypeDTO){
         try {
             RequestTypeReadDTO newRequestTypeDTO = requestTypeService.createRequestTypeByDTO(requestTypeDTO);
 
@@ -38,15 +38,15 @@ public class RequestTypeController {
     }
 
     /* READ */
-    //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin','Engineer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
             List<RequestTypeReadDTO> requestTypeDTOList =
-                    requestTypeService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+                    requestTypeService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (requestTypeDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No RequestType found");
@@ -63,25 +63,27 @@ public class RequestTypeController {
         }
     }
 
+
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.REQUEST_TYPE searchType) {
+        // TODO:
+        return null;
+    }
+
+    @PreAuthorize("hasAnyRole('Admin','Engineer')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                             @RequestParam(name = "searchType") SearchType searchType) {
+                                                @RequestParam SearchType.ALL_REQUEST_TYPE searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
         try {
             List<RequestTypeReadDTO> requestTypeDTOList;
 
             switch (searchType) {
-                case REQUEST_TYPE_BY_ID:
-                    RequestTypeReadDTO requestTypeDTO = requestTypeService.getDTOById(Long.parseLong(searchParam));
-
-                    if (requestTypeDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No RequestType found with name contains: '" + searchParam + "'. ");
-                    }
-
-                    requestTypeDTOList = new ArrayList<>(Collections.singletonList(requestTypeDTO));
-                    break;
-
-                case REQUEST_TYPE_BY_NAME_CONTAINS:
+                case BY_NAME_CONTAINS:
                     requestTypeDTOList = requestTypeService.getAllDTOByRequestTypeNameContains(searchParam);
 
                     if (requestTypeDTOList == null) {
@@ -109,11 +111,7 @@ public class RequestTypeController {
             String errorMsg = "Error searching for RequestType with ";
 
             switch (searchType) {
-                case REQUEST_TYPE_BY_ID:
-                    errorMsg += "requestTypeId: '" + searchParam + "'. ";
-                    break;
-
-                case REQUEST_TYPE_BY_NAME_CONTAINS:
+                case BY_NAME_CONTAINS:
                     errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
             }
@@ -123,9 +121,9 @@ public class RequestTypeController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @PutMapping(value = "/v1/updateRequestType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRequestType(@RequestBody RequestTypeUpdateDTO requestTypeDTO){
+    public ResponseEntity<Object> updateRequestType(@Valid @RequestBody RequestTypeUpdateDTO requestTypeDTO){
         try {
             RequestTypeReadDTO updatedRequestTypeDTO = requestTypeService.updateRequestTypeByDTO(requestTypeDTO);
 
@@ -143,7 +141,7 @@ public class RequestTypeController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasRequestType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value = "/v1/deleteRequestType/{requestTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRequestType(@PathVariable(name = "requestTypeId") long requestTypeId){
         try {

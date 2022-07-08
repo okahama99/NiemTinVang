@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -24,9 +24,9 @@ public class ReportTypeController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasReportType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @PostMapping(value = "/v1/createReportType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createReportType(@RequestBody ReportTypeCreateDTO reportTypeDTO){
+    public ResponseEntity<Object> createReportType(@Valid @RequestBody ReportTypeCreateDTO reportTypeDTO){
         try {
             ReportTypeReadDTO newReportTypeDTO = reportTypeService.createReportTypeByDTO(reportTypeDTO);
 
@@ -38,15 +38,15 @@ public class ReportTypeController {
     }
 
     /* READ */
-    //@PreAuthorize("hasReportType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin','Engineer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
             List<ReportTypeReadDTO> reportTypeDTOList =
-                    reportTypeService.getAllDTO(pageNo, pageSize, sortBy, sortType);
+                    reportTypeService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (reportTypeDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ReportType found");
@@ -63,25 +63,26 @@ public class ReportTypeController {
         }
     }
 
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.REPORT_TYPE searchType) {
+        // TODO:
+        return null;
+    }
+
+    @PreAuthorize("hasAnyRole('Admin','Engineer')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                             @RequestParam(name = "searchType") SearchType searchType) {
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam, 
+                                                @RequestParam SearchType.ALL_REPORT_TYPE searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
         try {
             List<ReportTypeReadDTO> reportTypeDTOList;
 
             switch (searchType) {
-                case REPORT_TYPE_BY_ID:
-                    ReportTypeReadDTO reportTypeDTO = reportTypeService.getDTOById(Long.parseLong(searchParam));
-
-                    if (reportTypeDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No ReportType found with reportTypeId: '" + searchParam + "'. ");
-                    }
-
-                    reportTypeDTOList = new ArrayList<>(Collections.singletonList(reportTypeDTO));
-                    break;
-
-                case REPORT_TYPE_BY_NAME_CONTAINS:
+                case BY_NAME_CONTAINS:
                     reportTypeDTOList = reportTypeService.getAllDTOByReportTypeNameContains(searchParam);
 
                     if (reportTypeDTOList == null) {
@@ -109,11 +110,7 @@ public class ReportTypeController {
             String errorMsg = "Error searching for ReportType with ";
 
             switch (searchType) {
-                case REPORT_TYPE_BY_ID:
-                    errorMsg += "reportTypeId: '" + searchParam + "'. ";
-                    break;
-
-                case REPORT_TYPE_BY_NAME_CONTAINS:
+                case BY_NAME_CONTAINS:
                     errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
             }
@@ -123,9 +120,9 @@ public class ReportTypeController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasReportType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @PutMapping(value = "/v1/updateReportType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateReportType(@RequestBody ReportTypeUpdateDTO reportTypeDTO){
+    public ResponseEntity<Object> updateReportType(@Valid @RequestBody ReportTypeUpdateDTO reportTypeDTO){
         try {
             ReportTypeReadDTO updatedReportTypeDTO = reportTypeService.updateReportTypeByDTO(reportTypeDTO);
 
@@ -143,7 +140,7 @@ public class ReportTypeController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasReportType('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value = "/v1/deleteReportType/{reportTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteReportType(@PathVariable(name = "reportTypeId") long reportTypeId){
         try {

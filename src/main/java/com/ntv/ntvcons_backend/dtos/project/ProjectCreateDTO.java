@@ -2,7 +2,8 @@ package com.ntv.ntvcons_backend.dtos.project;
 
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
-import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationCreateOptionDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,9 +24,10 @@ public class ProjectCreateDTO extends BaseCreateDTO {
     private String projectName;
 
     @NotNull(message = "location REQUIRED for create")
-    private LocationCreateDTO location;
+    private LocationCreateOptionDTO location;
 
-//    private BlueprintCreateDTO blueprint;
+    @NotNull(message = "blueprint REQUIRED for create")
+    private BlueprintCreateDTO blueprint;
 
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */

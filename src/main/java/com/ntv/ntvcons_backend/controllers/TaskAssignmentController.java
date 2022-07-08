@@ -2,19 +2,18 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentCreateDTO;
+import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -25,6 +24,7 @@ public class TaskAssignmentController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @PostMapping(value = "/v1/createTaskAssignment", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createTaskAssignment(@Valid @RequestBody TaskAssignmentCreateDTO taskAssignmentDTO){
         try {
@@ -43,14 +43,15 @@ public class TaskAssignmentController {
     }
 
     /* READ */
+    @PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortType) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
             List<TaskAssignmentReadDTO> taskAssignmentDTOList =
-                    taskAssignmentService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortType);
+                    taskAssignmentService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (taskAssignmentDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No TaskAssignment found");
@@ -67,26 +68,26 @@ public class TaskAssignmentController {
         }
     }
 
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.TASK_ASSIGNMENT searchType) {
+        // TODO:
+        return null;
+    }
+
+    @PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                             @RequestParam(name = "searchType") SearchType searchType) {
+                                                @RequestParam SearchType.ALL_TASK_ASSIGNMENT searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortTypeAsc) {
         try {
             List<TaskAssignmentReadDTO> taskAssignmentDTOList;
 
             switch (searchType) {
-                case TASK_ASSIGNMENT_BY_ID:
-                    TaskAssignmentReadDTO taskAssignmentDTO =
-                            taskAssignmentService.getDTOById(Long.parseLong(searchParam));
-
-                    if (taskAssignmentDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No TaskAssignment found with assignmentId: '" + searchParam + "'. ");
-                    }
-
-                    taskAssignmentDTOList = new ArrayList<>(Collections.singletonList(taskAssignmentDTO));
-                    break;
-
-                case TASK_ASSIGNMENT_BY_ASSIGNER_ID:
+                case BY_ASSIGNER_ID:
                     taskAssignmentDTOList =
                             taskAssignmentService.getAllDTOByAssignerId(Long.parseLong(searchParam));
 
@@ -96,7 +97,7 @@ public class TaskAssignmentController {
                     }
                     break;
 
-                case TASK_ASSIGNMENT_BY_ASSIGNEE_ID:
+                case BY_ASSIGNEE_ID:
                     taskAssignmentDTOList =
                             taskAssignmentService.getAllDTOByAssignerId(Long.parseLong(searchParam));
 
@@ -125,15 +126,11 @@ public class TaskAssignmentController {
             String errorMsg = "Error searching for TaskAssignment with ";
 
             switch (searchType) {
-                case TASK_ASSIGNMENT_BY_ID:
-                    errorMsg += "assignmentId: '" + searchParam + "'. ";
-                    break;
-
-                case TASK_ASSIGNMENT_BY_ASSIGNER_ID:
+                case BY_ASSIGNER_ID:
                     errorMsg += "assignerId: '" + searchParam + "'. ";
                     break;
 
-                case TASK_ASSIGNMENT_BY_ASSIGNEE_ID:
+                case BY_ASSIGNEE_ID:
                     errorMsg += "assigneeId: '" + searchParam + "'. ";
                     break;
             }
@@ -143,6 +140,7 @@ public class TaskAssignmentController {
     }
 
     /* UPDATE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @PutMapping(value = "/v1/updateTaskAssignment", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateTaskAssignment(@Valid @RequestBody TaskAssignmentUpdateDTO taskAssignmentDTO){
         try {
@@ -163,6 +161,7 @@ public class TaskAssignmentController {
     }
 
     /* DELETE */
+    @PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value = "/v1/deleteTaskAssignment/{assignmentId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteTaskAssignment(@PathVariable(name = "assignmentId") long assignmentId){
         try {

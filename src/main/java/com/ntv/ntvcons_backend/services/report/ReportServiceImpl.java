@@ -63,15 +63,18 @@ public class ReportServiceImpl implements ReportService {
             errorMsg += "No Project found with Id: '" + newReport.getProjectId()
                     + "'. Which violate constraint: FK_Report_Project. ";
         }
-
         if (!userService.existsById(newReport.getReporterId())) {
             errorMsg += "No User found with Id: '" + newReport.getReporterId()
                     + "'. Which violate constraint: FK_Report_User. ";
         }
-
         if (!reportTypeService.existsById(newReport.getReportTypeId())) {
             errorMsg += "No ReportType found with Id: '" + newReport.getReportTypeId()
                     + "'. Which violate constraint: FK_Report_ReportType. ";
+        }
+
+        /* Check duplicate */
+        if (reportRepository.existsByReportNameAndIsDeletedIsFalse(newReport.getReportName())) {
+            errorMsg += "Already exists another Report with name: '" + newReport.getReportName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) {
@@ -330,6 +333,87 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    public List<Report> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Report> reportList =
+                reportRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+
+        if (reportList.isEmpty()) {
+            return null;
+        }
+
+        return reportList;
+    }
+    @Override
+    public List<ReportReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Report> reportList = getAllByProjectIdIn(projectIdCollection);
+
+        if (reportList == null) {
+            return null;
+        }
+
+        Set<Long> reportIdSet = new HashSet<>();
+        Set<Long> reportTypeIdSet = new HashSet<>();
+
+        for (Report report : reportList) {
+            reportIdSet.add(report.getReportId());
+            reportTypeIdSet.add(report.getReportTypeId());
+        }
+
+        /* Get associated ReportType */
+        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
+                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
+
+        /* Get associated ReportDetail */
+        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
+                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
+
+        /* Get associated TaskReport */
+        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
+                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
+
+        return reportList.stream()
+                .map(report -> {
+                    ReportReadDTO reportDTO =
+                            modelMapper.map(report, ReportReadDTO.class);
+
+                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
+
+                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
+                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
+
+                    return reportDTO;})
+                .collect(Collectors.toList());
+    }
+    @Override
+    public Map<Long, List<ReportReadDTO>> mapProjectIdReportDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<ReportReadDTO> reportDTOList = getAllDTOByProjectIdIn(projectIdCollection);
+
+        if (reportDTOList == null) {
+            return new HashMap<>();
+        }
+
+        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap = new HashMap<>();
+
+        long tmpProjectId;
+        List<ReportReadDTO> tmpReportDTOList;
+
+        for (ReportReadDTO reportDTO : reportDTOList) {
+            tmpProjectId = reportDTO.getProjectId();
+            tmpReportDTOList = projectIdReportDTOListMap.get(tmpProjectId);
+
+            if (tmpReportDTOList == null) {
+                projectIdReportDTOListMap.put(tmpProjectId, new ArrayList<>(Collections.singletonList(reportDTO)));
+            } else {
+                tmpReportDTOList.add(reportDTO);
+
+                projectIdReportDTOListMap.put(tmpProjectId, tmpReportDTOList);
+            }
+        }
+
+        return projectIdReportDTOListMap;
+    }
+
+    @Override
     public List<Report> getAllByReporterId(long reporterId) throws Exception {
         List<Report> reportList =
                 reportRepository.findAllByReporterIdAndIsDeletedIsFalse(reporterId);
@@ -564,30 +648,53 @@ public class ReportServiceImpl implements ReportService {
 
         String errorMsg = "";
 
+        /* Check FK */
         if (!oldReport.getProjectId().equals(updatedReport.getProjectId())) {
             if (!projectService.existsById(updatedReport.getProjectId())) {
                 errorMsg += "No Project found with Id: '" + updatedReport.getProjectId()
                         + "'. Which violate constraint: FK_Report_Project. ";
             }
         }
-
+        if (!oldReport.getReportTypeId().equals(updatedReport.getReportTypeId())) {
+            if (!reportTypeService.existsById(updatedReport.getReportTypeId())) {
+                errorMsg += "No ReportType found with Id: '" + updatedReport.getReportTypeId()
+                        + "'. Which violate constraint: FK_Report_ReportType. ";
+            }
+        }
         if (!oldReport.getReporterId().equals(updatedReport.getReporterId())) {
             if (!userService.existsById(updatedReport.getReporterId())) {
-                errorMsg += "No User found with Id: '" + updatedReport.getReporterId()
-                        + "'. Which violate constraint: FK_Report_Project. ";
+                errorMsg += "No User (Reporter) found with Id: '" + updatedReport.getReporterId()
+                        + "'. Which violate constraint: FK_Report_User_ReporterId. ";
+            }
+        }
+        if (oldReport.getUpdatedBy() != null) {
+            if (!oldReport.getUpdatedBy().equals(updatedReport.getUpdatedBy())) {
+                if (!userService.existsById(updatedReport.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReport.getUpdatedBy()
+                            + "'. Which violate constraint: FK_Report_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (!userService.existsById(updatedReport.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReport.getUpdatedBy()
+                        + "'. Which violate constraint: FK_Report_User_UpdatedBy. ";
             }
         }
 
-       if (!oldReport.getReportTypeId().equals(updatedReport.getReportTypeId())) {
-           if (!reportTypeService.existsById(updatedReport.getReportTypeId())) {
-               errorMsg += "No ReportType found with Id: '" + updatedReport.getReportTypeId()
-                       + "'. Which violate constraint: FK_Report_Project. ";
-           }
-       }
+        /* Check duplicate */
+        if (reportRepository
+                .existsByReportNameAndReportIdIsNotAndIsDeletedIsFalse(
+                        updatedReport.getReportName(),
+                        updatedReport.getReportId())) {
+            errorMsg += "Already exists another Report with name: '" + updatedReport.getReportName() + "'. ";
+        }
 
         if (!errorMsg.trim().isEmpty()) {
             throw new IllegalArgumentException(errorMsg);
         }
+
+        updatedReport.setCreatedAt(oldReport.getCreatedAt());
+        updatedReport.setCreatedBy(oldReport.getCreatedBy());
 
         return reportRepository.saveAndFlush(updatedReport);
     }
@@ -599,8 +706,13 @@ public class ReportServiceImpl implements ReportService {
 
         Report updatedReport = modelMapper.map(updatedReportDTO, Report.class);
 
+        /* Already check not null */
         updatedReport.setReportDate(
                 LocalDateTime.parse(updatedReportDTO.getReportDate(), dateTimeFormatter));
+
+        if(updatedReport.getReportDate().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("reportDate can't be in the future");
+        }
 
         updatedReport = updateReport(updatedReport);
 
@@ -610,40 +722,76 @@ public class ReportServiceImpl implements ReportService {
 
         ReportReadDTO reportDTO = modelMapper.map(updatedReport, ReportReadDTO.class);
 
-        /* Get associated ReportTpe */
+        /* Get associated ReportType */
         reportDTO.setReportType(reportTypeService.getDTOById(updatedReport.getReportTypeId()));
 
+
+        /* Associated ReportDetail */
+        modelMapper.typeMap(ReportDetailUpdateDTO.class, ReportDetailCreateDTO.class)
+                .addMappings(mapper -> {
+                    mapper.map(ReportDetailUpdateDTO::getUpdatedBy, ReportDetailCreateDTO::setCreatedBy);});
+
+        List<ReportDetailCreateDTO> newReportDetailDTOList = new ArrayList<>();
+        List<ReportDetailUpdateDTO> updatedReportDetailDTOList = new ArrayList<>();
+
+        for (ReportDetailUpdateDTO updatedReportDetailDTO : updatedReportDTO.getReportDetailList()) {
+            if (updatedReportDetailDTO.getReportDetailId() <= 0) {
+                newReportDetailDTOList.add(modelMapper.map(updatedReportDetailDTO, ReportDetailCreateDTO.class));
+            } else {
+                updatedReportDetailDTOList.add(updatedReportDetailDTO);
+            }
+        }
+
         /* Create associated ReportDetail; Set required FK reportId (Just in case) */
-        List<ReportDetailCreateDTO> newReportDetailDTOList = updatedReportDTO.getNewReportDetailList();
-        if (newReportDetailDTOList != null && !newReportDetailDTOList.isEmpty()) {
+        if (!newReportDetailDTOList.isEmpty()) {
             reportDetailService.createBulkReportDetailByDTOList(
                     newReportDetailDTOList.stream()
                             .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportDTO.getReportId()))
                             .collect(Collectors.toList()));
         }
 
-        /* Update associated ReportDetail */
-        List<ReportDetailUpdateDTO> updatedReportDetailDTOList = updatedReportDTO.getUpdatedReportDetailList();
-        if (updatedReportDetailDTOList != null && !updatedReportDetailDTOList.isEmpty()) {
-            reportDetailService.updateBulkReportDetailByDTOList(updatedReportDetailDTOList);
+        /* Update associated ReportDetail; Set required FK reportId (Just in case) */
+        if (!updatedReportDetailDTOList.isEmpty()) {
+            reportDetailService.updateBulkReportDetailByDTOList(
+                    updatedReportDetailDTOList.stream()
+                            .peek(updatedReportDetailDTO -> updatedReportDetailDTO.setReportId(reportDTO.getReportId()))
+                            .collect(Collectors.toList()));
         }
 
         /* Get associated ReportDetail (After insert & update) */
         reportDTO.setReportDetailList(reportDetailService.getAllDTOByReportId(updatedReport.getReportId()));
 
+
+        /* Associated TaskReport */
+        modelMapper.typeMap(TaskReportUpdateDTO.class, TaskReportCreateDTO.class)
+                .addMappings(mapper -> {
+                    mapper.map(TaskReportUpdateDTO::getUpdatedBy, TaskReportCreateDTO::setCreatedBy);});
+
+        List<TaskReportCreateDTO> newTaskReportDTOList = new ArrayList<>();
+        List<TaskReportUpdateDTO> updatedTaskReportDTOList = new ArrayList<>();
+
+        for (TaskReportUpdateDTO updatedTaskReportDTO : updatedReportDTO.getTaskReportList()) {
+            if (updatedTaskReportDTO.getTaskReportId() <= 0) {
+                newTaskReportDTOList.add(modelMapper.map(updatedTaskReportDTO, TaskReportCreateDTO.class));
+            } else {
+                updatedTaskReportDTOList.add(updatedTaskReportDTO);
+            }
+        }
+
         /* Create associated TaskReport; Set required FK reportId (Just in case) */
-        List<TaskReportCreateDTO> newTaskReportDTOList = updatedReportDTO.getNewTaskReportList();
-        if (newTaskReportDTOList != null && !newTaskReportDTOList.isEmpty()) {
+        if (!newTaskReportDTOList.isEmpty()) {
             taskReportService.createBulkTaskReportByDTOList(
                     newTaskReportDTOList.stream()
                             .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportDTO.getReportId()))
                             .collect(Collectors.toList()));
         }
 
-        /* Update associated TaskReport */
-        List<TaskReportUpdateDTO> updatedTaskReportDTOList = updatedReportDTO.getUpdatedTaskReportList();
-        if (updatedTaskReportDTOList != null && !updatedTaskReportDTOList.isEmpty()) {
-            taskReportService.updateBulkTaskReportByDTOList(updatedTaskReportDTOList);
+        /* Update associated TaskReport; Set required FK reportId (Just in case) */
+        if (!updatedTaskReportDTOList.isEmpty()) {
+            taskReportService.updateBulkTaskReportByDTOList(
+                    updatedTaskReportDTOList.stream()
+                            .peek(updatedReportDetailDTO -> updatedReportDetailDTO.setReportId(reportDTO.getReportId()))
+                            .collect(Collectors.toList()));
         }
 
         /* Get associated TaskReport (After insert & update) */

@@ -23,14 +23,14 @@ public class ReportDetail extends BaseEntity {
     @Column(name = "reportId", nullable = false)
     private Long reportId;
 
-    @Column(name = "itemDesc", nullable = false, length = 100)
-    private String itemDesc;
-
     @Column(name = "itemAmount", nullable = false)
     private Double itemAmount;
 
     @Column(name = "itemUnit", nullable = false, length = 50)
     private String itemUnit;
+
+    @Column(name = "itemDesc", nullable = false, length = 100)
+    private String itemDesc;
 
     @Column(name = "itemPrice", nullable = false)
     private Double itemPrice;

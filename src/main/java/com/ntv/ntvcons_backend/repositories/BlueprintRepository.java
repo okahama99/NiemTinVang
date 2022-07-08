@@ -19,11 +19,29 @@ public interface BlueprintRepository extends JpaRepository<Blueprint, Long> {
     /* Id */
     Optional<Blueprint> findByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
     List<Blueprint> findAllByBlueprintIdInAndIsDeletedIsFalse(Collection<Long> blueprintIdCollection);
+    /* Id & projectId & blueprintName */
+    boolean existsByProjectIdOrBlueprintNameAndBlueprintIdIsNotAndIsDeletedIsFalse
+            (long projectId, String blueprintName, long blueprintId);
+
+
+    /* projectId */
+    Optional<Blueprint> findByProjectIdAndIsDeletedIsFalse(long projectId);
+    List<Blueprint> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
 
 
     /* blueprintName */
     Optional<Blueprint> findByBlueprintNameAndIsDeletedIsFalse(String blueprintName);
     List<Blueprint> findAllByBlueprintNameContainsAndIsDeletedIsFalse(String blueprintName);
+    Page<Blueprint> findAllByBlueprintNameContainsAndIsDeletedIsFalse(String blueprintName, Pageable paging);
+    /* projectId & blueprintName */
+    boolean existsByProjectIdOrBlueprintNameAndIsDeletedIsFalse(long projectId, String blueprintName);
+
+
+    /* designerName */
+    List<Blueprint> findAllByDesignerNameAndIsDeletedIsFalse(String designerName);
+    Page<Blueprint> findAllByDesignerNameAndIsDeletedIsFalse(String designerName, Pageable paging);
+    List<Blueprint> findAllByDesignerNameContainsAndIsDeletedIsFalse(String designerName);
+    Page<Blueprint> findAllByDesignerNameContainsAndIsDeletedIsFalse(String designerName, Pageable paging);
 
 
     /* estimatedCost */

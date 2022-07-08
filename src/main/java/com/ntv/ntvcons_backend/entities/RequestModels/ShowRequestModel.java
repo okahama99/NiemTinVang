@@ -5,14 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Getter
 @Setter
 public class ShowRequestModel {
     private Long requestId, projectId, requesterId, requestTypeId, verifierId;
-    private String requestDesc, verifyNote, requesterName, requestTypeName, verifierName, projectName;
+    private String requestName, requestDesc, verifyNote, requesterName, requestTypeName, verifierName, projectName;
     private LocalDateTime requestDate, verifyDate;
     private Boolean isVerified, isApproved;
 

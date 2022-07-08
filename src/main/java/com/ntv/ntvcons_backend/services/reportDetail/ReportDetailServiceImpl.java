@@ -251,8 +251,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap = new HashMap<>();
 
-        List<ReportDetailReadDTO> tmpReportDetailDTOList;
         long tmpReportId;
+        List<ReportDetailReadDTO> tmpReportDetailDTOList;
 
         for (ReportDetailReadDTO reportDetailDTO : reportDetailDTOList) {
             tmpReportId = reportDetailDTO.getReportId();
@@ -262,6 +262,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
                 reportIdReportDetailDTOListMap.put(tmpReportId, new ArrayList<>(Collections.singletonList(reportDetailDTO)));
             } else {
                 tmpReportDetailDTOList.add(reportDetailDTO);
+
                 reportIdReportDetailDTOListMap.put(tmpReportId, tmpReportDetailDTOList);
             }
         }

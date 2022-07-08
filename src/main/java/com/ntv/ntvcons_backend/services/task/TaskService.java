@@ -33,6 +33,10 @@ public interface TaskService {
     List<Task> getAllByProjectId(long projectId) throws Exception;
     List<TaskReadDTO> getAllDTOByProjectId(long projectId) throws Exception;
 
+    List<Task> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+    List<TaskReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+    Map<Long, List<TaskReadDTO>> mapProjectIdTaskDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+
     List<Task> getAllByTaskNameContains(String taskName) throws Exception;
     List<TaskReadDTO> getAllDTOByTaskNameContains(String taskName) throws Exception;
 
