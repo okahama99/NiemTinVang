@@ -2,21 +2,16 @@ package com.ntv.ntvcons_backend.dtos.report;
 
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
-import java.io.Serializable;
 import java.util.List;
 
 @Data

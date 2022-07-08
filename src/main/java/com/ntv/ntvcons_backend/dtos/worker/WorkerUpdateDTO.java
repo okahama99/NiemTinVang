@@ -1,7 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.worker;
 
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
-import com.ntv.ntvcons_backend.dtos.location.LocationCreateOptionDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateOptionDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

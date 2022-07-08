@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.dtos.projectManager;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ntv.ntvcons_backend.constants.Regex;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

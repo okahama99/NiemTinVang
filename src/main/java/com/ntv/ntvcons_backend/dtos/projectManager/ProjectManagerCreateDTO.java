@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.dtos.projectManager;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,8 +10,6 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
 
 @Data
 @AllArgsConstructor

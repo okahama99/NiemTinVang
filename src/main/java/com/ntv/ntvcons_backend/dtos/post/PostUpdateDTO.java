@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.dtos.post;
 
-import com.ntv.ntvcons_backend.dtos.BaseReadDTO;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

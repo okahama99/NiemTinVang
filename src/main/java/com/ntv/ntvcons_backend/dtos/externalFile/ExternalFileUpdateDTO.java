@@ -1,8 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.externalFile;
 
-import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.fileType.FileTypeReadDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,11 +1,9 @@
 package com.ntv.ntvcons_backend.services.taskAssignment;
 
-import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
-import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.entities.TaskAssignment;
 import com.ntv.ntvcons_backend.repositories.TaskAssignmentRepository;
 import com.ntv.ntvcons_backend.services.task.TaskService;

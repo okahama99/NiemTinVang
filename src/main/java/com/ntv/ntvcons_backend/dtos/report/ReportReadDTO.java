@@ -1,7 +1,5 @@
 package com.ntv.ntvcons_backend.dtos.report;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.ntv.ntvcons_backend.dtos.BaseReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
@@ -10,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 

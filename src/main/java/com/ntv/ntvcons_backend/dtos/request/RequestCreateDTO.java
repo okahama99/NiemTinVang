@@ -3,7 +3,6 @@ package com.ntv.ntvcons_backend.dtos.request;
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
-import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
