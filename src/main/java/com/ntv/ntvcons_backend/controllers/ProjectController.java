@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -35,7 +34,7 @@ public class ProjectController {
     
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyRole('Admin','Staff')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @PostMapping(value = "/v1/createProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProject(@RequestBody CreateProjectModel createProjectModel){
         try {
@@ -65,7 +64,7 @@ public class ProjectController {
     }
 
     /** Alternate create project by Thanh, with check FK */
-    @PreAuthorize("hasAnyRole('Admin','Staff')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @PostMapping(value = "/v1.1/createProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProjectAlt1(@Valid @RequestBody ProjectCreateDTO projectDTO) {
         try {
@@ -83,7 +82,7 @@ public class ProjectController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyRole('Admin','Staff','Customer','Engineer')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff','Customer','Engineer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -252,7 +251,7 @@ public class ProjectController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('Admin','Staff','Customer','Engineer')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff','Customer','Engineer')")
     @GetMapping(value = "/v1/getAllById", produces = "application/json;charset=UTF-8")
     public @ResponseBody
     List<ProjectModel> getAllById(@RequestParam long projectId,
@@ -264,7 +263,7 @@ public class ProjectController {
         return projects;
     }
 
-    @PreAuthorize("hasAnyRole('Admin','Staff','Customer','Engineer')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff','Customer','Engineer')")
     @GetMapping(value = "/v1/getUserForDropdown", produces = "application/json;charset=UTF-8")
     public @ResponseBody
     List<ListUserIDAndName> getUserForDropdown() {
@@ -273,7 +272,7 @@ public class ProjectController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyRole('Admin','Staff')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @PutMapping(value = "/v1/updateProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProject(@RequestBody UpdateProjectModel updateProjectModel) {
         boolean result = projectService.updateProject(updateProjectModel);
@@ -286,7 +285,7 @@ public class ProjectController {
     }
 
     /** Alternate update project by Thanh, with check FK */
-    @PreAuthorize("hasAnyRole('Admin','Staff')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @PutMapping(value = "/v1.1/updateProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProjectAlt1(@Valid @RequestBody ProjectUpdateDTO projectDTO){
         try {
@@ -309,7 +308,7 @@ public class ProjectController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyRole('Admin')")
+    //@PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value = "/v1/deleteProject/{projectId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteProject(@PathVariable(name = "projectId") int projectId) {
         try {

@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -24,7 +23,7 @@ public class ReportController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyRole('Engineer')")
+    //@PreAuthorize("hasAnyRole('Engineer')")
     @PostMapping(value = "/v1/createReport", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createReport(@Valid @RequestBody ReportCreateDTO reportDTO){
         try {
@@ -42,7 +41,7 @@ public class ReportController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
+    //@PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -74,7 +73,7 @@ public class ReportController {
         return null;
     }
 
-    @PreAuthorize("hasAnyRole('Engineer','Staff','Customer','Admin')")
+    //@PreAuthorize("hasAnyRole('Engineer','Staff','Customer','Admin')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_REPORT searchType,
@@ -150,7 +149,7 @@ public class ReportController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyRole('Engineer')")
+    //@PreAuthorize("hasAnyRole('Engineer')")
     @PutMapping(value = "/v1/updateReport", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateReport(@Valid @RequestBody ReportUpdateDTO reportDTO){
         try {
@@ -174,7 +173,7 @@ public class ReportController {
     }
     
     /* DELETE */
-    @PreAuthorize("hasAnyRole('Engineer','Admin')")
+    //@PreAuthorize("hasAnyRole('Engineer','Admin')")
     @DeleteMapping(value = "/v1/deleteReport/{reportId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteReport(@PathVariable(name = "reportId") long reportId){
         try {

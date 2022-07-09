@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,7 +29,7 @@ public class BlueprintController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyRole('Admin','Staff')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createBlueprint(@Valid @RequestBody BlueprintCreateDTO blueprintDTO) {
         try {
@@ -48,7 +47,7 @@ public class BlueprintController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyRole('Admin','Staff','Customer')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff','Customer')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -245,14 +244,14 @@ public class BlueprintController {
         }
     }
     
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    ////@PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = "/v1/checkDuplicate", produces = "application/json;charset=UTF-8")
     public @ResponseBody String checkDuplicate(@RequestParam String blueprintName) {
         return blueprintService.checkDuplicate(blueprintName);
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyRole('Admin','Staff')")
+    //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateBlueprint(@Valid @RequestBody BlueprintUpdateDTO blueprintDTO) {
         try {
@@ -275,7 +274,7 @@ public class BlueprintController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyRole('Admin')")
+    //@PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping(value = "/v1/deleteBlueprint/{blueprintId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteBlueprint(@PathVariable(name = "blueprintId") long blueprintId) {
         try {

@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -37,7 +36,7 @@ public class RequestController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyRole('Engineer')")
+    //@PreAuthorize("hasAnyRole('Engineer')")
     @PostMapping(value = "/v1/createRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequest(@RequestBody CreateRequestModel createRequestModel){
         if(!projectRepository.existsById(createRequestModel.getProjectId())){
@@ -62,7 +61,7 @@ public class RequestController {
         return null;
     }
 
-    @PreAuthorize("hasAnyRole('Engineer')")
+    //@PreAuthorize("hasAnyRole('Engineer')")
     @PostMapping(value = "/v1/addRequestDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> addRequestDetail(@RequestBody CreateRequestDetailModel createRequestDetailModel){
                 boolean result = requestDetailService.createRequest(createRequestDetailModel);
@@ -73,7 +72,7 @@ public class RequestController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyRole('Engineer','Admin','Customer','Staff')")
+    //@PreAuthorize("hasAnyRole('Engineer','Admin','Customer','Staff')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -124,7 +123,7 @@ public class RequestController {
         return null;
     }
 
-    @PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
+    //@PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
     @GetMapping(value = "/v1/getByProjectId", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByProjectId(@RequestParam Long projectId,
                                          @RequestParam int pageNo,
@@ -149,7 +148,7 @@ public class RequestController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
+    //@PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
     @GetMapping(value = "/v1/getByRequestId", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByRequestId(@RequestParam Long requestId) {
         try {
@@ -171,7 +170,7 @@ public class RequestController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyRole('Engineer')")
+    //@PreAuthorize("hasAnyRole('Engineer')")
     @PutMapping(value = "/v1/updateRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequest(@RequestBody UpdateRequestModel updateRequestModel) {
         boolean result = requestService.updateRequest(updateRequestModel);
@@ -197,7 +196,7 @@ public class RequestController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyRole('Engineer','Admin')")
+    //@PreAuthorize("hasAnyRole('Engineer','Admin')")
     @DeleteMapping(value = "/v1/deleteRequest/{requestId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRequest(@PathVariable(name = "requestId") Long requestId) {
         try {
@@ -212,7 +211,7 @@ public class RequestController {
         }
     }
 
-    @PreAuthorize("hasAnyRole('Admin')")
+    //@PreAuthorize("hasAnyRole('Admin')")
     @PutMapping(value = "/v1/approveRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> approveRequest(@RequestParam Long requestId,
                                                  @RequestParam Boolean decision) {
