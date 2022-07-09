@@ -9,13 +9,14 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectManagerUpdateDTO implements Serializable {
-    @Positive
+    @PositiveOrZero
     @NotNull(message = "projectId REQUIRED for update")
     private Long projectManagerId;
 

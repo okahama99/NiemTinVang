@@ -2,29 +2,47 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/projectManager")
 public class ProjectManagerController {
     @Autowired
     private ProjectManagerService projectManagerService;
+    @Autowired
+    private ThanhUtil thanhUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PostMapping(value = "/v1/createProjectManager", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProjectManager(@Valid @RequestBody ProjectManagerCreateDTO projectManagerDTO) {
-        // TODO:
-        return null;
+        try {
+            ProjectManagerReadDTO newProjectManagerDTO =
+                    projectManagerService.createProjectManagerByDTO(projectManagerDTO);
+
+            return ResponseEntity.ok().body(newProjectManagerDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project/User by respective Id, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating ProjectManager. ",
+                            e.getMessage()));
+        }
     }
 
     /* READ */
@@ -33,15 +51,68 @@ public class ProjectManagerController {
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
-        // TODO:
-        return null;
+        try {
+            List<ProjectManagerReadDTO> projectManagerList =
+                    projectManagerService.getAllDTOInPaging(
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+
+            if (projectManagerList == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ProjectManager found");
+            }
+
+            return ResponseEntity.ok().body(projectManagerList);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error searching for ProjectManager", e.getMessage()));
+        }
     }
     
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.PROJECT_MANAGER searchType) {
-        // TODO:
-        return null;
+        try {
+            ProjectManagerReadDTO projectManagerDTO;
+
+            switch (searchType) {
+                case BY_ID:
+                    projectManagerDTO = projectManagerService.getDTOById(Long.parseLong(searchParam));
+
+                    if (projectManagerDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ProjectManager found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ProjectManager");
+            }
+
+            return ResponseEntity.ok().body(projectManagerDTO);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for ProjectManager with ";
+
+            switch (searchType) {
+                case BY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
@@ -51,8 +122,62 @@ public class ProjectManagerController {
                                                 @RequestParam int pageSize,
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
-        // TODO:
-        return null;
+        try {
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+
+            List<ProjectManagerReadDTO> projectManagerDTOList;
+
+            switch (searchType) {
+                case BY_PROJECT_ID:
+                    projectManagerDTOList =
+                            projectManagerService.getAllDTOInPagingByProjectId(paging, Long.parseLong(searchParam));
+
+                    if (projectManagerDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ProjectManager found with projectId: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_MANAGER_ID:
+                    projectManagerDTOList =
+                            projectManagerService.getAllDTOInPagingByManagerId(paging, Long.parseLong(searchParam));
+
+                    if (projectManagerDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ProjectManager found with userId (managerId): '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ProjectManager");
+            }
+
+            return ResponseEntity.ok().body(projectManagerDTOList);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for ProjectManager with ";
+
+            switch (searchType) {
+                case BY_PROJECT_ID:
+                    errorMsg += "projectId: '" + searchParam + "'. ";
+                    break;
+
+                case BY_MANAGER_ID:
+                    errorMsg += "userId (managerId): '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
     
     /* UPDATE */
@@ -60,7 +185,6 @@ public class ProjectManagerController {
     @PutMapping(value = "/v1/updateProjectManager", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProjectManager(@Valid @RequestBody ProjectManagerUpdateDTO projectManagerDTO){
         try {
-
             ProjectManagerReadDTO updatedProjectManagerDTO =
                     projectManagerService.updateProjectManagerByDTO(projectManagerDTO);
 

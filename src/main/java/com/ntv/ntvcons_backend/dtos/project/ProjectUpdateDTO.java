@@ -4,6 +4,7 @@ import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateOptionDTO;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -31,6 +33,9 @@ public class ProjectUpdateDTO extends BaseUpdateDTO {
 
     /*TODO: implement update blueprint in projectService*/
     private BlueprintUpdateDTO blueprint;
+
+    private List<ProjectManagerUpdateDTO> projectManagerList;
+//  TODO:  private List<ProjectWorkerUpdateDTO> projectWorkerList;
 
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */

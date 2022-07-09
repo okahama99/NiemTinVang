@@ -4,6 +4,7 @@ import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateOptionDTO;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -28,6 +30,9 @@ public class ProjectCreateDTO extends BaseCreateDTO {
 
     @NotNull(message = "blueprint REQUIRED for create")
     private BlueprintCreateDTO blueprint;
+
+    private List<ProjectManagerCreateDTO> projectManagerList;
+//  TODO:  private List<ProjectWorkerCreateDTO> projectWorkerList;
 
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */

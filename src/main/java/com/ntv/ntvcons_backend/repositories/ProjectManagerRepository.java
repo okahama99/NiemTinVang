@@ -26,12 +26,16 @@ public interface ProjectManagerRepository extends JpaRepository<ProjectManager, 
 
     /* projectId */
     List<ProjectManager> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
+    Page<ProjectManager> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable paging);
     List<ProjectManager> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
+    Page<ProjectManager> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection, Pageable paging);
 
 
     /* managerId */
     List<ProjectManager> findAllByManagerIdAndIsDeletedIsFalse(long managerId);
+    Page<ProjectManager> findAllByManagerIdAndIsDeletedIsFalse(long managerId, Pageable paging);
     List<ProjectManager> findAllByManagerIdInAndIsDeletedIsFalse(Collection<Long> managerIdCollection);
+    Page<ProjectManager> findAllByManagerIdInAndIsDeletedIsFalse(Collection<Long> managerIdCollection, Pageable paging);
     /* projectId & managerId */
     boolean existsByProjectIdAndManagerIdAndIsDeletedIsFalse(long projectId, long managerId);
 }
