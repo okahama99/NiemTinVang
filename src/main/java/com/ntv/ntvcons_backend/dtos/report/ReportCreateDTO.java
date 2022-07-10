@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Data
@@ -36,7 +37,6 @@ public class ReportCreateDTO extends BaseCreateDTO {
     private String reportName;
 
     @ApiModelProperty(example = "Chuẩn bị xây tường, ...") /* Hint for Swagger */
-    @Positive
     private String reportDesc;
 
     /** yyyy-MM-dd HH:mm */
@@ -45,7 +45,9 @@ public class ReportCreateDTO extends BaseCreateDTO {
     @NotNull(message = "reportDate REQUIRED for create")
     private String reportDate;
 
+    @Size(min = 1, message = "Needed at least 1 for create")
     private List<ReportDetailCreateDTO> reportDetailList;
 
+    @Size(min = 1, message = "Needed at least 1 for create")
     private List<TaskReportCreateDTO> taskReportList;
 }

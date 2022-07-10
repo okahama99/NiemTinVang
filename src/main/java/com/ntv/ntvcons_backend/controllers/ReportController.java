@@ -6,7 +6,9 @@ import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
 import com.ntv.ntvcons_backend.services.report.ReportService;
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,8 @@ import java.util.List;
 public class ReportController {
     @Autowired
     private ReportService reportService;
+    @Autowired
+    private ThanhUtil thanhUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -48,7 +52,9 @@ public class ReportController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<ReportReadDTO> reportDTOList = reportService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            List<ReportReadDTO> reportDTOList =
+                    reportService.getAllDTOInPaging(
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (reportDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found");
@@ -69,8 +75,58 @@ public class ReportController {
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.REPORT searchType) {
-        // TODO:
-        return null;
+        try {
+            ReportReadDTO reportDTO;
+
+            switch (searchType) {
+                case BY_ID:
+                    reportDTO = reportService.getDTOById(Long.parseLong(searchParam));
+
+                    if (reportDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Report found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_NAME:
+                    reportDTO = reportService.getDTOByReportName(searchParam);
+
+                    if (reportDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Report found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Report");
+            }
+
+            return ResponseEntity.ok().body(reportDTO);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy || searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for Report with ";
+
+            switch (searchType) {
+                case BY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     //@PreAuthorize("hasAnyRole('Engineer','Staff','Customer','Admin')")
@@ -82,11 +138,13 @@ public class ReportController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+
             List<ReportReadDTO> reportDTOList;
 
             switch (searchType) {
                 case BY_PROJECT_ID:
-                    reportDTOList = reportService.getAllDTOByProjectId(Long.parseLong(searchParam));
+                    reportDTOList = reportService.getAllDTOInPagingByProjectId(paging, Long.parseLong(searchParam));
 
                     if (reportDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -95,7 +153,7 @@ public class ReportController {
                     break;
 
                 case BY_REPORTER_ID:
-                    reportDTOList = reportService.getAllDTOByReporterId(Long.parseLong(searchParam));
+                    reportDTOList = reportService.getAllDTOInPagingByReporterId(paging, Long.parseLong(searchParam));
 
                     if (reportDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -104,13 +162,26 @@ public class ReportController {
                     break;
 
                 case BY_REPORT_TYPE_ID:
-                    reportDTOList = reportService.getAllDTOByReportTypeId(Long.parseLong(searchParam));
+                    reportDTOList = reportService.getAllDTOInPagingByReportTypeId(paging, Long.parseLong(searchParam));
 
                     if (reportDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body("No Report found with reportTypeId: '" + searchParam + "'. ");
                     }
                     break;
+
+                case BY_NAME_CONTAINS:
+                    reportDTOList = reportService.getAllDTOInPagingByReportNameContains(paging, searchParam);
+
+                    if (reportDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Report found with name contains: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_REPORT_DATE:
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("This searchType is not yet supported: '" + searchParam + "'. ");
 
                 default:
                     throw new IllegalArgumentException("Invalid SearchType used for entity Report");
@@ -141,6 +212,10 @@ public class ReportController {
 
                 case BY_REPORT_TYPE_ID:
                     errorMsg += "reportTypeId: '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME_CONTAINS:
+                    errorMsg += "name contains: '" + searchParam + "'. ";
                     break;
             }
 

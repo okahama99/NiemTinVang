@@ -6,6 +6,7 @@ import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Report;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -18,8 +19,8 @@ public interface ReportService { /* TODO: throws Exception for controller to han
     ReportReadDTO createReportByDTO(ReportCreateDTO newReportDTO) throws Exception;
 
     /* READ */
-    Page<Report> getPageAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
-    List<ReportReadDTO> getAllDTOInPaging(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
+    Page<Report> getPageAll(Pageable paging) throws Exception;
+    List<ReportReadDTO> getAllDTOInPaging(Pageable paging) throws Exception;
 
     boolean existsById(long reportId) throws Exception;
     Report getById(long reportId) throws Exception;
@@ -31,6 +32,8 @@ public interface ReportService { /* TODO: throws Exception for controller to han
 
     List<Report> getAllByProjectId(long projectId) throws Exception;
     List<ReportReadDTO> getAllDTOByProjectId(long projectId) throws Exception;
+    Page<Report> getPageAllByProjectId(Pageable paging, long projectId) throws Exception;
+    List<ReportReadDTO> getAllDTOInPagingByProjectId(Pageable paging, long projectId) throws Exception;
 
     List<Report> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
     List<ReportReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
@@ -38,9 +41,21 @@ public interface ReportService { /* TODO: throws Exception for controller to han
 
     List<Report> getAllByReporterId(long reporterId) throws Exception;
     List<ReportReadDTO> getAllDTOByReporterId(long reporterId) throws Exception;
+    Page<Report> getPageAllByReporterId(Pageable paging, long reporterId) throws Exception;
+    List<ReportReadDTO> getAllDTOInPagingByReporterId(Pageable paging, long reporterId) throws Exception;
+
+    Report getByReportName(String reportName) throws Exception;
+    ReportReadDTO getDTOByReportName(String reportName) throws Exception;
+
+    List<Report> getAllByReportNameContains(String reportName) throws Exception;
+    List<ReportReadDTO> getAllDTOByReportNameContains(String reportName) throws Exception;
+    Page<Report> getPageAllByReportNameContains(Pageable paging, String reportName) throws Exception;
+    List<ReportReadDTO> getAllDTOInPagingByReportNameContains(Pageable paging, String reportName) throws Exception;
 
     List<Report> getAllByReportTypeId(long reportTypeId) throws Exception;
     List<ReportReadDTO> getAllDTOByReportTypeId(long reportTypeId) throws Exception;
+    Page<Report> getPageAllByReportTypeId(Pageable paging, long reportTypeId) throws Exception;
+    List<ReportReadDTO> getAllDTOInPagingByReportTypeId(Pageable paging, long reportTypeId) throws Exception;
 
     List<Report> getAllByProjectIdAndReporterId(int projectId, int reporterId) throws Exception;
     List<ReportReadDTO> getAllDTOByProjectIdAndReporterId(int projectId, int reporterId) throws Exception;

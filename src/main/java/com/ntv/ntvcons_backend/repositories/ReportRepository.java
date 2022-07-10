@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
-    Page<Report> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<Report> findAllByIsDeletedIsFalse(Pageable paging);
 
 
     /* Id */
@@ -27,24 +27,31 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 
     /* reportTypeId */
     List<Report> findAllByReportTypeIdAndIsDeletedIsFalse(long reportTypeId);
+    Page<Report> findAllByReportTypeIdAndIsDeletedIsFalse(long reportTypeId, Pageable paging);
     List<Report> findAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection);
+    Page<Report> findAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection, Pageable paging);
 
 
     /* projectId */
     List<Report> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
+    Page<Report> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable paging);
     List<Report> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
+    Page<Report> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection, Pageable paging);
 
 
     /* reporterId */
     List<Report> findAllByReporterIdAndIsDeletedIsFalse(long reporterId);
+    Page<Report> findAllByReporterIdAndIsDeletedIsFalse(long reporterId, Pageable paging);
     List<Report> findAllByReporterIdInAndIsDeletedIsFalse(Collection<Long> reporterIdCollection);
+    Page<Report> findAllByReporterIdInAndIsDeletedIsFalse(Collection<Long> reporterIdCollection, Pageable paging);
     /* projectId & reporterId */
     List<Report> findAllByProjectIdAndReporterIdAndIsDeletedIsFalse(long projectId, long reporterId);
 
 
     /* reportName */
-    Report findByReportNameAndIsDeletedIsFalse(String reportName);
+    Optional<Report> findByReportNameAndIsDeletedIsFalse(String reportName);
     List<Report> findAllByReportNameContainsAndIsDeletedIsFalse(String reportName);
+    Page<Report> findAllByReportNameContainsAndIsDeletedIsFalse(String reportName, Pageable paging);
     /* reportName */
     boolean existsByReportNameAndIsDeletedIsFalse(String reportName);
 
