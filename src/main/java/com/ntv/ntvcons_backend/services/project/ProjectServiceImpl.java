@@ -169,8 +169,8 @@ public class ProjectServiceImpl implements ProjectService{
             newProject.setPlanEndDate(
                     LocalDateTime.parse(newProjectDTO.getPlanEndDate(), dateTimeFormatter));
 
-            if (newProject.getPlanStartDate().isAfter(newProject.getPlanEndDate())) {
-                throw new IllegalArgumentException("planStartDate is after planEndDate");
+            if (newProject.getPlanEndDate().isBefore(newProject.getPlanEndDate())) {
+                throw new IllegalArgumentException("planEndDate is before planStartDate");
             }
         }
 
@@ -220,15 +220,16 @@ public class ProjectServiceImpl implements ProjectService{
         /* Set associated Blueprint */
         projectDTO.setBlueprint(blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint()));
 
+        if (newProjectDTO.getProjectManagerList() != null) {
+            /* Create associated ProjectManager; Set required FK projectId */
+            projectDTO.setProjectManagerList(
+                    projectManagerService.createBulkProjectManagerByDTO(
+                            newProjectDTO.getProjectManagerList().stream()
+                                    .peek(projectManagerDTO -> projectManagerDTO.setProjectId(newProjectId))
+                                    .collect(Collectors.toList())));
+        }
 
-        /* Set projectId to ProjectManager after create */
-        newProjectDTO.setProjectManagerList(
-                newProjectDTO.getProjectManagerList().stream()
-                        .peek(projectManagerDTO -> projectManagerDTO.setProjectId(newProjectId))
-                        .collect(Collectors.toList()));
-        /* Set associated ProjectManager */
-        projectDTO.setProjectManagerList(
-                projectManagerService.createBulkProjectManagerByDTO(newProjectDTO.getProjectManagerList()));
+        /* TODO: projectWorker */
 
         return projectDTO;
     }
@@ -1125,9 +1126,15 @@ public class ProjectServiceImpl implements ProjectService{
         if (updatedProjectDTO.getPlanEndDate() != null) {
             updatedProject.setPlanEndDate(
                     LocalDateTime.parse(updatedProjectDTO.getPlanEndDate(), dateTimeFormatter));
+
+            if (updatedProject.getPlanEndDate().isBefore(updatedProject.getPlanStartDate())) {
+                throw new IllegalArgumentException("planEndDate is before planStartDate");
+            }
         }
 
+        boolean hasActualStartDate = false;
         if (updatedProjectDTO.getActualStartDate() != null) {
+            hasActualStartDate = true;
             updatedProject.setActualStartDate(
                     LocalDateTime.parse(updatedProjectDTO.getActualStartDate(), dateTimeFormatter));
         }
@@ -1135,6 +1142,12 @@ public class ProjectServiceImpl implements ProjectService{
         if (updatedProjectDTO.getActualEndDate() != null) {
             updatedProject.setActualEndDate(
                     LocalDateTime.parse(updatedProjectDTO.getActualEndDate(), dateTimeFormatter));
+            
+            if (hasActualStartDate) {
+                if (updatedProject.getActualEndDate().isBefore(updatedProject.getActualStartDate())) {
+                    throw new IllegalArgumentException("actualEndDate is before actualStartDate");
+                }
+            }
         }
 
         /* Update Location if changed / Get associated Location  */
@@ -1170,7 +1183,7 @@ public class ProjectServiceImpl implements ProjectService{
                         throw new IllegalArgumentException("Missing REQUIRED existingLocationId");
                     }
 
-                    /* Get associated Location */
+                    /* Update associated Location */
                     locationDTO =
                             locationService.updateLocationByDTO(updatedProjectDTO.getLocation().getUpdatedLocation());
 
@@ -1217,8 +1230,8 @@ public class ProjectServiceImpl implements ProjectService{
         /* Get associated Blueprint */
         projectDTO.setBlueprint(blueprintService.getDTOByProjectId(updatedProjectId));
 
-        /* Create/Update associated ProjectManager */
-        if (updatedProjectDTO.getProjectManagerList() != null && !updatedProjectDTO.getProjectManagerList().isEmpty()) {
+        /* Associated ProjectManager */
+        if (updatedProjectDTO.getProjectManagerList() != null) {
             /* Just in case */
             updatedProjectDTO.setProjectManagerList(
                     updatedProjectDTO.getProjectManagerList().stream()
@@ -1250,8 +1263,12 @@ public class ProjectServiceImpl implements ProjectService{
                 projectManagerService.updateBulkProjectManagerByDTO(updatedProjectManagerDTOList);
             }
         }
-        /* Get associated ProjectManager */
+
+        /* Get associated ProjectManager (after insert/update) */
         projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(updatedProjectId));
+
+        /* TODO: Get associated ProjectWorker (after insert/update)
+        projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(updatedProjectId));*/
 
         /* Get associated Task */
         projectDTO.setTaskList(taskService.getAllDTOByProjectId(updatedProjectId));

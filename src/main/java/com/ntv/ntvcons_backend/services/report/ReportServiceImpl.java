@@ -1038,6 +1038,7 @@ public class ReportServiceImpl implements ReportService {
         if (updatedReport == null) {
             return null;
         }
+        long updatedReportId = updatedReport.getReportId();
 
         ReportReadDTO reportDTO = modelMapper.map(updatedReport, ReportReadDTO.class);
 
@@ -1046,6 +1047,12 @@ public class ReportServiceImpl implements ReportService {
 
         /* Associated ReportDetail */
         if (updatedReportDTO.getReportDetailList() != null) {
+            /* Just in case */
+            updatedReportDTO.setReportDetailList(
+                    updatedReportDTO.getReportDetailList().stream()
+                            .peek(reportDetailDTO -> reportDetailDTO.setReportId(updatedReportId))
+                            .collect(Collectors.toList()));
+
             modelMapper.typeMap(ReportDetailUpdateDTO.class, ReportDetailCreateDTO.class)
                     .addMappings(mapper -> {
                         mapper.map(ReportDetailUpdateDTO::getUpdatedBy, ReportDetailCreateDTO::setCreatedBy);});
@@ -1063,18 +1070,12 @@ public class ReportServiceImpl implements ReportService {
 
             /* Create associated ReportDetail; Set required FK reportId (Just in case) */
             if (!newReportDetailDTOList.isEmpty()) {
-                reportDetailService.createBulkReportDetailByDTOList(
-                        newReportDetailDTOList.stream()
-                                .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportDTO.getReportId()))
-                                .collect(Collectors.toList()));
+                reportDetailService.createBulkReportDetailByDTOList(newReportDetailDTOList);
             }
 
             /* Update associated ReportDetail; Set required FK reportId (Just in case) */
             if (!updatedReportDetailDTOList.isEmpty()) {
-                reportDetailService.updateBulkReportDetailByDTOList(
-                        updatedReportDetailDTOList.stream()
-                                .peek(updatedReportDetailDTO -> updatedReportDetailDTO.setReportId(reportDTO.getReportId()))
-                                .collect(Collectors.toList()));
+                reportDetailService.updateBulkReportDetailByDTOList(updatedReportDetailDTOList);
             }
         }
 
@@ -1083,8 +1084,13 @@ public class ReportServiceImpl implements ReportService {
 
 
         /* Associated TaskReport */
-
         if (updatedReportDTO.getTaskReportList() != null) {
+            /* Just in case */
+            updatedReportDTO.setTaskReportList(
+                    updatedReportDTO.getTaskReportList().stream()
+                            .peek(taskReportDTO -> taskReportDTO.setReportId(updatedReportId))
+                            .collect(Collectors.toList()));
+
             modelMapper.typeMap(TaskReportUpdateDTO.class, TaskReportCreateDTO.class)
                     .addMappings(mapper -> {
                         mapper.map(TaskReportUpdateDTO::getUpdatedBy, TaskReportCreateDTO::setCreatedBy);});
@@ -1102,18 +1108,12 @@ public class ReportServiceImpl implements ReportService {
 
             /* Create associated TaskReport; Set required FK reportId (Just in case) */
             if (!newTaskReportDTOList.isEmpty()) {
-                taskReportService.createBulkTaskReportByDTOList(
-                        newTaskReportDTOList.stream()
-                                .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportDTO.getReportId()))
-                                .collect(Collectors.toList()));
+                taskReportService.createBulkTaskReportByDTOList(newTaskReportDTOList);
             }
 
             /* Update associated TaskReport; Set required FK reportId (Just in case) */
             if (!updatedTaskReportDTOList.isEmpty()) {
-                taskReportService.updateBulkTaskReportByDTOList(
-                        updatedTaskReportDTOList.stream()
-                                .peek(updatedReportDetailDTO -> updatedReportDetailDTO.setReportId(reportDTO.getReportId()))
-                                .collect(Collectors.toList()));
+                taskReportService.updateBulkTaskReportByDTOList(updatedTaskReportDTOList);
             }
         }
 
