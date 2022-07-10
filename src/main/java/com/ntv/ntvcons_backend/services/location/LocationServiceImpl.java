@@ -64,15 +64,19 @@ public class LocationServiceImpl implements LocationService {
         if (locationRepository.existsByCoordinateAndIsDeletedIsFalse(newLocation.getCoordinate())) {
             errorMsg += "Already exists another Location with coordinate: '" + newLocation.getCoordinate() + "'. ";
         }
-        if (locationRepository
-                .existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndIsDeletedIsFalse(
-                        newLocation.getCountry(), newLocation.getProvince(), newLocation.getCity(),
-                        newLocation.getDistrict(), newLocation.getWard(), newLocation.getArea(),
-                        newLocation.getStreet(), newLocation.getAddressNumber())) {
-            errorMsg += "Already exists another Location with exact address: '"
-                    + newLocation.getAddressNumber() + ", " + newLocation.getStreet() + ", " + newLocation.getArea()
-                    + newLocation.getWard() + ", " + newLocation.getDistrict() + ", " + newLocation.getCity()
-                    + newLocation.getProvince() + ", " + newLocation.getCountry() + "'. ";
+        if (!(newLocation.getCountry() == null && newLocation.getProvince() == null && newLocation.getCity() == null
+                && newLocation.getDistrict() == null && newLocation.getWard() == null && newLocation.getArea() == null
+                && newLocation.getStreet() == null && newLocation.getAddressNumber() == null)) {
+            if (locationRepository
+                    .existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndIsDeletedIsFalse(
+                            newLocation.getCountry(), newLocation.getProvince(), newLocation.getCity(),
+                            newLocation.getDistrict(), newLocation.getWard(), newLocation.getArea(),
+                            newLocation.getStreet(), newLocation.getAddressNumber())) {
+                errorMsg += "Already exists another Location with exact address: '"
+                        + newLocation.getAddressNumber() + ", " + newLocation.getStreet() + ", " + newLocation.getArea() + ", "
+                        + newLocation.getWard() + ", " + newLocation.getDistrict() + ", " + newLocation.getCity() + ", "
+                        + newLocation.getProvince() + ", " + newLocation.getCountry() + "'. ";
+            }
         }
 
         if (!errorMsg.trim().isEmpty()) {

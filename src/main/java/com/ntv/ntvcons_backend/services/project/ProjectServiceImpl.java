@@ -7,6 +7,7 @@ import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
@@ -207,13 +208,27 @@ public class ProjectServiceImpl implements ProjectService{
         newProject.setLocationId(locationDTO.getLocationId());
 
         newProject = createProject(newProject);
+        long newProjectId = newProject.getProjectId();
 
         ProjectReadDTO projectDTO = modelMapper.map(newProject, ProjectReadDTO.class);
 
         /* Set associated Location */
         projectDTO.setLocation(locationDTO);
 
+        /* Set projectId to blueprint after create */
+        newProjectDTO.getBlueprint().setProjectId(newProjectId);
+        /* Set associated Blueprint */
         projectDTO.setBlueprint(blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint()));
+
+
+        /* Set projectId to ProjectManager after create */
+        newProjectDTO.setProjectManagerList(
+                newProjectDTO.getProjectManagerList().stream()
+                        .peek(projectManagerDTO -> projectManagerDTO.setProjectId(newProjectId))
+                        .collect(Collectors.toList()));
+        /* Set associated ProjectManager */
+        projectDTO.setProjectManagerList(
+                projectManagerService.createBulkProjectManagerByDTO(newProjectDTO.getProjectManagerList()));
 
         return projectDTO;
     }
@@ -1184,21 +1199,68 @@ public class ProjectServiceImpl implements ProjectService{
             return null;
             /* Not found with Id */
         }
+        long updatedProjectId = updatedProject.getProjectId();
 
         ProjectReadDTO projectDTO = modelMapper.map(updatedProject, ProjectReadDTO.class);
 
         /* Set associated Location */
         projectDTO.setLocation(locationDTO);
 
-        /* TODO: Get associated Blueprint */
-//        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(updatedProject.getProjectId()));
+        /* Update associated Blueprint */
+        if (updatedProjectDTO.getBlueprint() != null) {
+            /* Just in case */
+            updatedProjectDTO.getBlueprint().setProjectId(updatedProjectId);
 
-        projectDTO.setTaskList(taskService.getAllDTOByProjectId(updatedProject.getProjectId()));
+            blueprintService.updateBlueprintByDTO(updatedProjectDTO.getBlueprint());
+        }
 
-        projectDTO.setReportList(reportService.getAllDTOByProjectId(updatedProject.getProjectId()));
+        /* Get associated Blueprint */
+        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(updatedProjectId));
 
-        /* TODO: Get associated Request */
-//        projectDTO.setRequestList(requestService.getDTOByProjectId(updatedProject.getProjectId()));
+        /* Create/Update associated ProjectManager */
+        if (updatedProjectDTO.getProjectManagerList() != null && !updatedProjectDTO.getProjectManagerList().isEmpty()) {
+            /* Just in case */
+            updatedProjectDTO.setProjectManagerList(
+                    updatedProjectDTO.getProjectManagerList().stream()
+                            .peek(projectManagerDTO -> projectManagerDTO.setProjectId(updatedProjectId))
+                            .collect(Collectors.toList()));
+
+            modelMapper.typeMap(ProjectManagerUpdateDTO.class, ProjectManagerCreateDTO.class)
+                    .addMappings(mapper -> {
+                        mapper.map(ProjectManagerUpdateDTO::getUpdatedBy, ProjectManagerCreateDTO::setCreatedBy);});
+
+            List<ProjectManagerCreateDTO> newProjectManagerDTOList = new ArrayList<>();
+            List<ProjectManagerUpdateDTO> updatedProjectManagerDTOList = new ArrayList<>();
+
+            for (ProjectManagerUpdateDTO projectManagerDTO : updatedProjectDTO.getProjectManagerList()) {
+                if (projectManagerDTO.getProjectManagerId() <= 0) {
+                    newProjectManagerDTOList.add(modelMapper.map(projectManagerDTO, ProjectManagerCreateDTO.class));
+                } else {
+                    updatedProjectManagerDTOList.add(projectManagerDTO);
+                }
+            }
+
+            /* Create associated ProjectManager */
+            if (!newProjectManagerDTOList.isEmpty()) {
+                projectManagerService.createBulkProjectManagerByDTO(newProjectManagerDTOList);
+            }
+
+            /* Update associated ProjectManager */
+            if (!updatedProjectManagerDTOList.isEmpty()) {
+                projectManagerService.updateBulkProjectManagerByDTO(updatedProjectManagerDTOList);
+            }
+        }
+        /* Get associated ProjectManager */
+        projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(updatedProjectId));
+
+        /* Get associated Task */
+        projectDTO.setTaskList(taskService.getAllDTOByProjectId(updatedProjectId));
+
+        /* Get associated Report */
+        projectDTO.setReportList(reportService.getAllDTOByProjectId(updatedProjectId));
+
+        /* Get associated Request */
+        projectDTO.setRequestList(requestService.getAllDTOByProjectId(updatedProjectId));
 
         return projectDTO;
     }

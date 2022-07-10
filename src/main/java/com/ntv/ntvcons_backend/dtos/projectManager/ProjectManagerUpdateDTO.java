@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.projectManager;
 
 import com.ntv.ntvcons_backend.constants.Regex;
+import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectManagerUpdateDTO implements Serializable {
+public class ProjectManagerUpdateDTO extends BaseUpdateDTO {
     @PositiveOrZero
     @NotNull(message = "projectId REQUIRED for update")
     private Long projectManagerId;

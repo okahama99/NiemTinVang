@@ -31,9 +31,9 @@ public class ProjectUpdateDTO extends BaseUpdateDTO {
 
     private LocationUpdateOptionDTO location;
 
-    /*TODO: implement update blueprint in projectService*/
     private BlueprintUpdateDTO blueprint;
 
+    @Size(min = 1, message = "Need at least 1 to update")
     private List<ProjectManagerUpdateDTO> projectManagerList;
 //  TODO:  private List<ProjectWorkerUpdateDTO> projectWorkerList;
 
