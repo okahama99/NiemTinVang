@@ -2,6 +2,7 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
@@ -12,7 +13,9 @@ import com.ntv.ntvcons_backend.repositories.ProjectRepository;
 import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
 import com.ntv.ntvcons_backend.services.request.RequestService;
 import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +30,11 @@ public class RequestController {
     @Autowired
     private RequestService requestService;
     @Autowired
+    private ThanhUtil thanhUtil;
+    @Autowired
     private ProjectRepository projectRepository;
     @Autowired
     private RequestTypeRepository requestTypeRepository;
-
     @Autowired
     private RequestDetailService requestDetailService;
 
@@ -64,11 +68,11 @@ public class RequestController {
     //@PreAuthorize("hasAnyRole('Engineer')")
     @PostMapping(value = "/v1/addRequestDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> addRequestDetail(@RequestBody CreateRequestDetailModel createRequestDetailModel){
-                boolean result = requestDetailService.createRequest(createRequestDetailModel);
-                if (result) {
-                    return ResponseEntity.ok().body("Tạo thành công.");
-                }
-                return ResponseEntity.badRequest().body("Tạo thất bại.");
+        boolean result = requestDetailService.createRequest(createRequestDetailModel);
+        if (result) {
+            return ResponseEntity.ok().body("Tạo thành công.");
+        }
+        return ResponseEntity.badRequest().body("Tạo thất bại.");
     }
 
     /* READ */
@@ -101,15 +105,81 @@ public class RequestController {
                                              @RequestParam int pageSize, 
                                              @RequestParam String sortBy, 
                                              @RequestParam boolean sortTypeAsc) {
-        // TODO:
-        return null;
+        try {
+            List<RequestReadDTO> requestList =
+                    requestService.getAllDTOInPaging(
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+
+            if (requestList == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found");
+            }
+
+            return ResponseEntity.ok().body(requestList);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error searching for Request", e.getMessage()));
+        }
     }
 
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.REQUEST searchType) {
-        // TODO:
-        return null;
+        try {
+            RequestReadDTO requestDTO;
+
+            switch (searchType) {
+                case BY_ID:
+                    requestDTO = requestService.getDTOById(Long.parseLong(searchParam));
+
+                    if (requestDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_NAME:
+                    requestDTO = requestService.getDTOByRequestName(searchParam);
+
+                    if (requestDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Request");
+            }
+
+            return ResponseEntity.ok().body(requestDTO);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for Request with ";
+
+            switch (searchType) {
+                case BY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
@@ -119,8 +189,108 @@ public class RequestController {
                                                 @RequestParam int pageSize,
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
-        // TODO:
-        return null;
+        try {
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+
+            List<RequestReadDTO> requestDTOList;
+
+            switch (searchType) {
+                case BY_PROJECT_ID:
+                    requestDTOList =
+                            requestService.getAllDTOInPagingByProjectId(paging, Long.parseLong(searchParam));
+
+                    if (requestDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with projectId: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_REQUEST_TYPE_ID:
+                    requestDTOList =
+                            requestService.getAllDTOInPagingByRequestTypeId(paging, Long.parseLong(searchParam));
+
+                    if (requestDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with requestTypeId: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_REQUESTER_ID:
+                    requestDTOList =
+                            requestService.getAllDTOInPagingByRequesterId(paging, Long.parseLong(searchParam));
+
+                    if (requestDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with userId (requesterId): '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_VERIFIER_ID:
+                    requestDTOList =
+                            requestService.getAllDTOInPagingByVerifierId(paging, Long.parseLong(searchParam));
+
+                    if (requestDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with userId (verifierId): '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_NAME_CONTAINS:
+                    requestDTOList =
+                            requestService.getAllDTOInPagingByRequestNameContains(paging, searchParam);
+
+                    if (requestDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with name contains: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_REQUEST_DATE:
+                    throw new IllegalArgumentException("SearchType not yet supported");
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Request");
+            }
+
+            return ResponseEntity.ok().body(requestDTOList);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for Request with ";
+
+            switch (searchType) {
+                case BY_PROJECT_ID:
+                    errorMsg += "projectId: '" + searchParam + "'. ";
+                    break;
+
+                case BY_REQUEST_TYPE_ID:
+                    errorMsg += "requestTypeId: '" + searchParam + "'. ";
+                    break;
+
+                case BY_REQUESTER_ID:
+                    errorMsg += "userId (requesterId): '" + searchParam + "'. ";
+                    break;
+
+                case BY_VERIFIER_ID:
+                    errorMsg += "userId (verifierId): '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME_CONTAINS:
+                    errorMsg += "name contains: '" + searchParam + "'. ";
+                    break;
+
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     //@PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
@@ -182,8 +352,6 @@ public class RequestController {
         return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
 
-
-
     @PutMapping(value = "/v1/updateVerifier", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateVerifier(@RequestBody UpdateRequestVerifierModel updateRequestVerifierModel) {
         boolean result = requestService.updateVerifier(updateRequestVerifierModel);
@@ -201,7 +369,8 @@ public class RequestController {
     public ResponseEntity<Object> deleteRequest(@PathVariable(name = "requestId") Long requestId) {
         try {
             if (!requestService.deleteRequest(requestId)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found with Id: '" + requestId + "'. ");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Request found with Id: '" + requestId + "'. ");
             }
 
             return ResponseEntity.ok().body("Deleted Request with Id: '" + requestId + "'. ");

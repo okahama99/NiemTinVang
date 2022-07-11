@@ -1,7 +1,9 @@
 package com.ntv.ntvcons_backend.services.request;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
+import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.entities.*;
@@ -13,6 +15,7 @@ import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestVerifierModel;
 import com.ntv.ntvcons_backend.repositories.*;
+import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
 import com.ntv.ntvcons_backend.services.requestType.RequestTypeService;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -40,9 +43,12 @@ public class RequestServiceImpl implements RequestService{
     private DateTimeFormatter dateTimeFormatter;
     @Autowired
     private UserRepository userRepository;
-    @Lazy
+    @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private ProjectService projectService;
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
@@ -50,10 +56,11 @@ public class RequestServiceImpl implements RequestService{
     @Autowired
     private RequestTypeService requestTypeService;
     @Autowired
-    RequestDetailService requestDetailService;
+    private RequestDetailService requestDetailService;
     @Autowired
-    RequestDetailRepository requestDetailRepository;
+    private RequestDetailRepository requestDetailRepository;
 
+    /* CREATE */
     @Override
     public boolean createRequest(CreateRequestModel createRequestModel) {
         Request request = new Request();
@@ -63,13 +70,12 @@ public class RequestServiceImpl implements RequestService{
         request.setRequestDesc(createRequestModel.getRequestDesc());
         request.setRequestName(createRequestModel.getRequestName());
 
-        request.setCreatedAt(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
+        request.setCreatedAt(LocalDateTime.parse(createRequestModel.getRequestDate(), dateTimeFormatter));
 
         request.setCreatedBy(createRequestModel.getRequesterId());
-        request.setRequestDate(LocalDateTime.parse(createRequestModel.getRequestDate(),dateTimeFormatter));
+        request.setRequestDate(LocalDateTime.parse(createRequestModel.getRequestDate(), dateTimeFormatter));
         requestRepository.saveAndFlush(request);
-        if(createRequestModel.getModelList() != null)
-        {
+        if (createRequestModel.getModelList() != null) {
             for (RequestDetailModel requestDetailModel : createRequestModel.getModelList()) {
                 CreateRequestDetailModel createRequestDetailModel = new CreateRequestDetailModel();
                 createRequestDetailModel.setRequestId(request.getRequestId());
@@ -83,6 +89,16 @@ public class RequestServiceImpl implements RequestService{
         return true;
     }
 
+    @Override
+    public Request createRequest(Request newRequest) throws Exception {
+        return null;
+    }
+    @Override
+    public RequestReadDTO createRequestByDTO(RequestCreateDTO newRequestDTO) throws Exception {
+        return null;
+    }
+
+    /* READ */
     @Override
     public List<ShowRequestModel> getAllAvailableRequest(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
@@ -99,84 +115,223 @@ public class RequestServiceImpl implements RequestService{
 
             Page<ShowRequestModel> modelResult = pagingResult.map(new Converter<Request, ShowRequestModel>() {
 
-                        @Override
-                        protected ShowRequestModel doForward(Request request) {
-                            ShowRequestModel model = new ShowRequestModel();
-                            Optional<Project> project = projectRepository.findById(request.getProjectId());
-                            Optional<User> requester = userRepository.findById(request.getRequesterId());
-                            List<RequestDetail> detail = requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(request.getRequestId());
+                @Override
+                protected ShowRequestModel doForward(Request request) {
+                    ShowRequestModel model = new ShowRequestModel();
+                    Optional<Project> project = projectRepository.findById(request.getProjectId());
+                    Optional<User> requester = userRepository.findById(request.getRequesterId());
+                    List<RequestDetail> detail = requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(request.getRequestId());
 
-                            Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
+                    Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
 
-                            model.setRequestId(request.getRequestId());
-                            model.setRequestName(request.getRequestName());
-                            model.setProjectId(request.getProjectId());
-                            if(project.isPresent()){
-                                model.setProjectName(project.get().getProjectName());
-                            }else{
-                                model.setProjectName(null);
-                            }
+                    model.setRequestId(request.getRequestId());
+                    model.setRequestName(request.getRequestName());
+                    model.setProjectId(request.getProjectId());
+                    if(project.isPresent()){
+                        model.setProjectName(project.get().getProjectName());
+                    }else{
+                        model.setProjectName(null);
+                    }
 
-                            model.setRequesterId(request.getRequesterId());
-                            if(requester.isPresent()){
-                                model.setRequesterName(requester.get().getUsername());
-                            }else{
-                                model.setRequesterName(null);
-                            }
+                    model.setRequesterId(request.getRequesterId());
+                    if(requester.isPresent()){
+                        model.setRequesterName(requester.get().getUsername());
+                    }else{
+                        model.setRequesterName(null);
+                    }
 
-                            model.setRequestTypeId(request.getRequestTypeId());
-                            if(requestType.isPresent()){
-                                model.setRequestTypeName(requestType.get().getRequestTypeName());
-                            }else{
-                                model.setRequestTypeName(null);
-                            }
+                    model.setRequestTypeId(request.getRequestTypeId());
+                    if(requestType.isPresent()){
+                        model.setRequestTypeName(requestType.get().getRequestTypeName());
+                    }else{
+                        model.setRequestTypeName(null);
+                    }
 
-                            model.setRequestDate(request.getRequestDate());
-                            model.setRequestDesc(request.getRequestDesc());
+                    model.setRequestDate(request.getRequestDate());
+                    model.setRequestDesc(request.getRequestDesc());
 
-                            if(request.getVerifierId() !=null)
-                            {
-                                model.setVerifierId(request.getVerifierId());
-                                Optional<User> verifier = userRepository.findById(request.getVerifierId());
-                                if(verifier.isPresent()){
-                                    model.setVerifierName(verifier.get().getUsername());
-                                }else{
-                                    model.setVerifierName(null);
-                                }
-                            }else{
-                                model.setVerifierId(null);
-                                model.setVerifierName("");
-                            }
-
-                            if(detail != null)
-                            {
-                                model.setRequestDetailList(detail);
-                            }else{
-                                model.setRequestDetailList(null);
-                            }
-
-                            model.setVerifyDate(request.getVerifyDate());
-                            model.setVerifyNote(request.getVerifyNote());
-                            model.setIsVerified(request.getIsVerified());
-                            model.setIsApproved(request.getIsApproved());
-
-                            model.setCreatedAt(request.getCreatedAt());
-                            model.setCreatedBy(request.getCreatedBy());
-                            model.setUpdatedAt(request.getCreatedAt());
-                            model.setUpdatedBy(request.getUpdatedBy());
-                            model.setTotalPage(totalPage);
-                            return model;
+                    if(request.getVerifierId() !=null)
+                    {
+                        model.setVerifierId(request.getVerifierId());
+                        Optional<User> verifier = userRepository.findById(request.getVerifierId());
+                        if(verifier.isPresent()){
+                            model.setVerifierName(verifier.get().getUsername());
+                        }else{
+                            model.setVerifierName(null);
                         }
+                    }else{
+                        model.setVerifierId(null);
+                        model.setVerifierName("");
+                    }
 
-                        @Override
-                        protected Request doBackward(ShowRequestModel showRequestModel) {
-                            return null;
-                        }
-                    });
+                    if(detail != null)
+                    {
+                        model.setRequestDetailList(detail);
+                    }else{
+                        model.setRequestDetailList(null);
+                    }
+
+                    model.setVerifyDate(request.getVerifyDate());
+                    model.setVerifyNote(request.getVerifyNote());
+                    model.setIsVerified(request.getIsVerified());
+                    model.setIsApproved(request.getIsApproved());
+
+                    model.setCreatedAt(request.getCreatedAt());
+                    model.setCreatedBy(request.getCreatedBy());
+                    model.setUpdatedAt(request.getCreatedAt());
+                    model.setUpdatedBy(request.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Request doBackward(ShowRequestModel showRequestModel) {
+                    return null;
+                }
+            });
             return modelResult.getContent();
         }else{
             return new ArrayList<ShowRequestModel>();
         }
+    }
+
+    @Override
+    public Page<Request> getPageAll(Pageable paging) throws Exception {
+        Page<Request> requestPage = requestRepository.findAllByIsDeletedIsFalse(paging);
+
+        if (requestPage.isEmpty()){
+            return null;
+        }
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
+        Page<Request> requestPage = getPageAll(paging);
+
+        if (requestPage == null) {
+            return null;
+        }
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
+    }
+
+    @Override
+    public ShowRequestModel getByRequestId(Long requestId) {
+        Optional<Request> request = requestRepository.findByRequestIdAndIsDeletedIsFalse(requestId);
+        ShowRequestModel model = new ShowRequestModel();
+        if (request.isPresent()) {
+            Optional<Project> project = projectRepository.findById(request.get().getProjectId());
+            Optional<User> requester = userRepository.findById(request.get().getRequesterId());
+            List<RequestDetail> detail = requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(request.get().getRequestId());
+
+            Optional<RequestType> requestType = requestTypeRepository.findById(request.get().getRequestTypeId());
+
+            model.setRequestId(request.get().getRequestId());
+            model.setRequestName(request.get().getRequestName());
+            model.setProjectId(request.get().getProjectId());
+            if (project.isPresent()) {
+                model.setProjectName(project.get().getProjectName());
+            } else {
+                model.setProjectName(null);
+            }
+
+            model.setRequesterId(request.get().getRequesterId());
+            if (requester.isPresent()) {
+                model.setRequesterName(requester.get().getUsername());
+            } else {
+                model.setRequesterName(null);
+            }
+
+            model.setRequestTypeId(request.get().getRequestTypeId());
+            if (requestType.isPresent()) {
+                model.setRequestTypeName(requestType.get().getRequestTypeName());
+            } else {
+                model.setRequestTypeName(null);
+            }
+
+            model.setRequestDate(request.get().getRequestDate());
+            model.setRequestDesc(request.get().getRequestDesc());
+
+            if (request.get().getVerifierId() != null) {
+                model.setVerifierId(request.get().getVerifierId());
+                Optional<User> verifier = userRepository.findById(request.get().getVerifierId());
+                if (verifier.isPresent()) {
+                    model.setVerifierName(verifier.get().getUsername());
+                } else {
+                    model.setVerifierName(null);
+                }
+            } else {
+                model.setVerifierId(null);
+                model.setVerifierName("");
+            }
+
+            if (detail != null) {
+                model.setRequestDetailList(detail);
+            } else {
+                model.setRequestDetailList(null);
+            }
+
+            model.setVerifyDate(request.get().getVerifyDate());
+            model.setVerifyNote(request.get().getVerifyNote());
+            model.setIsVerified(request.get().getIsVerified());
+            model.setIsApproved(request.get().getIsApproved());
+
+            model.setCreatedAt(request.get().getCreatedAt());
+            model.setCreatedBy(request.get().getCreatedBy());
+            model.setUpdatedAt(request.get().getCreatedAt());
+            model.setUpdatedBy(request.get().getUpdatedBy());
+        }
+        return model;
+    }
+
+    @Override
+    public boolean existsById(long requestId) throws Exception {
+        return requestRepository.existsById(requestId);
+    }
+    @Override
+    public Request getById(long requestId) throws Exception {
+        return requestRepository
+                .findByRequestIdAndIsDeletedIsFalse(requestId)
+                .orElse(null);
+    }
+    @Override
+    public RequestReadDTO getDTOById(long requestId) throws Exception {
+        Request request = getById(requestId);
+
+        if (request == null) {
+            return null;
+        }
+
+        return fillDTO(request);
+    }
+
+    @Override
+    public List<Request> getAllByIdIn(Collection<Long> requestIdCollection) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByRequestIdInAndIsDeletedIsFalse(requestIdCollection);
+
+        if (requestList.isEmpty()){
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByIdIn(Collection<Long> requestIdCollection) throws Exception {
+        List<Request> requestList = getAllByIdIn(requestIdCollection);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, null);
     }
 
     @Override
@@ -294,33 +449,34 @@ public class RequestServiceImpl implements RequestService{
             return null;
         }
 
-        Set<Long> requestIdSet = new HashSet<>();
-        Set<Long> requestTypeIdSet = new HashSet<>();
+        return fillAllDTO(requestList, null);
+    }
+    @Override
+    public Page<Request> getPageAllByProjectId(Pageable paging, long projectId) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
 
-        for (Request request : requestList) {
-            requestIdSet.add(request.getRequestId());
-            requestTypeIdSet.add(request.getRequestTypeId());
+        if (requestPage.isEmpty()){
+            return null;
         }
 
-        /* Get associated RequestType */
-        Map<Long, RequestTypeReadDTO> requestTypeIdRequestTypeDTOMap =
-                requestTypeService.mapRequestTypeIdRequestTypeDTOByIdIn(requestTypeIdSet);
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByProjectId(Pageable paging, long projectId) throws Exception {
+        Page<Request> requestPage = getPageAllByProjectId(paging, projectId);
 
-        /* Get associated RequestDetail */
-        Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
-                requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
+        if (requestPage == null) {
+            return null;
+        }
 
-        return requestList.stream()
-                .map(request -> {
-                    RequestReadDTO requestDTO =
-                            modelMapper.map(request, RequestReadDTO.class);
+        List<Request> requestList = requestPage.getContent();
 
-                    requestDTO.setRequestType(requestTypeIdRequestTypeDTOMap.get(request.getRequestTypeId()));
+        if (requestList.isEmpty()) {
+            return null;
+        }
 
-                    requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(request.getRequestId()));
-
-                    return requestDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(requestList, requestPage.getTotalPages());
     }
 
     @Override
@@ -342,33 +498,7 @@ public class RequestServiceImpl implements RequestService{
             return null;
         }
 
-        Set<Long> requestIdSet = new HashSet<>();
-        Set<Long> requestTypeIdSet = new HashSet<>();
-
-        for (Request request : requestList) {
-            requestIdSet.add(request.getRequestId());
-            requestTypeIdSet.add(request.getRequestTypeId());
-        }
-
-        /* Get associated RequestType */
-        Map<Long, RequestTypeReadDTO> requestTypeIdRequestTypeDTOMap =
-                requestTypeService.mapRequestTypeIdRequestTypeDTOByIdIn(requestTypeIdSet);
-
-        /* Get associated RequestDetail */
-        Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
-                requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
-
-        return requestList.stream()
-                .map(request -> {
-                    RequestReadDTO requestDTO =
-                            modelMapper.map(request, RequestReadDTO.class);
-
-                    requestDTO.setRequestType(requestTypeIdRequestTypeDTOMap.get(request.getRequestTypeId()));
-
-                    requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(request.getRequestId()));
-
-                    return requestDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(requestList, null);
     }
     @Override
     public Map<Long, List<RequestReadDTO>> mapProjectIdRequestDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
@@ -398,76 +528,346 @@ public class RequestServiceImpl implements RequestService{
 
         return projectIdRequestDTOListMap;
     }
-
     @Override
-    public ShowRequestModel getByRequestId(Long requestId) {
-        Optional<Request> request = requestRepository.findByRequestIdAndIsDeletedIsFalse(requestId);
-        ShowRequestModel model = new ShowRequestModel();
-        if(request!=null) {
-            Optional<Project> project = projectRepository.findById(request.get().getProjectId());
-            Optional<User> requester = userRepository.findById(request.get().getRequesterId());
-            List<RequestDetail> detail = requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(request.get().getRequestId());
+    public Page<Request> getPageAllByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection, paging);
 
-            Optional<RequestType> requestType = requestTypeRepository.findById(request.get().getRequestTypeId());
-
-            model.setRequestId(request.get().getRequestId());
-            model.setRequestName(request.get().getRequestName());
-            model.setProjectId(request.get().getProjectId());
-            if (project.isPresent()) {
-                model.setProjectName(project.get().getProjectName());
-            } else {
-                model.setProjectName(null);
-            }
-
-            model.setRequesterId(request.get().getRequesterId());
-            if (requester.isPresent()) {
-                model.setRequesterName(requester.get().getUsername());
-            } else {
-                model.setRequesterName(null);
-            }
-
-            model.setRequestTypeId(request.get().getRequestTypeId());
-            if (requestType.isPresent()) {
-                model.setRequestTypeName(requestType.get().getRequestTypeName());
-            } else {
-                model.setRequestTypeName(null);
-            }
-
-            model.setRequestDate(request.get().getRequestDate());
-            model.setRequestDesc(request.get().getRequestDesc());
-
-            if (request.get().getVerifierId() != null) {
-                model.setVerifierId(request.get().getVerifierId());
-                Optional<User> verifier = userRepository.findById(request.get().getVerifierId());
-                if (verifier.isPresent()) {
-                    model.setVerifierName(verifier.get().getUsername());
-                } else {
-                    model.setVerifierName(null);
-                }
-            } else {
-                model.setVerifierId(null);
-                model.setVerifierName("");
-            }
-
-            if (detail != null) {
-                model.setRequestDetailList(detail);
-            } else {
-                model.setRequestDetailList(null);
-            }
-
-            model.setVerifyDate(request.get().getVerifyDate());
-            model.setVerifyNote(request.get().getVerifyNote());
-            model.setIsVerified(request.get().getIsVerified());
-            model.setIsApproved(request.get().getIsApproved());
-
-            model.setCreatedAt(request.get().getCreatedAt());
-            model.setCreatedBy(request.get().getCreatedBy());
-            model.setUpdatedAt(request.get().getCreatedAt());
-            model.setUpdatedBy(request.get().getUpdatedBy());
+        if (requestPage.isEmpty()){
+            return null;
         }
-        return model;
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
+        Page<Request> requestPage = getPageAllByProjectIdIn(paging, projectIdCollection);
+
+        if (requestPage == null) {
+            return null;
+        }
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
     }
 
+    @Override
+    public Request getByRequestName(String requestName) throws Exception {
+        return requestRepository
+                .findByRequestNameAndIsDeletedIsFalse(requestName)
+                .orElse(null);
+    }
+    @Override
+    public RequestReadDTO getDTOByRequestName(String requestName) throws Exception {
+        Request request = getByRequestName(requestName);
+
+        if (request == null) {
+            return null;
+        }
+
+        return fillDTO(request);
+    }
+
+    @Override
+    public List<Request> getAllByRequestNameContains(String requestName) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByRequestNameContainsAndIsDeletedIsFalse(requestName);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByRequestNameContains(String requestName) throws Exception {
+        List<Request> requestList = getAllByRequestNameContains(requestName);
+
+        if (requestList == null) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, null);
+    }
+    @Override
+    public Page<Request> getPageAllByRequestNameContains(Pageable paging, String requestName) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByRequestNameContainsAndIsDeletedIsFalse(requestName, paging);
+
+        if (requestPage.isEmpty()){
+            return null;
+        }
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByRequestNameContains(Pageable paging, String requestName) throws Exception {
+        Page<Request> requestPage = getPageAllByRequestNameContains(paging, requestName);
+
+        if (requestPage == null) {
+            return null;
+        }
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
+    }
+
+    @Override
+    public List<Request> getAllByRequestTypeId(long requestTypeId) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByRequestTypeIdAndIsDeletedIsFalse(requestTypeId);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByRequestTypeId(long requestTypeId) throws Exception {
+        List<Request> requestList = getAllByRequestTypeId(requestTypeId);
+
+        if (requestList == null) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, null);
+    }
+    @Override
+    public Page<Request> getPageAllByRequestTypeId(Pageable paging, long requestTypeId) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByRequestTypeIdAndIsDeletedIsFalse(requestTypeId, paging);
+
+        if (requestPage.isEmpty()) {
+            return null;
+        }
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByRequestTypeId(Pageable paging, long requestTypeId) throws Exception {
+        Page<Request> requestPage = getPageAllByRequestTypeId(paging, requestTypeId);
+
+        if (requestPage == null) {
+            return null;
+        }
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
+    }
+
+    @Override
+    public List<Request> getAllByRequesterId(long requesterId) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByRequesterIdAndIsDeletedIsFalse(requesterId);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByRequesterId(long requesterId) throws Exception {
+        List<Request> requestList = getAllByRequesterId(requesterId);
+
+        if (requestList == null) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, null);
+    }
+    @Override
+    public Page<Request> getPageAllByRequesterId(Pageable paging, long requesterId) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByRequesterIdAndIsDeletedIsFalse(requesterId, paging);
+
+        if (requestPage.isEmpty()) {
+            return null;
+        }
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByRequesterId(Pageable paging, long requesterId) throws Exception {
+        Page<Request> requestPage = getPageAllByRequesterId(paging, requesterId);
+
+        if (requestPage == null) {
+            return null;
+        }
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
+    }
+
+    @Override
+    public List<Request> getAllByRequesterIdIn(Collection<Long> requesterIdCollection) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByRequesterIdInAndIsDeletedIsFalse(requesterIdCollection);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByRequesterIdIn(Collection<Long> requesterIdCollection) throws Exception {
+        List<Request> requestList = getAllByRequesterIdIn(requesterIdCollection);
+
+        if (requestList == null) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, null);
+    }
+    @Override
+    public Page<Request> getPageAllByRequesterIdIn(Pageable paging, Collection<Long> requesterIdCollection) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByRequesterIdInAndIsDeletedIsFalse(requesterIdCollection, paging);
+
+        if (requestPage.isEmpty()) {
+            return null;
+        }
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByRequesterIdIn(Pageable paging, Collection<Long> requesterIdCollection) throws Exception {
+        Page<Request> requestPage = getPageAllByRequesterIdIn(paging, requesterIdCollection);
+
+        if (requestPage == null) {
+            return null;
+        }
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
+    }
+
+    @Override
+    public List<Request> getAllByVerifierId(long verifierId) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByVerifierIdAndIsDeletedIsFalse(verifierId);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByVerifierId(long verifierId) throws Exception {
+        List<Request> requestList = getAllByVerifierId(verifierId);
+
+        if (requestList == null) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, null);
+    }
+    @Override
+    public Page<Request> getPageAllByVerifierId(Pageable paging, long verifierId) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByVerifierIdAndIsDeletedIsFalse(verifierId, paging);
+
+        if (requestPage.isEmpty()) {
+            return null;
+        }
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByVerifierId(Pageable paging, long verifierId) throws Exception {
+        Page<Request> requestPage = getPageAllByVerifierId(paging, verifierId);
+
+        if (requestPage == null) {
+            return null;
+        }
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
+    }
+
+    @Override
+    public List<Request> getAllByVerifierIdIn(Collection<Long> verifierIdCollection) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByVerifierIdInAndIsDeletedIsFalse(verifierIdCollection);
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByVerifierIdIn(Collection<Long> verifierIdCollection) throws Exception {
+        List<Request> requestList = getAllByVerifierIdIn(verifierIdCollection);
+
+        if (requestList == null) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, null);
+    }
+    @Override
+    public Page<Request> getPageAllByVerifierIdIn(Pageable paging, Collection<Long> verifierIdCollection) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByVerifierIdInAndIsDeletedIsFalse(verifierIdCollection, paging);
+
+        if (requestPage.isEmpty()) {
+            return null;
+        }
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByVerifierIdIn(Pageable paging, Collection<Long> verifierIdCollection) throws Exception {
+        Page<Request> requestPage = getPageAllByVerifierIdIn(paging, verifierIdCollection);
+
+        if (requestPage == null) {
+            return null;
+        }
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty()) {
+            return null;
+        }
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
+    }
+
+    /* UPDATE */
     @Override
     public boolean updateRequest(UpdateRequestModel updateRequestModel) {
         Request request = requestRepository.findById(updateRequestModel.getRequestId()).orElse(null);
@@ -520,14 +920,162 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
-    public boolean deleteRequest(Long requestId) {
-        Request request = requestRepository.findById(requestId).orElse(null);
-        if(request != null){
-            request.setIsDeleted(true);
-            requestRepository.saveAndFlush(request);
-            return true;
+    public Request updateRequest(Request updatedRequest) throws Exception {
+        return null;
+    }
+    @Override
+    public RequestReadDTO updateRequestByDTO(RequestUpdateDTO updatedRequestDTO) throws Exception {
+        return null;
+    }
+
+    /* DELETE */
+    @Override
+    public boolean deleteRequest(Long requestId) throws Exception {
+        Request request = getById(requestId);
+
+        if (request == null){
+            return false;
         }
-        return false;
+
+        request.setIsDeleted(true);
+        requestRepository.saveAndFlush(request);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteAllByProjectId(long projectId) throws Exception {
+        List<Request> requestList = getAllByProjectId(projectId);
+
+        if (requestList == null){
+            return false;
+        }
+
+        requestList =
+                requestList.stream()
+                        .peek(request -> request.setIsDeleted(true))
+                        .collect(Collectors.toList());
+
+        requestRepository.saveAllAndFlush(requestList);
+
+        return true;
+    }
+    @Override
+    public boolean deleteAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<Request> requestList = getAllByProjectIdIn(projectIdCollection);
+
+        if (requestList == null){
+            return false;
+        }
+
+        requestList =
+                requestList.stream()
+                        .peek(request -> request.setIsDeleted(true))
+                        .collect(Collectors.toList());
+
+        requestRepository.saveAllAndFlush(requestList);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteAllByUserId(long userId) throws Exception {
+        Set<Request> requestSet = new HashSet<>();
+
+        List<Request> requestList = getAllByRequesterId(userId);
+        if (requestList != null){
+            requestSet.addAll(requestList);
+        }
+
+        requestList = getAllByVerifierId(userId);
+        if (requestList != null){
+            requestSet.addAll(requestList);
+        }
+
+        if (requestSet.isEmpty()){
+            return false;
+        }
+
+        requestSet =
+                requestSet.stream()
+                        .peek(request -> request.setIsDeleted(true))
+                        .collect(Collectors.toSet());
+
+        requestRepository.saveAllAndFlush(requestSet);
+
+        return true;
+    }
+    @Override
+    public boolean deleteAllByUserIdIn(Collection<Long> userIdCollection) throws Exception {
+        Set<Request> requestSet = new HashSet<>();
+
+        List<Request> requestList = getAllByRequesterIdIn(userIdCollection);
+        if (requestList != null){
+            requestSet.addAll(requestList);
+        }
+
+        requestList = getAllByVerifierIdIn(userIdCollection);
+        if (requestList != null){
+            requestSet.addAll(requestList);
+        }
+
+        if (requestSet.isEmpty()){
+            return false;
+        }
+
+        requestSet =
+                requestSet.stream()
+                        .peek(request -> request.setIsDeleted(true))
+                        .collect(Collectors.toSet());
+
+        requestRepository.saveAllAndFlush(requestSet);
+
+        return true;
+    }
+
+    /* Utils */
+    private RequestReadDTO fillDTO(Request request) throws Exception{
+        RequestReadDTO requestDTO = modelMapper.map(request, RequestReadDTO.class);
+
+        requestDTO.setRequestType(
+                requestTypeService.getDTOById(request.getRequestTypeId()));
+
+        requestDTO.setRequestDetailList(
+                requestDetailService.getAllDTOByRequestId(request.getRequestTypeId()));
+
+        return requestDTO;
+    }
+
+    private List<RequestReadDTO> fillAllDTO(List<Request> requestList, Integer totalPage) throws Exception{
+        Set<Long> requestIdSet = new HashSet<>();
+        Set<Long> requestTypeIdSet = new HashSet<>();
+
+        for (Request request : requestList) {
+            requestIdSet.add(request.getRequestId());
+            requestTypeIdSet.add(request.getRequestTypeId());
+        }
+
+        /* Get associated RequestType */
+        Map<Long, RequestTypeReadDTO> requestTypeIdRequestTypeDTOMap =
+                requestTypeService.mapRequestTypeIdRequestTypeDTOByIdIn(requestTypeIdSet);
+
+        /* Get associated RequestDetail */
+        Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
+                requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
+
+        return requestList.stream()
+                .map(request -> {
+                    RequestReadDTO requestDTO =
+                            modelMapper.map(request, RequestReadDTO.class);
+
+                    requestDTO.setRequestType(requestTypeIdRequestTypeDTOMap.get(request.getRequestTypeId()));
+
+                    requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(request.getRequestId()));
+
+                    requestDTO.setTotalPage(totalPage);
+
+                    return requestDTO;})
+                .collect(Collectors.toList());
     }
 
 }
