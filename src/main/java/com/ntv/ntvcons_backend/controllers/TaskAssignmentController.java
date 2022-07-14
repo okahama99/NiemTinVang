@@ -6,7 +6,9 @@ import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,8 @@ import java.util.List;
 public class TaskAssignmentController {
     @Autowired
     private TaskAssignmentService taskAssignmentService;
+    @Autowired
+    private ThanhUtil thanhUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -50,7 +54,8 @@ public class TaskAssignmentController {
                                          @RequestParam boolean sortTypeAsc) {
         try {
             List<TaskAssignmentReadDTO> taskAssignmentDTOList =
-                    taskAssignmentService.getAllDTOInPaging(pageNo, pageSize, sortBy, sortTypeAsc);
+                    taskAssignmentService.getAllDTOInPaging(
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (taskAssignmentDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No TaskAssignment found");
@@ -70,8 +75,58 @@ public class TaskAssignmentController {
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.TASK_ASSIGNMENT searchType) {
-        // TODO:
-        return null;
+        try {
+            TaskAssignmentReadDTO taskAssignmentDTO;
+
+            switch (searchType) {
+                case BY_ID:
+                    taskAssignmentDTO = taskAssignmentService.getDTOById(Long.parseLong(searchParam));
+
+                    if (taskAssignmentDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No TaskAssignment found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_TASK_ID:
+                    taskAssignmentDTO = taskAssignmentService.getDTOByTaskId(Long.parseLong(searchParam));
+
+                    if (taskAssignmentDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No TaskAssignment found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity TaskAssignment");
+            }
+
+            return ResponseEntity.ok().body(taskAssignmentDTO);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for TaskAssignment with ";
+
+            switch (searchType) {
+                case BY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+
+                case BY_TASK_ID:
+                    errorMsg += "taskId: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     //@PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
@@ -83,12 +138,14 @@ public class TaskAssignmentController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+
             List<TaskAssignmentReadDTO> taskAssignmentDTOList;
 
             switch (searchType) {
                 case BY_ASSIGNER_ID:
                     taskAssignmentDTOList =
-                            taskAssignmentService.getAllDTOByAssignerId(Long.parseLong(searchParam));
+                            taskAssignmentService.getAllDTOInPagingByAssignerId(paging, Long.parseLong(searchParam));
 
                     if (taskAssignmentDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -98,7 +155,7 @@ public class TaskAssignmentController {
 
                 case BY_ASSIGNEE_ID:
                     taskAssignmentDTOList =
-                            taskAssignmentService.getAllDTOByAssignerId(Long.parseLong(searchParam));
+                            taskAssignmentService.getAllDTOInPagingByAssignerId(paging, Long.parseLong(searchParam));
 
                     if (taskAssignmentDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -152,6 +209,10 @@ public class TaskAssignmentController {
             }
 
             return ResponseEntity.ok().body(updatedTaskAssignmentDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found User by Id (updatedBy / assignerId / assigneeId), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating TaskAssignment with Id: '" + taskAssignmentDTO.getAssignmentId() + "'. ",

@@ -18,14 +18,14 @@ public interface LocationService { /* TODO: throws Exception for controller to h
     /* CREATE */
     void createLocation(CreateLocationModel createLocationModel);
 
-    Location createLocation(Location newLocation)  throws Exception;
+    Location createLocation(Location newLocation) throws Exception;
     LocationReadDTO createLocationByDTO(LocationCreateDTO newLocationDTO) throws Exception;
 
     /* READ */
     List<ShowLocationModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType);
 
-    Page<Location> getPageAll(Pageable paging);
-    List<LocationReadDTO> getAllInPaging(Pageable paging);
+    Page<Location> getPageAll(Pageable paging) throws Exception;
+    List<LocationReadDTO> getAllInPaging(Pageable paging) throws Exception;
 
     boolean existsById(long locationId) throws Exception;
     Location getById(long locationId) throws Exception;

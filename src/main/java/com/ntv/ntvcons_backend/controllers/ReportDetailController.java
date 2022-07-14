@@ -6,7 +6,9 @@ import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailUpdateDTO;
 import com.ntv.ntvcons_backend.services.reportDetail.ReportDetailService;
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,8 @@ import java.util.List;
 public class ReportDetailController {
     @Autowired
     private ReportDetailService reportDetailService;
+    @Autowired
+    private ThanhUtil thanhUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -50,7 +54,8 @@ public class ReportDetailController {
                                          @RequestParam boolean sortTypeAsc) {
         try {
             List<ReportDetailReadDTO> reportDetailDTOList =
-                    reportDetailService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
+                    reportDetailService.getAllDTOInPaging(
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (reportDetailDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found");
@@ -70,19 +75,101 @@ public class ReportDetailController {
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.REPORT_DETAIL searchType) {
-        // TODO:
-        return null;
+        try {
+            ReportDetailReadDTO reportDetailDTO;
+
+            switch (searchType) {
+                case BY_ID:
+                    reportDetailDTO = reportDetailService.getDTOById(Long.parseLong(searchParam));
+
+                    if (reportDetailDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ReportDetail found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ReportDetail");
+            }
+
+            return ResponseEntity.ok().body(reportDetailDTO);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for ReportDetail with ";
+
+            switch (searchType) {
+                case BY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                                @RequestParam SearchType.REPORT_DETAIL searchType,
+                                                @RequestParam SearchType.ALL_REPORT_DETAIL searchType,
                                                 @RequestParam int pageNo,
                                                 @RequestParam int pageSize,
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
-        // TODO:
-        return null;
+        try {
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+
+            List<ReportDetailReadDTO> reportDetailDTOList;
+
+            switch (searchType) {
+                case BY_REPORT_ID:
+                    reportDetailDTOList =
+                            reportDetailService.getAllDTOInPagingByReportId(paging, Long.parseLong(searchParam));
+
+                    if (reportDetailDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ReportDetail found with name contains: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_ITEM_DESC:
+                    throw new IllegalArgumentException("Not yet supported this SearchType");
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ReportDetail");
+            }
+
+            return ResponseEntity.ok().body(reportDetailDTOList);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy || searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for ReportDetail with ";
+
+            switch (searchType) {
+                case BY_REPORT_ID:
+                    errorMsg += "reportId: '" + searchParam + "'. ";
+                    break;
+
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
     
     /* UPDATE */

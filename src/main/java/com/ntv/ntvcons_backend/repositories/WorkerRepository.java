@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface WorkerRepository extends JpaRepository<Worker, Long> {
-        Page<Worker> findAllByIsDeletedIsFalse(Pageable pageable);
+        Page<Worker> findAllByIsDeletedIsFalse(Pageable paging);
 
 
         /* Id */

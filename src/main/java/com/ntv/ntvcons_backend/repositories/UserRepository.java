@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-        Page<User> findAllByIsDeletedIsFalse(Pageable pageable);
+        Page<User> findAllByIsDeletedIsFalse(Pageable paging);
 
         List<User> findByIsDeletedFalse();
 

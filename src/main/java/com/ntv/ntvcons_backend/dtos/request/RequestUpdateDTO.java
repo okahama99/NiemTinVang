@@ -39,7 +39,7 @@ public class RequestUpdateDTO extends BaseUpdateDTO {
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     @NotNull(message = "requestDate REQUIRED for update")
-    private LocalDateTime requestDate;
+    private String requestDate;
 
     @ApiModelProperty(example = "Yêu cầu chi tiêu xxx") /* Hint for Swagger */
     @Size(max = 100, message = "requestDesc max length: 100 characters")
@@ -56,7 +56,7 @@ public class RequestUpdateDTO extends BaseUpdateDTO {
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    private LocalDateTime verifyDate;
+    private String verifyDate;
 
     @ApiModelProperty(example = "Chi tiêu hợp lý, đồng ý") /* Hint for Swagger */
     @Size(max = 100, message = "verifyNote max length: 100 characters")

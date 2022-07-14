@@ -6,7 +6,9 @@ import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
 import com.ntv.ntvcons_backend.services.requestType.RequestTypeService;
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,8 @@ import java.util.List;
 public class RequestTypeController {
     @Autowired
     private RequestTypeService requestTypeService;
+    @Autowired
+    private ThanhUtil thanhUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -27,9 +31,14 @@ public class RequestTypeController {
     @PostMapping(value = "/v1/createRequestType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequestType(@Valid @RequestBody RequestTypeCreateDTO requestTypeDTO){
         try {
-            RequestTypeReadDTO newRequestTypeDTO = requestTypeService.createRequestTypeByDTO(requestTypeDTO);
+            RequestTypeReadDTO newRequestTypeDTO = 
+                    requestTypeService.createRequestTypeByDTO(requestTypeDTO);
 
             return ResponseEntity.ok().body(newRequestTypeDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found User by Id (createdBy), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating RequestType", e.getMessage()));
@@ -45,7 +54,8 @@ public class RequestTypeController {
                                          @RequestParam boolean sortTypeAsc) {
         try {
             List<RequestTypeReadDTO> requestTypeDTOList =
-                    requestTypeService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
+                    requestTypeService.getAllDTOInPaging(
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (requestTypeDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No RequestType found");
@@ -66,8 +76,58 @@ public class RequestTypeController {
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.REQUEST_TYPE searchType) {
-        // TODO:
-        return null;
+        try {
+            RequestTypeReadDTO requestTypeDTO;
+
+            switch (searchType) {
+                case BY_ID:
+                    requestTypeDTO = requestTypeService.getDTOById(Long.parseLong(searchParam));
+
+                    if (requestTypeDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No RequestType found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_NAME:
+                    requestTypeDTO = requestTypeService.getDTOByRequestTypeName(searchParam);
+
+                    if (requestTypeDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No RequestType found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+                    
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity RequestType");
+            }
+
+            return ResponseEntity.ok().body(requestTypeDTO);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for RequestType with ";
+
+            switch (searchType) {
+                case BY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     //@PreAuthorize("hasAnyRole('Admin','Engineer')")
@@ -79,11 +139,14 @@ public class RequestTypeController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            
             List<RequestTypeReadDTO> requestTypeDTOList;
 
             switch (searchType) {
                 case BY_NAME_CONTAINS:
-                    requestTypeDTOList = requestTypeService.getAllDTOByRequestTypeNameContains(searchParam);
+                    requestTypeDTOList = 
+                            requestTypeService.getAllDTOInPagingByRequestTypeNameContains(paging, searchParam);
 
                     if (requestTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)

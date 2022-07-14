@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    Page<Project> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<Project> findAllByIsDeletedIsFalse(Pageable paging);
 
 
     /* Id */
@@ -21,7 +21,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
     Optional<Project> findByProjectIdAndIsDeletedIsFalse(long projectId);
     boolean existsAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
     List<Project> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
-    Page<Project> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable pageable);
+    Page<Project> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable paging);
     /* Id & projectName */
     boolean existsByProjectNameAndProjectIdIsNotAndIsDeletedIsFalse(String projectName, long projectId);
 

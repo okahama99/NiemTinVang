@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.dtos.project;
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateOptionDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,8 +26,12 @@ public class ProjectCreateDTO extends BaseCreateDTO {
     @NotNull(message = "projectName REQUIRED for create")
     private String projectName;
 
+    /* TODO: reuse later
     @NotNull(message = "location REQUIRED for create")
-    private LocationCreateOptionDTO location;
+    private LocationCreateOptionDTO location;*/
+
+    @NotNull(message = "blueprint REQUIRED for create")
+    private LocationCreateDTO location;
 
     @NotNull(message = "blueprint REQUIRED for create")
     private BlueprintCreateDTO blueprint;

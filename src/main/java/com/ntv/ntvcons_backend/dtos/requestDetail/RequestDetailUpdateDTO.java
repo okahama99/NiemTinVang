@@ -16,11 +16,11 @@ import javax.validation.constraints.Size;
 public class RequestDetailUpdateDTO extends BaseUpdateDTO {
     @Positive
     @NotNull(message = "Id REQUIRED for update")
-    private Long reportDetailId;
+    private Long requestDetailId;
 
     @Positive
     @NotNull(message = "reportId REQUIRED for update")
-    private Long reportId;
+    private Long requestId;
 
     @ApiModelProperty(example = "00.00") /* Hint for Swagger */
     @Positive

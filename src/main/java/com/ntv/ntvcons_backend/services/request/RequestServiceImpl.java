@@ -1,9 +1,15 @@
 package com.ntv.ntvcons_backend.services.request;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
+import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
+import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.entities.*;
@@ -83,7 +89,7 @@ public class RequestServiceImpl implements RequestService{
                 createRequestDetailModel.setItemAmount(requestDetailModel.getItemAmount());
                 createRequestDetailModel.setItemPrice(requestDetailModel.getItemPrice());
                 createRequestDetailModel.setItemUnit(requestDetailModel.getItemUnit());
-                requestDetailService.createRequest(createRequestDetailModel);
+                requestDetailService.createRequestDetail(createRequestDetailModel);
             }
         }
         return true;
@@ -91,18 +97,76 @@ public class RequestServiceImpl implements RequestService{
 
     @Override
     public Request createRequest(Request newRequest) throws Exception {
-        return null;
+        String errorMsg = "";
+
+        /* Check FK */
+        if (!projectService.existsById(newRequest.getProjectId())) {
+            errorMsg += "No Project found with Id: '" + newRequest.getProjectId()
+                    + "'. Which violate constraint: FK_Request_Project. ";
+        }
+        if (!requestTypeService.existsById(newRequest.getRequestTypeId())) {
+            errorMsg += "No RequestType found with Id: '" + newRequest.getRequestTypeId()
+                    + "'. Which violate constraint: FK_Request_RequestType. ";
+        }
+        if (!userService.existsById(newRequest.getRequesterId())) {
+            errorMsg += "No User (Requester) found with Id: '" + newRequest.getRequesterId()
+                    + "'. Which violate constraint: FK_Request_User_RequesterId. ";
+        }
+        if (!userService.existsById(newRequest.getCreatedBy())) {
+            errorMsg += "No User (CreatedBy) found with Id: '" + newRequest.getCreatedBy()
+                    + "'. Which violate constraint: FK_Request_User_CreatedBy. ";
+        }
+
+        /* Check duplicate */
+        if (requestRepository
+                .existsByRequestNameAndIsDeletedIsFalse(newRequest.getRequestName())) {
+            errorMsg += "Already exists another Request with name: '" + newRequest.getRequestName() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) 
+            throw new IllegalArgumentException(errorMsg);
+
+        /* TODO: create EntityWrapper for request */
+
+        return requestRepository.saveAndFlush(newRequest);
     }
     @Override
     public RequestReadDTO createRequestByDTO(RequestCreateDTO newRequestDTO) throws Exception {
-        return null;
+        modelMapper.typeMap(RequestCreateDTO.class, Request.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Request::setRequestDate);});
+
+        Request newRequest = modelMapper.map(newRequestDTO, Request.class);
+
+        /* Already check NOT NULL */
+        newRequest.setRequestDate(
+                LocalDateTime.parse(newRequestDTO.getRequestDate(), dateTimeFormatter));
+
+        if (newRequest.getRequestDate().isAfter(LocalDateTime.now())) 
+            throw new IllegalArgumentException("requestDate can't be in the future");
+
+        newRequest = createRequest(newRequest);
+
+        long requestId = newRequest.getRequestId();
+
+        /* Create associated RequestDetail; Set required FK requestId */
+        /* Already check NOT NULL & size > 1 */
+        List<RequestDetailCreateDTO> newRequestDetailDTOList = newRequestDTO.getRequestDetailList();
+
+        newRequestDetailDTOList = newRequestDetailDTOList.stream()
+                .peek(newRequestDetailDTO -> newRequestDetailDTO.setRequestId(requestId))
+                .collect(Collectors.toList());
+
+        requestDetailService.createBulkRequestDetailByDTOList(newRequestDetailDTOList);
+
+        return fillDTO(newRequest);
     }
 
     /* READ */
     @Override
     public List<ShowRequestModel> getAllAvailableRequest(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
-        if(sortType) {
+        if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
         }else{
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
@@ -110,7 +174,7 @@ public class RequestServiceImpl implements RequestService{
 
         Page<Request> pagingResult = requestRepository.findAllByIsDeletedIsFalse(paging);
 
-        if(pagingResult.hasContent()){
+        if (pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
 
             Page<ShowRequestModel> modelResult = pagingResult.map(new Converter<Request, ShowRequestModel>() {
@@ -127,21 +191,21 @@ public class RequestServiceImpl implements RequestService{
                     model.setRequestId(request.getRequestId());
                     model.setRequestName(request.getRequestName());
                     model.setProjectId(request.getProjectId());
-                    if(project.isPresent()){
+                    if (project.isPresent()){
                         model.setProjectName(project.get().getProjectName());
                     }else{
                         model.setProjectName(null);
                     }
 
                     model.setRequesterId(request.getRequesterId());
-                    if(requester.isPresent()){
+                    if (requester.isPresent()){
                         model.setRequesterName(requester.get().getUsername());
                     }else{
                         model.setRequesterName(null);
                     }
 
                     model.setRequestTypeId(request.getRequestTypeId());
-                    if(requestType.isPresent()){
+                    if (requestType.isPresent()){
                         model.setRequestTypeName(requestType.get().getRequestTypeName());
                     }else{
                         model.setRequestTypeName(null);
@@ -150,11 +214,11 @@ public class RequestServiceImpl implements RequestService{
                     model.setRequestDate(request.getRequestDate());
                     model.setRequestDesc(request.getRequestDesc());
 
-                    if(request.getVerifierId() !=null)
+                    if (request.getVerifierId() !=null)
                     {
                         model.setVerifierId(request.getVerifierId());
                         Optional<User> verifier = userRepository.findById(request.getVerifierId());
-                        if(verifier.isPresent()){
+                        if (verifier.isPresent()){
                             model.setVerifierName(verifier.get().getUsername());
                         }else{
                             model.setVerifierName(null);
@@ -164,7 +228,7 @@ public class RequestServiceImpl implements RequestService{
                         model.setVerifierName("");
                     }
 
-                    if(detail != null)
+                    if (detail != null)
                     {
                         model.setRequestDetailList(detail);
                     }else{
@@ -199,9 +263,8 @@ public class RequestServiceImpl implements RequestService{
     public Page<Request> getPageAll(Pageable paging) throws Exception {
         Page<Request> requestPage = requestRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (requestPage.isEmpty()){
+        if (requestPage.isEmpty())
             return null;
-        }
 
         return requestPage;
     }
@@ -209,15 +272,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
         Page<Request> requestPage = getPageAll(paging);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -293,7 +354,8 @@ public class RequestServiceImpl implements RequestService{
 
     @Override
     public boolean existsById(long requestId) throws Exception {
-        return requestRepository.existsById(requestId);
+        return requestRepository
+                .existsByRequestIdAndIsDeletedIsFalse(requestId);
     }
     @Override
     public Request getById(long requestId) throws Exception {
@@ -305,21 +367,24 @@ public class RequestServiceImpl implements RequestService{
     public RequestReadDTO getDTOById(long requestId) throws Exception {
         Request request = getById(requestId);
 
-        if (request == null) {
+        if (request == null) 
             return null;
-        }
 
         return fillDTO(request);
     }
 
     @Override
+    public boolean existsAllByIdIn(Collection<Long> requestIdCollection) throws Exception {
+        return requestRepository
+                .existsAllByRequestIdInAndIsDeletedIsFalse(requestIdCollection);
+    }
+    @Override
     public List<Request> getAllByIdIn(Collection<Long> requestIdCollection) throws Exception {
         List<Request> requestList =
                 requestRepository.findAllByRequestIdInAndIsDeletedIsFalse(requestIdCollection);
 
-        if (requestList.isEmpty()){
+        if (requestList.isEmpty())
             return null;
-        }
 
         return requestList;
     }
@@ -327,9 +392,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByIdIn(Collection<Long> requestIdCollection) throws Exception {
         List<Request> requestList = getAllByIdIn(requestIdCollection);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -337,7 +401,7 @@ public class RequestServiceImpl implements RequestService{
     @Override
     public List<ShowRequestModel> getByProjectId(Long projectId, int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
-        if(sortType) {
+        if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
         }else{
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
@@ -345,7 +409,7 @@ public class RequestServiceImpl implements RequestService{
 
         Page<Request> pagingResult = requestRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId,paging);
 
-        if(pagingResult.hasContent()){
+        if (pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
 
             Page<ShowRequestModel> modelResult = pagingResult.map(new Converter<Request, ShowRequestModel>() {
@@ -362,21 +426,21 @@ public class RequestServiceImpl implements RequestService{
                     model.setRequestId(request.getRequestId());
                     model.setRequestName(request.getRequestName());
                     model.setProjectId(request.getProjectId());
-                    if(project.isPresent()){
+                    if (project.isPresent()){
                         model.setProjectName(project.get().getProjectName());
                     }else{
                         model.setProjectName(null);
                     }
 
                     model.setRequesterId(request.getRequesterId());
-                    if(requester.isPresent()){
+                    if (requester.isPresent()){
                         model.setRequesterName(requester.get().getUsername());
                     }else{
                         model.setRequesterName(null);
                     }
 
                     model.setRequestTypeId(request.getRequestTypeId());
-                    if(requestType.isPresent()){
+                    if (requestType.isPresent()){
                         model.setRequestTypeName(requestType.get().getRequestTypeName());
                     }else{
                         model.setRequestTypeName(null);
@@ -385,11 +449,11 @@ public class RequestServiceImpl implements RequestService{
                     model.setRequestDate(request.getRequestDate());
                     model.setRequestDesc(request.getRequestDesc());
 
-                    if(request.getVerifierId() !=null)
+                    if (request.getVerifierId() !=null)
                     {
                         model.setVerifierId(request.getVerifierId());
                         Optional<User> verifier = userRepository.findById(request.getVerifierId());
-                        if(verifier.isPresent()){
+                        if (verifier.isPresent()){
                             model.setVerifierName(verifier.get().getUsername());
                         }else{
                             model.setVerifierName(null);
@@ -399,7 +463,7 @@ public class RequestServiceImpl implements RequestService{
                         model.setVerifierName("");
                     }
 
-                    if(detail != null)
+                    if (detail != null)
                     {
                         model.setRequestDetailList(detail);
                     }else{
@@ -435,9 +499,8 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requestList =
                 requestRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return requestList;
     }
@@ -445,9 +508,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByProjectId(long projectId) throws Exception {
         List<Request> requestList = getAllByProjectId(projectId);
 
-        if (requestList == null) {
+        if (requestList == null) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -456,9 +518,8 @@ public class RequestServiceImpl implements RequestService{
         Page<Request> requestPage =
                 requestRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
 
-        if (requestPage.isEmpty()){
+        if (requestPage.isEmpty())
             return null;
-        }
 
         return requestPage;
     }
@@ -466,15 +527,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPagingByProjectId(Pageable paging, long projectId) throws Exception {
         Page<Request> requestPage = getPageAllByProjectId(paging, projectId);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -484,9 +543,8 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requestList =
                 requestRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return requestList;
     }
@@ -494,9 +552,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Request> requestList = getAllByProjectIdIn(projectIdCollection);
 
-        if (requestList == null) {
+        if (requestList == null) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -504,9 +561,8 @@ public class RequestServiceImpl implements RequestService{
     public Map<Long, List<RequestReadDTO>> mapProjectIdRequestDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<RequestReadDTO> requestDTOList = getAllDTOByProjectIdIn(projectIdCollection);
 
-        if (requestDTOList == null) {
+        if (requestDTOList == null) 
             return new HashMap<>();
-        }
 
         Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap = new HashMap<>();
 
@@ -533,9 +589,8 @@ public class RequestServiceImpl implements RequestService{
         Page<Request> requestPage =
                 requestRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection, paging);
 
-        if (requestPage.isEmpty()){
+        if (requestPage.isEmpty())
             return null;
-        }
 
         return requestPage;
     }
@@ -543,15 +598,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPagingByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
         Page<Request> requestPage = getPageAllByProjectIdIn(paging, projectIdCollection);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -566,9 +619,8 @@ public class RequestServiceImpl implements RequestService{
     public RequestReadDTO getDTOByRequestName(String requestName) throws Exception {
         Request request = getByRequestName(requestName);
 
-        if (request == null) {
+        if (request == null) 
             return null;
-        }
 
         return fillDTO(request);
     }
@@ -578,9 +630,8 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requestList =
                 requestRepository.findAllByRequestNameContainsAndIsDeletedIsFalse(requestName);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return requestList;
     }
@@ -588,9 +639,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByRequestNameContains(String requestName) throws Exception {
         List<Request> requestList = getAllByRequestNameContains(requestName);
 
-        if (requestList == null) {
+        if (requestList == null) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -599,9 +649,8 @@ public class RequestServiceImpl implements RequestService{
         Page<Request> requestPage =
                 requestRepository.findAllByRequestNameContainsAndIsDeletedIsFalse(requestName, paging);
 
-        if (requestPage.isEmpty()){
+        if (requestPage.isEmpty())
             return null;
-        }
 
         return requestPage;
     }
@@ -609,15 +658,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPagingByRequestNameContains(Pageable paging, String requestName) throws Exception {
         Page<Request> requestPage = getPageAllByRequestNameContains(paging, requestName);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -627,9 +674,8 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requestList =
                 requestRepository.findAllByRequestTypeIdAndIsDeletedIsFalse(requestTypeId);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return requestList;
     }
@@ -637,9 +683,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByRequestTypeId(long requestTypeId) throws Exception {
         List<Request> requestList = getAllByRequestTypeId(requestTypeId);
 
-        if (requestList == null) {
+        if (requestList == null) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -648,9 +693,8 @@ public class RequestServiceImpl implements RequestService{
         Page<Request> requestPage =
                 requestRepository.findAllByRequestTypeIdAndIsDeletedIsFalse(requestTypeId, paging);
 
-        if (requestPage.isEmpty()) {
+        if (requestPage.isEmpty()) 
             return null;
-        }
 
         return requestPage;
     }
@@ -658,15 +702,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPagingByRequestTypeId(Pageable paging, long requestTypeId) throws Exception {
         Page<Request> requestPage = getPageAllByRequestTypeId(paging, requestTypeId);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -676,9 +718,8 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requestList =
                 requestRepository.findAllByRequesterIdAndIsDeletedIsFalse(requesterId);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return requestList;
     }
@@ -686,9 +727,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByRequesterId(long requesterId) throws Exception {
         List<Request> requestList = getAllByRequesterId(requesterId);
 
-        if (requestList == null) {
+        if (requestList == null) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -697,9 +737,8 @@ public class RequestServiceImpl implements RequestService{
         Page<Request> requestPage =
                 requestRepository.findAllByRequesterIdAndIsDeletedIsFalse(requesterId, paging);
 
-        if (requestPage.isEmpty()) {
+        if (requestPage.isEmpty()) 
             return null;
-        }
 
         return requestPage;
     }
@@ -707,15 +746,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPagingByRequesterId(Pageable paging, long requesterId) throws Exception {
         Page<Request> requestPage = getPageAllByRequesterId(paging, requesterId);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -725,9 +762,8 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requestList =
                 requestRepository.findAllByRequesterIdInAndIsDeletedIsFalse(requesterIdCollection);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return requestList;
     }
@@ -735,9 +771,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByRequesterIdIn(Collection<Long> requesterIdCollection) throws Exception {
         List<Request> requestList = getAllByRequesterIdIn(requesterIdCollection);
 
-        if (requestList == null) {
+        if (requestList == null) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -746,9 +781,8 @@ public class RequestServiceImpl implements RequestService{
         Page<Request> requestPage =
                 requestRepository.findAllByRequesterIdInAndIsDeletedIsFalse(requesterIdCollection, paging);
 
-        if (requestPage.isEmpty()) {
+        if (requestPage.isEmpty()) 
             return null;
-        }
 
         return requestPage;
     }
@@ -756,15 +790,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPagingByRequesterIdIn(Pageable paging, Collection<Long> requesterIdCollection) throws Exception {
         Page<Request> requestPage = getPageAllByRequesterIdIn(paging, requesterIdCollection);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -774,9 +806,8 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requestList =
                 requestRepository.findAllByVerifierIdAndIsDeletedIsFalse(verifierId);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return requestList;
     }
@@ -784,9 +815,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByVerifierId(long verifierId) throws Exception {
         List<Request> requestList = getAllByVerifierId(verifierId);
 
-        if (requestList == null) {
+        if (requestList == null) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -795,9 +825,8 @@ public class RequestServiceImpl implements RequestService{
         Page<Request> requestPage =
                 requestRepository.findAllByVerifierIdAndIsDeletedIsFalse(verifierId, paging);
 
-        if (requestPage.isEmpty()) {
+        if (requestPage.isEmpty()) 
             return null;
-        }
 
         return requestPage;
     }
@@ -805,15 +834,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPagingByVerifierId(Pageable paging, long verifierId) throws Exception {
         Page<Request> requestPage = getPageAllByVerifierId(paging, verifierId);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -823,9 +850,8 @@ public class RequestServiceImpl implements RequestService{
         List<Request> requestList =
                 requestRepository.findAllByVerifierIdInAndIsDeletedIsFalse(verifierIdCollection);
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return requestList;
     }
@@ -833,9 +859,8 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByVerifierIdIn(Collection<Long> verifierIdCollection) throws Exception {
         List<Request> requestList = getAllByVerifierIdIn(verifierIdCollection);
 
-        if (requestList == null) {
+        if (requestList == null) 
             return null;
-        }
 
         return fillAllDTO(requestList, null);
     }
@@ -844,9 +869,8 @@ public class RequestServiceImpl implements RequestService{
         Page<Request> requestPage =
                 requestRepository.findAllByVerifierIdInAndIsDeletedIsFalse(verifierIdCollection, paging);
 
-        if (requestPage.isEmpty()) {
+        if (requestPage.isEmpty()) 
             return null;
-        }
 
         return requestPage;
     }
@@ -854,15 +878,13 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOInPagingByVerifierIdIn(Pageable paging, Collection<Long> verifierIdCollection) throws Exception {
         Page<Request> requestPage = getPageAllByVerifierIdIn(paging, verifierIdCollection);
 
-        if (requestPage == null) {
+        if (requestPage == null) 
             return null;
-        }
 
         List<Request> requestList = requestPage.getContent();
 
-        if (requestList.isEmpty()) {
+        if (requestList.isEmpty()) 
             return null;
-        }
 
         return fillAllDTO(requestList, requestPage.getTotalPages());
     }
@@ -874,7 +896,7 @@ public class RequestServiceImpl implements RequestService{
         Optional<Project> project = projectRepository.findById(request.getProjectId());
         Optional<User> requester = userRepository.findById(request.getRequesterId());
         Optional<RequestType> requestType = requestTypeRepository.findById(request.getRequestTypeId());
-        if(request != null || project != null || requester != null || requestType != null)
+        if (request != null || project != null || requester != null || requestType != null)
         {
             request.setProjectId(updateRequestModel.getProjectId());
             request.setRequesterId(updateRequestModel.getRequesterId());
@@ -896,7 +918,7 @@ public class RequestServiceImpl implements RequestService{
     public boolean updateVerifier(UpdateRequestVerifierModel updateRequestVerifierModel) {
         Request request = requestRepository.findById(updateRequestVerifierModel.getRequestId()).orElse(null);
         Optional<User> verifier = userRepository.findById(request.getVerifierId());
-        if(request != null || verifier != null)
+        if (request != null || verifier != null)
         {
             request.setVerifyNote(updateRequestVerifierModel.getVerifierNote());
             request.setIsVerified(updateRequestVerifierModel.getIsVerified());
@@ -911,7 +933,7 @@ public class RequestServiceImpl implements RequestService{
     @Override
     public boolean approveUpdate(Long requestId, Boolean decision) {
         Request request = requestRepository.findById(requestId).orElse(null);
-        if(request != null){
+        if (request != null){
             request.setIsApproved(decision);
             requestRepository.saveAndFlush(request);
             return true;
@@ -921,11 +943,146 @@ public class RequestServiceImpl implements RequestService{
 
     @Override
     public Request updateRequest(Request updatedRequest) throws Exception {
-        return null;
+        Request oldRequest = getById(updatedRequest.getRequestId());
+
+        if (oldRequest == null)
+            return null;
+
+        String errorMsg = "";
+
+        /* Check FK */
+        if (!oldRequest.getProjectId().equals(updatedRequest.getProjectId())) {
+            if (!projectService.existsById(updatedRequest.getProjectId())) {
+                errorMsg += "No Project found with Id: '" + updatedRequest.getProjectId()
+                        + "'. Which violate constraint: FK_Request_Project. ";
+            }
+        }
+        if (!oldRequest.getRequestTypeId().equals(updatedRequest.getRequestTypeId())) {
+            if (!requestTypeService.existsById(updatedRequest.getRequestTypeId())) {
+                errorMsg += "No RequestType found with Id: '" + updatedRequest.getRequestTypeId()
+                        + "'. Which violate constraint: FK_Request_RequestType. ";
+            }
+        }
+        if (!oldRequest.getRequesterId().equals(updatedRequest.getRequesterId())) {
+            if (!userService.existsById(updatedRequest.getRequesterId())) {
+                errorMsg += "No User (Requester) found with Id: '" + updatedRequest.getRequesterId()
+                        + "'. Which violate constraint: FK_Request_User_RequesterId. ";
+            }
+        }
+        if (oldRequest.getVerifierId() != null) {
+            if (!oldRequest.getVerifierId().equals(updatedRequest.getVerifierId())) {
+                if (!userService.existsById(updatedRequest.getVerifierId())) {
+                    errorMsg += "No User (Verifier) found with Id: '" + updatedRequest.getVerifierId()
+                            + "'. Which violate constraint: FK_Request_User_VerifierId. ";
+                }
+            }
+        } else {
+            if (!userService.existsById(updatedRequest.getVerifierId())) {
+                errorMsg += "No User (Verifier) found with Id: '" + updatedRequest.getVerifierId()
+                        + "'. Which violate constraint: FK_Request_User_VerifierId. ";
+            }
+        }
+        if (oldRequest.getUpdatedBy() != null) {
+            if (!oldRequest.getUpdatedBy().equals(updatedRequest.getUpdatedBy())) {
+                if (!userService.existsById(updatedRequest.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequest.getUpdatedBy()
+                            + "'. Which violate constraint: FK_Request_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (!userService.existsById(updatedRequest.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequest.getUpdatedBy()
+                        + "'. Which violate constraint: FK_Request_User_UpdatedBy. ";
+            }
+        }
+
+        /* Check duplicate */
+        if (requestRepository
+                .existsByRequestNameAndRequestIdIsNotAndIsDeletedIsFalse(
+                        updatedRequest.getRequestName(),
+                        updatedRequest.getRequestId())) {
+            errorMsg += "Already exists another Request with name: '" + updatedRequest.getRequestName() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) 
+            throw new IllegalArgumentException(errorMsg);
+
+        updatedRequest.setCreatedAt(oldRequest.getCreatedAt());
+        updatedRequest.setCreatedBy(oldRequest.getCreatedBy());
+
+        return requestRepository.saveAndFlush(updatedRequest);
     }
     @Override
     public RequestReadDTO updateRequestByDTO(RequestUpdateDTO updatedRequestDTO) throws Exception {
-        return null;
+        modelMapper.typeMap(RequestUpdateDTO.class, Request.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Request::setRequestDate);
+                    mapper.skip(Request::setVerifyDate);});
+
+        Request updatedRequest = modelMapper.map(updatedRequestDTO, Request.class);
+
+        /* Already check NOT NULL */
+        updatedRequest.setRequestDate(
+                LocalDateTime.parse(updatedRequestDTO.getRequestDate(), dateTimeFormatter));
+
+        if (updatedRequest.getRequestDate().isAfter(LocalDateTime.now())) 
+            throw new IllegalArgumentException("requestDate can't be in the future");
+        
+        if (updatedRequestDTO.getVerifyDate() != null) {
+            updatedRequest.setVerifyDate(
+                    LocalDateTime.parse(updatedRequestDTO.getRequestDate(), dateTimeFormatter));
+            
+            if (updatedRequest.getVerifyDate().isAfter(LocalDateTime.now()))
+                throw new IllegalArgumentException("verifyDate can't be in the future");
+            
+            if (updatedRequest.getVerifyDate().isBefore(updatedRequest.getRequestDate())) 
+                throw new IllegalArgumentException("verifyDate is before requestDate");
+        }
+
+        updatedRequest = updateRequest(updatedRequest);
+
+        if (updatedRequest == null)
+            return null;
+
+        long updatedRequestId = updatedRequest.getRequestId();
+
+        /* (If change) Update/Create associated RequestDetail; Set required FK requestId */
+        List<RequestDetailUpdateDTO> requestDetailDTOList = updatedRequestDTO.getRequestDetailList();
+        if (requestDetailDTOList != null) {
+            requestDetailDTOList =
+                    requestDetailDTOList.stream()
+                            .peek(requestDetailDTO -> requestDetailDTO.setRequestId(updatedRequestId))
+                            .collect(Collectors.toList());
+
+            /* TODO: to use later when login done
+            modelMapper.typeMap(RequestDetailUpdateDTO.class, RequestDetailCreateDTO.class)
+                    .addMappings(mapper -> {
+                        mapper.map(RequestDetailUpdateDTO::getUpdatedBy, RequestDetailCreateDTO::setCreatedBy);});*/
+
+            List<RequestDetailCreateDTO> newRequestDetailDTOList = new ArrayList<>();
+            List<RequestDetailUpdateDTO> updatedRequestDetailDTOList = new ArrayList<>();
+
+            for (RequestDetailUpdateDTO updatedRequestDetailDTO : requestDetailDTOList) {
+                if (updatedRequestDetailDTO.getRequestDetailId() <= 0) {
+                    newRequestDetailDTOList.add(
+                            modelMapper.map(updatedRequestDetailDTO, RequestDetailCreateDTO.class));
+                } else {
+                    updatedRequestDetailDTOList.add(updatedRequestDetailDTO);
+                }
+            }
+
+            /* Create associated RequestDetail */
+            if (!newRequestDetailDTOList.isEmpty()) {
+                requestDetailService.createBulkRequestDetailByDTOList(newRequestDetailDTOList);
+            }
+
+            /* Update associated RequestDetail */
+            if (!updatedRequestDetailDTOList.isEmpty()) {
+                requestDetailService.updateBulkRequestDetailByDTOList(updatedRequestDetailDTOList);
+            }
+        }
+
+        return fillDTO(updatedRequest);
     }
 
     /* DELETE */
@@ -1037,9 +1194,11 @@ public class RequestServiceImpl implements RequestService{
     private RequestReadDTO fillDTO(Request request) throws Exception{
         RequestReadDTO requestDTO = modelMapper.map(request, RequestReadDTO.class);
 
+        /* Get associated RequestType */
         requestDTO.setRequestType(
                 requestTypeService.getDTOById(request.getRequestTypeId()));
 
+        /* Get associated RequestDetail */
         requestDTO.setRequestDetailList(
                 requestDetailService.getAllDTOByRequestId(request.getRequestTypeId()));
 
@@ -1077,5 +1236,4 @@ public class RequestServiceImpl implements RequestService{
                     return requestDTO;})
                 .collect(Collectors.toList());
     }
-
 }

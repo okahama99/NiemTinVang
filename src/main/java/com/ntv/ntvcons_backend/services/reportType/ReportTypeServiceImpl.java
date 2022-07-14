@@ -5,12 +5,12 @@ import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeUpdateDTO;
 import com.ntv.ntvcons_backend.entities.ReportType;
 import com.ntv.ntvcons_backend.repositories.ReportTypeRepository;
+import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -26,20 +26,29 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     private ReportTypeRepository reportTypeRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private UserService userService;
 
     /* CREATE */
     @Override
     public ReportType createReportType(ReportType newReportType) throws Exception {
         String errorMsg = "";
 
-        /* Check duplicate */
-        if (reportTypeRepository.existsByReportTypeNameAndIsDeletedIsFalse(newReportType.getReportTypeName())){
-            errorMsg += "Already exists another ReportType with name: '" + newReportType.getReportTypeName() +"'. ";
+        /* Check FK */
+        if (userService.existsById(newReportType.getCreatedBy())){
+            errorMsg += "No User (CreatedBy) found with Id: '" + newReportType.getCreatedBy()
+                    + "'. Which violate constraint: FK_ReportType_User_CreatedBy. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
-            throw new IllegalArgumentException(errorMsg);
+        /* Check duplicate */
+        if (reportTypeRepository.existsByReportTypeNameAndIsDeletedIsFalse(newReportType.getReportTypeName())){
+            errorMsg += "Already exists another ReportType with name: '" 
+                    + newReportType.getReportTypeName() + "'. ";
         }
+
+        if (!errorMsg.trim().isEmpty()) 
+            throw new IllegalArgumentException(errorMsg);
 
         return reportTypeRepository.saveAndFlush(newReportType);
     }
@@ -49,45 +58,32 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
         newReportType = createReportType(newReportType);
 
-        return modelMapper.map(newReportType, ReportTypeReadDTO.class);
+        return fillDTO(newReportType);
     }
 
     /* READ */
     @Override
-    public List<ReportType> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        Pageable paging;
-        if (sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        } else {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
+    public Page<ReportType> getPageAll(Pageable paging) throws Exception {
         Page<ReportType> reportTypePage = reportTypeRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (reportTypePage.isEmpty()) {
+        if (reportTypePage.isEmpty()) 
             return null;
-        }
 
-        return reportTypePage.getContent();
+        return reportTypePage;
     }
     @Override
-    public List<ReportTypeReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        List<ReportType> reportTypeList = getAll(pageNo, pageSize, sortBy, sortType);
+    public List<ReportTypeReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
+        Page<ReportType> reportTypePage = getPageAll(paging);
 
-        if (reportTypeList != null && !reportTypeList.isEmpty()) {
-            int totalPage = (int) Math.ceil((double) reportTypeList.size() / pageSize);
+        if (reportTypePage == null)
+            return null;
 
-            return reportTypeList.stream()
-                    .map(reportType -> {
-                        ReportTypeReadDTO reportTypeReadDTO =
-                                modelMapper.map(reportType, ReportTypeReadDTO.class);
-                        reportTypeReadDTO.setTotalPage(totalPage);
-                        return reportTypeReadDTO;})
-                    .collect(Collectors.toList());
+        List<ReportType> reportTypeList = reportTypePage.getContent();
 
-        } 
-            
-        return null;
+        if (reportTypePage.isEmpty())
+            return null;
+
+        return fillAllDTO(reportTypeList, reportTypePage.getTotalPages());
     }
 
     @Override
@@ -104,11 +100,10 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     public ReportTypeReadDTO getDTOById(long reportTypeId) throws Exception {
         ReportType reportType = getById(reportTypeId);
 
-        if (reportType == null) {
+        if (reportType == null) 
             return null;
-        }
 
-        return modelMapper.map(reportType, ReportTypeReadDTO.class);
+        return fillDTO(reportType);
     }
 
     @Override
@@ -120,9 +115,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         List<ReportType> reportTypeList =
                 reportTypeRepository.findAllByReportTypeIdInAndIsDeletedIsFalse(reportTypeIdCollection);
 
-        if (reportTypeList.isEmpty()) {
+        if (reportTypeList.isEmpty()) 
             return null;
-        }
 
         return reportTypeList;
     }
@@ -130,35 +124,36 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     public List<ReportTypeReadDTO> getAllDTOByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
         List<ReportType> reportTypeList = getAllByIdIn(reportTypeIdCollection);
 
-        if (reportTypeList == null) {
+        if (reportTypeList == null) 
             return null;
-        }
 
-        return reportTypeList.stream()
-                .map(reportType -> modelMapper.map(reportType, ReportTypeReadDTO.class))
-                .collect(Collectors.toList());
-    }
-    @Override
-    public Map<Long, ReportType> mapReportTypeIdReportTypeByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
-        List<ReportType> reportTypeList = getAllByIdIn(reportTypeIdCollection);
-
-        if (reportTypeList == null) {
-            return new HashMap<>();
-        }
-
-        return reportTypeList.stream()
-                .collect(Collectors.toMap(ReportType::getReportTypeId, Function.identity()));
+        return fillAllDTO(reportTypeList, null);
     }
     @Override
     public Map<Long, ReportTypeReadDTO> mapReportTypeIdReportTypeDTOByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
         List<ReportTypeReadDTO> reportTypeDTOList = getAllDTOByIdIn(reportTypeIdCollection);
 
-        if (reportTypeDTOList == null) {
+        if (reportTypeDTOList == null) 
             return new HashMap<>();
-        }
 
         return reportTypeDTOList.stream()
                 .collect(Collectors.toMap(ReportTypeReadDTO::getReportTypeId, Function.identity()));
+    }
+
+    @Override
+    public ReportType getByReportTypeName(String reportTypeName) throws Exception {
+        return reportTypeRepository
+                .findByReportTypeNameAndIsDeletedIsFalse(reportTypeName)
+                .orElse(null);
+    }
+    @Override
+    public ReportTypeReadDTO getDTOByReportTypeName(String reportTypeName) throws Exception {
+        ReportType reportType = getByReportTypeName(reportTypeName);
+
+        if (reportType == null)
+            return null;
+
+        return fillDTO(reportType);
     }
 
     @Override
@@ -166,9 +161,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         List<ReportType> reportTypeList =
                 reportTypeRepository.findAllByReportTypeNameContainsAndIsDeletedIsFalse(reportTypeName);
 
-        if (reportTypeList.isEmpty()) {
+        if (reportTypeList.isEmpty()) 
             return null;
-        }
 
         return reportTypeList;
     }
@@ -176,38 +170,51 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     public List<ReportTypeReadDTO> getAllDTOByReportTypeNameContains(String reportTypeName) throws Exception {
         List<ReportType> reportTypeList = getAllByReportTypeNameContains(reportTypeName);
 
-        if (reportTypeList == null) {
+        if (reportTypeList == null) 
             return null;
-        }
 
-        return reportTypeList.stream()
-                .map(reportType -> modelMapper.map(reportType, ReportTypeReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(reportTypeList, null);
     }
 
     /* UPDATE */
     @Override
     public ReportType updateReportType(ReportType updatedReportType) throws Exception {
-        ReportType reportType = getById(updatedReportType.getReportTypeId());
+        ReportType oldReportType = getById(updatedReportType.getReportTypeId());
 
-        if (reportType == null) {
-            return null;
-            /* Not found by Id, return null */
-        }
+        if (oldReportType == null) 
+            return null; /* Not found by Id, return null */
 
         String errorMsg = "";
+
+        /* Check FK */
+        if (oldReportType.getUpdatedBy() != null) {
+            if (!oldReportType.getUpdatedBy().equals(updatedReportType.getUpdatedBy())) {
+                if (userService.existsById(updatedReportType.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReportType.getUpdatedBy()
+                            + "'. Which violate constraint: FK_ReportType_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (userService.existsById(updatedReportType.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReportType.getUpdatedBy()
+                        + "'. Which violate constraint: FK_ReportType_User_UpdatedBy. ";
+            }
+        }
 
         /* Check duplicate */
         if (reportTypeRepository
                 .existsByReportTypeNameAndReportTypeIdIsNotAndIsDeletedIsFalse(
                         updatedReportType.getReportTypeName(),
                         updatedReportType.getReportTypeId())) {
-            errorMsg += "Already exists another ReportType with name: '" + updatedReportType.getReportTypeName() +"'. ";
+            errorMsg += "Already exists another ReportType with name: '"
+                    + updatedReportType.getReportTypeName() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
+
+        updatedReportType.setCreatedAt(oldReportType.getCreatedAt());
+        updatedReportType.setCreatedBy(oldReportType.getCreatedBy());
 
         return reportTypeRepository.saveAndFlush(updatedReportType);
     }
@@ -217,9 +224,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
         updatedReportType = updateReportType(updatedReportType);
 
-        if (updatedReportType == null) {
+        if (updatedReportType == null) 
             return null;
-        }
 
         return modelMapper.map(updatedReportType, ReportTypeReadDTO.class);
     }
@@ -238,5 +244,22 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         reportTypeRepository.saveAndFlush(reportType);
 
         return true;
+    }
+
+    /* Utils */
+    private ReportTypeReadDTO fillDTO(ReportType reportType) throws Exception {
+        return modelMapper.map(reportType, ReportTypeReadDTO.class);
+    }
+
+    private List<ReportTypeReadDTO> fillAllDTO(List<ReportType> reportTypeList, Integer totalPage) throws Exception {
+        return reportTypeList.stream()
+                .map(reportType -> {
+                    ReportTypeReadDTO reportTypeDTO =
+                            modelMapper.map(reportType, ReportTypeReadDTO.class);
+
+                    reportTypeDTO.setTotalPage(totalPage);
+
+                    return reportTypeDTO;})
+                .collect(Collectors.toList());
     }
 }

@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.dtos.project;
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateOptionDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import io.swagger.annotations.ApiModelProperty;
@@ -29,7 +30,9 @@ public class ProjectUpdateDTO extends BaseUpdateDTO {
     @NotNull(message = "projectName REQUIRED for update")
     private String projectName;
 
-    private LocationUpdateOptionDTO location;
+    /* TODO: reuse later
+    private LocationUpdateOptionDTO location;*/
+    private LocationUpdateDTO location;
 
     private BlueprintUpdateDTO blueprint;
 

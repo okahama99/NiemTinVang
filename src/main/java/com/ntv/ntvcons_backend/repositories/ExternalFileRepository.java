@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long> {
-    Page<ExternalFile> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<ExternalFile> findAllByIsDeletedIsFalse(Pageable paging);
 
     /* Id */
     Optional<ExternalFile> findByFileIdAndIsDeletedIsFalse(long fileId);

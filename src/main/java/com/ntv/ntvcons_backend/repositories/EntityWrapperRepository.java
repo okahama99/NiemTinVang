@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface EntityWrapperRepository extends JpaRepository<EntityWrapper, Long> {
-    Page<EntityWrapper> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<EntityWrapper> findAllByIsDeletedIsFalse(Pageable paging);
 
     /* Id */
     Optional<EntityWrapper> findByEntityWrapperIdAndIsDeletedIsFalse(long entityWrapperId);

@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ExternalFileEntityWrapperPairingRepository
         extends JpaRepository<ExternalFileEntityWrapperPairing, Long> {
-    Page<ExternalFileEntityWrapperPairing> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<ExternalFileEntityWrapperPairing> findAllByIsDeletedIsFalse(Pageable paging);
 
 
     /* Id */

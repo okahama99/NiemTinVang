@@ -10,8 +10,8 @@
 //@Repository
 //public interface ChatRepository extends PagingAndSortingRepository<ChatMessage, Long> {
 //
-//    Page<ChatMessage> findByChatGroupIdAndStatus(Long chatGroupId, Status status, Pageable pageable);
+//    Page<ChatMessage> findByChatGroupIdAndStatus(Long chatGroupId, Status status, Pageable paging);
 //
-//    Page<ChatMessage> findByChatGroupIdAndStatusIsNot(Long chatRoom, Status status, Pageable pageable);
+//    Page<ChatMessage> findByChatGroupIdAndStatusIsNot(Long chatRoom, Status status, Pageable paging);
 //
 //}

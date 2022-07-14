@@ -40,23 +40,23 @@ public interface BlueprintService { /* TODO: throws Exception for controller to 
     List<BlueprintReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection)throws Exception;
     Map<Long, BlueprintReadDTO> mapProjectIdBlueprintDTOByProjectIdIn(Collection<Long> projectIdCollection)throws Exception;
 
-    Blueprint getByBlueprintName(String blueprintName);
-    BlueprintReadDTO getDTOByBlueprintName(String blueprintName);
+    Blueprint getByBlueprintName(String blueprintName) throws Exception;
+    BlueprintReadDTO getDTOByBlueprintName(String blueprintName) throws Exception;
 
-    List<Blueprint> getAllByBlueprintNameContains(String blueprintName);
-    List<BlueprintReadDTO> getAllDTOByBlueprintNameContains(String blueprintName);
-    Page<Blueprint> getPageAllByBlueprintNameContains(Pageable paging, String blueprintName);
-    List<BlueprintReadDTO> getAllDTOInPagingByBlueprintNameContains(Pageable paging, String blueprintName);
+    List<Blueprint> getAllByBlueprintNameContains(String blueprintName) throws Exception;
+    List<BlueprintReadDTO> getAllDTOByBlueprintNameContains(String blueprintName) throws Exception;
+    Page<Blueprint> getPageAllByBlueprintNameContains(Pageable paging, String blueprintName) throws Exception;
+    List<BlueprintReadDTO> getAllDTOInPagingByBlueprintNameContains(Pageable paging, String blueprintName) throws Exception;
 
-    List<Blueprint> getAllByDesignerName(String designerName);
-    List<BlueprintReadDTO> getAllDTOByDesignerName(String designerName);
-    Page<Blueprint> getPageAllByDesignerName(Pageable paging, String designerName);
-    List<BlueprintReadDTO> getAllDTOInPagingByDesignerName(Pageable paging, String designerName);
+    List<Blueprint> getAllByDesignerName(String designerName) throws Exception;
+    List<BlueprintReadDTO> getAllDTOByDesignerName(String designerName) throws Exception;
+    Page<Blueprint> getPageAllByDesignerName(Pageable paging, String designerName) throws Exception;
+    List<BlueprintReadDTO> getAllDTOInPagingByDesignerName(Pageable paging, String designerName) throws Exception;
 
-    List<Blueprint> getAllByDesignerNameContains(String designerName);
-    List<BlueprintReadDTO> getAllDTOByDesignerNameContains(String designerName);
-    Page<Blueprint> getPageAllByDesignerNameContains(Pageable paging, String designerName);
-    List<BlueprintReadDTO> getAllDTOInPagingByDesignerNameContains(Pageable paging, String designerName);
+    List<Blueprint> getAllByDesignerNameContains(String designerName) throws Exception;
+    List<BlueprintReadDTO> getAllDTOByDesignerNameContains(String designerName) throws Exception;
+    Page<Blueprint> getPageAllByDesignerNameContains(Pageable paging, String designerName) throws Exception;
+    List<BlueprintReadDTO> getAllDTOInPagingByDesignerNameContains(Pageable paging, String designerName) throws Exception;
 
     List<Blueprint> getAllByEstimatedCostBetween(double from, double to);
     List<BlueprintReadDTO> getAllDTOByEstimatedCostBetween(double from, double to);
