@@ -6,7 +6,9 @@ import com.ntv.ntvcons_backend.dtos.role.RoleCreateDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleUpdateDTO;
 import com.ntv.ntvcons_backend.services.role.RoleService;
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +22,8 @@ import java.util.List;
 public class RoleController {
     @Autowired
     private RoleService roleService;
+    @Autowired
+    private ThanhUtil thanhUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -30,6 +34,10 @@ public class RoleController {
             RoleReadDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
 
             return ResponseEntity.ok().body(newRoleDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found User by Id (createdBy), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Role", e.getMessage()));
@@ -45,7 +53,8 @@ public class RoleController {
                                          @RequestParam boolean sortTypeAsc) {
         try {
             List<RoleReadDTO> roleDTOList =
-                    roleService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
+                    roleService.getAllDTOInPaging(
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (roleDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found");
@@ -65,8 +74,59 @@ public class RoleController {
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.ROLE searchType) {
-        // TODO:
-        return null;
+        try {
+            RoleReadDTO roleDTO;
+
+            switch (searchType) {
+                case BY_ID:
+                    roleDTO = roleService.getDTOById(Long.parseLong(searchParam));
+
+                    if (roleDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Role found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_NAME:
+                    roleDTO = roleService.getDTOByRoleName(searchParam);
+
+                    if (roleDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Role found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+                    
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Role");
+            }
+
+            return ResponseEntity.ok().body(roleDTO);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for Role with ";
+
+            switch (searchType) {
+                case BY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
+                    break;
+
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     //@PreAuthorize("hasAnyRole('Admin')")
@@ -78,11 +138,14 @@ public class RoleController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            
             List<RoleReadDTO> roleDTOList;
 
             switch (searchType) {
                 case BY_NAME_CONTAINS:
-                    roleDTOList = roleService.getAllDTOByRoleNameContains(searchParam);
+                    roleDTOList =
+                            roleService.getAllDTOInPagingByRoleNameContains(paging, searchParam);
 
                     if (roleDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -131,6 +194,10 @@ public class RoleController {
             }
 
             return ResponseEntity.ok().body(updatedRoleDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found User by Id (updatedBy), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Role with Id: '" + roleDTO.getRoleId() + "'. ",

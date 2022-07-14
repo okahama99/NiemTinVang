@@ -36,7 +36,7 @@ public class ReportCreateDTO extends BaseCreateDTO {
     @NotNull(message = "reportName REQUIRED for create")
     private String reportName;
 
-    @ApiModelProperty(example = "Chuẩn bị xây tường, ...") /* Hint for Swagger */
+    @ApiModelProperty(example = "Chuẩn bị xây tường, ...", notes = "Nullable") /* Hint for Swagger */
     private String reportDesc;
 
     /** yyyy-MM-dd HH:mm */

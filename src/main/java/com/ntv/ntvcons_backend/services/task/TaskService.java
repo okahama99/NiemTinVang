@@ -5,6 +5,8 @@ import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Task;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -17,8 +19,8 @@ public interface TaskService {
     TaskReadDTO createTaskByDTO(TaskCreateDTO newTaskDTO) throws Exception;
 
     /* READ */
-    List<Task> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
-    List<TaskReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
+    Page<Task> getPageAll(Pageable paging) throws Exception;
+    List<TaskReadDTO> getAllDTOInPaging(Pageable paging) throws Exception;
 
     boolean existsById(long taskId) throws Exception;
     Task getById(long taskId) throws Exception;
@@ -27,18 +29,28 @@ public interface TaskService {
     boolean existsAllByIdIn(Collection<Long> taskIdCollection) throws Exception;
     List<Task> getAllByIdIn(Collection<Long> taskIdCollection) throws Exception;
     List<TaskReadDTO> getAllDTOByIdIn(Collection<Long> taskIdCollection) throws Exception;
-    Map<Long, Task> mapTaskIdTaskByIdIn(Collection<Long> taskIdCollection) throws Exception;
     Map<Long, TaskReadDTO> mapTaskIdTaskDTOByIdIn(Collection<Long> taskIdCollection) throws Exception;
 
     List<Task> getAllByProjectId(long projectId) throws Exception;
     List<TaskReadDTO> getAllDTOByProjectId(long projectId) throws Exception;
+    Page<Task> getPageAllByProjectId(Pageable paging, long projectId) throws Exception;
+    List<TaskReadDTO> getAllDTOInPagingByProjectId(Pageable paging, long projectId) throws Exception;
 
     List<Task> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
     List<TaskReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
     Map<Long, List<TaskReadDTO>> mapProjectIdTaskDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+    Page<Task> getPageAllByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception;
+    List<TaskReadDTO> getAllDTOByInPagingProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception;
+
+    List<Task> getAllByTaskName(String taskName) throws Exception;
+    List<TaskReadDTO> getAllDTOByTaskName(String taskName) throws Exception;
+    Page<Task> getPageAllByTaskName(Pageable paging, String taskName) throws Exception;
+    List<TaskReadDTO> getAllDTOInPagingByTaskName(Pageable paging, String taskName) throws Exception;
 
     List<Task> getAllByTaskNameContains(String taskName) throws Exception;
     List<TaskReadDTO> getAllDTOByTaskNameContains(String taskName) throws Exception;
+    Page<Task> getPageAllByTaskNameContains(Pageable paging, String taskName) throws Exception;
+    List<TaskReadDTO> getAllDTOInPagingByTaskNameContains(Pageable paging, String taskName) throws Exception;
 
     List<Task> getAllByPlanStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;
     List<TaskReadDTO> getAllDTOByPlanStartDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception;

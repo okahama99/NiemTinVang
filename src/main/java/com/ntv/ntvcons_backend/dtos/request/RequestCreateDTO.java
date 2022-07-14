@@ -35,13 +35,14 @@ public class RequestCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     @NotNull(message = "requestDate REQUIRED for create")
-    private LocalDateTime requestDate;
+    private String requestDate;
 
     @ApiModelProperty(example = "Yêu cầu chi tiêu xxx") /* Hint for Swagger */
     @Size(max = 100, message = "requestDesc max length: 100 characters")
     @NotNull(message = "requestDesc REQUIRED for create")
     private String requestDesc;
 
+    @ApiModelProperty(notes = "NOT NULL; size >= 1") /* Hint for Swagger */
     @Size(min = 1, message = "Needed at least 1 detail")
     @NotNull(message = "requestDetailList REQUIRED for create")
     private List<RequestDetailCreateDTO> requestDetailList;

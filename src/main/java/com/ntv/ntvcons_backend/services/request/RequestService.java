@@ -34,6 +34,7 @@ public interface RequestService {
     Request getById(long requestId) throws Exception;
     RequestReadDTO getDTOById(long requestId) throws Exception;
 
+    boolean existsAllByIdIn(Collection<Long> requestIdCollection) throws Exception;
     List<Request> getAllByIdIn(Collection<Long> requestIdCollection) throws Exception;
     List<RequestReadDTO> getAllDTOByIdIn(Collection<Long> requestIdCollection) throws Exception;
 

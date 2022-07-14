@@ -4,6 +4,8 @@ import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
 import com.ntv.ntvcons_backend.entities.TaskReport;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,8 +19,8 @@ public interface TaskReportService {
     List<TaskReportReadDTO> createBulkTaskReportByDTOList(List<TaskReportCreateDTO> newTaskReportDTOList) throws Exception;
 
     /* READ */
-    List<TaskReport> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
-    List<TaskReportReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
+    Page<TaskReport> getPageAll(Pageable paging) throws Exception;
+    List<TaskReportReadDTO> getAllDTOInPaging(Pageable paging) throws Exception;
 
     boolean existsById(long taskReportId) throws Exception;
     TaskReport getById(long taskReportId) throws Exception;
@@ -32,7 +34,6 @@ public interface TaskReportService {
 
     List<TaskReport> getAllByReportIdIn(Collection<Long> reportIdCollection) throws Exception;
     List<TaskReportReadDTO> getAllDTOByReportIdIn(Collection<Long> reportIdCollection) throws Exception;
-    Map<Long, List<TaskReport>> mapReportIdTaskReportListByReportIdIn(Collection<Long> reportIdCollection) throws Exception;
     Map<Long, List<TaskReportReadDTO>> mapReportIdTaskReportDTOListByReportIdIn(Collection<Long> reportIdCollection) throws Exception;
 
     List<TaskReport> getAllByTaskId(long taskId) throws Exception;
@@ -40,8 +41,7 @@ public interface TaskReportService {
 
     List<TaskReport> getAllByTaskIdIn(Collection<Long> taskIdCollection) throws Exception;
     List<TaskReportReadDTO> getAllDTOByTaskIdIn(Collection<Long> taskIdCollection) throws Exception;
-    Map<Long, List<TaskReport>> mapTaskIdTaskReportListByTaskIdIn(Collection<Long> reportIdCollection) throws Exception;
-//    Map<Long, List<TaskReportReadDTO>> mapTaskIdTaskReportDTOListByTaskIdIn(Collection<Long> reportIdCollection) throws Exception;
+    Map<Long, List<TaskReportReadDTO>> mapTaskIdTaskReportDTOListByTaskIdIn(Collection<Long> reportIdCollection) throws Exception;
 
     /* UPDATE */
     TaskReport updateTaskReport(TaskReport updatedTaskReport) throws Exception;

@@ -65,9 +65,8 @@ public class UserServiceImpl implements UserService{
                     + "', email: '" + newUser.getEmail() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return userRepository.saveAndFlush(newUser);
     }
@@ -97,9 +96,8 @@ public class UserServiceImpl implements UserService{
 
         Page<User> userPage = userRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (userPage.isEmpty()) {
+        if (userPage.isEmpty()) 
             return null;
-        }
 
         return userPage;
     }
@@ -113,9 +111,8 @@ public class UserServiceImpl implements UserService{
 
         List<User> userList = userPage.getContent();
 
-        if (userList.isEmpty()) {
+        if (userList.isEmpty()) 
             return null;
-        }
 
         int totalPage = userPage.getTotalPages();
 
@@ -173,9 +170,8 @@ public class UserServiceImpl implements UserService{
     public List<User> getAllByIdIn(Collection<Long> userIdCollection) throws Exception {
         List<User> userList = userRepository.findAllByUserIdInAndIsDeletedIsFalse(userIdCollection);
 
-        if (!userList.isEmpty()) {
+        if (!userList.isEmpty()) 
             return null;
-        }
 
         return userList;
     }
@@ -183,9 +179,8 @@ public class UserServiceImpl implements UserService{
     public List<UserReadDTO> getAllDTOByIdIn(Collection<Long> userIdCollection) throws Exception {
         List<User> userList = getAllByIdIn(userIdCollection);
 
-        if (userList == null) {
+        if (userList == null) 
             return null;
-        }
 
         /* Get associated Role */
         Map<Long, RoleReadDTO> roleIdRoleDTOMap =
@@ -207,9 +202,8 @@ public class UserServiceImpl implements UserService{
     public Map<Long, UserReadDTO> mapUserIdUserDTOByIdIn(Collection<Long> userIdCollection) throws Exception {
         List<UserReadDTO> userDTOList = getAllDTOByIdIn(userIdCollection);
 
-        if (userDTOList == null) {
+        if (userDTOList == null) 
             return new HashMap<>();
-        }
 
         return userDTOList.stream()
                 .collect(Collectors.toMap(UserReadDTO::getUserId, Function.identity()));
@@ -219,9 +213,8 @@ public class UserServiceImpl implements UserService{
     public List<User> getAllByRoleId(long roleId) throws Exception {
         List<User> userList = userRepository.findAllByRoleIdAndIsDeletedIsFalse(roleId);
 
-        if (userList.isEmpty()) {
+        if (userList.isEmpty()) 
             return null;
-        }
 
         return userList;
     }
@@ -229,9 +222,8 @@ public class UserServiceImpl implements UserService{
     public List<UserReadDTO> getAllDTOByRoleId(long roleId) throws Exception {
         List<User> userList = getAllByRoleId(roleId);
 
-        if (userList == null) {
+        if (userList == null) 
             return null;
-        }
 
         /* Get associated Role */
         RoleReadDTO roleDTO = roleService.getDTOById(roleId);
@@ -251,9 +243,8 @@ public class UserServiceImpl implements UserService{
     public User updateUser(User updatedUser) throws Exception {
         User oldUser = getById(updatedUser.getUserId());
 
-        if (oldUser == null) {
+        if (oldUser == null) 
             return null;
-        }
 
         String errorMsg = "";
 
@@ -285,9 +276,8 @@ public class UserServiceImpl implements UserService{
                     + "', email: '" + updatedUser.getEmail() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return userRepository.saveAndFlush(updatedUser);
     }

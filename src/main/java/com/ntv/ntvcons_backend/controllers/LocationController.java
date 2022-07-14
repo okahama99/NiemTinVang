@@ -158,9 +158,9 @@ public class LocationController {
 //                                                @RequestParam int pageNo,
 //                                                @RequestParam int pageSize,
 //                                                @RequestParam String sortBy,
-//                                                @RequestParam boolean sortTypeAscAsc) {
+//                                                @RequestParam boolean sortTypeAsc) {
 //        try {
-//            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAscAsc);
+//            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 //
 //            List<LocationReadDTO> locationDTOList;
 //

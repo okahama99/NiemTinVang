@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Long> {
-    Page<TaskAssignment> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<TaskAssignment> findAllByIsDeletedIsFalse(Pageable paging);
 
 
     /* Id */
@@ -27,16 +27,21 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
     /* taskId */
     Optional<TaskAssignment> findByTaskIdAndIsDeletedIsFalse(long taskId);
     List<TaskAssignment> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
+    Page<TaskAssignment> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection, Pageable paging);
 
 
     /* assignerId */
     List<TaskAssignment> findAllByAssignerIdAndIsDeletedIsFalse(long assignerId);
+    Page<TaskAssignment> findAllByAssignerIdAndIsDeletedIsFalse(long assignerId, Pageable paging);
     List<TaskAssignment> findAllByAssignerIdInAndIsDeletedIsFalse(Collection<Long> assignerIdCollection);
+    Page<TaskAssignment> findAllByAssignerIdInAndIsDeletedIsFalse(Collection<Long> assignerIdCollection, Pageable paging);
 
 
     /* assigneeId */
     List<TaskAssignment> findAllByAssigneeIdAndIsDeletedIsFalse(long assigneeId);
+    Page<TaskAssignment> findAllByAssigneeIdAndIsDeletedIsFalse(long assigneeId, Pageable paging);
     List<TaskAssignment> findAllByAssigneeIdInAndIsDeletedIsFalse(Collection<Long> assigneeIdCollection);
+    Page<TaskAssignment> findAllByAssigneeIdInAndIsDeletedIsFalse(Collection<Long> assigneeIdCollection, Pageable paging);
     /* taskId & assignerId & assigneeId */
     boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndIsDeletedIsFalse(long taskId, long assignerId, long assigneeId);
 

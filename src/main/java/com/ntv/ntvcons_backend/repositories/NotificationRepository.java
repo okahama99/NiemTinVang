@@ -10,7 +10,7 @@
 //@Repository
 //public interface NotificationRepository extends JpaRepository<Notification, Long> {
 //
-//    Page<Notification> findByUser(User user, Pageable pageable);
+//    Page<Notification> findByUser(User user, Pageable paging);
 //
 //    Notification findByNotificationTriggerId(Long notificationTriggerId);
 //}

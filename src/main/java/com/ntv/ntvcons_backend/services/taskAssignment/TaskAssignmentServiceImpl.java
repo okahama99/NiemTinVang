@@ -20,10 +20,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class TaskAssignmentServiceImpl implements TaskAssignmentService{
+public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Autowired
     private TaskAssignmentRepository taskAssignmentRepository;
     @Autowired
@@ -74,95 +75,47 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
                     + newTaskAssignment.getAssigneeId() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return taskAssignmentRepository.saveAndFlush(newTaskAssignment);
     }
     @Override
     public TaskAssignmentReadDTO createTaskAssignmentByDTO(TaskAssignmentCreateDTO newTaskAssignmentDTO) throws Exception {
+        /* TODO: to use later or skip forever
         modelMapper.typeMap(TaskAssignmentCreateDTO.class, TaskAssignment.class)
-                .addMappings(mapper -> mapper.skip(TaskAssignment::setAssignDate));
+                .addMappings(mapper -> mapper.skip(TaskAssignment::setAssignDate));*/
 
         TaskAssignment newTaskAssignment = modelMapper.map(newTaskAssignmentDTO, TaskAssignment.class);
 
-        if (newTaskAssignmentDTO.getAssignDate() != null) {
-            newTaskAssignment.setAssignDate(
-                    LocalDateTime.parse(newTaskAssignmentDTO.getAssignDate(), dateTimeFormatter));
-        } else { /* if null, set current datetime */
-            newTaskAssignment.setAssignDate(LocalDateTime.now());
-        }
-
         newTaskAssignment = createTaskAssignment(newTaskAssignment);
 
-        TaskAssignmentReadDTO taskAssignmentDTO =
-                modelMapper.map(newTaskAssignment, TaskAssignmentReadDTO.class);
-
-        /* Get associated User (Assigner) */
-        taskAssignmentDTO.setAssigner(userService.getDTOById(newTaskAssignment.getAssignerId()));
-
-        /* Get associated User (Assignee) */
-        taskAssignmentDTO.setAssignee(userService.getDTOById(newTaskAssignment.getAssigneeId()));
-
-        return taskAssignmentDTO;
+        return fillDTO(newTaskAssignment);
     }
 
     /* READ */
     @Override
-    public Page<TaskAssignment> getPageAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        Pageable paging;
-        if (sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        } else {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
+    public Page<TaskAssignment> getPageAll(Pageable paging) throws Exception {
         Page<TaskAssignment> taskAssignmentPage = taskAssignmentRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (taskAssignmentPage.isEmpty()) {
+        if (taskAssignmentPage.isEmpty()) 
             return null;
-        }
 
         return taskAssignmentPage;
     }
     @Override
-    public List<TaskAssignmentReadDTO> getAllDTOInPaging(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        Page<TaskAssignment> taskAssignmentPage = getPageAll(pageNo, pageSize, sortBy, sortType);
+    public List<TaskAssignmentReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
+        Page<TaskAssignment> taskAssignmentPage = getPageAll(paging);
 
-        if (taskAssignmentPage == null) {
+        if (taskAssignmentPage == null) 
             return null;
-        }
 
         List<TaskAssignment> taskAssignmentList = taskAssignmentPage.getContent();
 
-        if (taskAssignmentList.isEmpty()) {
+        if (taskAssignmentList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = taskAssignmentPage.getTotalPages();
-
-        Set<Long> userIdSet = new HashSet<>();
-
-        for (TaskAssignment taskAssignment : taskAssignmentList) {
-            userIdSet.add(taskAssignment.getAssignerId());
-            userIdSet.add(taskAssignment.getAssigneeId());
-        }
-
-        /* Get associated User (Assigner & Assignee) */
-        Map<Long, UserReadDTO> userIdUserDTOMap = userService.mapUserIdUserDTOByIdIn(userIdSet);
-
-        return taskAssignmentList.stream()
-                .map(taskAssignment -> {
-                    TaskAssignmentReadDTO TaskAssignmentDTO =
-                            modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
-
-                    TaskAssignmentDTO.setAssigner(userIdUserDTOMap.get(taskAssignment.getAssignerId()));
-                    TaskAssignmentDTO.setAssignee(userIdUserDTOMap.get(taskAssignment.getAssigneeId()));
-                    TaskAssignmentDTO.setTotalPage(totalPage);
-
-                    return TaskAssignmentDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(taskAssignmentList, taskAssignmentPage.getTotalPages());
     }
 
     @Override
@@ -175,19 +128,10 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     public TaskAssignmentReadDTO getDTOById(long assignmentId) throws Exception {
         TaskAssignment taskAssignment = getById(assignmentId);
 
-        if (taskAssignment == null) {
+        if (taskAssignment == null) 
             return null;
-        }
 
-        TaskAssignmentReadDTO taskAssignmentDTO = modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
-
-        /* Get associated User (Assigner) */
-        taskAssignmentDTO.setAssigner(userService.getDTOById(taskAssignment.getAssignerId()));
-
-        /* Get associated User (Assignee) */
-        taskAssignmentDTO.setAssigner(userService.getDTOById(taskAssignment.getAssignerId()));
-
-        return taskAssignmentDTO;
+        return fillDTO(taskAssignment);
     }
 
     @Override
@@ -195,11 +139,19 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
         List<TaskAssignment> taskAssignmentList =
                 taskAssignmentRepository.findAllByAssignmentIdInAndIsDeletedIsFalse(assignmentIdCollection);
 
-        if (!taskAssignmentList.isEmpty()) {
+        if (!taskAssignmentList.isEmpty()) 
             return null;
-        }
 
         return taskAssignmentList;
+    }
+    @Override
+    public List<TaskAssignmentReadDTO> getAllDTOByIdIn(Collection<Long> assignmentIdCollection) throws Exception {
+        List<TaskAssignment> taskAssignmentList = getAllByIdIn(assignmentIdCollection);
+
+        if (taskAssignmentList == null)
+            return null;
+
+        return fillAllDTO(taskAssignmentList, null);
     }
 
     @Override
@@ -212,20 +164,64 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     public TaskAssignmentReadDTO getDTOByTaskId(long taskId) throws Exception {
         TaskAssignment taskAssignment = getByTaskId(taskId);
 
-        if (taskAssignment == null) {
+        if (taskAssignment == null) 
             return null;
-        }
 
-        TaskAssignmentReadDTO taskAssignmentDTO =
-                modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
+        return fillDTO(taskAssignment);
+    }
 
-        /* Get associated User (Assigner) */
-        taskAssignmentDTO.setAssigner(userService.getDTOById(taskAssignment.getAssignerId()));
+    @Override
+    public List<TaskAssignment> getAllByTaskIdIn(Collection<Long> taskIdCollection) throws Exception {
+        List<TaskAssignment> taskAssignmentList =
+                taskAssignmentRepository.findAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection);
+        
+        if (taskAssignmentList.isEmpty())
+            return null;
+        
+        return taskAssignmentList;
+    }
+    @Override
+    public List<TaskAssignmentReadDTO> getAllDTOByTaskIdIn(Collection<Long> taskIdCollection) throws Exception {
+        List<TaskAssignment> taskAssignmentList = getAllByTaskIdIn(taskIdCollection);
+        
+        if (taskAssignmentList == null) 
+            return null;
+        
+        return fillAllDTO(taskAssignmentList, null);
+    }
+    @Override
+    public Map<Long, TaskAssignmentReadDTO> mapTaskIdTaskAssignmentDTOByTaskIdIn(Collection<Long> taskIdCollection) throws Exception {
+        List<TaskAssignmentReadDTO> taskAssignmentDTOList = getAllDTOByTaskIdIn(taskIdCollection);
+        
+        if (taskAssignmentDTOList == null)
+            return new HashMap<>();
 
-        /* Get associated User (Assignee) */
-        taskAssignmentDTO.setAssignee(userService.getDTOById(taskAssignment.getAssigneeId()));
+        return taskAssignmentDTOList.stream()
+                .collect(Collectors.toMap(TaskAssignmentReadDTO::getTaskId, Function.identity()));
+    }
+    @Override
+    public Page<TaskAssignment> getPageAllByTaskIdIn(Pageable paging, Collection<Long> taskIdCollection) throws Exception {
+        Page<TaskAssignment> taskAssignmentPage =
+                taskAssignmentRepository.findAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection, paging);
 
-        return taskAssignmentDTO;
+        if (taskAssignmentPage.isEmpty())
+            return null;
+
+        return taskAssignmentPage;
+    }
+    @Override
+    public List<TaskAssignmentReadDTO> getAllDTOInPagingByTaskIdIn(Pageable paging, Collection<Long> taskIdCollection) throws Exception {
+        Page<TaskAssignment> taskAssignmentPage = getPageAllByTaskIdIn(paging, taskIdCollection);
+
+        if (taskAssignmentPage == null)
+            return null;
+
+        List<TaskAssignment> taskAssignmentList = taskAssignmentPage.getContent();
+
+        if (taskAssignmentList.isEmpty())
+            return null;
+
+        return fillAllDTO(taskAssignmentList, taskAssignmentPage.getTotalPages());
     }
 
     @Override
@@ -233,9 +229,8 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
         List<TaskAssignment> taskAssignmentList =
                 taskAssignmentRepository.findAllByAssignerIdAndIsDeletedIsFalse(assignerId);
 
-        if (!taskAssignmentList.isEmpty()) {
+        if (!taskAssignmentList.isEmpty()) 
             return null;
-        }
 
         return taskAssignmentList;
     }
@@ -243,9 +238,8 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     public List<TaskAssignmentReadDTO> getAllDTOByAssignerId(long assignerId) throws Exception {
         List<TaskAssignment> taskAssignmentList = getAllByAssignerId(assignerId);
 
-        if (taskAssignmentList == null) {
+        if (taskAssignmentList == null) 
             return null;
-        }
 
         Set<Long> userIdSet = new HashSet<>();
 
@@ -267,6 +261,30 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
 
                     return TaskAssignmentDTO;})
                 .collect(Collectors.toList());
+    }
+    @Override
+    public Page<TaskAssignment> getPageAllByAssignerId(Pageable paging, long assignerId) throws Exception {
+        Page<TaskAssignment> taskAssignmentPage =
+                taskAssignmentRepository.findAllByAssignerIdAndIsDeletedIsFalse(assignerId, paging);
+
+        if (!taskAssignmentPage.isEmpty())
+            return null;
+
+        return taskAssignmentPage;
+    }
+    @Override
+    public List<TaskAssignmentReadDTO> getAllDTOInPagingByAssignerId(Pageable paging, long assignerId) throws Exception {
+        Page<TaskAssignment> taskAssignmentPage = getPageAllByAssignerId(paging, assignerId);
+
+        if (taskAssignmentPage == null)
+            return null;
+
+        List<TaskAssignment> taskAssignmentList = taskAssignmentPage.getContent();
+
+        if (taskAssignmentList.isEmpty())
+            return null;
+
+        return fillAllDTO(taskAssignmentList, taskAssignmentPage.getTotalPages());
     }
 
     @Override
@@ -274,9 +292,8 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
         List<TaskAssignment> taskAssignmentList =
                 taskAssignmentRepository.findAllByAssigneeIdAndIsDeletedIsFalse(assigneeId);
 
-        if (!taskAssignmentList.isEmpty()) {
+        if (!taskAssignmentList.isEmpty()) 
             return null;
-        }
 
         return taskAssignmentList;
     }
@@ -284,30 +301,34 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     public List<TaskAssignmentReadDTO> getAllDTOByAssigneeId(long assigneeId) throws Exception {
         List<TaskAssignment> taskAssignmentList = getAllByAssigneeId(assigneeId);
 
-        if (taskAssignmentList == null) {
+        if (taskAssignmentList == null) 
             return null;
-        }
 
-        Set<Long> userIdSet = new HashSet<>();
+        return fillAllDTO(taskAssignmentList, null);
+    }
+    @Override
+    public Page<TaskAssignment> getPageAllByAssigneeId(Pageable paging, long assigneeId) throws Exception {
+        Page<TaskAssignment> taskAssignmentPage =
+                taskAssignmentRepository.findAllByAssigneeIdAndIsDeletedIsFalse(assigneeId, paging);
 
-        for (TaskAssignment taskAssignment : taskAssignmentList) {
-            userIdSet.add(taskAssignment.getAssignerId());
-            userIdSet.add(taskAssignment.getAssigneeId());
-        }
+        if (!taskAssignmentPage.isEmpty())
+            return null;
 
-        /* Get all associated User (Assigner & Assignee) */
-        Map<Long, UserReadDTO> userIdUserDTOMap = userService.mapUserIdUserDTOByIdIn(userIdSet);
+        return taskAssignmentPage;
+    }
+    @Override
+    public List<TaskAssignmentReadDTO> getAllDTOInPagingByAssigneeId(Pageable paging, long assigneeId) throws Exception {
+        Page<TaskAssignment> taskAssignmentPage = getPageAllByAssigneeId(paging, assigneeId);
 
-        return taskAssignmentList.stream()
-                .map(taskAssignment -> {
-                    TaskAssignmentReadDTO TaskAssignmentDTO =
-                            modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
+        if (taskAssignmentPage == null)
+            return null;
 
-                    TaskAssignmentDTO.setAssigner(userIdUserDTOMap.get(taskAssignment.getAssignerId()));
-                    TaskAssignmentDTO.setAssignee(userIdUserDTOMap.get(taskAssignment.getAssigneeId()));
+        List<TaskAssignment> taskAssignmentList = taskAssignmentPage.getContent();
 
-                    return TaskAssignmentDTO;})
-                .collect(Collectors.toList());
+        if (taskAssignmentList.isEmpty())
+            return null;
+
+        return fillAllDTO(taskAssignmentList, taskAssignmentPage.getTotalPages());
     }
 
     /* UPDATE */
@@ -315,11 +336,17 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
     public TaskAssignment updateTaskAssignment(TaskAssignment updatedTaskAssignment) throws Exception {
         TaskAssignment oldTaskAssignment = getById(updatedTaskAssignment.getAssignmentId());
 
-        if (oldTaskAssignment == null) {
+        if (oldTaskAssignment == null) 
             return null;
-        }
 
         String errorMsg = "";
+
+        /* Check input */
+        if (updatedTaskAssignment.getRemoveDate() != null) {
+            if (updatedTaskAssignment.getRemoveDate().isBefore(oldTaskAssignment.getAssignDate())) {
+                errorMsg += "Invalid Input: removeDate is before assignDate. ";
+            }
+        }
 
         /* Check FK (if changed) */
         if (!oldTaskAssignment.getTaskId().equals(updatedTaskAssignment.getTaskId())) {
@@ -340,7 +367,14 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
                         + "'. Which violate constraint: FK_TaskAssignment_User_AssigneeId. ";
             }
         }
-        if (!oldTaskAssignment.getUpdatedBy().equals(updatedTaskAssignment.getUpdatedBy())) {
+        if (oldTaskAssignment.getUpdatedBy() != null) {
+            if (!oldTaskAssignment.getUpdatedBy().equals(updatedTaskAssignment.getUpdatedBy())) {
+                if (!userService.existsById(updatedTaskAssignment.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTaskAssignment.getUpdatedBy()
+                            + "'. Which violate constraint: FK_TaskAssignment_User_UpdatedBy. ";
+                }
+            }
+        } else {
             if (!userService.existsById(updatedTaskAssignment.getUpdatedBy())) {
                 errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTaskAssignment.getUpdatedBy()
                         + "'. Which violate constraint: FK_TaskAssignment_User_UpdatedBy. ";
@@ -362,9 +396,11 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
                     + updatedTaskAssignment.getAssigneeId() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
+
+        updatedTaskAssignment.setCreatedAt(oldTaskAssignment.getCreatedAt());
+        updatedTaskAssignment.setCreatedBy(oldTaskAssignment.getCreatedBy());
 
         return taskAssignmentRepository.saveAndFlush(updatedTaskAssignment);
     }
@@ -377,31 +413,29 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
 
         TaskAssignment updatedTaskAssignment = modelMapper.map(updatedTaskAssignmentDTO, TaskAssignment.class);
 
+        boolean updateAssignDate = false;
         if (updatedTaskAssignmentDTO.getAssignDate() != null) {
+            updateAssignDate = true;
+
             updatedTaskAssignment.setAssignDate(
                     LocalDateTime.parse(updatedTaskAssignmentDTO.getAssignDate(), dateTimeFormatter));
         }
+
         if (updatedTaskAssignmentDTO.getRemoveDate() != null) {
             updatedTaskAssignment.setRemoveDate(
                     LocalDateTime.parse(updatedTaskAssignmentDTO.getRemoveDate(), dateTimeFormatter));
+
+            if (updateAssignDate)
+                if (updatedTaskAssignment.getRemoveDate().isBefore(updatedTaskAssignment.getAssignDate()))
+                    throw new IllegalArgumentException("removeDate is before assignDate");
         }
 
         updatedTaskAssignment = updateTaskAssignment(updatedTaskAssignment);
 
-        if (updatedTaskAssignment == null) {
+        if (updatedTaskAssignment == null) 
             return null;
-        }
 
-        TaskAssignmentReadDTO taskAssignmentDTO =
-                modelMapper.map(updatedTaskAssignment, TaskAssignmentReadDTO.class);
-
-        /* Get associated User (Assigner) */
-        taskAssignmentDTO.setAssigner(userService.getDTOById(updatedTaskAssignment.getAssignerId()));
-
-        /* Get associated User (Assignee) */
-        taskAssignmentDTO.setAssignee(userService.getDTOById(updatedTaskAssignment.getAssigneeId()));
-
-        return taskAssignmentDTO;
+        return fillDTO(updatedTaskAssignment);
     }
 
     /* DELETE */
@@ -453,5 +487,55 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService{
         taskAssignmentRepository.saveAndFlush(taskAssignment);
 
         return true;
+    }
+    
+    /* Utils */
+    private TaskAssignmentReadDTO fillDTO(TaskAssignment taskAssignment) throws Exception {
+        TaskAssignmentReadDTO taskAssignmentDTO = modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
+
+        Set<Long> userIdSet = new HashSet<>();
+
+        userIdSet.add(taskAssignment.getAssignerId());
+        userIdSet.add(taskAssignment.getAssigneeId());
+
+        /* Get all associated User (Assigner & Assignee) */
+        Map<Long, UserReadDTO> userIdUserDTOMap =
+                userService.mapUserIdUserDTOByIdIn(userIdSet);
+        
+        /* NOT NULL */
+        /* Set associated User (Assigner) */
+        taskAssignmentDTO.setAssigner(
+                userIdUserDTOMap.get(taskAssignment.getAssignerId()));
+        /* Set associated User (Assignee) */
+        taskAssignmentDTO.setAssignee(
+                userIdUserDTOMap.get(taskAssignment.getAssigneeId()));
+
+        return taskAssignmentDTO;
+    }
+    
+    private List<TaskAssignmentReadDTO> fillAllDTO(List<TaskAssignment> taskAssignmentList, Integer totalPage) throws Exception {
+        Set<Long> userIdSet = new HashSet<>();
+
+        for (TaskAssignment taskAssignment : taskAssignmentList) {
+            userIdSet.add(taskAssignment.getAssignerId());
+            userIdSet.add(taskAssignment.getAssigneeId());
+        }
+
+        /* Get all associated User (Assigner & Assignee) */
+        Map<Long, UserReadDTO> userIdUserDTOMap = 
+                userService.mapUserIdUserDTOByIdIn(userIdSet);
+
+        return taskAssignmentList.stream()
+                .map(taskAssignment -> {
+                    TaskAssignmentReadDTO TaskAssignmentDTO =
+                            modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
+
+                    TaskAssignmentDTO.setAssigner(userIdUserDTOMap.get(taskAssignment.getAssignerId()));
+                    TaskAssignmentDTO.setAssignee(userIdUserDTOMap.get(taskAssignment.getAssigneeId()));
+                    
+                    TaskAssignmentDTO.setTotalPage(totalPage);
+
+                    return TaskAssignmentDTO;})
+                .collect(Collectors.toList());
     }
 }

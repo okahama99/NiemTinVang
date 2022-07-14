@@ -30,13 +30,12 @@ public class ProjectManagerUpdateDTO extends BaseUpdateDTO {
     private Long managerId;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm", notes = "Nullable") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "assignDate REQUIRED for update")
     private String assignDate;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm", notes = "Nullable") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     private String removeDate;
 }

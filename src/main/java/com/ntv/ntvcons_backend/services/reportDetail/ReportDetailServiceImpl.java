@@ -6,15 +6,15 @@ import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailUpdateDTO;
 import com.ntv.ntvcons_backend.entities.ReportDetail;
 import com.ntv.ntvcons_backend.repositories.ReportDetailRepository;
 import com.ntv.ntvcons_backend.services.report.ReportService;
+import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +27,9 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private ReportService reportService;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private UserService userService;
 
     /* CREATE */
     @Override
@@ -38,10 +41,24 @@ public class ReportDetailServiceImpl implements ReportDetailService {
             errorMsg += "No Report found with Id: '" + newReportDetail.getReportId()
                     + "'. Which violate constraint: FK_ReportDetail_Report. ";
         }
-
-        if (!errorMsg.trim().isEmpty()) {
-            throw new IllegalArgumentException(errorMsg);
+        if (!userService.existsById(newReportDetail.getCreatedBy())) {
+            errorMsg += "No User (CreatedBy) found with Id: '" + newReportDetail.getCreatedBy()
+                    + "'. Which violate constraint: FK_ReportDetail_User_CreatedBy. ";
         }
+
+        /* Check duplicate */
+        if (reportDetailRepository
+                .existsByReportIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
+                        newReportDetail.getReportId(),
+                        newReportDetail.getItemDesc(),
+                        newReportDetail.getItemPrice())) {
+            errorMsg += "Already exist another ReportDetail of Report with Id: '" + newReportDetail.getReportId()
+                    + "'. With itemDesc: '" + newReportDetail.getItemDesc()
+                    + "' at price: '" + newReportDetail.getItemPrice() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) 
+            throw new IllegalArgumentException(errorMsg);
 
         return reportDetailRepository.saveAndFlush(newReportDetail);
     }
@@ -51,77 +68,130 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         newReportDetail = createReportDetail(newReportDetail);
 
-        return modelMapper.map(newReportDetail, ReportDetailReadDTO.class);
+        return fillDTO(newReportDetail);
     }
 
     @Override
     public List<ReportDetail> createBulkReportDetail(Collection<ReportDetail> newReportDetailList) throws Exception {
-        String errorMsg = "";
+        StringBuilder errorMsg = new StringBuilder();
 
-        if (!reportService.existsAllByIdIn(
-                newReportDetailList.stream()
-                        .map(ReportDetail::getReportId)
-                        .collect(Collectors.toSet()))) {
-            errorMsg += "1 or more Report not found with Id"
-                    + "'. Which violate constraint: FK_ReportDetail_Report. ";
+        Set<Long> reportIdSet = new HashSet<>();
+        Set<Long> createdBySet = new HashSet<>();
+
+        Map<Long, Map<String, List<Double>>> reportIdItemDescItemPriceListMapMap = new HashMap<>();
+
+        Long tmpReportId;
+        String tmpItemDesc;
+        Double tmpItemPrice;
+        List<Double> tmpItemPriceList;
+
+        Map<String, List<Double>> tmpItemDescItemPriceListMap;
+
+        for (ReportDetail newReportDetail : newReportDetailList) {
+            tmpReportId = newReportDetail.getReportId();
+            tmpItemDesc = newReportDetail.getItemDesc();
+            tmpItemPrice = newReportDetail.getItemPrice();
+
+            reportIdSet.add(tmpReportId);
+            createdBySet.add(newReportDetail.getCreatedBy());
+
+            tmpItemDescItemPriceListMap = reportIdItemDescItemPriceListMapMap.get(tmpReportId);
+
+            /* Check duplicate 1 (at input) */
+            if (tmpItemDescItemPriceListMap == null) {
+                tmpItemDescItemPriceListMap = new HashMap<>();
+
+                tmpItemDescItemPriceListMap
+                        .put(tmpItemDesc, new ArrayList<>(Collections.singletonList(tmpItemPrice)));
+            } else {
+                tmpItemPriceList = tmpItemDescItemPriceListMap.get(tmpItemDesc);
+
+                if (tmpItemPriceList == null) {
+                    tmpItemDescItemPriceListMap
+                            .put(tmpItemDesc, new ArrayList<>(Collections.singletonList(tmpItemPrice)));
+                } else {
+                    if (tmpItemPriceList.contains(tmpItemPrice)) {
+                        errorMsg.append("Already exist another ReportDetail of Report with Id: '").append(tmpReportId)
+                                .append("'. With itemDesc: '").append(tmpItemDesc)
+                                .append("' at price: '").append(tmpItemPrice).append("'. ");
+                    } else {
+                        tmpItemPriceList.add(tmpItemPrice);
+
+                        tmpItemDescItemPriceListMap
+                                .put(tmpItemDesc, tmpItemPriceList);
+                    }
+                }
+            }
+
+            reportIdItemDescItemPriceListMapMap
+                    .put(tmpReportId, tmpItemDescItemPriceListMap);
         }
 
-        if (!errorMsg.trim().isEmpty()) {
-            throw new IllegalArgumentException(errorMsg);
+        /* Check FK */
+        if (!reportService.existsAllByIdIn(reportIdSet)) {
+            errorMsg.append("1 or more Report not found with Id: '")
+                    .append("'. Which violate constraint: FK_ReportDetail_Report. ");
+        }
+        if (!userService.existsAllByIdIn(createdBySet)) {
+            errorMsg.append("1 or more User (CreatedBy) not found with Id: '")
+                    .append("'. Which violate constraint: FK_ReportDetail_User_CreatedBy. ");
+        }
+
+        /* Check duplicate 2 (input vs DB) */
+        for (ReportDetail newReportDetail : newReportDetailList) {
+            if (reportDetailRepository
+                    .existsByReportIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
+                            newReportDetail.getReportId(),
+                            newReportDetail.getItemDesc(),
+                            newReportDetail.getItemPrice())) {
+                errorMsg.append("Already exist another ReportDetail of Report with Id: '")
+                        .append(newReportDetail.getReportId())
+                        .append("'. With itemDesc: '").append(newReportDetail.getItemDesc())
+                        .append("' at price: '").append(newReportDetail.getItemPrice()).append("'. ");
+            }
+        }
+
+        if (!errorMsg.toString().trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg.toString());
         }
 
         return reportDetailRepository.saveAllAndFlush(newReportDetailList);
     }
     @Override
     public List<ReportDetailReadDTO> createBulkReportDetailByDTOList(Collection<ReportDetailCreateDTO> newReportDetailDTOList) throws Exception {
-        List<ReportDetail> newReportDetailList = newReportDetailDTOList.stream()
-                .map(newReportDetailDTO -> modelMapper.map(newReportDetailDTO, ReportDetail.class))
-                .collect(Collectors.toList());
+        List<ReportDetail> newReportDetailList =
+                newReportDetailDTOList.stream()
+                        .map(newReportDetailDTO -> modelMapper.map(newReportDetailDTO, ReportDetail.class))
+                        .collect(Collectors.toList());
 
         newReportDetailList = createBulkReportDetail(newReportDetailList);
 
-        return newReportDetailList.stream()
-                .map(newReportDetail -> modelMapper.map(newReportDetail, ReportDetailReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(newReportDetailList, null);
     }
 
     /* READ */
     @Override
-    public List<ReportDetail> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        Pageable paging;
-        if (sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        } else {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
+    public Page<ReportDetail> getPageAll(Pageable paging) throws Exception {
         Page<ReportDetail> reportDetailPage = reportDetailRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (reportDetailPage.isEmpty()) {
+        if (reportDetailPage.isEmpty()) 
             return null;
-        }
 
-        return reportDetailPage.getContent();
+        return reportDetailPage;
     }
     @Override
-    public List<ReportDetailReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        List<ReportDetail> reportDetailList = getAll(pageNo, pageSize, sortBy, sortType);
+    public List<ReportDetailReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
+        Page<ReportDetail> reportDetailPage = getPageAll(paging);
 
-        if (reportDetailList != null && !reportDetailList.isEmpty()) {
-            int totalPage = (int) Math.ceil((double) reportDetailList.size() / pageSize);
+        if (reportDetailPage == null)
+            return null;
 
-            return reportDetailList.stream()
-                    .map(reportDetail -> {
-                        ReportDetailReadDTO reportDetailReadDTO =
-                                modelMapper.map(reportDetail, ReportDetailReadDTO.class);
-                        reportDetailReadDTO.setTotalPage(totalPage);
-                        return reportDetailReadDTO;
-                    })
-                    .collect(Collectors.toList());
+        List<ReportDetail> reportDetailList = reportDetailPage.getContent();
 
-        } 
-            
-        return null;
+        if (reportDetailList.isEmpty())
+            return null;
+
+        return fillAllDTO(reportDetailList, reportDetailPage.getTotalPages());
     }
 
     @Override
@@ -135,11 +205,10 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     public ReportDetailReadDTO getDTOById(long reportDetailId) throws Exception {
         ReportDetail reportDetail = getById(reportDetailId);
 
-        if (reportDetail == null) {
+        if (reportDetail == null) 
             return null;
-        }
 
-        return modelMapper.map(reportDetail, ReportDetailReadDTO.class);
+        return fillDTO(reportDetail);
     }
 
     @Override
@@ -147,9 +216,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         List<ReportDetail> reportDetailList =
                 reportDetailRepository.findAllByReportDetailIdInAndIsDeletedIsFalse(reportDetailIdCollection);
 
-        if (reportDetailList.isEmpty()) {
+        if (reportDetailList.isEmpty()) 
             return null;
-        }
 
         return reportDetailList;
     }
@@ -157,13 +225,10 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     public List<ReportDetailReadDTO> getAllDTOByIdIn(Collection<Long> reportDetailIdCollection) throws Exception {
         List<ReportDetail> reportDetailList = getAllByIdIn(reportDetailIdCollection);
 
-        if (reportDetailList == null) {
+        if (reportDetailList == null) 
             return null;
-        }
 
-        return reportDetailList.stream()
-                .map(reportDetail -> modelMapper.map(reportDetail, ReportDetailReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(reportDetailList, null);
     }
 
     @Override
@@ -171,9 +236,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         List<ReportDetail> reportDetailList =
                 reportDetailRepository.findAllByReportIdAndIsDeletedIsFalse(reportId);
 
-        if (reportDetailList.isEmpty()) {
+        if (reportDetailList.isEmpty()) 
             return null;
-        }
 
         return reportDetailList;
     }
@@ -181,13 +245,34 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     public List<ReportDetailReadDTO> getAllDTOByReportId(long reportId) throws Exception {
         List<ReportDetail> reportDetailList = getAllByReportId(reportId);
 
-        if (reportDetailList == null) {
+        if (reportDetailList == null) 
             return null;
-        }
 
-        return reportDetailList.stream()
-                .map(reportDetail -> modelMapper.map(reportDetail, ReportDetailReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(reportDetailList, null);
+    }
+    @Override
+    public Page<ReportDetail> getPageAllByReportId(Pageable paging, long reportId) throws Exception {
+        Page<ReportDetail> reportDetailPage =
+                reportDetailRepository.findAllByReportIdAndIsDeletedIsFalse(reportId, paging);
+
+        if (reportDetailPage.isEmpty()) 
+            return null;
+
+        return reportDetailPage;
+    }
+    @Override
+    public List<ReportDetailReadDTO> getAllDTOInPagingByReportId(Pageable paging, long reportId) throws Exception {
+        Page<ReportDetail> reportDetailPage = getPageAllByReportId(paging, reportId);
+
+        if (reportDetailPage == null)
+            return null;
+
+        List<ReportDetail> reportDetailList = reportDetailPage.getContent();
+
+        if (reportDetailList.isEmpty())
+            return null;
+
+        return fillAllDTO(reportDetailList, reportDetailPage.getTotalPages());
     }
 
     @Override
@@ -195,9 +280,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         List<ReportDetail> reportDetailList =
                 reportDetailRepository.findAllByReportIdInAndIsDeletedIsFalse(reportIdCollection);
 
-        if (reportDetailList.isEmpty()) {
+        if (reportDetailList.isEmpty()) 
             return null;
-        }
 
         return reportDetailList;
     }
@@ -205,49 +289,17 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     public List<ReportDetailReadDTO> getAllDTOByReportIdIn(Collection<Long> reportIdCollection) throws Exception {
         List<ReportDetail> reportDetailList = getAllByReportIdIn(reportIdCollection);
 
-        if (reportDetailList == null) {
+        if (reportDetailList == null) 
             return null;
-        }
 
-        return reportDetailList.stream()
-                .map(reportDetail -> modelMapper.map(reportDetail, ReportDetailReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(reportDetailList, null);
     }
-    @Override
-    public Map<Long, List<ReportDetail>> mapReportIdReportDetailListByReportIdIn(Collection<Long> reportIdCollection) throws Exception {
-        List<ReportDetail> reportDetailList = getAllByReportIdIn(reportIdCollection);
-
-        if (reportDetailList == null) {
-            return new HashMap<>();
-        }
-
-        Map<Long, List<ReportDetail>> reportIdReportDetailListMap = new HashMap<>();
-
-        List<ReportDetail> tmpReportDetailList;
-        long tmpReportId;
-
-        for (ReportDetail reportDetail : reportDetailList) {
-            tmpReportId = reportDetail.getReportId();
-            tmpReportDetailList = reportIdReportDetailListMap.get(tmpReportId);
-
-            if (tmpReportDetailList == null) {
-                reportIdReportDetailListMap.put(tmpReportId, new ArrayList<>(Collections.singletonList(reportDetail)));
-            } else {
-                tmpReportDetailList.add(reportDetail);
-                reportIdReportDetailListMap.put(tmpReportId, tmpReportDetailList);
-            }
-        }
-
-        return reportIdReportDetailListMap;
-    }
-
     @Override
     public Map<Long, List<ReportDetailReadDTO>> mapReportIdReportDetailDTOListByReportIdIn(Collection<Long> reportIdCollection) throws Exception {
         List<ReportDetailReadDTO> reportDetailDTOList = getAllDTOByReportIdIn(reportIdCollection);
 
-        if (reportDetailDTOList == null) {
+        if (reportDetailDTOList == null) 
             return new HashMap<>();
-        }
 
         Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap = new HashMap<>();
 
@@ -269,16 +321,38 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         return reportIdReportDetailDTOListMap;
     }
+    @Override
+    public Page<ReportDetail> getPageAllByReportIdIn(Pageable paging, Collection<Long> reportIdCollection) throws Exception {
+        Page<ReportDetail> reportDetailPage =
+                reportDetailRepository.findAllByReportIdInAndIsDeletedIsFalse(reportIdCollection, paging);
+
+        if (reportDetailPage.isEmpty()) 
+            return null;
+
+        return reportDetailPage;
+    }
+    @Override
+    public List<ReportDetailReadDTO> getAllDTOInPagingByReportIdIn(Pageable paging, Collection<Long> reportIdCollection) throws Exception {
+        Page<ReportDetail> reportDetailPage = getPageAllByReportIdIn(paging, reportIdCollection);
+
+        if (reportDetailPage == null)
+            return null;
+
+        List<ReportDetail> reportDetailList = reportDetailPage.getContent();
+
+        if (reportDetailList.isEmpty())
+            return null;
+
+        return fillAllDTO(reportDetailList, reportDetailPage.getTotalPages());
+    }
 
     /* UPDATE */
     @Override
     public ReportDetail updateReportDetail(ReportDetail updatedReportDetail) throws Exception {
         ReportDetail oldReportDetail = getById(updatedReportDetail.getReportDetailId());
 
-        if (oldReportDetail == null) {
-            return null;
-            /* Not found by Id, return null */
-        }
+        if (oldReportDetail == null) 
+            return null; /* Not found by Id, return null */
 
         String errorMsg = "";
 
@@ -289,10 +363,37 @@ public class ReportDetailServiceImpl implements ReportDetailService {
                         + "'. Which violate constraint: FK_ReportDetail_Report. ";
             }
         }
-
-        if (!errorMsg.trim().isEmpty()) {
-            throw new IllegalArgumentException(errorMsg);
+        if (oldReportDetail.getUpdatedBy() != null) {
+            if (!oldReportDetail.getUpdatedBy().equals(updatedReportDetail.getUpdatedBy())) {
+                if (!reportService.existsById(updatedReportDetail.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReportDetail.getUpdatedBy()
+                            + "'. Which violate constraint: FK_ReportDetail_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (!reportService.existsById(updatedReportDetail.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReportDetail.getUpdatedBy()
+                        + "'. Which violate constraint: FK_ReportDetail_User_UpdatedBy. ";
+            }
         }
+
+        /* Check duplicate */
+        if (reportDetailRepository
+                .existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndIsDeletedIsFalse(
+                        updatedReportDetail.getReportId(),
+                        updatedReportDetail.getItemDesc(),
+                        updatedReportDetail.getItemPrice(),
+                        updatedReportDetail.getReportDetailId())) {
+            errorMsg += "Already exist another ReportDetail of Report with Id: '" + updatedReportDetail.getReportId()
+                    + "'. With itemDesc: '" + updatedReportDetail.getItemDesc()
+                    + "' at price: '" + updatedReportDetail.getItemPrice() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty()) 
+            throw new IllegalArgumentException(errorMsg);
+
+        updatedReportDetail.setCreatedAt(oldReportDetail.getCreatedAt());
+        updatedReportDetail.setCreatedBy(oldReportDetail.getCreatedBy());
 
         return reportDetailRepository.saveAndFlush(updatedReportDetail);
     }
@@ -302,59 +403,153 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         updatedReportDetail = updateReportDetail(updatedReportDetail);
 
-        if (updatedReportDetail == null) {
+        if (updatedReportDetail == null) 
             return null;
-        }
 
-        return modelMapper.map(updatedReportDetail, ReportDetailReadDTO.class);
+        return fillDTO(updatedReportDetail);
     }
 
     @Override
     public List<ReportDetail> updateBulkReportDetail(Collection<ReportDetail> updatedReportDetailList) throws Exception {
+        StringBuilder errorMsg = new StringBuilder();
+
+        Map<Long, Long> reportDetailIdCreatedByMap = new HashMap<>();
+        Map<Long, LocalDateTime> reportDetailIdCreatedAtMap = new HashMap<>();
+
+        Map<Long, Map<String, List<Double>>> reportIdItemDescItemPriceListMapMap = new HashMap<>();
+
         Set<Long> reportDetailIdSet = new HashSet<>();
         Set<Long> oldReportIdSet = new HashSet<>();
         Set<Long> updatedReportIdSet = new HashSet<>();
+        Set<Long> oldUpdateBySet = new HashSet<>();
+        Set<Long> updatedUpdatedBySet = new HashSet<>();
+
+        Long tmpReportId;
+        String tmpItemDesc;
+        Double tmpItemPrice;
+        List<Double> tmpItemPriceList;
+
+        Map<String, List<Double>> tmpItemDescItemPriceListMap;
 
         for (ReportDetail updatedReportDetail : updatedReportDetailList) {
+            tmpReportId = updatedReportDetail.getReportId();
+            tmpItemDesc = updatedReportDetail.getItemDesc();
+            tmpItemPrice = updatedReportDetail.getItemPrice();
+
             reportDetailIdSet.add(updatedReportDetail.getReportDetailId());
-            updatedReportIdSet.add(updatedReportDetail.getReportId());
+            updatedReportIdSet.add(tmpReportId);
+            updatedUpdatedBySet.add(updatedReportDetail.getUpdatedBy());
+
+            tmpItemDescItemPriceListMap = reportIdItemDescItemPriceListMapMap.get(tmpReportId);
+
+            /* Check duplicate 1 (at input) */
+            if (tmpItemDescItemPriceListMap == null) {
+                tmpItemDescItemPriceListMap = new HashMap<>();
+
+                tmpItemDescItemPriceListMap
+                        .put(tmpItemDesc, new ArrayList<>(Collections.singletonList(tmpItemPrice)));
+            } else {
+                tmpItemPriceList = tmpItemDescItemPriceListMap.get(tmpItemDesc);
+
+                if (tmpItemPriceList == null) {
+                    tmpItemDescItemPriceListMap
+                            .put(tmpItemDesc, new ArrayList<>(Collections.singletonList(tmpItemPrice)));
+                } else {
+                    if (tmpItemPriceList.contains(tmpItemPrice)) {
+                        errorMsg.append("Already exist another ReportDetail of Report with Id: '").append(tmpReportId)
+                                .append("'. With itemDesc: '").append(tmpItemDesc)
+                                .append("' at price: '").append(tmpItemPrice).append("'. ");
+                    } else {
+                        tmpItemPriceList.add(tmpItemPrice);
+
+                        tmpItemDescItemPriceListMap
+                                .put(tmpItemDesc, tmpItemPriceList);
+                    }
+                }
+            }
+
+            reportIdItemDescItemPriceListMapMap
+                    .put(tmpReportId, tmpItemDescItemPriceListMap);
         }
 
-        for (ReportDetail oldReportDetail : getAllByIdIn(reportDetailIdSet)) {
+        List<ReportDetail> oldReportDetailList = getAllByIdIn(reportDetailIdSet);
+
+        if (oldReportDetailList == null)
+            return null;
+
+        for (ReportDetail oldReportDetail : oldReportDetailList) {
             oldReportIdSet.add(oldReportDetail.getReportId());
+
+            if (oldReportDetail.getUpdatedBy() != null)
+                oldUpdateBySet.add(oldReportDetail.getUpdatedBy());
+
+            reportDetailIdCreatedAtMap.put(oldReportDetail.getReportDetailId(), oldReportDetail.getCreatedAt());
+            reportDetailIdCreatedByMap.put(oldReportDetail.getReportDetailId(), oldReportDetail.getCreatedBy());
         }
 
         /* Remove all unchanged reportId */
         updatedReportIdSet.removeAll(oldReportIdSet);
+        /* Remove all unchanged updateBy */
+        updatedUpdatedBySet.removeAll(oldUpdateBySet);
 
-        String errorMsg = "";
-
-        /* Check FK */
-        /* If there are updated reportId, need to recheck FK */
-        if (updatedReportIdSet.size() <= 0) {
+        /* Check FK (if change) */
+        if (!updatedReportIdSet.isEmpty()) {
             if (!reportService.existsAllByIdIn(updatedReportIdSet)) {
-                errorMsg += "1 or more Report not found with Id"
-                        + "'. Which violate constraint: FK_ReportDetail_Report. ";
+                errorMsg.append("1 or more Report not found with Id: '")
+                        .append("'. Which violate constraint: FK_ReportDetail_Report. ");
+            }
+        }
+        if (!updatedUpdatedBySet.isEmpty()) {
+            if (!userService.existsAllByIdIn(updatedUpdatedBySet)) {
+                errorMsg.append("1 or more User (UpdatedBy) not found with Id: '")
+                        .append("'. Which violate constraint: FK_ReportDetail_User_UpdatedBy. ");
             }
         }
 
-        if (!errorMsg.trim().isEmpty()) {
-            throw new IllegalArgumentException(errorMsg);
+        /* Check duplicate 2 (input vs DB) */
+        for (ReportDetail updatedReportDetail : updatedReportDetailList) {
+            if (reportDetailRepository
+                    .existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndIsDeletedIsFalse(
+                            updatedReportDetail.getReportId(),
+                            updatedReportDetail.getItemDesc(),
+                            updatedReportDetail.getItemPrice(),
+                            updatedReportDetail.getReportDetailId())) {
+                errorMsg.append("Already exist another ReportDetail of Report with Id: '")
+                        .append(updatedReportDetail.getReportId())
+                        .append("'. With itemDesc: '").append(updatedReportDetail.getItemDesc())
+                        .append("' at price: '").append(updatedReportDetail.getItemPrice()).append("'. ");
+            }
         }
+
+        if (!errorMsg.toString().trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg.toString());
+        }
+
+        updatedReportDetailList =
+                updatedReportDetailList.stream()
+                        .peek(reportDetail -> {
+                            reportDetail.setCreatedAt(
+                                    reportDetailIdCreatedAtMap.get(reportDetail.getReportDetailId()));
+
+                            reportDetail.setCreatedBy(
+                                    reportDetailIdCreatedByMap.get(reportDetail.getReportDetailId()));})
+                        .collect(Collectors.toList());
 
         return reportDetailRepository.saveAllAndFlush(updatedReportDetailList);
     }
     @Override
     public List<ReportDetailReadDTO> updateBulkReportDetailByDTOList(Collection<ReportDetailUpdateDTO> updatedReportDetailDTOList) throws Exception {
-        List<ReportDetail> updatedReportDetailList = updatedReportDetailDTOList.stream()
-                .map(updatedReportDetailDTO -> modelMapper.map(updatedReportDetailDTO, ReportDetail.class))
-                .collect(Collectors.toList());
+        List<ReportDetail> updatedReportDetailList =
+                updatedReportDetailDTOList.stream()
+                        .map(updatedReportDetailDTO -> modelMapper.map(updatedReportDetailDTO, ReportDetail.class))
+                        .collect(Collectors.toList());
 
         updatedReportDetailList = updateBulkReportDetail(updatedReportDetailList);
 
-        return updatedReportDetailList.stream()
-                .map(updatedReportDetail -> modelMapper.map(updatedReportDetail, ReportDetailReadDTO.class))
-                .collect(Collectors.toList());
+        if (updatedReportDetailList == null)
+            return null;
+
+        return fillAllDTO(updatedReportDetailList, null);
     }
 
     /* DELETE */
@@ -405,5 +600,22 @@ public class ReportDetailServiceImpl implements ReportDetailService {
                         .collect(Collectors.toList()));
 
         return true;
+    }
+
+    /* Utils */
+    private ReportDetailReadDTO fillDTO(ReportDetail reportDetail) throws Exception {
+        return modelMapper.map(reportDetail, ReportDetailReadDTO.class);
+    }
+
+    private List<ReportDetailReadDTO> fillAllDTO(List<ReportDetail> reportDetailList, Integer totalPage) throws Exception {
+        return reportDetailList.stream()
+                .map(reportDetail -> {
+                    ReportDetailReadDTO reportDetailDTO =
+                            modelMapper.map(reportDetail, ReportDetailReadDTO.class);
+
+                    reportDetailDTO.setTotalPage(totalPage);
+
+                    return reportDetailDTO;})
+                .collect(Collectors.toList());
     }
 }

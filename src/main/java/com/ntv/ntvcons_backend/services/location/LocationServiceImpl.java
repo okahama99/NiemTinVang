@@ -79,9 +79,8 @@ public class LocationServiceImpl implements LocationService {
             }
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return locationRepository.saveAndFlush(newLocation);
     }
@@ -91,7 +90,7 @@ public class LocationServiceImpl implements LocationService {
 
         newLocation = createLocation(newLocation);
 
-        return modelMapper.map(newLocation, LocationReadDTO.class);
+        return fillDTO(newLocation);
     }
 
     /* READ */
@@ -148,40 +147,27 @@ public class LocationServiceImpl implements LocationService {
     }
 
     @Override
-    public Page<Location> getPageAll(Pageable paging) {
+    public Page<Location> getPageAll(Pageable paging) throws Exception {
         Page<Location> locationPage = locationRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (locationPage.isEmpty()) {
+        if (locationPage.isEmpty()) 
             return null;
-        }
 
         return locationPage;
     }
     @Override
-    public List<LocationReadDTO> getAllInPaging(Pageable paging) {
+    public List<LocationReadDTO> getAllInPaging(Pageable paging) throws Exception {
         Page<Location> locationPage = getPageAll(paging);
 
-        if (locationPage == null) {
+        if (locationPage == null) 
             return null;
-        }
 
         List<Location> locationList = locationPage.getContent();
 
-        if (locationList.isEmpty()) {
+        if (locationList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = locationPage.getTotalPages();
-
-        return locationList.stream()
-                .map(location -> {
-                    LocationReadDTO locationDTO =
-                            modelMapper.map(location, LocationReadDTO.class);
-
-                    locationDTO.setTotalPage(totalPage);
-
-                    return locationDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(locationList, locationPage.getTotalPages());
     }
 
     @Override
@@ -199,11 +185,10 @@ public class LocationServiceImpl implements LocationService {
     public LocationReadDTO getDTOById(long locationId) throws Exception {
         Location location = getById(locationId);
 
-        if (location == null) {
+        if (location == null) 
             return null;
-        }
 
-        return modelMapper.map(location, LocationReadDTO.class);
+        return fillDTO(location);
     }
 
     @Override
@@ -211,9 +196,8 @@ public class LocationServiceImpl implements LocationService {
         List<Location> locationList =
                 locationRepository.findAllByLocationIdInAndIsDeletedIsFalse(locationIdCollection);
 
-        if (locationList.isEmpty()) {
+        if (locationList.isEmpty()) 
             return null;
-        }
 
         return locationList;
     }
@@ -221,21 +205,17 @@ public class LocationServiceImpl implements LocationService {
     public List<LocationReadDTO> getAllDTOByIdIn(Collection<Long> locationIdCollection) throws Exception {
         List<Location> locationList = getAllByIdIn(locationIdCollection);
 
-        if (locationList == null) {
+        if (locationList == null) 
             return null;
-        }
 
-        return locationList.stream()
-                .map(location -> modelMapper.map(location, LocationReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(locationList, null);
     }
     @Override
     public Map<Long, LocationReadDTO> mapLocationIdLocationDTOByIdIn(Collection<Long> locationIdCollection) throws Exception {
         List<LocationReadDTO> locationDTOList = getAllDTOByIdIn(locationIdCollection);
 
-        if (locationDTOList.isEmpty()) {
+        if (locationDTOList.isEmpty()) 
             return new HashMap<>();
-        }
 
         return locationDTOList.stream()
                 .collect(Collectors.toMap(LocationReadDTO::getLocationId, Function.identity()));
@@ -243,7 +223,8 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public boolean existsByCoordinate(String coordinate) throws Exception {
-        return locationRepository.existsByCoordinateAndIsDeletedIsFalse(coordinate);
+        return locationRepository
+                .existsByCoordinateAndIsDeletedIsFalse(coordinate);
     }
     @Override
     public Location getByCoordinate(String coordinate) throws Exception {
@@ -255,18 +236,17 @@ public class LocationServiceImpl implements LocationService {
     public LocationReadDTO getDTOByCoordinate(String coordinate) throws Exception {
         Location location = getByCoordinate(coordinate);
 
-        if (location == null) {
+        if (location == null) 
             return null;
-        }
 
-        return modelMapper.map(location, LocationReadDTO.class);
+        return fillDTO(location);
     }
 
     @Override
     public String checkDuplicate(String addressNumber) {
         String result = "No duplicate";
         Location checkDuplicateLocation = locationRepository.getByAddressNumberAndIsDeletedIsFalse(addressNumber);
-        if(checkDuplicateLocation != null)
+        if (checkDuplicateLocation != null)
         {
             result = "Existed address number";
             return result;
@@ -277,7 +257,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public boolean checkCoordinate(String coordinate) {
         Location checkDuplicateLocation = locationRepository.getByCoordinateAndIsDeletedIsFalse(coordinate);
-        if(checkDuplicateLocation != null)
+        if (checkDuplicateLocation != null)
         {
             return true;
         }
@@ -307,9 +287,8 @@ public class LocationServiceImpl implements LocationService {
     public Location updateLocation(Location updatedLocation) throws Exception {
         Location oldLocation = getById(updatedLocation.getLocationId());
 
-        if (oldLocation == null) {
+        if (oldLocation == null) 
             return null;
-        }
 
         String errorMsg = "";
 
@@ -348,9 +327,8 @@ public class LocationServiceImpl implements LocationService {
                     + updatedLocation.getProvince() + ", " + updatedLocation.getCountry() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         updatedLocation.setCreatedAt(oldLocation.getCreatedAt());
         updatedLocation.setCreatedBy(oldLocation.getCreatedBy());
@@ -363,11 +341,10 @@ public class LocationServiceImpl implements LocationService {
 
         updatedLocation = updateLocation(updatedLocation);
 
-        if (updatedLocation == null) {
+        if (updatedLocation == null) 
             return null;
-        }
 
-        return modelMapper.map(updatedLocation, LocationReadDTO.class);
+        return fillDTO(updatedLocation);
     }
 
     /* DELETE */
@@ -384,5 +361,22 @@ public class LocationServiceImpl implements LocationService {
         locationRepository.saveAndFlush(location);
 
         return true;
+    }
+
+    /* Utils */
+    private LocationReadDTO fillDTO(Location location) throws Exception {
+        return modelMapper.map(location, LocationReadDTO.class);
+    }
+
+    private List<LocationReadDTO> fillAllDTO(List<Location> locationList, Integer totalPage) throws Exception {
+        return locationList.stream()
+                .map(location -> {
+                    LocationReadDTO locationDTO =
+                            modelMapper.map(location, LocationReadDTO.class);
+
+                    locationDTO.setTotalPage(totalPage);
+
+                    return locationDTO;})
+                .collect(Collectors.toList());
     }
 }

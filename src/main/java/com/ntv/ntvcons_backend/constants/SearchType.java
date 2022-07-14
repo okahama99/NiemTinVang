@@ -137,9 +137,9 @@ public class SearchType {
 
     public enum TASK {
         BY_ID,
-        BY_NAME,
     }
     public enum ALL_TASK {
+        BY_NAME,
         BY_NAME_CONTAINS,
         BY_PROJECT_ID,
         BY_PLAN_START_DATE,

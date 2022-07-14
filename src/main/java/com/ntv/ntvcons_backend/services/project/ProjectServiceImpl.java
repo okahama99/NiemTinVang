@@ -7,6 +7,7 @@ import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
@@ -33,6 +34,7 @@ import com.ntv.ntvcons_backend.services.task.TaskService;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -59,6 +61,7 @@ public class ProjectServiceImpl implements ProjectService{
     private LocationRepository locationRepository;
     @Autowired
     private BlueprintService blueprintService;
+    @Lazy
     @Autowired
     private UserService userService;
     @Autowired
@@ -117,7 +120,7 @@ public class ProjectServiceImpl implements ProjectService{
         ProjectManagerCreateDTO projectManagerDTO = new ProjectManagerCreateDTO();
         projectManagerDTO.setProjectId(project.getProjectId());
         projectManagerDTO.setManagerId(createProjectModel.getUserId());
-        projectManagerDTO.setAssignDate(LocalDateTime.now().format(dateTimeFormatter));
+//        projectManagerDTO.setAssignDate(LocalDateTime.now().format(dateTimeFormatter));
         projectManagerService.createProjectManager(modelMapper.map(projectManagerDTO, ProjectManager.class));
         return true;
     }
@@ -146,9 +149,8 @@ public class ProjectServiceImpl implements ProjectService{
             errorMsg += "Already exists another Project with name: '" + newProject.getProjectName() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return projectRepository.saveAndFlush(newProject);
     }
@@ -161,7 +163,7 @@ public class ProjectServiceImpl implements ProjectService{
 
         Project newProject = modelMapper.map(newProjectDTO, Project.class);
 
-        /* Already check not null */
+        /* Already check NOT NULL */
         newProject.setPlanStartDate(
                 LocalDateTime.parse(newProjectDTO.getPlanStartDate(), dateTimeFormatter));
 
@@ -174,14 +176,16 @@ public class ProjectServiceImpl implements ProjectService{
             }
         }
 
+        /* Associated Location */
         LocationReadDTO locationDTO;
-        switch (newProjectDTO.getLocation().getCreateOption()) {
+        /* TODO: reuse later */
+        /* switch (newProjectDTO.getLocation().getCreateOption()) {
             case CREATE_NEW_LOCATION:
                 if (newProjectDTO.getLocation().getNewLocation() == null) {
                     throw new IllegalArgumentException("Missing REQUIRED newLocation");
                 }
 
-                /* Create Location first (to get locationId) */
+                /* Create Location first (to get locationId) * /
                 locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation().getNewLocation());
                 break;
 
@@ -190,55 +194,53 @@ public class ProjectServiceImpl implements ProjectService{
                     throw new IllegalArgumentException("Missing REQUIRED existingLocationId");
                 }
 
-                /* Get associated Location */
+                /* Get associated Location * /
                 locationDTO = locationService.getDTOById(newProjectDTO.getLocation().getExistingLocationId());
 
                 if (locationDTO == null) {
-                    /* Not found location with Id, NEED TO STOP */
+                    /* Not found location with Id, NEED TO STOP * /
                     throw new IllegalArgumentException("No location found with Id: '"
-                            + newProjectDTO.getLocation().getExistingLocationId() +"'. ");
+                            + newProjectDTO.getLocation().getExistingLocationId() + "'. ");
                 }
                 break;
 
             default:
                 throw new IllegalArgumentException("Invalid createOption used");
-        }
+        }*/
 
+        /* Create Location first (to get locationId) */
+        locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation());
         /* Set locationId because createProject() check FK */
         newProject.setLocationId(locationDTO.getLocationId());
 
         newProject = createProject(newProject);
+
         long newProjectId = newProject.getProjectId();
 
-        ProjectReadDTO projectDTO = modelMapper.map(newProject, ProjectReadDTO.class);
-
-        /* Set associated Location */
-        projectDTO.setLocation(locationDTO);
-
-        /* Set projectId to blueprint after create */
+        /* Set REQUIRED FK projectId to blueprint after create Project */
         newProjectDTO.getBlueprint().setProjectId(newProjectId);
-        /* Set associated Blueprint */
-        projectDTO.setBlueprint(blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint()));
+        /* Create associated Blueprint */
+        blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
 
+        /* Create associated ProjectManager if present */
         if (newProjectDTO.getProjectManagerList() != null) {
             /* Create associated ProjectManager; Set required FK projectId */
-            projectDTO.setProjectManagerList(
-                    projectManagerService.createBulkProjectManagerByDTO(
-                            newProjectDTO.getProjectManagerList().stream()
-                                    .peek(projectManagerDTO -> projectManagerDTO.setProjectId(newProjectId))
-                                    .collect(Collectors.toList())));
+            projectManagerService.createBulkProjectManagerByDTO(
+                    newProjectDTO.getProjectManagerList().stream()
+                            .peek(projectManagerDTO -> projectManagerDTO.setProjectId(newProjectId))
+                            .collect(Collectors.toList()));
         }
 
         /* TODO: projectWorker */
 
-        return projectDTO;
+        return fillDTO(newProject);
     }
 
     /* READ */
     @Override
     public List<ProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
-        if(sortType) {
+        if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
         }else{
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
@@ -246,7 +248,7 @@ public class ProjectServiceImpl implements ProjectService{
 
         Page<Project> pagingResult = projectRepository.findAllByIsDeletedIsFalse(paging);
 
-        if(pagingResult.hasContent()){
+        if (pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
 
             Page<ProjectModel> modelResult =
@@ -316,9 +318,8 @@ public class ProjectServiceImpl implements ProjectService{
     public Page<Project> getPageAll(Pageable paging) throws Exception {
         Page<Project> projectPage = projectRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (projectPage.isEmpty()) {
+        if (projectPage.isEmpty()) 
             return null;
-        }
 
         return projectPage;
     }
@@ -326,62 +327,15 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllInPaging(Pageable paging) throws Exception {
         Page<Project> projectPage = getPageAll(paging);
 
-        if (projectPage == null) {
+        if (projectPage == null) 
             return null;
-        }
 
         List<Project> projectList = projectPage.getContent();
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectPage.getTotalPages();
-
-        Set<Long> projectIdSet = new HashSet<>();
-        Set<Long> locationIdSet = new HashSet<>();
-
-        for (Project project : projectList) {
-            projectIdSet.add(project.getProjectId());
-            locationIdSet.add(project.getLocationId());
-        }
-
-        /* Get associated Location */
-        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
-                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
-
-        /* Get associated Blueprint */
-        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
-                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
-
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
-
-        return projectList.stream()
-                .map(project -> {
-                    ProjectReadDTO projectDTO =
-                            modelMapper.map(project, ProjectReadDTO.class);
-
-                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
-                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(project.getProjectId()));
-
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(project.getProjectId()));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(project.getProjectId()));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(project.getProjectId()));
-
-                    projectDTO.setTotalPage(totalPage);
-
-                    return projectDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectList, projectPage.getTotalPages());
     }
 
     @Override
@@ -398,34 +352,24 @@ public class ProjectServiceImpl implements ProjectService{
     public ProjectReadDTO getDTOById(long projectId) throws Exception {
         Project project = getById(projectId);
 
-        if (project == null) {
+        if (project == null) 
             return null;
-        }
 
-        ProjectReadDTO projectDTO = modelMapper.map(project, ProjectReadDTO.class);
-
-        projectDTO.setLocation(locationService.getDTOById(project.getLocationId()));
-        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(projectId));
-
-        projectDTO.setTaskList(taskService.getAllDTOByProjectId(projectId));
-        projectDTO.setReportList(reportService.getAllDTOByProjectId(projectId));
-        projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
-
-        return projectDTO;
+        return fillDTO(project);
     }
 
     /* get all gì? theo id thì là 1. Các entity con/phụ thuộc là chuyện khác */
     @Override
     public List<ProjectModel> getAllById(long projectId, int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
-        if(sortType) {
+        if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
         }else{
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
         Page<Project> pagingResult = projectRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
-        if(pagingResult.hasContent()){
+        if (pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
             Page<ProjectModel> modelResult =
                     pagingResult.map(new Converter<Project, ProjectModel>() {
@@ -484,9 +428,8 @@ public class ProjectServiceImpl implements ProjectService{
         List<Project> projectList =
                 projectRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
         return projectList;
     }
@@ -494,52 +437,10 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Project> projectList = getAllByIdIn(projectIdCollection);
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
-        Set<Long> projectIdSet = new HashSet<>();
-        Set<Long> locationIdSet = new HashSet<>();
-
-        for (Project project : projectList) {
-            projectIdSet.add(project.getProjectId());
-            locationIdSet.add(project.getLocationId());
-        }
-
-        /* Get associated Location */
-        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
-                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
-
-        /* Get associated Blueprint */
-        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
-                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
-
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
-
-        return projectList.stream()
-                .map(project -> {
-                    ProjectReadDTO projectDTO =
-                            modelMapper.map(project, ProjectReadDTO.class);
-
-                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
-                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(project.getProjectId()));
-
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(project.getProjectId()));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(project.getProjectId()));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(project.getProjectId()));
-
-                    return projectDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectList, null);
     }
 
     @Override
@@ -547,9 +448,8 @@ public class ProjectServiceImpl implements ProjectService{
         List<Project> projectList =
                 projectRepository.findAllByLocationIdAndIsDeletedIsFalse(locationId);
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
         return projectList;
     }
@@ -557,60 +457,17 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByLocationId(long locationId) throws Exception {
         List<Project> projectList = getAllByLocationId(locationId);
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
-        Set<Long> projectIdSet = new HashSet<>();
-        Set<Long> locationIdSet = new HashSet<>();
-
-        for (Project project : projectList) {
-            projectIdSet.add(project.getProjectId());
-            locationIdSet.add(project.getLocationId());
-        }
-
-        /* Get associated Location */
-        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
-                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
-
-        /* Get associated Blueprint */
-        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
-                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
-
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
-
-        return projectList.stream()
-                .map(project -> {
-                    ProjectReadDTO projectDTO =
-                            modelMapper.map(project, ProjectReadDTO.class);
-
-                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
-                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(project.getProjectId()));
-
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(project.getProjectId()));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(project.getProjectId()));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(project.getProjectId()));
-
-                    return projectDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectList, null);
     }
     @Override
     public Page<Project> getPageAllByLocationId(Pageable paging, long locationId) throws Exception {
         Page<Project> projectPage = projectRepository.findAllByLocationIdAndIsDeletedIsFalse(locationId, paging);
 
-        if (projectPage.isEmpty()) {
+        if (projectPage.isEmpty()) 
             return null;
-        }
 
         return projectPage;
     }
@@ -618,62 +475,15 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOInPagingByLocationId(Pageable paging, long locationId) throws Exception {
         Page<Project> projectPage = getPageAllByLocationId(paging, locationId);
 
-        if (projectPage == null) {
+        if (projectPage == null) 
             return null;
-        }
 
         List<Project> projectList = projectPage.getContent();
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectPage.getTotalPages();
-
-        Set<Long> projectIdSet = new HashSet<>();
-        Set<Long> locationIdSet = new HashSet<>();
-
-        for (Project project : projectList) {
-            projectIdSet.add(project.getProjectId());
-            locationIdSet.add(project.getLocationId());
-        }
-
-        /* Get associated Location */
-        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
-                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
-
-        /* Get associated Blueprint */
-        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
-                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
-
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
-
-        return projectList.stream()
-                .map(project -> {
-                    ProjectReadDTO projectDTO =
-                            modelMapper.map(project, ProjectReadDTO.class);
-
-                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
-                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(project.getProjectId()));
-
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(project.getProjectId()));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(project.getProjectId()));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(project.getProjectId()));
-
-                    projectDTO.setTotalPage(totalPage);
-
-                    return projectDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectList, projectPage.getTotalPages());
     }
 
     @Override
@@ -681,9 +491,8 @@ public class ProjectServiceImpl implements ProjectService{
         List<Project> projectList =
                 projectRepository.findAllByLocationIdInAndIsDeletedIsFalse(locationIdCollection);
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
         return projectList;
     }
@@ -691,61 +500,18 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByLocationIdIn(Collection<Long> locationIdCollection) throws Exception {
         List<Project> projectList = getAllByLocationIdIn(locationIdCollection);
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
-        Set<Long> projectIdSet = new HashSet<>();
-        Set<Long> locationIdSet = new HashSet<>();
-
-        for (Project project : projectList) {
-            projectIdSet.add(project.getProjectId());
-            locationIdSet.add(project.getLocationId());
-        }
-
-        /* Get associated Location */
-        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
-                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
-
-        /* Get associated Blueprint */
-        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
-                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
-
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
-
-        return projectList.stream()
-                .map(project -> {
-                    ProjectReadDTO projectDTO =
-                            modelMapper.map(project, ProjectReadDTO.class);
-
-                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
-                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(project.getProjectId()));
-
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(project.getProjectId()));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(project.getProjectId()));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(project.getProjectId()));
-
-                    return projectDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectList, null);
     }
     @Override
     public Page<Project> getPageAllByLocationIdIn(Pageable paging, Collection<Long> locationIdCollection) throws Exception {
         Page<Project> projectPage =
                 projectRepository.findAllByLocationIdInAndIsDeletedIsFalse(locationIdCollection, paging);
 
-        if (projectPage.isEmpty()) {
+        if (projectPage.isEmpty()) 
             return null;
-        }
 
         return projectPage;
     }
@@ -753,68 +519,21 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOInPagingByLocationIdIn(Pageable paging, Collection<Long> locationIdCollection) throws Exception {
         Page<Project> projectPage = getPageAllByLocationIdIn(paging, locationIdCollection);
 
-        if (projectPage == null) {
+        if (projectPage == null) 
             return null;
-        }
 
         List<Project> projectList = projectPage.getContent();
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectPage.getTotalPages();
-
-        Set<Long> projectIdSet = new HashSet<>();
-        Set<Long> locationIdSet = new HashSet<>();
-
-        for (Project project : projectList) {
-            projectIdSet.add(project.getProjectId());
-            locationIdSet.add(project.getLocationId());
-        }
-
-        /* Get associated Location */
-        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
-                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
-
-        /* Get associated Blueprint */
-        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
-                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
-
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
-
-        return projectList.stream()
-                .map(project -> {
-                    ProjectReadDTO projectDTO =
-                            modelMapper.map(project, ProjectReadDTO.class);
-
-                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
-                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(project.getProjectId()));
-
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(project.getProjectId()));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(project.getProjectId()));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(project.getProjectId()));
-
-                    projectDTO.setTotalPage(totalPage);
-
-                    return projectDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectList, projectPage.getTotalPages());
     }
 
     @Override
     public boolean checkDuplicate(String projectName) {
         Project checkDuplicateProject = projectRepository.getByProjectNameAndIsDeletedIsFalse(projectName);
-        if(checkDuplicateProject != null) {
+        if (checkDuplicateProject != null) {
             return true;
         }
         return false;
@@ -830,20 +549,10 @@ public class ProjectServiceImpl implements ProjectService{
     public ProjectReadDTO getDTOByProjectName(String projectName) throws Exception {
         Project project = getByProjectName(projectName);
 
-        if (project == null) {
+        if (project == null) 
             return null;
-        }
 
-        ProjectReadDTO projectDTO = modelMapper.map(project, ProjectReadDTO.class);
-
-        projectDTO.setLocation(locationService.getDTOById(project.getLocationId()));
-        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(project.getProjectId()));
-
-        projectDTO.setTaskList(taskService.getAllDTOByProjectId(project.getProjectId()));
-        projectDTO.setReportList(reportService.getAllDTOByProjectId(project.getProjectId()));
-        projectDTO.setRequestList(requestService.getAllDTOByProjectId(project.getProjectId()));
-
-        return projectDTO;
+        return fillDTO(project);
     }
 
     @Override
@@ -851,9 +560,8 @@ public class ProjectServiceImpl implements ProjectService{
         List<Project> projectList =
                 projectRepository.findAllByProjectNameContainsAndIsDeletedIsFalse(projectName);
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
         return projectList;
     }
@@ -861,61 +569,18 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByProjectNameContains(String projectName) throws Exception {
         List<Project> projectList = getAllByProjectNameContains(projectName);
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
-        Set<Long> projectIdSet = new HashSet<>();
-        Set<Long> locationIdSet = new HashSet<>();
-
-        for (Project project : projectList) {
-            projectIdSet.add(project.getProjectId());
-            locationIdSet.add(project.getLocationId());
-        }
-
-        /* Get associated Location */
-        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
-                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
-
-        /* Get associated Blueprint */
-        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
-                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
-
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
-
-        return projectList.stream()
-                .map(project -> {
-                    ProjectReadDTO projectDTO =
-                            modelMapper.map(project, ProjectReadDTO.class);
-
-                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
-                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(project.getProjectId()));
-
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(project.getProjectId()));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(project.getProjectId()));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(project.getProjectId()));
-
-                    return projectDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectList, null);
     }
     @Override
     public Page<Project> getPageAllByProjectNameContains(Pageable paging, String projectName) throws Exception {
         Page<Project> projectPage =
                 projectRepository.findAllByProjectNameContainsAndIsDeletedIsFalse(projectName, paging);
 
-        if (projectPage.isEmpty()) {
+        if (projectPage.isEmpty()) 
             return null;
-        }
 
         return projectPage;
     }
@@ -923,62 +588,15 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOInPagingByProjectNameContains(Pageable paging, String projectName) throws Exception {
         Page<Project> projectPage = getPageAllByProjectNameContains(paging, projectName);
 
-        if (projectPage == null) {
+        if (projectPage == null) 
             return null;
-        }
 
         List<Project> projectList = projectPage.getContent();
 
-        if (projectList.isEmpty()) {
+        if (projectList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectPage.getTotalPages();
-
-        Set<Long> projectIdSet = new HashSet<>();
-        Set<Long> locationIdSet = new HashSet<>();
-
-        for (Project project : projectList) {
-            projectIdSet.add(project.getProjectId());
-            locationIdSet.add(project.getLocationId());
-        }
-
-        /* Get associated Location */
-        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
-                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
-
-        /* Get associated Blueprint */
-        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
-                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
-
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
-
-        return projectList.stream()
-                .map(project -> {
-                    ProjectReadDTO projectDTO =
-                            modelMapper.map(project, ProjectReadDTO.class);
-
-                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
-                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(project.getProjectId()));
-
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(project.getProjectId()));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(project.getProjectId()));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(project.getProjectId()));
-
-                    projectDTO.setTotalPage(totalPage);
-
-                    return projectDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectList, projectPage.getTotalPages());
     }
 
     @Override
@@ -1015,7 +633,7 @@ public class ProjectServiceImpl implements ProjectService{
     public boolean updateProject(UpdateProjectModel updateProjectModel) {
             Project project = projectRepository.findById(updateProjectModel.getProjectId()).orElse(null);
             /* optional.get() mà null -> ra Exception, khỏi check null luôn  */
-            if(project != null) {
+            if (project != null) {
                 UpdateLocationModel locationModel = new UpdateLocationModel();
                 locationModel.setLocationId(updateProjectModel.getLocationId());
                 locationModel.setAddressNumber(updateProjectModel.getAddressNumber());
@@ -1059,9 +677,8 @@ public class ProjectServiceImpl implements ProjectService{
     public Project updateProject(Project updatedProject) throws Exception {
         Project oldProject = getById(updatedProject.getProjectId());
 
-        if (oldProject == null) {
+        if (oldProject == null) 
             return null;
-        }
 
         String errorMsg = "";
 
@@ -1099,9 +716,8 @@ public class ProjectServiceImpl implements ProjectService{
             errorMsg += "Already exists another Project with name: '" + updatedProject.getProjectName() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         updatedProject.setCreatedBy(oldProject.getCreatedBy());
         updatedProject.setCreatedAt(oldProject.getCreatedAt());
@@ -1119,7 +735,7 @@ public class ProjectServiceImpl implements ProjectService{
 
         Project updatedProject = modelMapper.map(updatedProjectDTO, Project.class);
 
-        /* Already check not null */
+        /* Already check NOT NULL */
         updatedProject.setPlanStartDate(
                 LocalDateTime.parse(updatedProjectDTO.getPlanStartDate(), dateTimeFormatter));
 
@@ -1135,6 +751,7 @@ public class ProjectServiceImpl implements ProjectService{
         boolean hasActualStartDate = false;
         if (updatedProjectDTO.getActualStartDate() != null) {
             hasActualStartDate = true;
+
             updatedProject.setActualStartDate(
                     LocalDateTime.parse(updatedProjectDTO.getActualStartDate(), dateTimeFormatter));
         }
@@ -1143,15 +760,15 @@ public class ProjectServiceImpl implements ProjectService{
             updatedProject.setActualEndDate(
                     LocalDateTime.parse(updatedProjectDTO.getActualEndDate(), dateTimeFormatter));
             
-            if (hasActualStartDate) {
-                if (updatedProject.getActualEndDate().isBefore(updatedProject.getActualStartDate())) {
+            if (hasActualStartDate)
+                if (updatedProject.getActualEndDate().isBefore(updatedProject.getActualStartDate()))
                     throw new IllegalArgumentException("actualEndDate is before actualStartDate");
-                }
-            }
         }
 
-        /* Update Location if changed / Get associated Location  */
         LocationReadDTO locationDTO;
+        /* TODO: reuse later */
+        /*
+        /* Update Location if changed / Get associated Location  * /
         if (updatedProjectDTO.getLocation() != null) {
             switch (updatedProjectDTO.getLocation().getUpdateOption()) {
                 case CREATE_NEW_LOCATION:
@@ -1159,7 +776,7 @@ public class ProjectServiceImpl implements ProjectService{
                         throw new IllegalArgumentException("Missing REQUIRED newLocation");
                     }
 
-                    /* Create Location first (to get locationId) */
+                    /* Create Location first (to get locationId) * /
                     locationDTO = locationService.createLocationByDTO(updatedProjectDTO.getLocation().getNewLocation());
                     break;
 
@@ -1168,13 +785,13 @@ public class ProjectServiceImpl implements ProjectService{
                         throw new IllegalArgumentException("Missing REQUIRED existingLocationId");
                     }
 
-                    /* Get associated Location */
+                    /* Get associated Location * /
                     locationDTO = locationService.getDTOById(updatedProjectDTO.getLocation().getExistingLocationId());
 
                     if (locationDTO == null) {
-                        /* Not found location with Id, NEED TO STOP */
+                        /* Not found location with Id, NEED TO STOP * /
                         throw new IllegalArgumentException("No location found with Id: '"
-                                + updatedProjectDTO.getLocation().getExistingLocationId() +"'. ");
+                                + updatedProjectDTO.getLocation().getExistingLocationId() + "'. ");
                     }
                     break;
 
@@ -1183,12 +800,12 @@ public class ProjectServiceImpl implements ProjectService{
                         throw new IllegalArgumentException("Missing REQUIRED existingLocationId");
                     }
 
-                    /* Update associated Location */
+                    /* Update associated Location * /
                     locationDTO =
                             locationService.updateLocationByDTO(updatedProjectDTO.getLocation().getUpdatedLocation());
 
                     if (locationDTO == null) {
-                        /* Not found location with Id, NEED TO STOP */
+                        /* Not found location with Id, NEED TO STOP * /
                         throw new IllegalArgumentException("Invalid locationId, No location found with Id to update");
                     }
                     break;
@@ -1197,29 +814,35 @@ public class ProjectServiceImpl implements ProjectService{
                     throw new IllegalArgumentException("Invalid updateOption used");
             }
 
-            /* Set locationId because updateProject() check FK */
+            /* Set locationId because updateProject() check FK * /
             updatedProject.setLocationId(locationDTO.getLocationId());
 
             updatedProject = updateProject(updatedProject);
         } else {
             updatedProject = updateProject(updatedProject);
 
-            /* Get associated Location */
+            /* Get associated Location * /
             locationDTO = locationService.getDTOById(updatedProject.getLocationId());
+        } */
+
+        /* Update associated Location if changed */
+        if (updatedProjectDTO.getLocation() != null) {
+            locationDTO = locationService.updateLocationByDTO(updatedProjectDTO.getLocation());
+
+            if (locationDTO == null) {
+                /* Not found location with Id, NEED TO STOP */
+                throw new IllegalArgumentException("Invalid locationId, No location found with Id to update");
+            }
         }
 
-        if (updatedProject == null) {
-            return null;
-            /* Not found with Id */
-        }
+        updatedProject = updateProject(updatedProject);
+
+        if (updatedProject == null)
+            return null; /* Not found with Id */
+
         long updatedProjectId = updatedProject.getProjectId();
 
-        ProjectReadDTO projectDTO = modelMapper.map(updatedProject, ProjectReadDTO.class);
-
-        /* Set associated Location */
-        projectDTO.setLocation(locationDTO);
-
-        /* Update associated Blueprint */
+        /* Update associated Blueprint if changed */
         if (updatedProjectDTO.getBlueprint() != null) {
             /* Just in case */
             updatedProjectDTO.getBlueprint().setProjectId(updatedProjectId);
@@ -1227,10 +850,7 @@ public class ProjectServiceImpl implements ProjectService{
             blueprintService.updateBlueprintByDTO(updatedProjectDTO.getBlueprint());
         }
 
-        /* Get associated Blueprint */
-        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(updatedProjectId));
-
-        /* Associated ProjectManager */
+        /* Update associated ProjectManager if changed */
         if (updatedProjectDTO.getProjectManagerList() != null) {
             /* Just in case */
             updatedProjectDTO.setProjectManagerList(
@@ -1238,9 +858,10 @@ public class ProjectServiceImpl implements ProjectService{
                             .peek(projectManagerDTO -> projectManagerDTO.setProjectId(updatedProjectId))
                             .collect(Collectors.toList()));
 
+            /* TODO: reuse when login done
             modelMapper.typeMap(ProjectManagerUpdateDTO.class, ProjectManagerCreateDTO.class)
                     .addMappings(mapper -> {
-                        mapper.map(ProjectManagerUpdateDTO::getUpdatedBy, ProjectManagerCreateDTO::setCreatedBy);});
+                        mapper.map(ProjectManagerUpdateDTO::getUpdatedBy, ProjectManagerCreateDTO::setCreatedBy);});*/
 
             List<ProjectManagerCreateDTO> newProjectManagerDTOList = new ArrayList<>();
             List<ProjectManagerUpdateDTO> updatedProjectManagerDTOList = new ArrayList<>();
@@ -1264,22 +885,9 @@ public class ProjectServiceImpl implements ProjectService{
             }
         }
 
-        /* Get associated ProjectManager (after insert/update) */
-        projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(updatedProjectId));
+        /* TODO: Update associated ProjectWorker if changed */
 
-        /* TODO: Get associated ProjectWorker (after insert/update)
-        projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(updatedProjectId));*/
-
-        /* Get associated Task */
-        projectDTO.setTaskList(taskService.getAllDTOByProjectId(updatedProjectId));
-
-        /* Get associated Report */
-        projectDTO.setReportList(reportService.getAllDTOByProjectId(updatedProjectId));
-
-        /* Get associated Request */
-        projectDTO.setRequestList(requestService.getAllDTOByProjectId(updatedProjectId));
-
-        return projectDTO;
+        return fillDTO(updatedProject);
     }
 
     /* DELETE */
@@ -1296,5 +904,82 @@ public class ProjectServiceImpl implements ProjectService{
         projectRepository.saveAndFlush(project);
 
         return true;
+    }
+
+    /* Utils */
+    private ProjectReadDTO fillDTO(Project project) throws Exception {
+        long projectId = project.getProjectId();
+
+        ProjectReadDTO projectDTO = modelMapper.map(project, ProjectReadDTO.class);
+
+        /* NOT NULL */
+        projectDTO.setLocation(locationService.getDTOById(project.getLocationId()));
+        projectDTO.setBlueprint(blueprintService.getDTOByProjectId(projectId));
+
+        /* Nullable */
+        projectDTO.setTaskList(taskService.getAllDTOByProjectId(projectId));
+        projectDTO.setReportList(reportService.getAllDTOByProjectId(projectId));
+        projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
+        projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(projectId));
+        /* TODO: ProjectWorkerList */
+
+        return projectDTO;
+    }
+
+    private List<ProjectReadDTO> fillAllDTO(List<Project> projectList, Integer totalPage) throws Exception {
+        Set<Long> locationIdSet = new HashSet<>();
+        Set<Long> projectIdSet = new HashSet<>();
+
+        for (Project project : projectList) {
+            locationIdSet.add(project.getLocationId());
+            projectIdSet.add(project.getProjectId());
+        }
+
+        /* Get associated Location */
+        Map<Long, LocationReadDTO> locationIdLocationDTOMap =
+                locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
+        /* Get associated Blueprint */
+        Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
+                blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
+
+        /* Get associated Task */
+        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
+                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
+        /* Get associated Report */
+        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
+                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
+        /* Get associated Request */
+        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
+                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
+        /* Get associated ProjectManager */
+        Map<Long, List<ProjectManagerReadDTO>> projectIdProjectManagerDTOListMap =
+                projectManagerService.mapProjectIdProjectManagerDTOListByProjectIdIn(projectIdSet);
+        /* Get associated ProjectWorker */
+        /* TODO: ProjectWorkerMap
+        Map<Long, List<ProjectWorkerReadDTO>> projectIdProjectWorkerDTOListMap =
+                projectWorkerService.mapProjectIdProjectWorkerDTOListByProjectIdIn(projectIdSet);*/
+
+        return projectList.stream()
+                .map(project -> {
+                    ProjectReadDTO projectDTO =
+                            modelMapper.map(project, ProjectReadDTO.class);
+
+                    long tmpProjectId = project.getProjectId();
+
+                    /* NOT NULL */
+                    projectDTO.setLocation(locationIdLocationDTOMap.get(project.getLocationId()));
+                    projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(tmpProjectId));
+
+                    /* Nullable */
+                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(tmpProjectId));
+                    projectDTO.setReportList(projectIdReportDTOListMap.get(tmpProjectId));
+                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
+                    projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
+                    /* TODO: ProjectWorkerList */
+
+                    projectDTO.setTotalPage(totalPage);
+
+                    return projectDTO;})
+                .collect(Collectors.toList());
     }
 }

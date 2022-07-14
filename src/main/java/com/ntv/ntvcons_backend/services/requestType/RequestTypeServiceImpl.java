@@ -5,8 +5,10 @@ import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
 import com.ntv.ntvcons_backend.entities.RequestType;
 import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
+import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,20 +28,29 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     private RequestTypeRepository requestTypeRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private UserService userService;
 
     /* CREATE */
     @Override
     public RequestType createRequestType(RequestType newRequestType) throws Exception {
         String errorMsg = "";
 
-        /* Check duplicate */
-        if (requestTypeRepository.existsByRequestTypeNameAndIsDeletedIsFalse(newRequestType.getRequestTypeName())) {
-            errorMsg += "Already exists another RequestType with name: '" + newRequestType.getRequestTypeName() + "'. ";
+        /* Check FK */
+        if (userService.existsById(newRequestType.getCreatedBy())) {
+            errorMsg += "No User (CreatedBy) found with Id: '" + newRequestType.getCreatedBy()
+                    + "'. Which violate constraint: FK_RequestType_User_CreatedBy. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
-            throw new IllegalArgumentException(errorMsg);
+        /* Check duplicate */
+        if (requestTypeRepository.existsByRequestTypeNameAndIsDeletedIsFalse(newRequestType.getRequestTypeName())) {
+            errorMsg += "Already exists another RequestType with name: '"
+                    + newRequestType.getRequestTypeName() + "'. ";
         }
+
+        if (!errorMsg.trim().isEmpty()) 
+            throw new IllegalArgumentException(errorMsg);
 
         return requestTypeRepository.saveAndFlush(newRequestType);
     }
@@ -49,45 +60,32 @@ public class RequestTypeServiceImpl implements RequestTypeService {
 
         newRequestType = createRequestType(newRequestType);
 
-        return modelMapper.map(newRequestType, RequestTypeReadDTO.class);
+        return fillDTO(newRequestType);
     }
 
     /* READ */
     @Override
-    public List<RequestType> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        Pageable paging;
-        if (sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        } else {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
+    public Page<RequestType> getPageAll(Pageable paging) throws Exception {
         Page<RequestType> requestTypePage = requestTypeRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (requestTypePage.isEmpty()) {
+        if (requestTypePage.isEmpty()) 
             return null;
-        }
 
-        return requestTypePage.getContent();
+        return requestTypePage;
     }
     @Override
-    public List<RequestTypeReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        List<RequestType> requestTypeList = getAll(pageNo, pageSize, sortBy, sortType);
+    public List<RequestTypeReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
+        Page<RequestType> requestTypePage = getPageAll(paging);
 
-        if (requestTypeList != null && !requestTypeList.isEmpty()) {
-            int totalPage = (int) Math.ceil((double) requestTypeList.size() / pageSize);
+        if (requestTypePage == null)
+            return null;
 
-            return requestTypeList.stream()
-                    .map(requestType -> {
-                        RequestTypeReadDTO requestTypeReadDTO =
-                                modelMapper.map(requestType, RequestTypeReadDTO.class);
-                        requestTypeReadDTO.setTotalPage(totalPage);
-                        return requestTypeReadDTO;})
-                    .collect(Collectors.toList());
+        List<RequestType> requestTypeList = requestTypePage.getContent();
 
-        } 
-            
-        return null;
+        if (requestTypeList.isEmpty())
+            return null;
+
+        return fillAllDTO(requestTypeList, requestTypePage.getTotalPages());
     }
 
     @Override
@@ -104,25 +102,19 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     public RequestTypeReadDTO getDTOById(long requestTypeId) throws Exception {
         RequestType requestType = getById(requestTypeId);
 
-        if (requestType == null) {
+        if (requestType == null) 
             return null;
-        }
 
-        return modelMapper.map(requestType, RequestTypeReadDTO.class);
+        return fillDTO(requestType);
     }
 
-    @Override
-    public boolean existsAllByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
-        return requestTypeRepository.existsAllByRequestTypeIdInAndIsDeletedIsFalse(requestTypeIdCollection);
-    }
     @Override
     public List<RequestType> getAllByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
         List<RequestType> requestTypeList =
                 requestTypeRepository.findAllByRequestTypeIdInAndIsDeletedIsFalse(requestTypeIdCollection);
 
-        if (requestTypeList.isEmpty()) {
+        if (requestTypeList.isEmpty()) 
             return null;
-        }
 
         return requestTypeList;
     }
@@ -130,35 +122,36 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     public List<RequestTypeReadDTO> getAllDTOByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
         List<RequestType> requestTypeList = getAllByIdIn(requestTypeIdCollection);
 
-        if (requestTypeList == null) {
+        if (requestTypeList == null) 
             return null;
-        }
 
-        return requestTypeList.stream()
-                .map(requestType -> modelMapper.map(requestType, RequestTypeReadDTO.class))
-                .collect(Collectors.toList());
-    }
-    @Override
-    public Map<Long, RequestType> mapRequestTypeIdRequestTypeByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
-        List<RequestType> requestTypeList = getAllByIdIn(requestTypeIdCollection);
-
-        if (requestTypeList == null) {
-            return new HashMap<>();
-        }
-
-        return requestTypeList.stream()
-                .collect(Collectors.toMap(RequestType::getRequestTypeId, Function.identity()));
+        return fillAllDTO(requestTypeList, null);
     }
     @Override
     public Map<Long, RequestTypeReadDTO> mapRequestTypeIdRequestTypeDTOByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
         List<RequestTypeReadDTO> requestTypeDTOList = getAllDTOByIdIn(requestTypeIdCollection);
 
-        if (requestTypeDTOList == null) {
+        if (requestTypeDTOList == null) 
             return new HashMap<>();
-        }
 
         return requestTypeDTOList.stream()
                 .collect(Collectors.toMap(RequestTypeReadDTO::getRequestTypeId, Function.identity()));
+    }
+
+    @Override
+    public RequestType getByRequestTypeName(String requestTypeName) throws Exception {
+        return requestTypeRepository
+                .findByRequestTypeNameAndIsDeletedIsFalse(requestTypeName)
+                .orElse(null);
+    }
+    @Override
+    public RequestTypeReadDTO getDTOByRequestTypeName(String requestTypeName) throws Exception {
+        RequestType requestType = getByRequestTypeName(requestTypeName);
+
+        if (requestType == null)
+            return null;
+
+        return fillDTO(requestType);
     }
 
     @Override
@@ -166,9 +159,8 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         List<RequestType> requestTypeList =
                 requestTypeRepository.findAllByRequestTypeNameContainsAndIsDeletedIsFalse(requestTypeName);
 
-        if (requestTypeList.isEmpty()) {
+        if (requestTypeList.isEmpty())
             return null;
-        }
 
         return requestTypeList;
     }
@@ -176,38 +168,75 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     public List<RequestTypeReadDTO> getAllDTOByRequestTypeNameContains(String requestTypeName) throws Exception {
         List<RequestType> requestTypeList = getAllByRequestTypeNameContains(requestTypeName);
 
-        if (requestTypeList == null) {
+        if (requestTypeList == null)
             return null;
-        }
 
-        return requestTypeList.stream()
-                .map(requestType -> modelMapper.map(requestType, RequestTypeReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(requestTypeList, null);
+    }
+    @Override
+    public Page<RequestType> getPageAllByRequestTypeNameContains(Pageable paging, String requestTypeName) throws Exception {
+        Page<RequestType> requestTypePage =
+                requestTypeRepository.findAllByRequestTypeNameContainsAndIsDeletedIsFalse(requestTypeName, paging);
+
+        if (requestTypePage.isEmpty())
+            return null;
+
+        return requestTypePage;
+    }
+    @Override
+    public List<RequestTypeReadDTO> getAllDTOInPagingByRequestTypeNameContains(Pageable paging, String requestTypeName) throws Exception {
+        Page<RequestType> requestTypePage = getPageAllByRequestTypeNameContains(paging, requestTypeName);
+
+        if (requestTypePage == null)
+            return null;
+
+        List<RequestType> requestTypeList = requestTypePage.getContent();
+
+        if (requestTypeList.isEmpty())
+            return null;
+
+        return fillAllDTO(requestTypeList, requestTypePage.getTotalPages());
     }
 
     /* UPDATE */
     @Override
     public RequestType updateRequestType(RequestType updatedRequestType) throws Exception {
-        RequestType requestType = getById(updatedRequestType.getRequestTypeId());
+        RequestType oldRequestType = getById(updatedRequestType.getRequestTypeId());
 
-        if (requestType == null) {
-            return null;
-            /* Not found by Id, return null */
-        }
+        if (oldRequestType == null)
+            return null; /* Not found by Id, return null */
 
         String errorMsg = "";
+
+        /* Check FK */
+        if (oldRequestType.getUpdatedBy() != null) {
+            if (!oldRequestType.getUpdatedBy().equals(updatedRequestType.getUpdatedBy())) {
+                if (userService.existsById(updatedRequestType.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequestType.getUpdatedBy()
+                            + "'. Which violate constraint: FK_RequestType_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (userService.existsById(updatedRequestType.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequestType.getUpdatedBy()
+                        + "'. Which violate constraint: FK_RequestType_User_UpdatedBy. ";
+            }
+        }
 
         /* Check duplicate */
         if (requestTypeRepository
                 .existsByRequestTypeNameAndRequestTypeIdIsNotAndIsDeletedIsFalse(
                         updatedRequestType.getRequestTypeName(),
                         updatedRequestType.getRequestTypeId())) {
-            errorMsg += "Already exists another RequestType with name: '" + updatedRequestType.getRequestTypeName() + "'. ";
+            errorMsg += "Already exists another RequestType with name: '" 
+                    + updatedRequestType.getRequestTypeName() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty())
             throw new IllegalArgumentException(errorMsg);
-        }
+
+        updatedRequestType.setCreatedAt(oldRequestType.getCreatedAt());
+        updatedRequestType.setCreatedBy(oldRequestType.getCreatedBy());
 
         return requestTypeRepository.saveAndFlush(updatedRequestType);
     }
@@ -217,11 +246,10 @@ public class RequestTypeServiceImpl implements RequestTypeService {
 
         updatedRequestType = updateRequestType(updatedRequestType);
 
-        if (updatedRequestType == null) {
+        if (updatedRequestType == null) 
             return null;
-        }
 
-        return modelMapper.map(updatedRequestType, RequestTypeReadDTO.class);
+        return fillDTO(updatedRequestType);
     }
 
     /* DELETE */
@@ -238,5 +266,22 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         requestTypeRepository.saveAndFlush(requestType);
 
         return true;
+    }
+
+    /* Utils */
+    private RequestTypeReadDTO fillDTO(RequestType requestType) throws Exception {
+        return modelMapper.map(requestType, RequestTypeReadDTO.class);
+    }
+
+    private List<RequestTypeReadDTO> fillAllDTO(List<RequestType> requestTypeList, Integer totalPage) throws Exception {
+        return requestTypeList.stream()
+                .map(requestType -> {
+                    RequestTypeReadDTO requestTypeDTO =
+                            modelMapper.map(requestType, RequestTypeReadDTO.class);
+
+                    requestTypeDTO.setTotalPage(totalPage);
+
+                    return requestTypeDTO;})
+                .collect(Collectors.toList());
     }
 }

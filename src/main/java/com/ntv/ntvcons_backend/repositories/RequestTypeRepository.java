@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface RequestTypeRepository extends JpaRepository<RequestType, Long> {
-    Page<RequestType> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<RequestType> findAllByIsDeletedIsFalse(Pageable paging);
 
 
     /* Id */
@@ -27,6 +27,7 @@ public interface RequestTypeRepository extends JpaRepository<RequestType, Long> 
 
     /* requestTypeName */
     boolean existsByRequestTypeNameAndIsDeletedIsFalse(String requestTypeName);
-    Optional<RequestType> findAllByRequestTypeNameAndIsDeletedIsFalse(String requestTypeName);
+    Optional<RequestType> findByRequestTypeNameAndIsDeletedIsFalse(String requestTypeName);
     List<RequestType> findAllByRequestTypeNameContainsAndIsDeletedIsFalse(String requestTypeName);
+    Page<RequestType> findAllByRequestTypeNameContainsAndIsDeletedIsFalse(String requestTypeName, Pageable paging);
 }

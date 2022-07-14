@@ -4,6 +4,8 @@ import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailUpdateDTO;
 import com.ntv.ntvcons_backend.entities.ReportDetail;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,8 +19,8 @@ public interface ReportDetailService { /* TODO: throws Exception for controller 
     List<ReportDetailReadDTO> createBulkReportDetailByDTOList(Collection<ReportDetailCreateDTO> newReportDetailDTOList) throws Exception;
 
     /* READ */
-    List<ReportDetail> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
-    List<ReportDetailReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception;
+    Page<ReportDetail> getPageAll(Pageable paging) throws Exception;
+    List<ReportDetailReadDTO> getAllDTOInPaging(Pageable paging) throws Exception;
 
     ReportDetail getById(long reportDetailId) throws Exception;
     ReportDetailReadDTO getDTOById(long reportDetailId) throws Exception;
@@ -28,11 +30,14 @@ public interface ReportDetailService { /* TODO: throws Exception for controller 
 
     List<ReportDetail> getAllByReportId(long reportId) throws Exception;
     List<ReportDetailReadDTO> getAllDTOByReportId(long reportId) throws Exception;
+    Page<ReportDetail> getPageAllByReportId(Pageable paging, long reportId) throws Exception;
+    List<ReportDetailReadDTO> getAllDTOInPagingByReportId(Pageable paging,long reportId) throws Exception;
 
     List<ReportDetail> getAllByReportIdIn(Collection<Long> reportIdCollection) throws Exception;
     List<ReportDetailReadDTO> getAllDTOByReportIdIn(Collection<Long> reportIdCollection) throws Exception;
-    Map<Long, List<ReportDetail>> mapReportIdReportDetailListByReportIdIn(Collection<Long> reportIdCollection) throws Exception;
     Map<Long, List<ReportDetailReadDTO>> mapReportIdReportDetailDTOListByReportIdIn(Collection<Long> reportIdCollection) throws Exception;
+    Page<ReportDetail> getPageAllByReportIdIn(Pageable paging, Collection<Long> reportIdCollection) throws Exception;
+    List<ReportDetailReadDTO> getAllDTOInPagingByReportIdIn(Pageable paging, Collection<Long> reportIdCollection) throws Exception;
 
     /* UPDATE */
     ReportDetail updateReportDetail(ReportDetail updatedReportDetail) throws Exception;

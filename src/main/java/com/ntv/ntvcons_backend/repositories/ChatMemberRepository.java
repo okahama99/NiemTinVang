@@ -16,7 +16,7 @@
 //
 //    List<ChatMember> findByUserAndStatus(User user, Status status);
 //
-//    Page<ChatMember> findByUserOrderByChatRoomUpdatedAtDescAndStatus(User user, Pageable pageable, Status status);
+//    Page<ChatMember> findByUserOrderByChatRoomUpdatedAtDescAndStatus(User user, Pageable paging, Status status);
 //
-//    Page<ChatMember> findByStatusAndMemberIdOrderByUpdatedAtDesc(Status status, Long userId, Pageable pageable);
+//    Page<ChatMember> findByStatusAndMemberIdOrderByUpdatedAtDesc(Status status, Long userId, Pageable paging);
 //}

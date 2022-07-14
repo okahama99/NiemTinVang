@@ -6,7 +6,9 @@ import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.services.task.TaskService;
+import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,12 +17,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-
-@Controller
-@RequestMapping("/task")
+@Controller@RequestMapping("/task")
 public class TaskController {
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private ThanhUtil thanhUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -49,7 +51,9 @@ public class TaskController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<TaskReadDTO> taskDTOList = taskService.getAllDTO(pageNo, pageSize, sortBy, sortTypeAsc);
+            List<TaskReadDTO> taskDTOList = 
+                    taskService.getAllDTOInPaging(
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (taskDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Task found");
@@ -69,8 +73,45 @@ public class TaskController {
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.TASK searchType) {
-        // TODO:
-        return null;
+        try {
+            TaskReadDTO taskDTO;
+
+            switch (searchType) {
+                case BY_ID:
+                    taskDTO = taskService.getDTOById(Long.parseLong(searchParam));
+
+                    if (taskDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Task found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Task");
+            }
+
+            return ResponseEntity.ok().body(taskDTO);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for Task with ";
+
+            switch (searchType) {
+                case BY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 
     //@PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
@@ -82,11 +123,24 @@ public class TaskController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+
             List<TaskReadDTO> taskDTOList;
 
             switch (searchType) {
+                case BY_NAME:
+                    taskDTOList =
+                            taskService.getAllDTOInPagingByTaskName(paging, searchParam);
+
+                    if (taskDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Task found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+
                 case BY_NAME_CONTAINS:
-                    taskDTOList = taskService.getAllDTOByTaskNameContains(searchParam);
+                    taskDTOList =
+                            taskService.getAllDTOInPagingByTaskNameContains(paging, searchParam);
 
                     if (taskDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -95,7 +149,8 @@ public class TaskController {
                     break;
 
                 case BY_PROJECT_ID:
-                    taskDTOList = taskService.getAllDTOByProjectId(Long.parseLong(searchParam));
+                    taskDTOList =
+                            taskService.getAllDTOInPagingByProjectId(paging, Long.parseLong(searchParam));
 
                     if (taskDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -121,6 +176,10 @@ public class TaskController {
             String errorMsg = "Error searching for Task with ";
 
             switch (searchType) {
+                case BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
+                    break;
+
                 case BY_NAME_CONTAINS:
                     errorMsg += "name contains: '" + searchParam + "'. ";
                     break;

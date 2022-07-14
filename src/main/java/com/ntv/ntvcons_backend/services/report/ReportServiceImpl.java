@@ -22,9 +22,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -63,23 +61,27 @@ public class ReportServiceImpl implements ReportService {
             errorMsg += "No Project found with Id: '" + newReport.getProjectId()
                     + "'. Which violate constraint: FK_Report_Project. ";
         }
-        if (!userService.existsById(newReport.getReporterId())) {
-            errorMsg += "No User found with Id: '" + newReport.getReporterId()
-                    + "'. Which violate constraint: FK_Report_User. ";
-        }
         if (!reportTypeService.existsById(newReport.getReportTypeId())) {
             errorMsg += "No ReportType found with Id: '" + newReport.getReportTypeId()
                     + "'. Which violate constraint: FK_Report_ReportType. ";
         }
+        if (!userService.existsById(newReport.getReporterId())) {
+            errorMsg += "No User (Reporter) found with Id: '" + newReport.getReporterId()
+                    + "'. Which violate constraint: FK_Report_User_ReporterId. ";
+        }
+        if (!userService.existsById(newReport.getCreatedBy())) {
+            errorMsg += "No User (CreatedBy) found with Id: '" + newReport.getCreatedBy()
+                    + "'. Which violate constraint: FK_Report_User_CreatedBy. ";
+        }
 
         /* Check duplicate */
-        if (reportRepository.existsByReportNameAndIsDeletedIsFalse(newReport.getReportName())) {
+        if (reportRepository
+                .existsByReportNameAndIsDeletedIsFalse(newReport.getReportName())) {
             errorMsg += "Already exists another Report with name: '" + newReport.getReportName() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         /* TODO: create EntityWrapper for report */
 
@@ -92,36 +94,40 @@ public class ReportServiceImpl implements ReportService {
                     mapper.skip(Report::setReportDate);});
 
         Report newReport = modelMapper.map(newReportDTO, Report.class);
-        newReport.setReportDate(LocalDateTime.parse(newReportDTO.getReportDate(), dateTimeFormatter));
+
+        /* Already check NOT NULL */
+        newReport.setReportDate(
+                LocalDateTime.parse(newReportDTO.getReportDate(), dateTimeFormatter));
+
+        if (newReport.getReportDate().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("reportDate can't be in the future");
+        }
 
         newReport = createReport(newReport);
 
-        ReportReadDTO reportDTO = modelMapper.map(newReport, ReportReadDTO.class);
-
-        /* Get associated ReportType */
-        reportDTO.setReportType(reportTypeService.getDTOById(newReport.getReportTypeId()));
+        long reportId = newReport.getReportId();
 
         /* Create associated ReportDetail; Set required FK reportId */
         List<ReportDetailCreateDTO> newReportDetailDTOList = newReportDTO.getReportDetailList();
         if (newReportDetailDTOList != null) {
-            reportDTO.setReportDetailList(
-                    reportDetailService.createBulkReportDetailByDTOList(
-                            newReportDetailDTOList.stream()
-                                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportDTO.getReportId()))
-                                    .collect(Collectors.toList())));
+            newReportDetailDTOList = newReportDetailDTOList.stream()
+                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportId))
+                    .collect(Collectors.toList());
+
+            reportDetailService.createBulkReportDetailByDTOList(newReportDetailDTOList);
         }
 
         /* Create associated TaskReport; Set required FK reportId */
         List<TaskReportCreateDTO> newTaskReportDTOList = newReportDTO.getTaskReportList();
         if (newTaskReportDTOList != null) {
-            reportDTO.setTaskReportList(
-                    taskReportService.createBulkTaskReportByDTOList(
-                            newTaskReportDTOList.stream()
-                                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportDTO.getReportId()))
-                                    .collect(Collectors.toList())));
+            newTaskReportDTOList = newTaskReportDTOList.stream()
+                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportId))
+                    .collect(Collectors.toList());
+
+            taskReportService.createBulkTaskReportByDTOList(newTaskReportDTOList);
         }
 
-        return reportDTO;
+        return fillDTO(newReport);
     }
 
     /* READ */
@@ -129,9 +135,8 @@ public class ReportServiceImpl implements ReportService {
     public Page<Report> getPageAll(Pageable paging) throws Exception {
         Page<Report> reportPage = reportRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (reportPage.isEmpty()) {
+        if (reportPage.isEmpty()) 
             return null;
-        }
 
         return reportPage;
     }
@@ -139,51 +144,15 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
         Page<Report> reportPage = getPageAll(paging);
 
-        if (reportPage == null) {
+        if (reportPage == null) 
             return null;
-        }
 
         List<Report> reportList = reportPage.getContent();
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = reportPage.getTotalPages();
-
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    reportDTO.setTotalPage(totalPage);
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, reportPage.getTotalPages());
     }
 
     @Override
@@ -200,22 +169,10 @@ public class ReportServiceImpl implements ReportService {
     public ReportReadDTO getDTOById(long reportId) throws Exception {
         Report report = getById(reportId);
 
-        if (report == null) {
+        if (report == null) 
             return null;
-        }
 
-        ReportReadDTO reportDTO = modelMapper.map(report, ReportReadDTO.class);
-
-        /* Get associated ReportType */
-        reportDTO.setReportType(reportTypeService.getDTOById(report.getReportTypeId()));
-
-        /* Get associated ReportDetail */
-        reportDTO.setReportDetailList(reportDetailService.getAllDTOByReportId(reportId));
-
-        /* Get associated TaskReport */
-        reportDTO.setTaskReportList(taskReportService.getAllDTOByReportId(reportId));
-
-        return reportDTO;
+        return fillDTO(report);
     }
 
     @Override
@@ -227,9 +184,8 @@ public class ReportServiceImpl implements ReportService {
         List<Report> reportList =
                 reportRepository.findAllByReportIdInAndIsDeletedIsFalse(reportIdCollection);
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
         return reportList;
     }
@@ -237,41 +193,10 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOByIdIn(Collection<Long> reportIdCollection) throws Exception {
         List<Report> reportList = getAllByIdIn(reportIdCollection);
 
-        if (reportList == null) {
+        if (reportList == null) 
             return null;
-        }
 
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, null);
     }
 
     @Override
@@ -279,9 +204,8 @@ public class ReportServiceImpl implements ReportService {
         List<Report> reportList =
                 reportRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
         return reportList;
     }
@@ -289,50 +213,18 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOByProjectId(long projectId) throws Exception {
         List<Report> reportList = getAllByProjectId(projectId);
 
-        if (reportList == null) {
+        if (reportList == null) 
             return null;
-        }
 
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, null);
     }
     @Override
     public Page<Report> getPageAllByProjectId(Pageable paging, long projectId) throws Exception {
         Page<Report> reportPage =
                 reportRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
 
-        if (reportPage.isEmpty()) {
+        if (reportPage.isEmpty()) 
             return null;
-        }
 
         return reportPage;
     }
@@ -340,51 +232,15 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOInPagingByProjectId(Pageable paging, long projectId) throws Exception {
         Page<Report> reportPage = getPageAllByProjectId(paging, projectId);
 
-        if (reportPage == null) {
+        if (reportPage == null) 
             return null;
-        }
 
         List<Report> reportList = reportPage.getContent();
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = reportPage.getTotalPages();
-
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    reportDTO.setTotalPage(totalPage);
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, reportPage.getTotalPages());
     }
 
     @Override
@@ -392,9 +248,8 @@ public class ReportServiceImpl implements ReportService {
         List<Report> reportList =
                 reportRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
         return reportList;
     }
@@ -402,50 +257,17 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Report> reportList = getAllByProjectIdIn(projectIdCollection);
 
-        if (reportList == null) {
+        if (reportList == null) 
             return null;
-        }
 
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, null);
     }
     @Override
     public Map<Long, List<ReportReadDTO>> mapProjectIdReportDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<ReportReadDTO> reportDTOList = getAllDTOByProjectIdIn(projectIdCollection);
 
-        if (reportDTOList == null) {
+        if (reportDTOList == null) 
             return new HashMap<>();
-        }
 
         Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap = new HashMap<>();
 
@@ -473,9 +295,8 @@ public class ReportServiceImpl implements ReportService {
         List<Report> reportList =
                 reportRepository.findAllByReporterIdAndIsDeletedIsFalse(reporterId);
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
         return reportList;
     }
@@ -483,50 +304,18 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOByReporterId(long reporterId) throws Exception {
         List<Report> reportList = getAllByReporterId(reporterId);
 
-        if (reportList == null) {
+        if (reportList == null) 
             return null;
-        }
 
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, null);
     }
     @Override
     public Page<Report> getPageAllByReporterId(Pageable paging, long reporterId) throws Exception {
         Page<Report> reportPage =
                 reportRepository.findAllByReporterIdAndIsDeletedIsFalse(reporterId, paging);
 
-        if (reportPage.isEmpty()) {
+        if (reportPage.isEmpty()) 
             return null;
-        }
 
         return reportPage;
     }
@@ -534,51 +323,15 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOInPagingByReporterId(Pageable paging, long reporterId) throws Exception {
         Page<Report> reportPage = getPageAllByReporterId(paging, reporterId);
 
-        if (reportPage == null) {
+        if (reportPage == null) 
             return null;
-        }
 
         List<Report> reportList = reportPage.getContent();
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = reportPage.getTotalPages();
-
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    reportDTO.setTotalPage(totalPage);
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, reportPage.getTotalPages());
     }
 
     @Override
@@ -591,23 +344,10 @@ public class ReportServiceImpl implements ReportService {
     public ReportReadDTO getDTOByReportName(String reportName) throws Exception {
         Report report = getByReportName(reportName);
 
-        if (report == null) {
+        if (report == null) 
             return null;
-        }
-        long reportId = report.getReportId();
 
-        ReportReadDTO reportDTO = modelMapper.map(report, ReportReadDTO.class);
-
-        /* Get associated ReportType */
-        reportDTO.setReportType(reportTypeService.getDTOById(report.getReportTypeId()));
-
-        /* Get associated ReportDetail */
-        reportDTO.setReportDetailList(reportDetailService.getAllDTOByReportId(reportId));
-
-        /* Get associated TaskReport */
-        reportDTO.setTaskReportList(taskReportService.getAllDTOByReportId(reportId));
-
-        return reportDTO;
+        return fillDTO(report);
     }
 
     @Override
@@ -615,9 +355,8 @@ public class ReportServiceImpl implements ReportService {
         List<Report> reportList =
                 reportRepository.findAllByReportNameContainsAndIsDeletedIsFalse(reportName);
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
         return reportList;
     }
@@ -625,50 +364,18 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOByReportNameContains(String reportName) throws Exception {
         List<Report> reportList = getAllByReportNameContains(reportName);
 
-        if (reportList == null) {
+        if (reportList == null) 
             return null;
-        }
 
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, null);
     }
     @Override
     public Page<Report> getPageAllByReportNameContains(Pageable paging, String reportName) throws Exception {
         Page<Report> reportPage =
                 reportRepository.findAllByReportNameContainsAndIsDeletedIsFalse(reportName, paging);
 
-        if (reportPage.isEmpty()) {
+        if (reportPage.isEmpty()) 
             return null;
-        }
 
         return reportPage;
     }
@@ -676,51 +383,15 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOInPagingByReportNameContains(Pageable paging, String reportName) throws Exception {
         Page<Report> reportPage = getPageAllByReportNameContains(paging, reportName);
 
-        if (reportPage == null) {
+        if (reportPage == null) 
             return null;
-        }
 
         List<Report> reportList = reportPage.getContent();
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = reportPage.getTotalPages();
-
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    reportDTO.setTotalPage(totalPage);
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, reportPage.getTotalPages());
     }
 
     @Override
@@ -728,9 +399,8 @@ public class ReportServiceImpl implements ReportService {
         List<Report> reportList =
                 reportRepository.findAllByReportTypeIdAndIsDeletedIsFalse(reportTypeId);
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
         return reportList;
     }
@@ -738,47 +408,18 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOByReportTypeId(long reportTypeId) throws Exception {
         List<Report> reportList = getAllByReportTypeId(reportTypeId);
 
-        if (reportList == null) {
+        if (reportList == null) 
             return null;
-        }
 
-        Set<Long> reportIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-        }
-
-        /* Get associated ReportType */
-        ReportTypeReadDTO reportTypeDTO = reportTypeService.getDTOById(reportTypeId);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeDTO);
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, null);
     }
     @Override
     public Page<Report> getPageAllByReportTypeId(Pageable paging, long reportTypeId) throws Exception {
         Page<Report> reportPage =
                 reportRepository.findAllByReportTypeIdAndIsDeletedIsFalse(reportTypeId, paging);
 
-        if (reportPage.isEmpty()) {
+        if (reportPage.isEmpty()) 
             return null;
-        }
 
         return reportPage;
     }
@@ -786,51 +427,15 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOInPagingByReportTypeId(Pageable paging, long reportTypeId) throws Exception {
         Page<Report> reportPage = getPageAllByReportTypeId(paging, reportTypeId);
 
-        if (reportPage == null) {
+        if (reportPage == null) 
             return null;
-        }
 
         List<Report> reportList = reportPage.getContent();
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = reportPage.getTotalPages();
-
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    reportDTO.setTotalPage(totalPage);
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, reportPage.getTotalPages());
     }
 
     @Override
@@ -838,9 +443,8 @@ public class ReportServiceImpl implements ReportService {
         List<Report> reportList =
                 reportRepository.findAllByProjectIdAndReporterIdAndIsDeletedIsFalse(projectId, reporterId);
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
         return reportList;
     }
@@ -848,41 +452,10 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOByProjectIdAndReporterId(int projectId, int reporterId) throws Exception {
         List<Report> reportList = getAllByProjectIdAndReporterId(projectId, reporterId);
 
-        if (reportList == null) {
+        if (reportList == null) 
             return null;
-        }
 
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, null);
     }
 
     @Override
@@ -908,9 +481,8 @@ public class ReportServiceImpl implements ReportService {
                 throw new IllegalArgumentException("Invalid SearchOption used for entity Report");
         }
 
-        if (reportList.isEmpty()) {
+        if (reportList.isEmpty()) 
             return null;
-        }
 
         return reportList;
     }
@@ -918,41 +490,10 @@ public class ReportServiceImpl implements ReportService {
     public List<ReportReadDTO> getAllDTOByReportDate(SearchOption searchOption, LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Report> reportList = getAllByReportDate(searchOption, fromDate, toDate);
 
-        if (reportList == null) {
+        if (reportList == null) 
             return null;
-        }
 
-        Set<Long> reportIdSet = new HashSet<>();
-        Set<Long> reportTypeIdSet = new HashSet<>();
-
-        for (Report report : reportList) {
-            reportIdSet.add(report.getReportId());
-            reportTypeIdSet.add(report.getReportTypeId());
-        }
-
-        /* Get associated ReportType */
-        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
-                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
-
-        /* Get associated ReportDetail */
-        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
-                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
-
-        /* Get associated TaskReport */
-        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
-                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
-
-        return reportList.stream()
-                .map(report -> {
-                    ReportReadDTO reportDTO =
-                            modelMapper.map(report, ReportReadDTO.class);
-
-                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
-
-                    return reportDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(reportList, null);
     }
 
     /* UPDATE */
@@ -960,10 +501,8 @@ public class ReportServiceImpl implements ReportService {
     public Report updateReport(Report updatedReport) throws Exception {
         Report oldReport = getById(updatedReport.getReportId());
 
-        if (oldReport == null) {
-            return null;
-            /* Not found by Id, return null */
-        }
+        if (oldReport == null) 
+            return null; /* Not found by Id, return null */
 
         String errorMsg = "";
 
@@ -1008,9 +547,8 @@ public class ReportServiceImpl implements ReportService {
             errorMsg += "Already exists another Report with name: '" + updatedReport.getReportName() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         updatedReport.setCreatedAt(oldReport.getCreatedAt());
         updatedReport.setCreatedBy(oldReport.getCreatedBy());
@@ -1025,80 +563,73 @@ public class ReportServiceImpl implements ReportService {
 
         Report updatedReport = modelMapper.map(updatedReportDTO, Report.class);
 
-        /* Already check not null */
+        /* Already check NOT NULL */
         updatedReport.setReportDate(
                 LocalDateTime.parse(updatedReportDTO.getReportDate(), dateTimeFormatter));
 
-        if(updatedReport.getReportDate().isAfter(LocalDateTime.now())) {
+        if (updatedReport.getReportDate().isAfter(LocalDateTime.now())) {
             throw new IllegalArgumentException("reportDate can't be in the future");
         }
 
         updatedReport = updateReport(updatedReport);
 
-        if (updatedReport == null) {
+        if (updatedReport == null) 
             return null;
-        }
         long updatedReportId = updatedReport.getReportId();
 
-        ReportReadDTO reportDTO = modelMapper.map(updatedReport, ReportReadDTO.class);
-
-        /* Get associated ReportType */
-        reportDTO.setReportType(reportTypeService.getDTOById(updatedReport.getReportTypeId()));
-
-        /* Associated ReportDetail */
-        if (updatedReportDTO.getReportDetailList() != null) {
-            /* Just in case */
-            updatedReportDTO.setReportDetailList(
-                    updatedReportDTO.getReportDetailList().stream()
+        /* (If change) Update/Create associated ReportDetail; Set required FK reportId */
+        List<ReportDetailUpdateDTO> reportDetailDTOList = updatedReportDTO.getReportDetailList();
+        if (reportDetailDTOList != null) {
+            reportDetailDTOList =
+                    reportDetailDTOList.stream()
                             .peek(reportDetailDTO -> reportDetailDTO.setReportId(updatedReportId))
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList());
 
+            /* TODO: to use later when login done
             modelMapper.typeMap(ReportDetailUpdateDTO.class, ReportDetailCreateDTO.class)
                     .addMappings(mapper -> {
-                        mapper.map(ReportDetailUpdateDTO::getUpdatedBy, ReportDetailCreateDTO::setCreatedBy);});
+                        mapper.map(ReportDetailUpdateDTO::getUpdatedBy, ReportDetailCreateDTO::setCreatedBy);});*/
 
             List<ReportDetailCreateDTO> newReportDetailDTOList = new ArrayList<>();
             List<ReportDetailUpdateDTO> updatedReportDetailDTOList = new ArrayList<>();
 
-            for (ReportDetailUpdateDTO updatedReportDetailDTO : updatedReportDTO.getReportDetailList()) {
+            for (ReportDetailUpdateDTO updatedReportDetailDTO : reportDetailDTOList) {
                 if (updatedReportDetailDTO.getReportDetailId() <= 0) {
-                    newReportDetailDTOList.add(modelMapper.map(updatedReportDetailDTO, ReportDetailCreateDTO.class));
+                    newReportDetailDTOList.add(
+                            modelMapper.map(updatedReportDetailDTO, ReportDetailCreateDTO.class));
                 } else {
                     updatedReportDetailDTOList.add(updatedReportDetailDTO);
                 }
             }
 
-            /* Create associated ReportDetail; Set required FK reportId (Just in case) */
+            /* Create associated ReportDetail */
             if (!newReportDetailDTOList.isEmpty()) {
                 reportDetailService.createBulkReportDetailByDTOList(newReportDetailDTOList);
             }
 
-            /* Update associated ReportDetail; Set required FK reportId (Just in case) */
+            /* Update associated ReportDetail */
             if (!updatedReportDetailDTOList.isEmpty()) {
                 reportDetailService.updateBulkReportDetailByDTOList(updatedReportDetailDTOList);
             }
         }
 
-        /* Get associated ReportDetail (After insert & update) */
-        reportDTO.setReportDetailList(reportDetailService.getAllDTOByReportId(updatedReport.getReportId()));
-
-
-        /* Associated TaskReport */
-        if (updatedReportDTO.getTaskReportList() != null) {
-            /* Just in case */
-            updatedReportDTO.setTaskReportList(
-                    updatedReportDTO.getTaskReportList().stream()
+        /* (If change) Update/Create associated TaskReport; Set required FK reportId */
+        List<TaskReportUpdateDTO> taskReportDTOList = updatedReportDTO.getTaskReportList();
+        if (taskReportDTOList != null) {
+            taskReportDTOList =
+                    taskReportDTOList.stream()
                             .peek(taskReportDTO -> taskReportDTO.setReportId(updatedReportId))
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList());
 
+            /* TODO: to use later when login done
             modelMapper.typeMap(TaskReportUpdateDTO.class, TaskReportCreateDTO.class)
                     .addMappings(mapper -> {
-                        mapper.map(TaskReportUpdateDTO::getUpdatedBy, TaskReportCreateDTO::setCreatedBy);});
+                        mapper.map(TaskReportUpdateDTO::getUpdatedBy, TaskReportCreateDTO::setCreatedBy);});*/
 
             List<TaskReportCreateDTO> newTaskReportDTOList = new ArrayList<>();
             List<TaskReportUpdateDTO> updatedTaskReportDTOList = new ArrayList<>();
 
-            for (TaskReportUpdateDTO updatedTaskReportDTO : updatedReportDTO.getTaskReportList()) {
+            for (TaskReportUpdateDTO updatedTaskReportDTO : taskReportDTOList) {
                 if (updatedTaskReportDTO.getTaskReportId() <= 0) {
                     newTaskReportDTOList.add(modelMapper.map(updatedTaskReportDTO, TaskReportCreateDTO.class));
                 } else {
@@ -1117,10 +648,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
 
-        /* Get associated TaskReport (After insert & update) */
-        reportDTO.setTaskReportList(taskReportService.getAllDTOByReportId(updatedReport.getReportId()));
-
-        return reportDTO;
+        return fillDTO(updatedReport);
     }
 
     /* DELETE */
@@ -1167,5 +695,62 @@ public class ReportServiceImpl implements ReportService {
         reportRepository.saveAllAndFlush(reportList);
 
         return true;
+    }
+
+    /* Utils */
+    private ReportReadDTO fillDTO(Report report) throws Exception {
+        long reportId = report.getProjectId();
+
+        ReportReadDTO reportDTO = modelMapper.map(report, ReportReadDTO.class);
+
+        /* NOT NULL */
+        /* Get associated ReportType */
+        reportDTO.setReportType(reportTypeService.getDTOById(report.getReportTypeId()));
+
+        /* Nullable */
+        /* Get associated ReportDetail */
+        reportDTO.setReportDetailList(reportDetailService.getAllDTOByReportId(reportId));
+        /* Get associated TaskReport */
+        reportDTO.setTaskReportList(taskReportService.getAllDTOByReportId(reportId));
+
+        return reportDTO;
+    }
+
+    private List<ReportReadDTO> fillAllDTO(List<Report> reportList,Integer totalPage) throws Exception {
+        Set<Long> reportIdSet = new HashSet<>();
+        Set<Long> reportTypeIdSet = new HashSet<>();
+
+        for (Report report : reportList) {
+            reportIdSet.add(report.getReportId());
+            reportTypeIdSet.add(report.getReportTypeId());
+        }
+
+        /* Get associated ReportType */
+        Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
+                reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
+
+        /* Get associated ReportDetail */
+        Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
+                reportDetailService.mapReportIdReportDetailDTOListByReportIdIn(reportIdSet);
+        /* Get associated TaskReport */
+        Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
+                taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
+
+        return reportList.stream()
+                .map(report -> {
+                    ReportReadDTO reportDTO =
+                            modelMapper.map(report, ReportReadDTO.class);
+
+                    /* NOT NULL */
+                    reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
+
+                    /* Nullable */
+                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
+                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
+
+                    reportDTO.setTotalPage(totalPage);
+
+                    return reportDTO;})
+                .collect(Collectors.toList());
     }
 }
