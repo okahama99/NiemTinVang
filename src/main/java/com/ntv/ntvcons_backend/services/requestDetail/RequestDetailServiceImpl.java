@@ -114,6 +114,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         String tmpItemDesc;
         Double tmpItemPrice;
         List<Double> tmpItemPriceList;
+        boolean isDuplicated = false;
 
         Map<String, List<Double>> tmpItemDescItemPriceListMap;
 
@@ -141,6 +142,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
                             .put(tmpItemDesc, new ArrayList<>(Collections.singletonList(tmpItemPrice)));
                 } else {
                     if (tmpItemPriceList.contains(tmpItemPrice)) {
+                        isDuplicated = true;
+
                         errorMsg.append("Already exist another RequestDetail of Request with Id: '").append(tmpRequestId)
                                 .append("'. With itemDesc: '").append(tmpItemDesc)
                                 .append("' at price: '").append(tmpItemPrice).append("'. ");
@@ -167,19 +170,23 @@ public class RequestDetailServiceImpl implements RequestDetailService {
                     .append("'. Which violate constraint: FK_RequestDetail_User_CreatedBy. ");
         }
 
-        /* Check duplicate 2 (input vs DB) */
-        for (RequestDetail newRequestDetail : newRequestDetailList) {
-            if (requestDetailRepository
-                    .existsByRequestIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
-                            newRequestDetail.getRequestId(),
-                            newRequestDetail.getItemDesc(),
-                            newRequestDetail.getItemPrice())) {
-                errorMsg.append("Already exist another RequestDetail of Request with Id: '")
-                        .append(newRequestDetail.getRequestId())
-                        .append("'. With itemDesc: '").append(newRequestDetail.getItemDesc())
-                        .append("' at price: '").append(newRequestDetail.getItemPrice()).append("'. ");
+        /* If already duplicated within input, no need to check in DB */
+        if (!isDuplicated) {
+            /* Check duplicate 2 (input vs DB) */
+            for (RequestDetail newRequestDetail : newRequestDetailList) {
+                if (requestDetailRepository
+                        .existsByRequestIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
+                                newRequestDetail.getRequestId(),
+                                newRequestDetail.getItemDesc(),
+                                newRequestDetail.getItemPrice())) {
+                    errorMsg.append("Already exist another RequestDetail of Request with Id: '")
+                            .append(newRequestDetail.getRequestId())
+                            .append("'. With itemDesc: '").append(newRequestDetail.getItemDesc())
+                            .append("' at price: '").append(newRequestDetail.getItemPrice()).append("'. ");
+                }
             }
         }
+
 
         if (!errorMsg.toString().trim().isEmpty()) {
             throw new IllegalArgumentException(errorMsg.toString());

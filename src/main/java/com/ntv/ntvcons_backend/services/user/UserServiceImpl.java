@@ -17,10 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,7 +45,7 @@ public class UserServiceImpl implements UserService{
                     + "'. Which violate constraint: FK_User_Role. ";
         }
         if (newUser.getCreatedBy() != null) {
-            if (!userRepository.existsByUserIdAndIsDeletedIsFalse(newUser.getCreatedBy())) {
+            if (!existsById(newUser.getCreatedBy())) {
                 errorMsg += "No User (CreatedBy) found with Id: '" + newUser.getCreatedBy()
                         + "'. Which violate constraint: FK_User_User_CreatedBy. ";
             }
@@ -61,12 +58,18 @@ public class UserServiceImpl implements UserService{
                         newUser.getPhone(),
                         newUser.getEmail())) {
             errorMsg += "Already exists another User with username: '" + newUser.getUsername()
-                    + "', phone: '" + newUser.getPhone()
-                    + "', email: '" + newUser.getEmail() + "'. ";
+                    + "', or with phone: '" + newUser.getPhone()
+                    + "', or with email: '" + newUser.getEmail() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
+
+        if (newUser.getCreatedBy() == null) { /* Self created */
+            newUser = userRepository.saveAndFlush(newUser);
+
+            newUser.setCreatedBy(newUser.getUserId());
+        }
 
         return userRepository.saveAndFlush(newUser);
     }
@@ -76,63 +79,32 @@ public class UserServiceImpl implements UserService{
 
         newUser = createUser(newUser);
 
-        UserReadDTO userDTO = modelMapper.map(newUser, UserReadDTO.class);
-
-        /* Get associated Role */
-        userDTO.setRole(roleService.getDTOById(newUser.getRoleId()));
-
-        return userDTO;
+        return fillDTO(newUser);
     }
 
     /* READ */
     @Override
-    public Page<User> getPageAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        Pageable paging;
-        if (sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        } else {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
+    public Page<User> getPageAll(Pageable paging) throws Exception {
         Page<User> userPage = userRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (userPage.isEmpty()) 
+        if (userPage.isEmpty())
             return null;
 
         return userPage;
     }
     @Override
-    public List<UserReadDTO> getAllDTOInPaging(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        Page<User> userPage = getPageAll(pageNo, pageSize, sortBy, sortType);
+    public List<UserReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
+        Page<User> userPage = getPageAll(paging);
 
-        if (userPage == null) {
-             return null;
-        }
+        if (userPage == null)
+            return null;
 
         List<User> userList = userPage.getContent();
 
-        if (userList.isEmpty()) 
+        if (userList.isEmpty())
             return null;
 
-        int totalPage = userPage.getTotalPages();
-
-        /* Get associated Role */
-        Map<Long, RoleReadDTO> roleIdRoleDTOMap =
-                roleService.mapRoleIdRoleDTOByIdIn(
-                        userList.stream()
-                                .map(User::getRoleId)
-                                .collect(Collectors.toSet()));
-
-        return userList.stream()
-                .map(user -> {
-                    UserReadDTO userReadDTO =
-                            modelMapper.map(user, UserReadDTO.class);
-
-                    userReadDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
-                    userReadDTO.setTotalPage(totalPage);
-
-                    return userReadDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(userList, userPage.getTotalPages());
     }
 
     @Override
@@ -149,17 +121,10 @@ public class UserServiceImpl implements UserService{
     public UserReadDTO getDTOById(long userId) throws Exception {
         User user = getById(userId);
 
-        if (user == null) {
-            return null;
-            /* Not found with Id */
-        }
+        if (user == null)
+            return null; /* Not found with Id */
 
-        UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
-
-        /* Get associated Role */
-        userDTO.setRole(roleService.getDTOById(user.getRoleId()));
-
-        return userDTO;
+        return fillDTO(user);
     }
 
     @Override
@@ -182,21 +147,7 @@ public class UserServiceImpl implements UserService{
         if (userList == null) 
             return null;
 
-        /* Get associated Role */
-        Map<Long, RoleReadDTO> roleIdRoleDTOMap =
-                roleService.mapRoleIdRoleDTOByIdIn(
-                        userList.stream()
-                                .map(User::getRoleId)
-                                .collect(Collectors.toSet()));
-
-        return userList.stream()
-                .map(user -> {
-                    UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
-
-                    userDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
-
-                    return userDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(userList, null);
     }
     @Override
     public Map<Long, UserReadDTO> mapUserIdUserDTOByIdIn(Collection<Long> userIdCollection) throws Exception {
@@ -225,17 +176,208 @@ public class UserServiceImpl implements UserService{
         if (userList == null) 
             return null;
 
-        /* Get associated Role */
-        RoleReadDTO roleDTO = roleService.getDTOById(roleId);
+        return fillAllDTO(userList, null);
+    }
+    @Override
+    public Page<User> getPageAllByRoleId(Pageable paging, long roleId) throws Exception {
+        Page<User> userPage =
+                userRepository.findAllByRoleIdAndIsDeletedIsFalse(roleId, paging);
 
-        return userList.stream()
-                .map(user -> {
-                    UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
+        if (userPage.isEmpty())
+            return null;
 
-                    userDTO.setRole(roleDTO);
+        return userPage;
+    }
+    @Override
+    public List<UserReadDTO> getAllDTOInPagingByRoleId(Pageable paging, long roleId) throws Exception {
+        Page<User> userPage = getPageAllByRoleId(paging, roleId);
 
-                    return userDTO;})
-                .collect(Collectors.toList());
+        if (userPage == null)
+            return null;
+
+        List<User> userList = userPage.getContent();
+
+        if (userList.isEmpty())
+            return null;
+
+        return fillAllDTO(userList, userPage.getTotalPages());
+    }
+
+    @Override
+    public User getByUsername(String username) throws Exception {
+        return userRepository
+                .findByUsernameAndIsDeletedIsFalse(username)
+                .orElse(null);
+    }
+    @Override
+    public UserReadDTO getDTOByUsername(String username) throws Exception {
+        User user = getByUsername(username);
+
+        if (user == null)
+            return null;
+
+        return fillDTO(user);
+    }
+
+    @Override
+    public List<User> getAllByUsernameContains(String username) throws Exception {
+        List<User> userList = userRepository.findAllByUsernameContainsAndIsDeletedIsFalse(username);
+
+        if (userList.isEmpty())
+            return null;
+
+        return userList;
+    }
+    @Override
+    public List<UserReadDTO> getAllDTOByUsernameContains(String username) throws Exception {
+        List<User> userList = getAllByUsernameContains(username);
+
+        if (userList == null)
+            return null;
+
+        return fillAllDTO(userList, null);
+    }
+    @Override
+    public Page<User> getPageAllByUsernameContains(Pageable paging, String username) throws Exception {
+        Page<User> userPage =
+                userRepository.findAllByUsernameContainsAndIsDeletedIsFalse(username, paging);
+
+        if (userPage.isEmpty())
+            return null;
+
+        return userPage;
+    }
+    @Override
+    public List<UserReadDTO> getAllDTOInPagingByUsernameContains(Pageable paging, String username) throws Exception {
+        Page<User> userPage = getPageAllByUsernameContains(paging, username);
+
+        if (userPage == null)
+            return null;
+
+        List<User> userList = userPage.getContent();
+
+        if (userList.isEmpty())
+            return null;
+
+        return fillAllDTO(userList, userPage.getTotalPages());
+    }
+
+    @Override
+    public User getByPhone(String phone) throws Exception {
+        return userRepository
+                .findByPhoneAndIsDeletedIsFalse(phone)
+                .orElse(null);
+    }
+    @Override
+    public UserReadDTO getDTOByPhone(String phone) throws Exception {
+        User user = getByPhone(phone);
+
+        if (user == null)
+            return null;
+
+        return fillDTO(user);
+    }
+
+    @Override
+    public List<User> getAllByPhoneContains(String phone) throws Exception {
+        List<User> userList = userRepository.findAllByPhoneContainsAndIsDeletedIsFalse(phone);
+
+        if (userList.isEmpty())
+            return null;
+
+        return userList;
+    }
+    @Override
+    public List<UserReadDTO> getAllDTOByPhoneContains(String phone) throws Exception {
+        List<User> userList = getAllByPhoneContains(phone);
+
+        if (userList == null)
+            return null;
+
+        return fillAllDTO(userList, null);
+    }
+    @Override
+    public Page<User> getPageAllByPhoneContains(Pageable paging, String phone) throws Exception {
+        Page<User> userPage =
+                userRepository.findAllByPhoneContainsAndIsDeletedIsFalse(phone, paging);
+
+        if (userPage.isEmpty())
+            return null;
+
+        return userPage;
+    }
+    @Override
+    public List<UserReadDTO> getAllDTOInPagingByPhoneContains(Pageable paging, String phone) throws Exception {
+        Page<User> userPage = getPageAllByPhoneContains(paging, phone);
+
+        if (userPage == null)
+            return null;
+
+        List<User> userList = userPage.getContent();
+
+        if (userList.isEmpty())
+            return null;
+
+        return fillAllDTO(userList, userPage.getTotalPages());
+    }
+
+    @Override
+    public User getByEmail(String email) throws Exception {
+        return userRepository
+                .findByEmailAndIsDeletedIsFalse(email)
+                .orElse(null);
+    }
+    @Override
+    public UserReadDTO getDTOByEmail(String email) throws Exception {
+        User user = getByEmail(email);
+
+        if (user == null)
+            return null;
+
+        return fillDTO(user);
+    }
+
+    @Override
+    public List<User> getAllByEmailContains(String email) throws Exception {
+        List<User> userList = userRepository.findAllByEmailContainsAndIsDeletedIsFalse(email);
+
+        if (userList.isEmpty())
+            return null;
+
+        return userList;
+    }
+    @Override
+    public List<UserReadDTO> getAllDTOByEmailContains(String email) throws Exception {
+        List<User> userList = getAllByEmailContains(email);
+
+        if (userList == null)
+            return null;
+
+        return fillAllDTO(userList, null);
+    }
+    @Override
+    public Page<User> getPageAllByEmailContains(Pageable paging, String email) throws Exception {
+        Page<User> userPage =
+                userRepository.findAllByEmailContainsAndIsDeletedIsFalse(email, paging);
+
+        if (userPage.isEmpty())
+            return null;
+
+        return userPage;
+    }
+    @Override
+    public List<UserReadDTO> getAllDTOInPagingByEmailContains(Pageable paging, String email) throws Exception {
+        Page<User> userPage = getPageAllByEmailContains(paging, email);
+
+        if (userPage == null)
+            return null;
+
+        List<User> userList = userPage.getContent();
+
+        if (userList.isEmpty())
+            return null;
+
+        return fillAllDTO(userList, userPage.getTotalPages());
     }
 
     /* UPDATE */
@@ -257,10 +399,15 @@ public class UserServiceImpl implements UserService{
         }
         if (oldUser.getUpdatedBy() != null) {
             if (!oldUser.getUpdatedBy().equals(updatedUser.getUpdatedBy())) {
-                if (!userRepository.existsByUserIdAndIsDeletedIsFalse(updatedUser.getUpdatedBy())) {
+                if (!existsById(updatedUser.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedUser.getUpdatedBy()
                             + "'. Which violate constraint: FK_User_User_UpdatedBy. ";
                 }
+            }
+        } else {
+            if (!existsById(updatedUser.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedUser.getUpdatedBy()
+                        + "'. Which violate constraint: FK_User_User_UpdatedBy. ";
             }
         }
 
@@ -272,12 +419,15 @@ public class UserServiceImpl implements UserService{
                         updatedUser.getEmail(),
                         updatedUser.getUserId())) {
             errorMsg += "Already exists another User with username: '" + updatedUser.getUsername()
-                    + "', phone: '" + updatedUser.getPhone()
-                    + "', email: '" + updatedUser.getEmail() + "'. ";
+                    + "', or with phone: '" + updatedUser.getPhone()
+                    + "', or with email: '" + updatedUser.getEmail() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
+
+        updatedUser.setCreatedAt(oldUser.getCreatedAt());
+        updatedUser.setCreatedBy(oldUser.getCreatedBy());
 
         return userRepository.saveAndFlush(updatedUser);
     }
@@ -287,12 +437,7 @@ public class UserServiceImpl implements UserService{
 
         updatedUser = updateUser(updatedUser);
 
-        UserReadDTO userDTO = modelMapper.map(updatedUser, UserReadDTO.class);
-
-        /* Get associated Role */
-        userDTO.setRole(roleService.getDTOById(updatedUser.getRoleId()));
-
-        return userDTO;
+        return fillDTO(updatedUser);
     }
 
     /* DELETE */
@@ -315,5 +460,40 @@ public class UserServiceImpl implements UserService{
         userRepository.saveAndFlush(user);
 
         return true;
+    }
+
+    /* Utils */
+    private UserReadDTO fillDTO(User user) throws Exception {
+        UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
+
+        /* Get associated Role */
+        userDTO.setRole(
+                roleService.getDTOById(user.getRoleId()));
+
+        return userDTO;
+    }
+
+    private List<UserReadDTO> fillAllDTO(Collection<User> userCollection, Integer totalPage) throws Exception {
+        Set<Long> roleIdSet = new HashSet<>();
+
+        for (User user : userCollection) {
+            roleIdSet.add(user.getRoleId());
+        }
+
+        /* Get associated Role */
+        Map<Long, RoleReadDTO> roleIdRoleDTOMap =
+                roleService.mapRoleIdRoleDTOByIdIn(roleIdSet);
+
+        return userCollection.stream()
+                .map(user -> {
+                    UserReadDTO userReadDTO =
+                            modelMapper.map(user, UserReadDTO.class);
+
+                    userReadDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
+
+                    userReadDTO.setTotalPage(totalPage);
+
+                    return userReadDTO;})
+                .collect(Collectors.toList());
     }
 }

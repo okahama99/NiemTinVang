@@ -9,6 +9,7 @@ import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
@@ -28,6 +29,7 @@ import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
+import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.services.report.ReportService;
 import com.ntv.ntvcons_backend.services.request.RequestService;
 import com.ntv.ntvcons_backend.services.task.TaskService;
@@ -68,6 +70,8 @@ public class ProjectServiceImpl implements ProjectService{
     private UserRepository userRepository;
     @Autowired
     private ProjectManagerService projectManagerService;
+    @Autowired
+    private ProjectWorkerService projectWorkerService;
     @Autowired
     private TaskService taskService;
     @Autowired
@@ -222,16 +226,29 @@ public class ProjectServiceImpl implements ProjectService{
         /* Create associated Blueprint */
         blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
 
-        /* Create associated ProjectManager if present */
-        if (newProjectDTO.getProjectManagerList() != null) {
-            /* Create associated ProjectManager; Set required FK projectId */
-            projectManagerService.createBulkProjectManagerByDTO(
-                    newProjectDTO.getProjectManagerList().stream()
+        /* Create associated ProjectManager (if present) */
+        List<ProjectManagerCreateDTO> projectManagerDTOList = newProjectDTO.getProjectManagerList();
+        if (projectManagerDTOList != null) {
+            projectManagerDTOList =
+                    projectManagerDTOList.stream()
                             .peek(projectManagerDTO -> projectManagerDTO.setProjectId(newProjectId))
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList());
+
+            /* Create associated ProjectManager; Set required FK projectId */
+            projectManagerService.createBulkProjectManagerByDTO(projectManagerDTOList);
         }
 
-        /* TODO: projectWorker */
+        /* Create associated ProjectWorker (if present) */
+        List<ProjectWorkerCreateDTO> projectWorkerDTOList = newProjectDTO.getProjectWorkerList();
+        if (projectWorkerDTOList != null) {
+            projectWorkerDTOList =
+                    projectWorkerDTOList.stream()
+                            .peek(projectWorkerDTO -> projectWorkerDTO.setProjectId(newProjectId))
+                            .collect(Collectors.toList());
+
+            /* Create associated ProjectWorker; Set required FK projectId */
+            projectWorkerService.createBulkProjectWorkerByDTO(projectWorkerDTOList);
+        }
 
         return fillDTO(newProject);
     }

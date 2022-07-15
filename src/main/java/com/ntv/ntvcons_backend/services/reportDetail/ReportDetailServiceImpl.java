@@ -85,6 +85,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         Double tmpItemPrice;
         List<Double> tmpItemPriceList;
 
+        boolean isDuplicated = false;
+
         Map<String, List<Double>> tmpItemDescItemPriceListMap;
 
         for (ReportDetail newReportDetail : newReportDetailList) {
@@ -111,6 +113,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
                             .put(tmpItemDesc, new ArrayList<>(Collections.singletonList(tmpItemPrice)));
                 } else {
                     if (tmpItemPriceList.contains(tmpItemPrice)) {
+                        isDuplicated = true;
+
                         errorMsg.append("Already exist another ReportDetail of Report with Id: '").append(tmpReportId)
                                 .append("'. With itemDesc: '").append(tmpItemDesc)
                                 .append("' at price: '").append(tmpItemPrice).append("'. ");
@@ -137,17 +141,20 @@ public class ReportDetailServiceImpl implements ReportDetailService {
                     .append("'. Which violate constraint: FK_ReportDetail_User_CreatedBy. ");
         }
 
-        /* Check duplicate 2 (input vs DB) */
-        for (ReportDetail newReportDetail : newReportDetailList) {
-            if (reportDetailRepository
-                    .existsByReportIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
-                            newReportDetail.getReportId(),
-                            newReportDetail.getItemDesc(),
-                            newReportDetail.getItemPrice())) {
-                errorMsg.append("Already exist another ReportDetail of Report with Id: '")
-                        .append(newReportDetail.getReportId())
-                        .append("'. With itemDesc: '").append(newReportDetail.getItemDesc())
-                        .append("' at price: '").append(newReportDetail.getItemPrice()).append("'. ");
+        /* If already duplicated within input, no need to check with DB */
+        if (!isDuplicated) {
+            /* Check duplicate 2 (input vs DB) */
+            for (ReportDetail newReportDetail : newReportDetailList) {
+                if (reportDetailRepository
+                        .existsByReportIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
+                                newReportDetail.getReportId(),
+                                newReportDetail.getItemDesc(),
+                                newReportDetail.getItemPrice())) {
+                    errorMsg.append("Already exist another ReportDetail of Report with Id: '")
+                            .append(newReportDetail.getReportId())
+                            .append("'. With itemDesc: '").append(newReportDetail.getItemDesc())
+                            .append("' at price: '").append(newReportDetail.getItemPrice()).append("'. ");
+                }
             }
         }
 
@@ -413,15 +420,10 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     public List<ReportDetail> updateBulkReportDetail(Collection<ReportDetail> updatedReportDetailList) throws Exception {
         StringBuilder errorMsg = new StringBuilder();
 
-        Map<Long, Long> reportDetailIdCreatedByMap = new HashMap<>();
-        Map<Long, LocalDateTime> reportDetailIdCreatedAtMap = new HashMap<>();
-
         Map<Long, Map<String, List<Double>>> reportIdItemDescItemPriceListMapMap = new HashMap<>();
 
         Set<Long> reportDetailIdSet = new HashSet<>();
-        Set<Long> oldReportIdSet = new HashSet<>();
         Set<Long> updatedReportIdSet = new HashSet<>();
-        Set<Long> oldUpdateBySet = new HashSet<>();
         Set<Long> updatedUpdatedBySet = new HashSet<>();
 
         Long tmpReportId;
@@ -476,6 +478,12 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         if (oldReportDetailList == null)
             return null;
+
+        Set<Long> oldReportIdSet = new HashSet<>();
+        Set<Long> oldUpdateBySet = new HashSet<>();
+
+        Map<Long, Long> reportDetailIdCreatedByMap = new HashMap<>();
+        Map<Long, LocalDateTime> reportDetailIdCreatedAtMap = new HashMap<>();
 
         for (ReportDetail oldReportDetail : oldReportDetailList) {
             oldReportIdSet.add(oldReportDetail.getReportId());

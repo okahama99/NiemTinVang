@@ -120,11 +120,24 @@ public class SearchType {
         BY_ID,
         BY_USERNAME,
         BY_PHONE,
+        BY_EMAIL,
     }
     public enum ALL_USER {
         BY_ROLE_ID,
         BY_USERNAME_CONTAINS,
         BY_PHONE_CONTAINS,
+        BY_EMAIL_CONTAINS
+    }
+
+    public enum WORKER {
+        BY_ID,
+        BY_CITIZEN_ID,
+    }
+    public enum ALL_WORKER {
+        BY_FULL_NAME,
+        BY_FULL_NAME_CONTAINS,
+        BY_CITIZEN_ID_CONTAINS,
+        BY_ADDRESS_ID,
     }
 
     public enum ROLE {

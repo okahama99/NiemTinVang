@@ -5,6 +5,7 @@ import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.ProjectManager;
+import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.repositories.ProjectManagerRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -88,7 +89,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManager> createBulkProjectManager(List<ProjectManager> newProjectManagerList) throws Exception {
         StringBuilder errorMsg = new StringBuilder();
 
-        Map<Long, List<Long>> projectIdManagerIdMap = new HashMap<>();
+        Map<Long, List<Long>> projectIdManagerIdListMap = new HashMap<>();
         Set<Long> projectIdSet = new HashSet<>();
         Set<Long> managerIdSet = new HashSet<>();
         Set<Long> createdBySet = new HashSet<>();
@@ -101,10 +102,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             createdBySet.add(newProjectManager.getCreatedBy());
 
             /* Check duplicate 1 (within input) */
-            tmpManagerIdList = projectIdManagerIdMap.get(newProjectManager.getProjectId());
+            tmpManagerIdList = projectIdManagerIdListMap.get(newProjectManager.getProjectId());
 
             if (tmpManagerIdList == null) {
-                projectIdManagerIdMap.put(
+                projectIdManagerIdListMap.put(
                         newProjectManager.getProjectId(),
                         new ArrayList<>(Collections.singletonList(newProjectManager.getManagerId())));
             } else {
@@ -117,7 +118,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                             .append(newProjectManager.getManagerId()).append("'. ");
                 } else {
                        tmpManagerIdList.add(newProjectManager.getManagerId());
-                       projectIdManagerIdMap.put(newProjectManager.getProjectId(), tmpManagerIdList);
+                       projectIdManagerIdListMap.put(newProjectManager.getProjectId(), tmpManagerIdList);
                 }
             }
         }
@@ -540,14 +541,14 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public List<ProjectManager> updateBulkProjectManager(List<ProjectManager> updatedProjectManagerList) throws Exception {
         Set<Long> projectManagerIdSet = new HashSet<>();
-        Map<Long, List<Long>> projectIdManagerIdMap = new HashMap<>();
-        Set<Long> oldProjectIdSet = new HashSet<>();
-        Set<Long> oldManagerIdSet = new HashSet<>();
-        Set<Long> oldUpdatedBySet = new HashSet<>();
+        Map<Long, List<Long>> projectIdManagerIdListMap = new HashMap<>();
+
         Set<Long> updatedProjectIdSet = new HashSet<>();
         Set<Long> updatedManagerIdSet = new HashSet<>();
         Set<Long> updatedUpdatedBySet = new HashSet<>();
+
         Map<Long, ProjectManager> projectManagerIdUpdatedProjectManagerMap = new HashMap<>();
+
         List<Long> tmpManagerIdList;
         boolean isDuplicated = false;
 
@@ -563,9 +564,9 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                     .put(updatedProjectManager.getProjectManagerId(), updatedProjectManager);
 
             /* Check duplicate 1 (within input) */
-            tmpManagerIdList = projectIdManagerIdMap.get(updatedProjectManager.getProjectId());
+            tmpManagerIdList = projectIdManagerIdListMap.get(updatedProjectManager.getProjectId());
             if (tmpManagerIdList == null) {
-                projectIdManagerIdMap.put(
+                projectIdManagerIdListMap.put(
                         updatedProjectManager.getProjectId(),
                         new ArrayList<>(Collections.singletonList(updatedProjectManager.getManagerId())));
             } else {
@@ -577,7 +578,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                             .append(updatedProjectManager.getManagerId()).append("'. ");
                 } else {
                     tmpManagerIdList.add(updatedProjectManager.getManagerId());
-                    projectIdManagerIdMap.put(updatedProjectManager.getProjectId(), tmpManagerIdList);
+                    projectIdManagerIdListMap.put(updatedProjectManager.getProjectId(), tmpManagerIdList);
                 }
             }
         }
@@ -587,12 +588,22 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         if (oldProjectManagerList == null) 
             return null;
 
+        Set<Long> oldProjectIdSet = new HashSet<>();
+        Set<Long> oldManagerIdSet = new HashSet<>();
+        Set<Long> oldUpdatedBySet = new HashSet<>();
+
+        Map<Long, Long> projectManagerIdCreatedByMap = new HashMap<>();
+        Map<Long, LocalDateTime> projectManagerIdCreatedAtMap = new HashMap<>();
+
         for (ProjectManager oldProjectManager : oldProjectManagerList) {
             oldProjectIdSet.add(oldProjectManager.getProjectId());
             oldManagerIdSet.add(oldProjectManager.getManagerId());
             if (oldProjectManager.getUpdatedBy() != null) {
                 oldUpdatedBySet.add(oldProjectManager.getManagerId());
             }
+
+            projectManagerIdCreatedByMap.put(oldProjectManager.getProjectManagerId(), oldProjectManager.getCreatedBy());
+            projectManagerIdCreatedAtMap.put(oldProjectManager.getProjectManagerId(), oldProjectManager.getCreatedAt());
 
             ProjectManager updatedProjectManager =
                     projectManagerIdUpdatedProjectManagerMap.get(oldProjectManager.getProjectManagerId());
@@ -663,6 +674,16 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             throw new IllegalArgumentException(errorMsg.toString());
         }
 
+        updatedProjectManagerList =
+                updatedProjectManagerList.stream()
+                        .peek(projectManager -> {
+                            projectManager.setCreatedAt(
+                                    projectManagerIdCreatedAtMap.get(projectManager.getProjectManagerId()));
+
+                            projectManager.setCreatedBy(
+                                    projectManagerIdCreatedByMap.get(projectManager.getProjectManagerId()));})
+                        .collect(Collectors.toList());
+
         return projectManagerRepository.saveAllAndFlush(updatedProjectManagerList);
     }
     @Override
@@ -710,6 +731,9 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         }
 
         projectManagerList = updateBulkProjectManager(projectManagerList);
+
+        if (projectManagerList == null)
+            return null;
 
         return fillAllDTO(projectManagerList, null);
     }

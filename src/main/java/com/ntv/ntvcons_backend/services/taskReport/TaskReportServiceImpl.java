@@ -95,11 +95,11 @@ public class TaskReportServiceImpl implements TaskReportService {
             errorMsg += "1 or more Report not found with Id: '"
                     + "'. Which violate constraint: FK_TaskReport_Report. ";
         }
-
         if (!taskService.existsAllByIdIn(taskIdSet)) {
             errorMsg += "1 or more Task not found with Id: '"
                     + "'. Which violate constraint: FK_TaskReport_Task. ";
         }
+
 
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);

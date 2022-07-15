@@ -6,6 +6,7 @@ import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateOptionDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerUpdateDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,51 +22,65 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectUpdateDTO extends BaseUpdateDTO {
+    @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
     @NotNull(message = "Id REQUIRED for update")
     private Long projectId;
 
-    @ApiModelProperty(example = "Dự án xxx") /* Hint for Swagger */
+    @ApiModelProperty(example = "Dự án xxx",
+            notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "projectName max length: 100 characters")
     @NotNull(message = "projectName REQUIRED for update")
     private String projectName;
 
     /* TODO: reuse later
     private LocationUpdateOptionDTO location;*/
+    @ApiModelProperty(notes = "Nullable") /* Hint for Swagger */
     private LocationUpdateDTO location;
 
+    @ApiModelProperty(notes = "Nullable") /* Hint for Swagger */
     private BlueprintUpdateDTO blueprint;
 
-    @Size(min = 1, message = "Need at least 1 to update")
+    @ApiModelProperty(notes = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
+    @Size(min = 1, message = "Need at least 1 for update")
     private List<ProjectManagerUpdateDTO> projectManagerList;
-//  TODO:  private List<ProjectWorkerUpdateDTO> projectWorkerList;
+
+    @ApiModelProperty(notes = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
+    @Size(min = 1, message = "Need at least 1 for update")
+    private List<ProjectWorkerUpdateDTO> projectWorkerList;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
+            notes = "NOT NULL") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     @NotNull(message = "planStartDate REQUIRED for create")
     private String planStartDate;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
+            notes = "Nullable; endDate >= startDate") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     private String planEndDate;
 
-    @ApiModelProperty(example = "00.00") /* Hint for Swagger */
+    @ApiModelProperty(example = "00.00",
+            notes = "Nullable; cost > 0 (if not null)") /* Hint for Swagger */
     @Positive
     private Double estimatedCost;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
+            notes = "Nullable; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     private String actualStartDate;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
+            notes = "Nullable; endDate >= startDate; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     private String actualEndDate;
 
-    @ApiModelProperty(example = "00.00") /* Hint for Swagger */
+    @ApiModelProperty(example = "00.00",
+            notes = "Nullable; cost > 0 (if not null)") /* Hint for Swagger */
     @Positive
     private Double actualCost;
 }
