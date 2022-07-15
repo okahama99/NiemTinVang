@@ -699,7 +699,7 @@ public class ReportServiceImpl implements ReportService {
 
     /* Utils */
     private ReportReadDTO fillDTO(Report report) throws Exception {
-        long reportId = report.getProjectId();
+        long reportId = report.getReportId();
 
         ReportReadDTO reportDTO = modelMapper.map(report, ReportReadDTO.class);
 

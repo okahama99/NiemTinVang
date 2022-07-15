@@ -4,6 +4,7 @@ import com.ntv.ntvcons_backend.constants.SearchOption;
 import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
@@ -100,8 +101,14 @@ public class TaskServiceImpl implements TaskService{
 
         newTask = createTask(newTask);
 
+        long taskId = newTask.getTaskId();
+
         /* Create associated TaskAssignment (if present) */
-        if (newTaskDTO.getTaskAssignment() != null) {
+        TaskAssignmentCreateDTO taskAssignmentDTO = newTaskDTO.getTaskAssignment();
+        if (taskAssignmentDTO != null) {
+            /* Set required FK */
+            taskAssignmentDTO.setTaskId(taskId);
+
             taskAssignmentService.createTaskAssignmentByDTO(newTaskDTO.getTaskAssignment());
         }
 
