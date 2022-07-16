@@ -12,6 +12,7 @@ import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.*;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.RequestDetailModel;
@@ -1206,17 +1207,23 @@ public class RequestServiceImpl implements RequestService{
     }
 
     private List<RequestReadDTO> fillAllDTO(List<Request> requestList, Integer totalPage) throws Exception{
-        Set<Long> requestIdSet = new HashSet<>();
         Set<Long> requestTypeIdSet = new HashSet<>();
+        Set<Long> requesterIdSet = new HashSet<>();
+        Set<Long> requestIdSet = new HashSet<>();
 
         for (Request request : requestList) {
-            requestIdSet.add(request.getRequestId());
             requestTypeIdSet.add(request.getRequestTypeId());
+            requesterIdSet.add(request.getRequesterId());
+            requestIdSet.add(request.getRequestId());
         }
 
         /* Get associated RequestType */
         Map<Long, RequestTypeReadDTO> requestTypeIdRequestTypeDTOMap =
                 requestTypeService.mapRequestTypeIdRequestTypeDTOByIdIn(requestTypeIdSet);
+
+        /* Get associated Requester */
+        Map<Long, UserReadDTO> userIdUserDTOMap =
+                userService.mapUserIdUserDTOByIdIn(requesterIdSet);
 
         /* Get associated RequestDetail */
         Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
@@ -1228,6 +1235,7 @@ public class RequestServiceImpl implements RequestService{
                             modelMapper.map(request, RequestReadDTO.class);
 
                     requestDTO.setRequestType(requestTypeIdRequestTypeDTOMap.get(request.getRequestTypeId()));
+                    requestDTO.setRequester(userIdUserDTOMap.get(request.getRequesterId()));
 
                     requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(request.getRequestId()));
 

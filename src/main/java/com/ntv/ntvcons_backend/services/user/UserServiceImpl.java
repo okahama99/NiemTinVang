@@ -133,9 +133,10 @@ public class UserServiceImpl implements UserService{
     }
     @Override
     public List<User> getAllByIdIn(Collection<Long> userIdCollection) throws Exception {
-        List<User> userList = userRepository.findAllByUserIdInAndIsDeletedIsFalse(userIdCollection);
+        List<User> userList =
+                userRepository.findAllByUserIdInAndIsDeletedIsFalse(userIdCollection);
 
-        if (!userList.isEmpty()) 
+        if (userList.isEmpty())
             return null;
 
         return userList;
