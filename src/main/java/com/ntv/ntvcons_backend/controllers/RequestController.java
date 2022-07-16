@@ -67,10 +67,14 @@ public class RequestController {
 
             return ResponseEntity.ok().body(newRequestDTO);
         } catch (IllegalArgumentException iAE) {
+            iAE.printStackTrace();
+
             /* Catch not found User by Id (createdBy), which violate FK constraint */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
+
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Request", e.getMessage()));
         }

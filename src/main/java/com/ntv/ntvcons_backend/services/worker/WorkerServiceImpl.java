@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.worker;
 
+import com.ntv.ntvcons_backend.dtos.location.LocationCreateOptionDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
@@ -67,6 +68,42 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public WorkerReadDTO createWorkerByDTO(WorkerCreateDTO newWorkerDTO) throws Exception {
         Worker newWorker = modelMapper.map(newWorkerDTO, Worker.class);
+
+
+        LocationCreateOptionDTO address = newWorkerDTO.getAddress();
+
+        LocationReadDTO locationDTO;
+
+        switch (newWorkerDTO.getAddress().getCreateOption()) {
+            case CREATE_NEW_LOCATION:
+                if (address.getNewLocation() == null) {
+                    throw new IllegalArgumentException("Missing REQUIRED newLocation");
+                }
+
+                /* Create Location first (to get locationId) */
+                locationDTO = locationService.createLocationByDTO(address.getNewLocation());
+                break;
+
+            case SELECT_EXISTING_LOCATION:
+                if (address.getExistingLocationId() == null) {
+                    throw new IllegalArgumentException("Missing REQUIRED existingLocationId");
+                }
+
+                /* Get associated Location */
+                locationDTO = locationService.getDTOById(address.getExistingLocationId());
+
+                if (locationDTO == null) {
+                    /* Not found location with Id, NEED TO STOP */
+                    throw new IllegalArgumentException("No location found with Id: '"
+                            + address.getExistingLocationId() + "'. ");
+                }
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid createOption used");
+        }
+
+        newWorker.setAddressId(locationDTO.getLocationId());
 
         newWorker = createWorker(newWorker);
 

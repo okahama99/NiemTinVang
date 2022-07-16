@@ -241,26 +241,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         if (taskAssignmentList == null) 
             return null;
 
-        Set<Long> userIdSet = new HashSet<>();
-
-        for (TaskAssignment taskAssignment : taskAssignmentList) {
-            userIdSet.add(taskAssignment.getAssignerId());
-            userIdSet.add(taskAssignment.getAssigneeId());
-        }
-
-        /* Get all associated User (Assigner & Assignee) */
-        Map<Long, UserReadDTO> userIdUserDTOMap = userService.mapUserIdUserDTOByIdIn(userIdSet);
-
-        return taskAssignmentList.stream()
-                .map(taskAssignment -> {
-                    TaskAssignmentReadDTO TaskAssignmentDTO =
-                            modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
-
-                    TaskAssignmentDTO.setAssigner(userIdUserDTOMap.get(taskAssignment.getAssignerId()));
-                    TaskAssignmentDTO.setAssignee(userIdUserDTOMap.get(taskAssignment.getAssigneeId()));
-
-                    return TaskAssignmentDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(taskAssignmentList, null);
     }
     @Override
     public Page<TaskAssignment> getPageAllByAssignerId(Pageable paging, long assignerId) throws Exception {

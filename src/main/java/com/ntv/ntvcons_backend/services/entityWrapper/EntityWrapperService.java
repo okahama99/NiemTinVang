@@ -8,21 +8,21 @@ import java.util.List;
 
 public interface EntityWrapperService {
     /* CREATE */
-    EntityWrapper createEntityWrapper(int entityID, EntityType type);
+    EntityWrapper createEntityWrapper(EntityWrapper entityWrapper, EntityType type) throws Exception;
 
     /* READ */
-    List<EntityWrapper> getAll();
+    List<EntityWrapper> getAll() throws Exception;
 
-    List<EntityWrapper> getAllByEntityType(EntityType type);
+    List<EntityWrapper> getAllByEntityType(EntityType type) throws Exception;
 
-    List<EntityWrapper> getAllByEntityIdInAndEntityType(Collection<Integer> entityIdCollection, EntityType type);
+    List<EntityWrapper> getAllByEntityIdInAndEntityType(Collection<Integer> entityIdCollection, EntityType type) throws Exception;
 
-    EntityWrapper getByEntityIdAndEntityType(int entityID, EntityType type);
+    EntityWrapper getByEntityIdAndEntityType(int entityID, EntityType type) throws Exception;
 
-    EntityWrapper getById(int entityWrapperId);
+    EntityWrapper getById(int entityWrapperId) throws Exception;
 
     /* UPDATE */
 
     /* DELETE */
-    boolean deleteEntityWrapper(int entityWrapperID);
+    boolean deleteEntityWrapper(int entityWrapperID) throws Exception;
 }

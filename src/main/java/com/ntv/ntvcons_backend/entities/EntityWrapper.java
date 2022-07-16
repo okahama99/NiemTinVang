@@ -21,25 +21,28 @@ public class EntityWrapper extends BaseEntity {
     @Column(name = "entityWrapperId", nullable = false)
     private Long entityWrapperId;
 
-    @Column(name = "postId", unique = true)
+    @Column(name = "blueprintId")
+    private Long blueprintId;
+
+    @Column(name = "postId")
     private Long postId;
 
-    @Column(name = "projectId", unique = true)
+    @Column(name = "projectId")
     private Long projectId;
 
-    @Column(name = "reportId", unique = true)
+    @Column(name = "reportId")
     private Long reportId;
 
-    @Column(name = "requestId", unique = true)
+    @Column(name = "requestId")
     private Long requestId;
 
-    @Column(name = "taskId", unique = true)
+    @Column(name = "taskId")
     private Long taskId;
 
-    @Column(name = "userId", unique = true)
+    @Column(name = "userId")
     private Long userId;
 
-    @Column(name = "workerId", unique = true)
+    @Column(name = "workerId")
     private Long workerId;
 
     @Column(name = "isDeleted", nullable = false)
@@ -48,6 +51,7 @@ public class EntityWrapper extends BaseEntity {
     /** For CREATE only */
     public EntityWrapper(long entityId, EntityType type) {
         this.entityWrapperId = null;
+        this.blueprintId = null;
         this.projectId = null;
         this.reportId = null;
         this.requestId = null;
@@ -58,6 +62,12 @@ public class EntityWrapper extends BaseEntity {
         this.isDeleted = false;
 
         switch (type) {
+            case BLUEPRINT_ENTITY:
+                this.blueprintId = entityId;
+                break;
+            case POST_ENTITY:
+                this.postId = entityId;
+                break;
             case PROJECT_ENTITY:
                 this.projectId = entityId;
                 break;
@@ -67,17 +77,14 @@ public class EntityWrapper extends BaseEntity {
             case REQUEST_ENTITY:
                 this.requestId = entityId;
                 break;
-            case POST_ENTITY:
-                this.postId = entityId;
+            case TASK_ENTITY:
+                this.taskId = entityId;
                 break;
             case USER_ENTITY:
                 this.userId = entityId;
                 break;
             case WORKER_ENTITY:
                 this.workerId = entityId;
-                break;
-            case TASK_ENTITY:
-                this.taskId = entityId;
                 break;
         }
     }
