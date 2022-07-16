@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.worker;
 
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateOptionDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -34,5 +35,8 @@ public class WorkerUpdateDTO extends BaseCreateDTO {
     @NotNull(message = "socialSecurityCode REQUIRED for update")
     private String socialSecurityCode;
 
-    private LocationUpdateOptionDTO address;
+    /* TODO: to reuse later
+    private LocationUpdateOptionDTO address;*/
+
+    private LocationUpdateDTO address;
 }

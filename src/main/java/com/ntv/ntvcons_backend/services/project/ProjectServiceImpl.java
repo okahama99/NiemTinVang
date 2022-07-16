@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.services.project;
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
@@ -782,7 +783,6 @@ public class ProjectServiceImpl implements ProjectService{
                     throw new IllegalArgumentException("actualEndDate is before actualStartDate");
         }
 
-        LocationReadDTO locationDTO;
         /* TODO: reuse later */
         /*
         /* Update Location if changed / Get associated Location  * /
@@ -843,12 +843,12 @@ public class ProjectServiceImpl implements ProjectService{
         } */
 
         /* Update associated Location if changed */
-        if (updatedProjectDTO.getLocation() != null) {
-            locationDTO = locationService.updateLocationByDTO(updatedProjectDTO.getLocation());
-
-            if (locationDTO == null) {
+        LocationUpdateDTO location = updatedProjectDTO.getLocation();
+        if (location != null) {
+            if (locationService.updateLocationByDTO(location) == null) {
                 /* Not found location with Id, NEED TO STOP */
-                throw new IllegalArgumentException("Invalid locationId, No location found with Id to update");
+                throw new IllegalArgumentException("No location found with Id: '"
+                        + location.getLocationId() + "' to update");
             }
         }
 
