@@ -806,16 +806,16 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
         return projectWorkerDTO;
     }
 
-    private List<ProjectWorkerReadDTO> fillAllDTO(List<ProjectWorker> projectWorkerList, Integer totalPage) throws Exception {
+    private List<ProjectWorkerReadDTO> fillAllDTO(Collection<ProjectWorker> projectWorkerCollection, Integer totalPage) throws Exception {
         Set<Long> workerIdSet =
-                projectWorkerList.stream()
+                projectWorkerCollection.stream()
                         .map(ProjectWorker::getWorkerId)
                         .collect(Collectors.toSet());
 
         /* Get associated Worker (Worker) */
         Map<Long, WorkerReadDTO> workerIdWorkerDTOMap = workerService.mapWorkerIdWorkerDTOByIdIn(workerIdSet);
 
-        return projectWorkerList.stream()
+        return projectWorkerCollection.stream()
                 .map(projectWorker -> {
                     ProjectWorkerReadDTO projectWorkerDTO =
                             modelMapper.map(projectWorker, ProjectWorkerReadDTO.class);

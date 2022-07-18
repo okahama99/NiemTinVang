@@ -88,15 +88,6 @@ public class ReportController {
                     }
                     break;
 
-                case BY_NAME:
-                    reportDTO = reportService.getDTOByReportName(searchParam);
-
-                    if (reportDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Report found with name: '" + searchParam + "'. ");
-                    }
-                    break;
-
                 default:
                     throw new IllegalArgumentException("Invalid SearchType used for entity Report");
             }
@@ -120,9 +111,6 @@ public class ReportController {
                     errorMsg += "Id: '" + searchParam + "'. ";
                     break;
 
-                case BY_NAME:
-                    errorMsg += "name: '" + searchParam + "'. ";
-                    break;
             }
 
             return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
@@ -170,6 +158,15 @@ public class ReportController {
                     }
                     break;
 
+                case BY_NAME:
+                    reportDTOList = reportService.getAllDTOInPagingByReportName(paging, searchParam);
+
+                    if (reportDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Report found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+
                 case BY_NAME_CONTAINS:
                     reportDTOList = reportService.getAllDTOInPagingByReportNameContains(paging, searchParam);
 
@@ -212,6 +209,10 @@ public class ReportController {
 
                 case BY_REPORT_TYPE_ID:
                     errorMsg += "reportTypeId: '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
                     break;
 
                 case BY_NAME_CONTAINS:

@@ -254,11 +254,27 @@ public class RequestDetailServiceImpl implements RequestDetailService {
 
     @Override
     public Page<RequestDetail> getPageAll(Pageable paging) throws Exception {
-        return null;
+        Page<RequestDetail> requestDetailPage =
+                requestDetailRepository.findAllByIsDeletedIsFalse(paging);
+
+        if (requestDetailPage.isEmpty())
+            return null;
+
+        return requestDetailPage;
     }
     @Override
     public List<RequestDetailReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
-        return null;
+        Page<RequestDetail> requestDetailPage = getPageAll(paging);
+
+        if (requestDetailPage == null)
+            return null;
+
+        List<RequestDetail> requestDetailList = requestDetailPage.getContent();
+
+        if (requestDetailList.isEmpty())
+            return null;
+
+        return fillAllDTO(requestDetailList, requestDetailPage.getTotalPages());
     }
 
     @Override
@@ -323,6 +339,30 @@ public class RequestDetailServiceImpl implements RequestDetailService {
                 .map(requestDetail -> modelMapper.map(requestDetail, RequestDetailReadDTO.class))
                 .collect(Collectors.toList());
     }
+    @Override
+    public Page<RequestDetail> getPageAllByRequestId(Pageable paging, long requestId) throws Exception {
+        Page<RequestDetail> requestDetailPage =
+                requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(requestId, paging);
+
+        if (requestDetailPage.isEmpty())
+            return null;
+
+        return requestDetailPage;
+    }
+    @Override
+    public List<RequestDetailReadDTO> getAllDTOInPagingByRequestId(Pageable paging, long requestId) throws Exception {
+        Page<RequestDetail> requestDetailPage = getPageAllByRequestId(paging, requestId);
+
+        if (requestDetailPage == null)
+            return null;
+
+        List<RequestDetail> requestDetailList = requestDetailPage.getContent();
+
+        if (requestDetailList.isEmpty())
+            return null;
+
+        return fillAllDTO(requestDetailList, requestDetailPage.getTotalPages());
+    }
 
     @Override
     public List<RequestDetail> getAllByRequestIdIn(Collection<Long> requestIdCollection) throws Exception {
@@ -370,6 +410,30 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         }
 
         return requestIdRequestDetailDTOListMap;
+    }
+    @Override
+    public Page<RequestDetail> getPageAllByRequestIdIn(Pageable paging, Collection<Long> requestIdCollection) throws Exception {
+        Page<RequestDetail> requestDetailPage =
+                requestDetailRepository.findAllByRequestIdInAndIsDeletedIsFalse(requestIdCollection, paging);
+
+        if (requestDetailPage.isEmpty())
+            return null;
+
+        return requestDetailPage;
+    }
+    @Override
+    public List<RequestDetailReadDTO> getAllDTOInPagingByRequestIdIn(Pageable paging, Collection<Long> requestIdCollection) throws Exception {
+        Page<RequestDetail> requestDetailPage = getPageAllByRequestIdIn(paging, requestIdCollection);
+
+        if (requestDetailPage == null)
+            return null;
+
+        List<RequestDetail> requestDetailList = requestDetailPage.getContent();
+
+        if (requestDetailList.isEmpty())
+            return null;
+
+        return fillAllDTO(requestDetailList, requestDetailPage.getTotalPages());
     }
 
     /* UPDATE */
@@ -610,8 +674,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         return modelMapper.map(requestDetail, RequestDetailReadDTO.class);
     }
 
-    private List<RequestDetailReadDTO> fillAllDTO(List<RequestDetail> requestDetailList, Integer totalPage) throws Exception {
-        return requestDetailList.stream()
+    private List<RequestDetailReadDTO> fillAllDTO(Collection<RequestDetail> requestDetailCollection, Integer totalPage) throws Exception {
+        return requestDetailCollection.stream()
                 .map(requestDetail -> {
                     RequestDetailReadDTO requestDetailDTO =
                             modelMapper.map(requestDetail, RequestDetailReadDTO.class);

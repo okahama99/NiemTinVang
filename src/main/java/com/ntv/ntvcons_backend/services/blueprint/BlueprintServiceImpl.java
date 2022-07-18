@@ -160,6 +160,11 @@ public class BlueprintServiceImpl implements BlueprintService {
     }
 
     @Override
+    public boolean existsById(long blueprintId) throws Exception {
+        return blueprintRepository
+                .existsByBlueprintIdAndIsDeletedIsFalse(blueprintId);
+    }
+    @Override
     public Blueprint getById(long blueprintId) throws Exception {
         return blueprintRepository
                 .findByBlueprintIdAndIsDeletedIsFalse(blueprintId)
@@ -551,8 +556,8 @@ public class BlueprintServiceImpl implements BlueprintService {
         return modelMapper.map(blueprint, BlueprintReadDTO.class);
     }
 
-    private List<BlueprintReadDTO> fillAllDTO(List<Blueprint> blueprintList, Integer totalPage) throws Exception {
-        return blueprintList.stream()
+    private List<BlueprintReadDTO> fillAllDTO(Collection<Blueprint> blueprintCollection, Integer totalPage) throws Exception {
+        return blueprintCollection.stream()
                 .map(blueprint -> {
                     BlueprintReadDTO blueprintDTO =
                             modelMapper.map(blueprint, BlueprintReadDTO.class);

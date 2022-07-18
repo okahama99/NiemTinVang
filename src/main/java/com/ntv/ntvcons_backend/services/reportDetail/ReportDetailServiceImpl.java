@@ -615,8 +615,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         return modelMapper.map(reportDetail, ReportDetailReadDTO.class);
     }
 
-    private List<ReportDetailReadDTO> fillAllDTO(List<ReportDetail> reportDetailList, Integer totalPage) throws Exception {
-        return reportDetailList.stream()
+    private List<ReportDetailReadDTO> fillAllDTO(Collection<ReportDetail> reportDetailCollection, Integer totalPage) throws Exception {
+        return reportDetailCollection.stream()
                 .map(reportDetail -> {
                     ReportDetailReadDTO reportDetailDTO =
                             modelMapper.map(reportDetail, ReportDetailReadDTO.class);

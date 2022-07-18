@@ -165,17 +165,13 @@ public class RequestDetailController {
             switch (searchType) {
                 case BY_REQUEST_ID:
                     requestDetailDTOList =
-                            requestDetailService.getAllDTOByRequestId(Long.parseLong(searchParam));
-                    /* TODO: replace with paging */
+                            requestDetailService.getAllDTOInPagingByRequestId(paging, Long.parseLong(searchParam));
 
                     if (requestDetailDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body("No RequestDetail found with name contains: '" + searchParam + "'. ");
                     }
                     break;
-
-                case BY_ITEM_DESC:
-                    throw new IllegalArgumentException("SearchType not yet supported");
 
                 default:
                     throw new IllegalArgumentException("Invalid SearchType used for entity RequestDetail");

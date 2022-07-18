@@ -8,6 +8,7 @@ import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestVerifierModel;
+import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,7 +16,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface RequestService {
+public interface RequestService extends BaseService {
     /* CREATE */
     boolean createRequest(CreateRequestModel createRequestModel);
 
@@ -51,8 +52,11 @@ public interface RequestService {
     Page<Request> getPageAllByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception;
     List<RequestReadDTO> getAllDTOInPagingByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception;
 
-    Request getByRequestName(String requestName) throws Exception;
-    RequestReadDTO getDTOByRequestName(String requestName) throws Exception;
+    List<Request> getAllByRequestName(String requestName) throws Exception;
+    List<RequestReadDTO> getAllDTOByRequestName(String requestName) throws Exception;
+    Page<Request> getPageAllByRequestName(Pageable paging, String requestName) throws Exception;
+    List<RequestReadDTO> getAllDTOInPagingByRequestName(Pageable paging, String requestName) throws Exception;
+
 
     List<Request> getAllByRequestNameContains(String requestName) throws Exception;
     List<RequestReadDTO> getAllDTOByRequestNameContains(String requestName) throws Exception;

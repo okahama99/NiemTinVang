@@ -68,8 +68,8 @@ public class TaskServiceImpl implements TaskService{
                 .existsByProjectIdAndTaskNameAndIsDeletedIsFalse(
                         newTask.getProjectId(),
                         newTask.getTaskName())) {
-            errorMsg += "Already exists another Task with projectId: '" + newTask.getProjectId()
-                    + "', taskName: '" + newTask.getTaskName() + "'. ";
+            errorMsg += "Already exists another Task with name: '" + newTask.getTaskName()
+                    + "' for Project with Id:' " +  newTask.getProjectId() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -623,8 +623,8 @@ public class TaskServiceImpl implements TaskService{
                         updatedTask.getProjectId(),
                         updatedTask.getTaskName(),
                         updatedTask.getTaskId())) {
-            errorMsg += "Already exists another Task with projectId: '" + updatedTask.getProjectId()
-                    + "', taskName: '" + updatedTask.getTaskName() + "'. ";
+            errorMsg += "Already exists another Task with name: '" + updatedTask.getTaskName()
+                    + "' for Project with Id:' " +  updatedTask.getProjectId() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty())
@@ -744,10 +744,10 @@ public class TaskServiceImpl implements TaskService{
         return taskDTO;
     }
 
-    private List<TaskReadDTO> fillAllDTO(List<Task> taskList, Integer totalPage) throws Exception {
+    private List<TaskReadDTO> fillAllDTO(Collection<Task> taskCollection, Integer totalPage) throws Exception {
         Set<Long> taskIdSet = new HashSet<>();
 
-        for (Task task : taskList) {
+        for (Task task : taskCollection) {
             taskIdSet.add(task.getTaskId());
         }
 
@@ -759,7 +759,7 @@ public class TaskServiceImpl implements TaskService{
         Map<Long, List<TaskReportReadDTO>> taskIdTaskReportDTOListMap =
                 taskReportService.mapTaskIdTaskReportDTOListByTaskIdIn(taskIdSet);
 
-        return taskList.stream()
+        return taskCollection.stream()
                 .map(task -> {
                     TaskReadDTO taskReadDTO =
                             modelMapper.map(task, TaskReadDTO.class);

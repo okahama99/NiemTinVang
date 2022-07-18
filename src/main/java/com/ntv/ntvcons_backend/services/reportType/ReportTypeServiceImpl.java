@@ -175,6 +175,30 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
         return fillAllDTO(reportTypeList, null);
     }
+    @Override
+    public Page<ReportType> getPageAllByReportTypeNameContains(Pageable paging, String reportTypeName) throws Exception {
+        Page<ReportType> reportTypePage =
+                reportTypeRepository.findAllByReportTypeNameContainsAndIsDeletedIsFalse(reportTypeName, paging);
+
+        if (reportTypePage.isEmpty())
+            return null;
+
+        return reportTypePage;
+    }
+    @Override
+    public List<ReportTypeReadDTO> getAllDTOInPagingByReportTypeNameContains(Pageable paging, String reportTypeName) throws Exception {
+        Page<ReportType> reportTypePage = getPageAllByReportTypeNameContains(paging, reportTypeName);
+
+        if (reportTypePage == null)
+            return null;
+
+        List<ReportType> reportTypeList = reportTypePage.getContent();
+
+        if (reportTypePage.isEmpty())
+            return null;
+
+        return fillAllDTO(reportTypeList, reportTypePage.getTotalPages());
+    }
 
     /* UPDATE */
     @Override
@@ -251,8 +275,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         return modelMapper.map(reportType, ReportTypeReadDTO.class);
     }
 
-    private List<ReportTypeReadDTO> fillAllDTO(List<ReportType> reportTypeList, Integer totalPage) throws Exception {
-        return reportTypeList.stream()
+    private List<ReportTypeReadDTO> fillAllDTO(Collection<ReportType> reportTypeCollection, Integer totalPage) throws Exception {
+        return reportTypeCollection.stream()
                 .map(reportType -> {
                     ReportTypeReadDTO reportTypeDTO =
                             modelMapper.map(reportType, ReportTypeReadDTO.class);

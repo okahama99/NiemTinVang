@@ -5,11 +5,7 @@ import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
-import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
@@ -120,8 +116,11 @@ public class RequestServiceImpl implements RequestService{
 
         /* Check duplicate */
         if (requestRepository
-                .existsByRequestNameAndIsDeletedIsFalse(newRequest.getRequestName())) {
-            errorMsg += "Already exists another Request with name: '" + newRequest.getRequestName() + "'. ";
+                .existsByProjectIdAndRequestNameAndIsDeletedIsFalse(
+                        newRequest.getProjectId(),
+                        newRequest.getRequestName())) {
+            errorMsg += "Already exists another Request with name: '" + newRequest.getRequestName()
+                    + "' for Project with Id:' " +  newRequest.getProjectId() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -611,19 +610,47 @@ public class RequestServiceImpl implements RequestService{
     }
 
     @Override
-    public Request getByRequestName(String requestName) throws Exception {
-        return requestRepository
-                .findByRequestNameAndIsDeletedIsFalse(requestName)
-                .orElse(null);
-    }
-    @Override
-    public RequestReadDTO getDTOByRequestName(String requestName) throws Exception {
-        Request request = getByRequestName(requestName);
+    public List<Request> getAllByRequestName(String requestName) throws Exception {
+        List<Request> requestList =
+                requestRepository.findAllByRequestNameAndIsDeletedIsFalse(requestName);
 
-        if (request == null) 
+        if (requestList.isEmpty())
             return null;
 
-        return fillDTO(request);
+        return requestList;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOByRequestName(String requestName) throws Exception {
+        List<Request> requestList = getAllByRequestName(requestName);
+
+        if (requestList == null)
+            return null;
+
+        return fillAllDTO(requestList, null);
+    }
+    @Override
+    public Page<Request> getPageAllByRequestName(Pageable paging, String requestName) throws Exception {
+        Page<Request> requestPage =
+                requestRepository.findAllByRequestNameAndIsDeletedIsFalse(requestName, paging);
+
+        if (requestPage.isEmpty())
+            return null;
+
+        return requestPage;
+    }
+    @Override
+    public List<RequestReadDTO> getAllDTOInPagingByRequestName(Pageable paging, String requestName) throws Exception {
+        Page<Request> requestPage = getPageAllByRequestName(paging, requestName);
+
+        if (requestPage == null)
+            return null;
+
+        List<Request> requestList = requestPage.getContent();
+
+        if (requestList.isEmpty())
+            return null;
+
+        return fillAllDTO(requestList, requestPage.getTotalPages());
     }
 
     @Override
@@ -999,10 +1026,12 @@ public class RequestServiceImpl implements RequestService{
 
         /* Check duplicate */
         if (requestRepository
-                .existsByRequestNameAndRequestIdIsNotAndIsDeletedIsFalse(
+                .existsByProjectIdAndRequestNameAndRequestIdIsNotAndIsDeletedIsFalse(
+                        updatedRequest.getProjectId(),
                         updatedRequest.getRequestName(),
                         updatedRequest.getRequestId())) {
-            errorMsg += "Already exists another Request with name: '" + updatedRequest.getRequestName() + "'. ";
+            errorMsg += "Already exists another Request with name: '" + updatedRequest.getRequestName()
+                    + "' for Project with Id:' " +  updatedRequest.getProjectId() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -1206,12 +1235,12 @@ public class RequestServiceImpl implements RequestService{
         return requestDTO;
     }
 
-    private List<RequestReadDTO> fillAllDTO(List<Request> requestList, Integer totalPage) throws Exception{
+    private List<RequestReadDTO> fillAllDTO(Collection<Request> requestCollection, Integer totalPage) throws Exception{
         Set<Long> requestTypeIdSet = new HashSet<>();
         Set<Long> requesterIdSet = new HashSet<>();
         Set<Long> requestIdSet = new HashSet<>();
 
-        for (Request request : requestList) {
+        for (Request request : requestCollection) {
             requestTypeIdSet.add(request.getRequestTypeId());
             requesterIdSet.add(request.getRequesterId());
             requestIdSet.add(request.getRequestId());
@@ -1229,7 +1258,7 @@ public class RequestServiceImpl implements RequestService{
         Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
                 requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
 
-        return requestList.stream()
+        return requestCollection.stream()
                 .map(request -> {
                     RequestReadDTO requestDTO =
                             modelMapper.map(request, RequestReadDTO.class);

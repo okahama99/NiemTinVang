@@ -54,7 +54,6 @@ public class SearchType {
     }
     public enum ALL_REPORT_DETAIL {
         BY_REPORT_ID,
-        BY_ITEM_DESC,
     }
 
     public enum REQUEST_DETAIL {
@@ -62,7 +61,6 @@ public class SearchType {
     }
     public enum ALL_REQUEST_DETAIL {
         BY_REQUEST_ID,
-        BY_ITEM_DESC,
     }
 
     public enum FILE_TYPE {
@@ -77,26 +75,26 @@ public class SearchType {
 
     public enum REPORT {
         BY_ID,
-        BY_NAME,
     }
     public enum ALL_REPORT {
+        BY_NAME,
+        BY_NAME_CONTAINS,
         BY_PROJECT_ID,
         BY_REPORTER_ID,
         BY_REPORT_TYPE_ID,
-        BY_NAME_CONTAINS,
         BY_REPORT_DATE,
     }
 
     public enum REQUEST {
         BY_ID,
-        BY_NAME,
     }
     public enum ALL_REQUEST {
+        BY_NAME,
+        BY_NAME_CONTAINS,
         BY_PROJECT_ID,
         BY_REQUESTER_ID,
         BY_VERIFIER_ID,
         BY_REQUEST_TYPE_ID,
-        BY_NAME_CONTAINS,
         BY_REQUEST_DATE,
     }
 

@@ -11,6 +11,7 @@ import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
@@ -151,7 +152,8 @@ public class ProjectServiceImpl implements ProjectService{
         if (projectRepository
                 .existsByProjectNameAndIsDeletedIsFalse(
                         newProject.getProjectName())) {
-            errorMsg += "Already exists another Project with name: '" + newProject.getProjectName() + "'. ";
+            errorMsg += "Already exists another Project with name: '"
+                    + newProject.getProjectName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -943,11 +945,11 @@ public class ProjectServiceImpl implements ProjectService{
         return projectDTO;
     }
 
-    private List<ProjectReadDTO> fillAllDTO(List<Project> projectList, Integer totalPage) throws Exception {
+    private List<ProjectReadDTO> fillAllDTO(Collection<Project> projectCollection, Integer totalPage) throws Exception {
         Set<Long> locationIdSet = new HashSet<>();
         Set<Long> projectIdSet = new HashSet<>();
 
-        for (Project project : projectList) {
+        for (Project project : projectCollection) {
             locationIdSet.add(project.getLocationId());
             projectIdSet.add(project.getProjectId());
         }
@@ -972,11 +974,10 @@ public class ProjectServiceImpl implements ProjectService{
         Map<Long, List<ProjectManagerReadDTO>> projectIdProjectManagerDTOListMap =
                 projectManagerService.mapProjectIdProjectManagerDTOListByProjectIdIn(projectIdSet);
         /* Get associated ProjectWorker */
-        /* TODO: ProjectWorkerMap
         Map<Long, List<ProjectWorkerReadDTO>> projectIdProjectWorkerDTOListMap =
-                projectWorkerService.mapProjectIdProjectWorkerDTOListByProjectIdIn(projectIdSet);*/
+                projectWorkerService.mapProjectIdProjectWorkerDTOListByProjectIdIn(projectIdSet);
 
-        return projectList.stream()
+        return projectCollection.stream()
                 .map(project -> {
                     ProjectReadDTO projectDTO =
                             modelMapper.map(project, ProjectReadDTO.class);
@@ -992,7 +993,7 @@ public class ProjectServiceImpl implements ProjectService{
                     projectDTO.setReportList(projectIdReportDTOListMap.get(tmpProjectId));
                     projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
-                    /* TODO: ProjectWorkerList */
+                    projectDTO.setProjectWorkerList(projectIdProjectWorkerDTOListMap.get(tmpProjectId));
 
                     projectDTO.setTotalPage(totalPage);
 

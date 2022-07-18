@@ -140,7 +140,7 @@ public class ReportTypeController {
             switch (searchType) {
                 case BY_NAME_CONTAINS:
                     reportTypeDTOList = 
-                            reportTypeService.getAllDTOByReportTypeNameContains(searchParam);
+                            reportTypeService.getAllDTOInPagingByReportTypeNameContains(paging, searchParam);
 
                     if (reportTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)

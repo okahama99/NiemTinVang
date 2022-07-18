@@ -800,16 +800,16 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         return projectManagerDTO;
     }
 
-    private List<ProjectManagerReadDTO> fillAllDTO(List<ProjectManager> projectManagerList, Integer totalPage) throws Exception {
+    private List<ProjectManagerReadDTO> fillAllDTO(Collection<ProjectManager> projectManagerCollection, Integer totalPage) throws Exception {
         Set<Long> managerIdSet =
-                projectManagerList.stream()
+                projectManagerCollection.stream()
                         .map(ProjectManager::getManagerId)
                         .collect(Collectors.toSet());
 
         /* Get associated User (Manager) */
         Map<Long, UserReadDTO> userIdUserDTOMap = userService.mapUserIdUserDTOByIdIn(managerIdSet);
 
-        return projectManagerList.stream()
+        return projectManagerCollection.stream()
                 .map(projectManager -> {
                     ProjectManagerReadDTO projectManagerDTO =
                             modelMapper.map(projectManager, ProjectManagerReadDTO.class);

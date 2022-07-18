@@ -17,6 +17,7 @@ public interface BlueprintRepository extends JpaRepository<Blueprint, Long> {
     Blueprint getByBlueprintNameAndIsDeletedIsFalse(String bluePrintName);
 
     /* Id */
+    boolean existsByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
     Optional<Blueprint> findByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
     List<Blueprint> findAllByBlueprintIdInAndIsDeletedIsFalse(Collection<Long> blueprintIdCollection);
     /* Id & projectId & blueprintName */

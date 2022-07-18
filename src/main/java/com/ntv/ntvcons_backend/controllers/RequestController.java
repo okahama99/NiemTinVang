@@ -156,15 +156,6 @@ public class RequestController {
                     }
                     break;
 
-                case BY_NAME:
-                    requestDTO = requestService.getDTOByRequestName(searchParam);
-
-                    if (requestDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Request found with name: '" + searchParam + "'. ");
-                    }
-                    break;
-
                 default:
                     throw new IllegalArgumentException("Invalid SearchType used for entity Request");
             }
@@ -186,10 +177,6 @@ public class RequestController {
             switch (searchType) {
                 case BY_ID:
                     errorMsg += "Id: '" + searchParam + "'. ";
-                    break;
-
-                case BY_NAME:
-                    errorMsg += "name: '" + searchParam + "'. ";
                     break;
             }
 
@@ -250,6 +237,15 @@ public class RequestController {
                     }
                     break;
 
+                case BY_NAME:
+                    requestDTOList = requestService.getAllDTOInPagingByRequestName(paging, searchParam);
+
+                    if (requestDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+
                 case BY_NAME_CONTAINS:
                     requestDTOList =
                             requestService.getAllDTOInPagingByRequestNameContains(paging, searchParam);
@@ -296,6 +292,10 @@ public class RequestController {
 
                 case BY_VERIFIER_ID:
                     errorMsg += "userId (verifierId): '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
                     break;
 
                 case BY_NAME_CONTAINS:

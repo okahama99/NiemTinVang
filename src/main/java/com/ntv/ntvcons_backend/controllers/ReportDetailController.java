@@ -140,9 +140,6 @@ public class ReportDetailController {
                     }
                     break;
 
-                case BY_ITEM_DESC:
-                    throw new IllegalArgumentException("Not yet supported this SearchType");
-
                 default:
                     throw new IllegalArgumentException("Invalid SearchType used for entity ReportDetail");
             }

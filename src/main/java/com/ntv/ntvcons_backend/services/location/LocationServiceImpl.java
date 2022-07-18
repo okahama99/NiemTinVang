@@ -368,8 +368,8 @@ public class LocationServiceImpl implements LocationService {
         return modelMapper.map(location, LocationReadDTO.class);
     }
 
-    private List<LocationReadDTO> fillAllDTO(List<Location> locationList, Integer totalPage) throws Exception {
-        return locationList.stream()
+    private List<LocationReadDTO> fillAllDTO(Collection<Location> locationCollection, Integer totalPage) throws Exception {
+        return locationCollection.stream()
                 .map(location -> {
                     LocationReadDTO locationDTO =
                             modelMapper.map(location, LocationReadDTO.class);

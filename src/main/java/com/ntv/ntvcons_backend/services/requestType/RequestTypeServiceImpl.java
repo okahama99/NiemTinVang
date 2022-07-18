@@ -273,8 +273,8 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         return modelMapper.map(requestType, RequestTypeReadDTO.class);
     }
 
-    private List<RequestTypeReadDTO> fillAllDTO(List<RequestType> requestTypeList, Integer totalPage) throws Exception {
-        return requestTypeList.stream()
+    private List<RequestTypeReadDTO> fillAllDTO(Collection<RequestType> requestTypeCollection, Integer totalPage) throws Exception {
+        return requestTypeCollection.stream()
                 .map(requestType -> {
                     RequestTypeReadDTO requestTypeDTO =
                             modelMapper.map(requestType, RequestTypeReadDTO.class);

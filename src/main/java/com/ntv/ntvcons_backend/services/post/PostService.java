@@ -1,9 +1,12 @@
 package com.ntv.ntvcons_backend.services.post;
 
-public interface PostService {
+import com.ntv.ntvcons_backend.services.BaseService;
+
+public interface PostService extends BaseService {
     /* CREATE */
 
-    /* READ */;
+    /* READ */
+    boolean existsById(long postId) throws Exception;
 
     /* UPDATE */
 

@@ -76,8 +76,11 @@ public class ReportServiceImpl implements ReportService {
 
         /* Check duplicate */
         if (reportRepository
-                .existsByReportNameAndIsDeletedIsFalse(newReport.getReportName())) {
-            errorMsg += "Already exists another Report with name: '" + newReport.getReportName() + "'. ";
+                .existsByProjectIdAndReportNameAndIsDeletedIsFalse(
+                        newReport.getProjectId(),
+                        newReport.getReportName())) {
+            errorMsg += "Already exists another Report with name: '" + newReport.getReportName()
+                    + "' for Project with Id:' " +  newReport.getProjectId() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -335,19 +338,47 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Report getByReportName(String reportName) throws Exception {
-        return reportRepository
-                .findByReportNameAndIsDeletedIsFalse(reportName)
-                .orElse(null);
-    }
-    @Override
-    public ReportReadDTO getDTOByReportName(String reportName) throws Exception {
-        Report report = getByReportName(reportName);
+    public List<Report> getAllByReportName(String reportName) throws Exception {
+        List<Report> reportList =
+                reportRepository.findAllByReportNameAndIsDeletedIsFalse(reportName);
 
-        if (report == null) 
+        if (reportList.isEmpty())
             return null;
 
-        return fillDTO(report);
+        return reportList;
+    }
+    @Override
+    public List<ReportReadDTO> getAllDTOByReportName(String reportName) throws Exception {
+        List<Report> reportList = getAllByReportName(reportName);
+
+        if (reportList == null)
+            return null;
+
+        return fillAllDTO(reportList, null);
+    }
+    @Override
+    public Page<Report> getPageAllByReportName(Pageable paging, String reportName) throws Exception {
+        Page<Report> reportPage =
+                reportRepository.findAllByReportNameAndIsDeletedIsFalse(reportName, paging);
+
+        if (reportPage.isEmpty())
+            return null;
+
+        return reportPage;
+    }
+    @Override
+    public List<ReportReadDTO> getAllDTOInPagingByReportName(Pageable paging, String reportName) throws Exception {
+        Page<Report> reportPage = getPageAllByReportName(paging, reportName);
+
+        if (reportPage == null)
+            return null;
+
+        List<Report> reportList = reportPage.getContent();
+
+        if (reportList.isEmpty())
+            return null;
+
+        return fillAllDTO(reportList, reportPage.getTotalPages());
     }
 
     @Override
@@ -541,10 +572,12 @@ public class ReportServiceImpl implements ReportService {
 
         /* Check duplicate */
         if (reportRepository
-                .existsByReportNameAndReportIdIsNotAndIsDeletedIsFalse(
+                .existsByProjectIdAndReportNameAndReportIdIsNotAndIsDeletedIsFalse(
+                        updatedReport.getProjectId(),
                         updatedReport.getReportName(),
                         updatedReport.getReportId())) {
-            errorMsg += "Already exists another Report with name: '" + updatedReport.getReportName() + "'. ";
+            errorMsg += "Already exists another Report with name: '" + updatedReport.getReportName()
+                    + "' for Project with Id:' " +  updatedReport.getProjectId() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -716,11 +749,11 @@ public class ReportServiceImpl implements ReportService {
         return reportDTO;
     }
 
-    private List<ReportReadDTO> fillAllDTO(List<Report> reportList,Integer totalPage) throws Exception {
+    private List<ReportReadDTO> fillAllDTO(Collection<Report> reportCollection, Integer totalPage) throws Exception {
         Set<Long> reportIdSet = new HashSet<>();
         Set<Long> reportTypeIdSet = new HashSet<>();
 
-        for (Report report : reportList) {
+        for (Report report : reportCollection) {
             reportIdSet.add(report.getReportId());
             reportTypeIdSet.add(report.getReportTypeId());
         }
@@ -736,7 +769,7 @@ public class ReportServiceImpl implements ReportService {
         Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
                 taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
 
-        return reportList.stream()
+        return reportCollection.stream()
                 .map(report -> {
                     ReportReadDTO reportDTO =
                             modelMapper.map(report, ReportReadDTO.class);

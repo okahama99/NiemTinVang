@@ -25,7 +25,9 @@ public interface RequestDetailRepository extends JpaRepository<RequestDetail, Lo
 
     /* requestId */
     List<RequestDetail> findAllByRequestIdAndIsDeletedIsFalse(long requestId);
+    Page<RequestDetail> findAllByRequestIdAndIsDeletedIsFalse(long requestId, Pageable paging);
     List<RequestDetail> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
+    Page<RequestDetail> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection, Pageable paging);
 
 
     /* Id & requestId & itemDesc & itemPrice */

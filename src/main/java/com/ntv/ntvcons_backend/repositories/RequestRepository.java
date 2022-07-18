@@ -21,9 +21,9 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     Optional<Request> findByRequestIdAndIsDeletedIsFalse(long requestId);
     boolean existsAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
     List<Request> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
-    /* Id & requestName */
-    boolean existsByRequestNameAndRequestIdIsNotAndIsDeletedIsFalse(String requestName, long requestId);
-
+    /* Id & projectId & requestName */
+    boolean existsByProjectIdAndRequestNameAndRequestIdIsNotAndIsDeletedIsFalse
+            (long projectId, String requestName, long requestId);
 
 
     /* projectId */
@@ -40,10 +40,12 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
 
     /* requestName */
-    boolean existsByRequestNameAndIsDeletedIsFalse(String requestName);
-    Optional<Request> findByRequestNameAndIsDeletedIsFalse(String requestName);
+    List<Request> findAllByRequestNameAndIsDeletedIsFalse(String requestName);
+    Page<Request> findAllByRequestNameAndIsDeletedIsFalse(String requestName, Pageable paging);
     List<Request> findAllByRequestNameContainsAndIsDeletedIsFalse(String requestName);
     Page<Request> findAllByRequestNameContainsAndIsDeletedIsFalse(String requestName, Pageable paging);
+    /* projectId & requestName */
+    boolean existsByProjectIdAndRequestNameAndIsDeletedIsFalse(long projectId, String requestName);
 
 
     /* requestTypeId */

@@ -274,8 +274,8 @@ public class RoleServiceImpl implements RoleService {
         return modelMapper.map(role, RoleReadDTO.class);
     }
 
-    private List<RoleReadDTO> fillAllDTO(List<Role> roleList, Integer totalPage) throws Exception {
-        return roleList.stream()
+    private List<RoleReadDTO> fillAllDTO(Collection<Role> roleCollection, Integer totalPage) throws Exception {
+        return roleCollection.stream()
                 .map(role -> {
                     RoleReadDTO roleDTO =
                             modelMapper.map(role, RoleReadDTO.class);

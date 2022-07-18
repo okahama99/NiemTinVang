@@ -331,8 +331,8 @@ public class FileTypeServiceImpl implements FileTypeService{
         return modelMapper.map(fileType, FileTypeReadDTO.class);
     }
 
-    private List<FileTypeReadDTO> fillAllDTO(List<FileType> fileTypeList, Integer totalPage) throws Exception {
-        return fileTypeList.stream()
+    private List<FileTypeReadDTO> fillAllDTO(Collection<FileType> fileTypeCollection, Integer totalPage) throws Exception {
+        return fileTypeCollection.stream()
                 .map(fileType -> {
                     FileTypeReadDTO fileTypeReadDTO =
                             modelMapper.map(fileType, FileTypeReadDTO.class);

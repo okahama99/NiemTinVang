@@ -41,10 +41,14 @@ public interface RequestDetailService {
 
     List<RequestDetail> getAllByRequestId(long requestId) throws Exception;
     List<RequestDetailReadDTO> getAllDTOByRequestId(long requestId) throws Exception;
+    Page<RequestDetail> getPageAllByRequestId(Pageable paging, long requestId) throws Exception;
+    List<RequestDetailReadDTO> getAllDTOInPagingByRequestId(Pageable paging, long requestId) throws Exception;
 
     List<RequestDetail> getAllByRequestIdIn(Collection<Long> requestIdCollection) throws Exception;
     List<RequestDetailReadDTO> getAllDTOByRequestIdIn(Collection<Long> requestIdCollection) throws Exception;
     Map<Long, List<RequestDetailReadDTO>> mapRequestIdRequestDetailDTOListByRequestIdIn(Collection<Long> requestIdCollection) throws Exception;
+    Page<RequestDetail> getPageAllByRequestIdIn(Pageable paging, Collection<Long> requestIdCollection) throws Exception;
+    List<RequestDetailReadDTO> getAllDTOInPagingByRequestIdIn(Pageable paging, Collection<Long> requestIdCollection) throws Exception;
 
     /* UPDATE */
     boolean updateRequestDetail(UpdateRequestDetailModel updateRequestDetailModel);

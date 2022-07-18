@@ -16,6 +16,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     /* Id */
+    boolean existsByPostIdAndIsDeletedIsFalse(long postId);
     Optional<Post> findByPostIdAndIsDeletedIsFalse(long postId);
     List<Post> findAllByPostIdInAndIsDeletedIsFalse(Collection<Long> postIdCollection);
 
@@ -23,4 +24,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     /* postTitle */
     Optional<Post> findByPostTitleAndIsDeletedIsFalse(String postTitle);
     List<Post> findAllByPostTitleContainsAndIsDeletedIsFalse(String postTitleCollection);
+    Page<Post> findAllByPostTitleContainsAndIsDeletedIsFalse(String postTitleCollection, Pageable paging);
 }

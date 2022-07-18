@@ -494,10 +494,10 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         return taskAssignmentDTO;
     }
     
-    private List<TaskAssignmentReadDTO> fillAllDTO(List<TaskAssignment> taskAssignmentList, Integer totalPage) throws Exception {
+    private List<TaskAssignmentReadDTO> fillAllDTO(Collection<TaskAssignment> taskAssignmentCollection, Integer totalPage) throws Exception {
         Set<Long> userIdSet = new HashSet<>();
 
-        for (TaskAssignment taskAssignment : taskAssignmentList) {
+        for (TaskAssignment taskAssignment : taskAssignmentCollection) {
             userIdSet.add(taskAssignment.getAssignerId());
             userIdSet.add(taskAssignment.getAssigneeId());
         }
@@ -506,7 +506,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         Map<Long, UserReadDTO> userIdUserDTOMap = 
                 userService.mapUserIdUserDTOByIdIn(userIdSet);
 
-        return taskAssignmentList.stream()
+        return taskAssignmentCollection.stream()
                 .map(taskAssignment -> {
                     TaskAssignmentReadDTO TaskAssignmentDTO =
                             modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
