@@ -21,17 +21,17 @@ public class WorkerUpdateDTO extends BaseCreateDTO {
     private Long workerId;
 
     @ApiModelProperty(example = "Nguyen Van A") /* Hint for Swagger */
-    @Size(max = 100, message = "taskName max length: 100 characters")
+    @Size(max = 100, message = "fullName max length: 100 characters")
     @NotNull(message = "fullName REQUIRED for update")
     private String fullName;
 
     @ApiModelProperty(example = "xxxxxxxxx") /* Hint for Swagger */
-    @Size(max = 20, message = "taskName max length: 20 characters")
+    @Size(max = 20, message = "citizenId max length: 20 characters")
     @NotNull(message = "citizenId REQUIRED for update")
     private String citizenId;
 
     @ApiModelProperty(example = "xxxxxxxxx") /* Hint for Swagger */
-    @Size(max = 20, message = "taskName max length: 20 characters")
+    @Size(max = 100, message = "socialSecurityCode max length: 100 characters")
     @NotNull(message = "socialSecurityCode REQUIRED for update")
     private String socialSecurityCode;
 

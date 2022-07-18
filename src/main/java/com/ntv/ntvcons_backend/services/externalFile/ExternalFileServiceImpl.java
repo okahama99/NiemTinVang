@@ -35,6 +35,8 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     public ExternalFile createExternalFile(ExternalFile newFile) throws Exception {
         String errorMsg = "";
 
+        /* TODO: check url link validate */
+
         /* Check FK */
         if (userService.existsById(newFile.getCreatedBy())) {
             errorMsg += "No User (CreatedBy) found with Id: '" + newFile.getCreatedBy()
@@ -55,7 +57,11 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     }
     @Override
     public ExternalFileReadDTO createExternalFileByDTO(ExternalFileCreateDTO newFileDTO) throws Exception {
-        return null;
+        ExternalFile newFile = modelMapper.map(newFileDTO, ExternalFile.class);
+
+        newFile = createExternalFile(newFile);
+
+        return fillDTO(newFile);
     }
 
     /* READ */
@@ -345,7 +351,4 @@ public class ExternalFileServiceImpl implements ExternalFileService {
                     return fileDTO;})
                 .collect(Collectors.toList());
     }
-
-
-
 }

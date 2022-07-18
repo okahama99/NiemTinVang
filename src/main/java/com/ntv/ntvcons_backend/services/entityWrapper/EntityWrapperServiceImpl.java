@@ -186,7 +186,70 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
 
     @Override
     public EntityWrapper getByEntityIdAndEntityType(long entityID, EntityType type) throws Exception {
-        return null;
+        EntityWrapper entityWrapper = null;
+
+        switch (type) {
+            case BLUEPRINT_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByBlueprintIdAndIsDeletedIsFalse(entityID)
+                                .orElse(null);
+                break;
+
+            case POST_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByPostIdAndIsDeletedIsFalse(entityID)
+                                .orElse(null);
+                break;
+
+            case PROJECT_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByProjectIdAndIsDeletedIsFalse(entityID)
+                                .orElse(null);
+                break;
+
+            case REPORT_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByReportIdAndIsDeletedIsFalse(entityID)
+                                .orElse(null);
+                break;
+
+            case REQUEST_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByRequestIdAndIsDeletedIsFalse(entityID)
+                                .orElse(null);
+                break;
+
+            case TASK_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByTaskIdAndIsDeletedIsFalse(entityID)
+                                .orElse(null);
+                break;
+
+            case USER_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByUserIdAndIsDeletedIsFalse(entityID)
+                                .orElse(null);
+                break;
+
+            case WORKER_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByWorkerIdAndIsDeletedIsFalse(entityID)
+                                .orElse(null);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid EntityType used, no such type exists!");
+        }
+
+        return entityWrapper;
     }
 
     @Override
