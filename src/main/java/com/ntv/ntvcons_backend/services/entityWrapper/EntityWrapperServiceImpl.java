@@ -413,9 +413,9 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                 entityService = new BlueprintServiceImpl();
                 break;
 
-            case POST_ENTITY:
-                entityService = new PostServiceImpl();
-                break;
+//            case POST_ENTITY:
+//                entityService = new PostServiceImpl();
+//                break;
 
             case PROJECT_ENTITY:
                 entityService = new ProjectServiceImpl();
@@ -440,6 +440,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
             case WORKER_ENTITY:
                 entityService = new WorkerServiceImpl();
                 break;
+
 
             default:
                 throw new IllegalArgumentException("Invalid EntityType used, no such type exists!");

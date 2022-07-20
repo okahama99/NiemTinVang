@@ -24,7 +24,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<Post> findByPostTitleAndIsDeletedIsFalse(String postTitle);
     List<Post> findAllByPostTitleContainsAndIsDeletedIsFalse(String postTitleCollection);
 
-    Post existsByAddressAndIsDeletedIsFalse(String address);
+    boolean existsByAddressAndIsDeletedIsFalse(String address);
 
     Page<Post> findByPostCategoryIdAndIsDeletedIsFalse(Long postCategoryId, Pageable pageable);
 }
