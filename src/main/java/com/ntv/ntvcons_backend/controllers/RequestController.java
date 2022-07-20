@@ -2,8 +2,9 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
+import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
+import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
@@ -61,14 +62,28 @@ public class RequestController {
     
     @PostMapping(value = "/v1.1/createRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequestAlt1(@Valid @RequestBody RequestCreateDTO requestDTO) {
-        // TODO:
-        return null;
+        try {
+            RequestReadDTO newRequestDTO = requestService.createRequestByDTO(requestDTO);
+
+            return ResponseEntity.ok().body(newRequestDTO);
+        } catch (IllegalArgumentException iAE) {
+            iAE.printStackTrace();
+
+            /* Catch not found User by Id (createdBy), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating Request", e.getMessage()));
+        }
     }
 
     //@PreAuthorize("hasAnyRole('Engineer')")
     @PostMapping(value = "/v1/addRequestDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> addRequestDetail(@RequestBody CreateRequestDetailModel createRequestDetailModel){
-        boolean result = requestDetailService.createRequest(createRequestDetailModel);
+        boolean result = requestDetailService.createRequestDetail(createRequestDetailModel);
         if (result) {
             return ResponseEntity.ok().body("Tạo thành công.");
         }
@@ -141,15 +156,6 @@ public class RequestController {
                     }
                     break;
 
-                case BY_NAME:
-                    requestDTO = requestService.getDTOByRequestName(searchParam);
-
-                    if (requestDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Request found with name: '" + searchParam + "'. ");
-                    }
-                    break;
-
                 default:
                     throw new IllegalArgumentException("Invalid SearchType used for entity Request");
             }
@@ -171,10 +177,6 @@ public class RequestController {
             switch (searchType) {
                 case BY_ID:
                     errorMsg += "Id: '" + searchParam + "'. ";
-                    break;
-
-                case BY_NAME:
-                    errorMsg += "name: '" + searchParam + "'. ";
                     break;
             }
 
@@ -235,6 +237,15 @@ public class RequestController {
                     }
                     break;
 
+                case BY_NAME:
+                    requestDTOList = requestService.getAllDTOInPagingByRequestName(paging, searchParam);
+
+                    if (requestDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Request found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+
                 case BY_NAME_CONTAINS:
                     requestDTOList =
                             requestService.getAllDTOInPagingByRequestNameContains(paging, searchParam);
@@ -281,6 +292,10 @@ public class RequestController {
 
                 case BY_VERIFIER_ID:
                     errorMsg += "userId (verifierId): '" + searchParam + "'. ";
+                    break;
+
+                case BY_NAME:
+                    errorMsg += "name: '" + searchParam + "'. ";
                     break;
 
                 case BY_NAME_CONTAINS:
@@ -351,6 +366,28 @@ public class RequestController {
 
         return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
+    
+    @PutMapping(value = "/v1.1/updateRequest", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateRequestAlt1(@RequestBody RequestUpdateDTO requestDTO) {
+        try {
+            RequestReadDTO updatedRequestDTO = requestService.updateRequestByDTO(requestDTO);
+
+            if (updatedRequestDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Request found with Id: '" + requestDTO.getRequestId() + "'. ");
+            }
+
+            return ResponseEntity.ok().body(updatedRequestDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found User by Id (updatedBy), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error updating Request with Id: '" + requestDTO.getRequestId() + "'. ",
+                            e.getMessage()));
+        }
+    }
 
     @PutMapping(value = "/v1/updateVerifier", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateVerifier(@RequestBody UpdateRequestVerifierModel updateRequestVerifierModel) {
@@ -363,6 +400,19 @@ public class RequestController {
         return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
 
+    //@PreAuthorize("hasAnyRole('Admin')")
+    @PutMapping(value = "/v1/approveRequest", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> approveRequest(@RequestParam Long requestId,
+                                                 @RequestParam Boolean decision) {
+        boolean result = requestService.approveUpdate(requestId,decision);
+
+        if(result) {
+            return ResponseEntity.ok().body("Cập nhật thành công.");
+        }
+
+        return ResponseEntity.badRequest().body("Cập nhật thất bại.");
+    }
+    
     /* DELETE */
     //@PreAuthorize("hasAnyRole('Engineer','Admin')")
     @DeleteMapping(value = "/v1/deleteRequest/{requestId}", produces = "application/json;charset=UTF-8")
@@ -380,16 +430,4 @@ public class RequestController {
         }
     }
 
-    //@PreAuthorize("hasAnyRole('Admin')")
-    @PutMapping(value = "/v1/approveRequest", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> approveRequest(@RequestParam Long requestId,
-                                                 @RequestParam Boolean decision) {
-        boolean result = requestService.approveUpdate(requestId,decision);
-
-        if(result) {
-            return ResponseEntity.ok().body("Cập nhật thành công.");
-        }
-
-        return ResponseEntity.badRequest().body("Cập nhật thất bại.");
-    }
 }

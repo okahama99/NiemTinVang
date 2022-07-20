@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-        Page<User> findAllByIsDeletedIsFalse(Pageable pageable);
+        Page<User> findAllByIsDeletedIsFalse(Pageable paging);
 
         List<User> findByIsDeletedFalse();
 
@@ -21,29 +21,34 @@ public interface UserRepository extends JpaRepository<User, Long> {
         Optional<User> findByUserIdAndIsDeletedIsFalse(long userId);
         boolean existsAllByUserIdInAndIsDeletedIsFalse(Collection<Long> userIdCollection);
         List<User> findAllByUserIdInAndIsDeletedIsFalse(Collection<Long> userIdCollection);
-        /* username & phone & email */
+        /* !Id & (username || phone || email) */
         boolean existsByUsernameOrPhoneOrEmailAndUserIdIsNotAndIsDeletedIsFalse
                 (String username, String phone, String email, long userId);
 
 
         /* roleId */
         List<User> findAllByRoleIdAndIsDeletedIsFalse(long roleId);
+        Page<User> findAllByRoleIdAndIsDeletedIsFalse(long roleId, Pageable paging);
         List<User> findAllByRoleIdInAndIsDeletedIsFalse(Collection<Long> roleIdCollection);
+        Page<User> findAllByRoleIdInAndIsDeletedIsFalse(Collection<Long> roleIdCollection, Pageable paging);
 
 
         /* username */
         Optional<User> findByUsernameAndIsDeletedIsFalse(String username);
-        List<User> findByUsernameContainsAndIsDeletedIsFalse(String username);
+        List<User> findAllByUsernameContainsAndIsDeletedIsFalse(String username);
+        Page<User> findAllByUsernameContainsAndIsDeletedIsFalse(String username, Pageable paging);
 
 
         /* phone */
         Optional<User> findByPhoneAndIsDeletedIsFalse(String phone);
-        List<User> findByPhoneContainsAndIsDeletedIsFalse(String phone);
+        List<User> findAllByPhoneContainsAndIsDeletedIsFalse(String phone);
+        Page<User> findAllByPhoneContainsAndIsDeletedIsFalse(String phone, Pageable paging);
 
 
         /* email */
         Optional<User> findByEmailAndIsDeletedIsFalse(String email);
-        List<User> findByEmailContainsAndIsDeletedIsFalse(String email);
+        List<User> findAllByEmailContainsAndIsDeletedIsFalse(String email);
+        Page<User> findAllByEmailContainsAndIsDeletedIsFalse(String email, Pageable paging);
         /* username || phone || email */
         boolean existsByUsernameOrPhoneOrEmailAndIsDeletedIsFalse(String username, String phone, String email);
 }

@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    Page<Task> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<Task> findAllByIsDeletedIsFalse(Pageable paging);
 
 
     /* Id */
@@ -28,12 +28,16 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     /* projectId */
     List<Task> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
+    Page<Task> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable paging);
     List<Task> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
+    Page<Task> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection, Pageable paging);
 
 
     /* taskName */
-    Optional<Task> findByTaskNameAndIsDeletedIsFalse(String taskName);
+    List<Task> findAllByTaskNameAndIsDeletedIsFalse(String taskName); /* List because duplicate = name + projectId */
+    Page<Task> findAllByTaskNameAndIsDeletedIsFalse(String taskName, Pageable paging);
     List<Task> findAllByTaskNameContainsAndIsDeletedIsFalse(String taskName);
+    Page<Task> findAllByTaskNameContainsAndIsDeletedIsFalse(String taskName, Pageable paging);
     /* projectId & taskName */
     boolean existsByProjectIdAndTaskNameAndIsDeletedIsFalse(long projectId, String taskName);
 

@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
-        Page<Role> findAllByIsDeletedIsFalse(Pageable pageable);
+        Page<Role> findAllByIsDeletedIsFalse(Pageable paging);
 
 
         /* Id */
@@ -28,4 +28,5 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
         boolean existsByRoleNameAndIsDeletedIsFalse(String roleName);
         Optional<Role> findByRoleNameAndIsDeletedIsFalse(String roleName);
         List<Role> findAllByRoleNameContainsAndIsDeletedIsFalse(String roleName);
+        Page<Role> findAllByRoleNameContainsAndIsDeletedIsFalse(String roleName, Pageable paging);
 }

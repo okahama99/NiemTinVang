@@ -1,6 +1,5 @@
-package com.ntv.ntvcons_backend.dtos.projectManager;
+package com.ntv.ntvcons_backend.dtos.projectWorker;
 
-import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -9,7 +8,6 @@ import lombok.NoArgsConstructor;
 import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
@@ -17,14 +15,16 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjectManagerCreateDTO extends BaseCreateDTO {
+public class ProjectWorkerCreateDTO extends BaseCreateDTO {
+    @ApiModelProperty(notes = "NOT NULL; Id >= 0") /* Hint for Swagger */
     @PositiveOrZero
     @NotNull(message = "projectId REQUIRED for create")
     private Long projectId;
 
+    @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "userId (managerId) REQUIRED for create")
-    private Long managerId;
+    @NotNull(message = "workerId REQUIRED for create")
+    private Long workerId;
 
     /** yyyy-MM-dd HH:mm */
     /* TODO: use later or skip forever */

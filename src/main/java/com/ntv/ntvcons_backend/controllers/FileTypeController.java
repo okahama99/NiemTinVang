@@ -50,11 +50,11 @@ public class FileTypeController {
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
-                                         @RequestParam boolean sortTypeAscAsc) {
+                                         @RequestParam boolean sortTypeAsc) {
         try {
             List<FileTypeReadDTO> fileTypeDTOList =
                     fileTypeService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAscAsc));
+                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (fileTypeDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No FileType found");
@@ -96,7 +96,6 @@ public class FileTypeController {
                                 .body("No FileType found with name: '" + searchParam + "'. ");
                     }
                     break;
-
 
                 case BY_EXTENSION:
                     fileTypeDTO = fileTypeService.getDTOByFileTypeExtension(searchParam);
@@ -149,9 +148,9 @@ public class FileTypeController {
                                                 @RequestParam int pageNo,
                                                 @RequestParam int pageSize,
                                                 @RequestParam String sortBy,
-                                                @RequestParam boolean sortTypeAscAsc) {
+                                                @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAscAsc);
+            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<FileTypeReadDTO> fileTypeDTOList;
 

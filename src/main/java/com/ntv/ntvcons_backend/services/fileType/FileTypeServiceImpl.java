@@ -50,9 +50,8 @@ public class FileTypeServiceImpl implements FileTypeService{
                     + "'. Or with fileTypeExtension: '" + newFileType.getFileTypeExtension() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return fileTypeRepository.saveAndFlush(newFileType);
     }
@@ -62,7 +61,7 @@ public class FileTypeServiceImpl implements FileTypeService{
 
         newFileType = createFileType(newFileType);
 
-        return modelMapper.map(newFileType, FileTypeReadDTO.class);
+        return fillDTO(newFileType);
     }
 
     /* READ */
@@ -70,9 +69,8 @@ public class FileTypeServiceImpl implements FileTypeService{
     public Page<FileType> getPageAll(Pageable paging) throws Exception {
         Page<FileType> fileTypePage = fileTypeRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (fileTypePage.isEmpty()) {
+        if (fileTypePage.isEmpty()) 
             return null;
-        }
 
         return fileTypePage;
     }
@@ -80,27 +78,15 @@ public class FileTypeServiceImpl implements FileTypeService{
     public List<FileTypeReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
         Page<FileType> fileTypePage = getPageAll(paging);
 
-        if (fileTypePage == null) {
+        if (fileTypePage == null) 
             return null;
-        }
 
         List<FileType> fileTypeList = fileTypePage.getContent();
 
-        if (fileTypeList.isEmpty()) {
+        if (fileTypeList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = fileTypePage.getTotalPages();
-
-        return fileTypeList.stream()
-                .map(fileType -> {
-                    FileTypeReadDTO fileTypeReadDTO =
-                            modelMapper.map(fileType, FileTypeReadDTO.class);
-
-                    fileTypeReadDTO.setTotalPage(totalPage);
-
-                    return fileTypeReadDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(fileTypeList, fileTypePage.getTotalPages());
     }
 
     @Override
@@ -113,20 +99,18 @@ public class FileTypeServiceImpl implements FileTypeService{
     public FileTypeReadDTO getDTOById(long fileTypeId) throws Exception {
         FileType fileType = getById(fileTypeId);
 
-        if (fileType == null) {
+        if (fileType == null) 
             return null;
-        }
 
-        return modelMapper.map(fileType, FileTypeReadDTO.class);
+        return fillDTO(fileType);
     }
 
     @Override
     public List<FileType> getAllByIdIn(Collection<Long> fileTypeIdCollection) throws Exception {
         List<FileType> fileTypeList = fileTypeRepository.findAllByFileTypeIdInAndIsDeletedIsFalse(fileTypeIdCollection);
 
-        if (fileTypeList.isEmpty()) {
+        if (fileTypeList.isEmpty()) 
             return null;
-        }
 
         return fileTypeList;
     }
@@ -134,61 +118,20 @@ public class FileTypeServiceImpl implements FileTypeService{
     public List<FileTypeReadDTO> getAllDTOByIdIn(Collection<Long> fileTypeIdCollection) throws Exception {
         List<FileType> fileTypeList = getAllByIdIn(fileTypeIdCollection);
 
-        if (fileTypeList == null) {
+        if (fileTypeList == null) 
             return null;
-        }
 
-        return fileTypeList.stream()
-                .map(fileType -> modelMapper.map(fileType, FileTypeReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(fileTypeList, null);
     }
     @Override
     public Map<Long, FileTypeReadDTO> mapFileTypeIdFileTypeDTOByIdIn(Collection<Long> fileTypeIdCollection) throws Exception {
         List<FileTypeReadDTO> fileTypeDTOList = getAllDTOByIdIn(fileTypeIdCollection);
 
-        if (fileTypeDTOList == null) {
+        if (fileTypeDTOList == null) 
             return new HashMap<>();
-        }
 
         return fileTypeDTOList.stream()
                 .collect(Collectors.toMap(FileTypeReadDTO::getFileTypeId, Function.identity()));
-    }
-    @Override
-    public Page<FileType> getPageAllByIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception {
-        Page<FileType> fileTypePage =
-                fileTypeRepository.findAllByFileTypeIdInAndIsDeletedIsFalse(fileTypeIdCollection, paging);
-
-        if (fileTypePage.isEmpty()) {
-            return null;
-        }
-
-        return fileTypePage;
-    }
-    @Override
-    public List<FileTypeReadDTO> getAllDTOInPagingByIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception {
-        Page<FileType> fileTypePage = getPageAllByIdIn(paging, fileTypeIdCollection);
-
-        if (fileTypePage == null) {
-            return null;
-        }
-
-        List<FileType> fileTypeList = fileTypePage.getContent();
-
-        if (fileTypeList.isEmpty()) {
-            return null;
-        }
-
-        int totalPage = fileTypePage.getTotalPages();
-
-        return fileTypeList.stream()
-                .map(fileType -> {
-                    FileTypeReadDTO fileTypeReadDTO =
-                            modelMapper.map(fileType, FileTypeReadDTO.class);
-
-                    fileTypeReadDTO.setTotalPage(totalPage);
-
-                    return fileTypeReadDTO;})
-                .collect(Collectors.toList());
     }
 
     @Override
@@ -201,11 +144,10 @@ public class FileTypeServiceImpl implements FileTypeService{
     public FileTypeReadDTO getDTOByFileTypeName(String fileTypeName) throws Exception {
         FileType fileType = getByFileTypeName(fileTypeName);
 
-        if (fileType == null) {
+        if (fileType == null) 
             return null;
-        }
 
-        return modelMapper.map(fileType, FileTypeReadDTO.class);
+        return fillDTO(fileType);
     }
 
     @Override
@@ -213,9 +155,8 @@ public class FileTypeServiceImpl implements FileTypeService{
         List<FileType> fileTypeList =
                 fileTypeRepository.findAllByFileTypeNameContainsAndIsDeletedIsFalse(fileTypeName);
 
-        if (fileTypeList.isEmpty()) {
+        if (fileTypeList.isEmpty()) 
             return null;
-        }
 
         return fileTypeList;
     }
@@ -223,22 +164,18 @@ public class FileTypeServiceImpl implements FileTypeService{
     public List<FileTypeReadDTO> getAllDTOByFileTypeNameContains(String fileTypeName) throws Exception {
         List<FileType> fileTypeList = getAllByFileTypeNameContains(fileTypeName);
 
-        if (fileTypeList == null) {
+        if (fileTypeList == null) 
             return null;
-        }
 
-        return fileTypeList.stream()
-                .map(fileType -> modelMapper.map(fileType, FileTypeReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(fileTypeList, null);
     }
     @Override
     public Page<FileType> getPageAllByFileTypeNameContains(Pageable paging, String fileTypeName) throws Exception {
         Page<FileType> fileTypePage =
                 fileTypeRepository.findAllByFileTypeNameContainsAndIsDeletedIsFalse(fileTypeName, paging);
 
-        if (fileTypePage.isEmpty()) {
+        if (fileTypePage.isEmpty()) 
             return null;
-        }
 
         return fileTypePage;
     }
@@ -246,27 +183,15 @@ public class FileTypeServiceImpl implements FileTypeService{
     public List<FileTypeReadDTO> getAllDTOInPagingByFileTypeNameContains(Pageable paging, String fileTypeName) throws Exception {
         Page<FileType> fileTypePage = getPageAllByFileTypeNameContains(paging, fileTypeName);
 
-        if (fileTypePage == null) {
+        if (fileTypePage == null) 
             return null;
-        }
 
         List<FileType> fileTypeList = fileTypePage.getContent();
 
-        if (fileTypeList.isEmpty()) {
+        if (fileTypeList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = fileTypePage.getTotalPages();
-
-        return fileTypeList.stream()
-                .map(fileType -> {
-                    FileTypeReadDTO fileTypeReadDTO =
-                            modelMapper.map(fileType, FileTypeReadDTO.class);
-
-                    fileTypeReadDTO.setTotalPage(totalPage);
-
-                    return fileTypeReadDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(fileTypeList, fileTypePage.getTotalPages());
     }
 
     @Override
@@ -279,11 +204,10 @@ public class FileTypeServiceImpl implements FileTypeService{
     public FileTypeReadDTO getDTOByFileTypeExtension(String fileTypeExtension) throws Exception {
         FileType fileType = getByFileTypeExtension(fileTypeExtension);
 
-        if (fileType == null) {
+        if (fileType == null) 
             return null;
-        }
 
-        return modelMapper.map(fileType, FileTypeReadDTO.class);
+        return fillDTO(fileType);
     }
 
     @Override
@@ -291,9 +215,8 @@ public class FileTypeServiceImpl implements FileTypeService{
         List<FileType> fileTypeList =
                 fileTypeRepository.findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(fileTypeExtension);
 
-        if (fileTypeList.isEmpty()) {
+        if (fileTypeList.isEmpty()) 
             return null;
-        }
 
         return fileTypeList;
     }
@@ -301,22 +224,18 @@ public class FileTypeServiceImpl implements FileTypeService{
     public List<FileTypeReadDTO> getAllDTOByFileTypeExtensionContains(String fileTypeExtension) throws Exception {
         List<FileType> fileTypeList = getAllByFileTypeExtensionContains(fileTypeExtension);
 
-        if (fileTypeList == null) {
+        if (fileTypeList == null) 
             return null;
-        }
 
-        return fileTypeList.stream()
-                .map(fileType -> modelMapper.map(fileType, FileTypeReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(fileTypeList, null);
     }
     @Override
     public Page<FileType> getPageAllByFileTypeExtensionContains(Pageable paging, String fileTypeExtension) throws Exception {
         Page<FileType> fileTypePage =
                 fileTypeRepository.findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(fileTypeExtension, paging);
 
-        if (fileTypePage.isEmpty()) {
+        if (fileTypePage.isEmpty()) 
             return null;
-        }
 
         return fileTypePage;
     }
@@ -324,27 +243,15 @@ public class FileTypeServiceImpl implements FileTypeService{
     public List<FileTypeReadDTO> getAllDTOInPagingByFileTypeExtensionContains(Pageable paging, String fileTypeExtension) throws Exception {
         Page<FileType> fileTypePage = getPageAllByFileTypeExtensionContains(paging, fileTypeExtension);
 
-        if (fileTypePage == null) {
+        if (fileTypePage == null) 
             return null;
-        }
 
         List<FileType> fileTypeList = fileTypePage.getContent();
 
-        if (fileTypeList.isEmpty()) {
+        if (fileTypeList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = fileTypePage.getTotalPages();
-
-        return fileTypeList.stream()
-                .map(fileType -> {
-                    FileTypeReadDTO fileTypeReadDTO =
-                            modelMapper.map(fileType, FileTypeReadDTO.class);
-
-                    fileTypeReadDTO.setTotalPage(totalPage);
-
-                    return fileTypeReadDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(fileTypeList, fileTypePage.getTotalPages());
     }
 
     /* UPDATE */
@@ -352,10 +259,8 @@ public class FileTypeServiceImpl implements FileTypeService{
     public FileType updateFileType(FileType updatedFileType) throws Exception {
         FileType oldFileType = getById(updatedFileType.getFileTypeId());
 
-        if (oldFileType == null) {
-            return null;
-            /* Not found by Id, return null */
-        }
+        if (oldFileType == null) 
+            return null; /* Not found by Id, return null */
 
         String errorMsg = "";
 
@@ -384,9 +289,8 @@ public class FileTypeServiceImpl implements FileTypeService{
                     + "'. Or with fileTypeExtension: '" + updatedFileType.getFileTypeExtension() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         updatedFileType.setCreatedAt(oldFileType.getCreatedAt());
         updatedFileType.setCreatedBy(oldFileType.getCreatedBy());
@@ -399,11 +303,10 @@ public class FileTypeServiceImpl implements FileTypeService{
 
         updatedFileType = updateFileType(updatedFileType);
 
-        if (updatedFileType == null) {
+        if (updatedFileType == null) 
             return null;
-        }
 
-        return modelMapper.map(updatedFileType, FileTypeReadDTO.class);
+        return fillDTO(updatedFileType);
     }
 
     /* DELETE */
@@ -421,5 +324,22 @@ public class FileTypeServiceImpl implements FileTypeService{
         fileTypeRepository.saveAndFlush(fileType);
 
         return true;
+    }
+
+    /* Utils */
+    private FileTypeReadDTO fillDTO(FileType fileType) throws Exception {
+        return modelMapper.map(fileType, FileTypeReadDTO.class);
+    }
+
+    private List<FileTypeReadDTO> fillAllDTO(Collection<FileType> fileTypeCollection, Integer totalPage) throws Exception {
+        return fileTypeCollection.stream()
+                .map(fileType -> {
+                    FileTypeReadDTO fileTypeReadDTO =
+                            modelMapper.map(fileType, FileTypeReadDTO.class);
+
+                    fileTypeReadDTO.setTotalPage(totalPage);
+
+                    return fileTypeReadDTO;})
+                .collect(Collectors.toList());
     }
 }

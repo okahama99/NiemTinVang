@@ -26,9 +26,6 @@ public interface FileTypeService {
     List<FileType> getAllByIdIn(Collection<Long> fileTypeIdCollection) throws Exception;
     List<FileTypeReadDTO> getAllDTOByIdIn(Collection<Long> fileTypeIdCollection) throws Exception;
     Map<Long, FileTypeReadDTO> mapFileTypeIdFileTypeDTOByIdIn(Collection<Long> fileTypeIdCollection) throws Exception;
-    Page<FileType> getPageAllByIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception;
-    List<FileTypeReadDTO> getAllDTOInPagingByIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception;
-
     FileType getByFileTypeName(String fileTypeName) throws Exception;
     FileTypeReadDTO getDTOByFileTypeName(String fileTypeName) throws Exception;
 

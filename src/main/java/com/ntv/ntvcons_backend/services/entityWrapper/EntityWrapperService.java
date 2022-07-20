@@ -5,24 +5,27 @@ import com.ntv.ntvcons_backend.entities.EntityWrapper;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface EntityWrapperService {
     /* CREATE */
-    EntityWrapper createEntityWrapper(int entityID, EntityType type);
+    EntityWrapper createEntityWrapper(long entityId, EntityType type, long createdBy) throws Exception;
 
     /* READ */
-    List<EntityWrapper> getAll();
+    List<EntityWrapper> getAll() throws Exception;
 
-    List<EntityWrapper> getAllByEntityType(EntityType type);
+    EntityWrapper getById(long entityWrapperId) throws Exception;
 
-    List<EntityWrapper> getAllByEntityIdInAndEntityType(Collection<Integer> entityIdCollection, EntityType type);
+    List<EntityWrapper> getAllByEntityType(EntityType type) throws Exception;
 
-    EntityWrapper getByEntityIdAndEntityType(int entityID, EntityType type);
+    EntityWrapper getByEntityIdAndEntityType(long entityID, EntityType type) throws Exception;
 
-    EntityWrapper getById(int entityWrapperId);
+    List<EntityWrapper> getAllByEntityIdInAndEntityType(Collection<Long> entityIdCollection, EntityType type) throws Exception;
+    Map<Long, Long> mapEntityIdEntityWrapperIdByEntityIdInAndEntityType(Collection<Long> entityIdCollection, EntityType type) throws Exception;
 
     /* UPDATE */
 
     /* DELETE */
-    boolean deleteEntityWrapper(int entityWrapperID);
+    boolean deleteEntityWrapper(long entityWrapperID) throws Exception;
+    boolean deleteByEntityIdAndEntityType(long entityWrapperID, EntityType type) throws Exception;
 }

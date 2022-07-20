@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface TaskReportRepository extends JpaRepository<TaskReport, Long> {
-    Page<TaskReport> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<TaskReport> findAllByIsDeletedIsFalse(Pageable paging);
 
 
     /* Id */
@@ -21,8 +21,8 @@ public interface TaskReportRepository extends JpaRepository<TaskReport, Long> {
     List<TaskReport> findAllByTaskReportIdInAndIsDeletedIsFalse(Collection<Long> taskReportIdCollection);
     /* Id & reportId & taskId & taskProgress */
     /** Check duplicate reportId & taskId & taskProgress for update */
-    boolean existsByReportIdAndTaskIdAndTaskProgressAndTaskReportIdIsNotAndIsDeletedIsFalse
-            (long reportId, long taskId, String taskProgress, long taskReportId);
+    boolean existsByReportIdAndTaskIdAndTaskReportIdIsNotAndIsDeletedIsFalse
+            (long reportId, long taskId, long taskReportId);
 
 
     /* reportId */
@@ -33,6 +33,6 @@ public interface TaskReportRepository extends JpaRepository<TaskReport, Long> {
     /* taskId */
     List<TaskReport> findAllByTaskIdAndIsDeletedIsFalse(long taskId);
     List<TaskReport> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
-    /* Id & reportId & taskId & taskProgress */
-    boolean existsByReportIdAndTaskIdAndTaskProgressAndIsDeletedIsFalse(long reportId, long taskId, String taskProgress);
+    /* Id & reportId & taskId */
+    boolean existsByReportIdAndTaskIdAndIsDeletedIsFalse(long reportId, long taskId);
 }

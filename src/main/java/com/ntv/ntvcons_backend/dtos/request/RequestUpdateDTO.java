@@ -19,48 +19,68 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RequestUpdateDTO extends BaseUpdateDTO {
+    @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
     @NotNull(message = "Id REQUIRED for update")
     private Long requestId;
 
+    @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
     @NotNull(message = "projectId REQUIRED for update")
     private Long projectId;
 
+    @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
     @NotNull(message = "requestTypeId REQUIRED for update")
     private Long requestTypeId;
 
+    @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
     @NotNull(message = "RequesterId REQUIRED for update")
     private Long RequesterId;
 
+    @ApiModelProperty(example = "Yêu cầu xxx",
+            notes = "NOT NULL; size <= 100") /* Hint for Swagger */
+    @Size(max = 100, message = "requestName max length: 100 characters")
+    @NotNull(message = "requestName REQUIRED for update")
+    private String requestName;
+
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
+            notes = "NOT NULL; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     @NotNull(message = "requestDate REQUIRED for update")
-    private LocalDateTime requestDate;
+    private String requestDate;
 
-    @ApiModelProperty(example = "Yêu cầu chi tiêu xxx") /* Hint for Swagger */
+    @ApiModelProperty(example = "Yêu cầu chi tiêu xxx",
+            notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "requestDesc max length: 100 characters")
     @NotNull(message = "requestDesc REQUIRED for update")
     private String requestDesc;
 
+    @ApiModelProperty(notes = "Nullable; size >= 1 (if not null)")
+    @Size(min = 1, message = "Needed at least 1 detail")
     private List<RequestDetailUpdateDTO> requestDetailList;
 
+    /* Verifying */
+    @ApiModelProperty(notes = "Nullable; Id > 0 (if not null)")
     @Positive
     private Long verifierId;
 
+    @ApiModelProperty(notes = "Nullable")
     private Boolean isVerified;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
+    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
+            notes = "Nullable; date <= now (if not null)") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    private LocalDateTime verifyDate;
+    private String verifyDate;
 
-    @ApiModelProperty(example = "Chi tiêu hợp lý, đồng ý") /* Hint for Swagger */
+    @ApiModelProperty(example = "Chi tiêu hợp lý, đồng ý",
+            notes = "Nullable; size <= 100 (if not null)") /* Hint for Swagger */
     @Size(max = 100, message = "verifyNote max length: 100 characters")
     private String verifyNote;
 
+    @ApiModelProperty(notes = "Nullable")
     private Boolean isApproved;
 }

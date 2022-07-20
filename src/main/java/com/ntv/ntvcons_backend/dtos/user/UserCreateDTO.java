@@ -32,10 +32,12 @@ public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO
     private String email;
 
     /* Copy from BaseCreateDTO due to FK conflict */
-    @Positive
+    @JsonIgnore /* No serialize/deserialize */
+    @ApiModelProperty(hidden = true) /* No show on swagger */
+//    @Positive
 //    @NotNull(message = "userId (createdBy) REQUIRED for create")
 //    For self create user
-    private Long createdBy;
+    private final Long createdBy = null;
 
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */

@@ -5,8 +5,10 @@ import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
+import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,20 +28,28 @@ public class RoleServiceImpl implements RoleService {
     private RoleRepository roleRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private UserService userService;
 
     /* CREATE */
     @Override
     public Role createRole(Role newRole) throws Exception {
         String errorMsg = "";
 
+        /* Check FK */
+        if (!userService.existsById(newRole.getCreatedBy())) {
+            errorMsg += "No User (CreatedBy) found with Id: '" + newRole.getCreatedBy()
+                    + "'. Which violate constraint: FK_Role_User_CreatedBy. ";
+        }
+        
         /* Check duplicate */
         if (roleRepository.existsByRoleNameAndIsDeletedIsFalse(newRole.getRoleName())) {
             errorMsg += "Already exists another Role with name: '" + newRole.getRoleName() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return roleRepository.saveAndFlush(newRole);
     }
@@ -54,40 +64,27 @@ public class RoleServiceImpl implements RoleService {
 
     /* READ */
     @Override
-    public List<Role> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        Pageable paging;
-        if (sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        } else {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
+    public Page<Role> getPageAll(Pageable paging) throws Exception {
+       Page<Role> rolePage = roleRepository.findAllByIsDeletedIsFalse(paging);
 
-        Page<Role> rolePage = roleRepository.findAllByIsDeletedIsFalse(paging);
-
-        if (rolePage.isEmpty()) {
+        if (rolePage.isEmpty())
             return null;
-        }
 
-        return rolePage.getContent();
+        return rolePage;
     }
     @Override
-    public List<RoleReadDTO> getAllDTO(int pageNo, int pageSize, String sortBy, boolean sortType) throws Exception {
-        List<Role> roleList = getAll(pageNo, pageSize, sortBy, sortType);
+    public List<RoleReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
+        Page<Role> rolePage = getPageAll(paging);
 
-        if (roleList != null && !roleList.isEmpty()) {
-            int totalPage = (int) Math.ceil((double) roleList.size() / pageSize);
+        if (rolePage == null)
+            return null;
 
-            return roleList.stream()
-                    .map(role -> {
-                        RoleReadDTO roleReadDTO =
-                                modelMapper.map(role, RoleReadDTO.class);
-                        roleReadDTO.setTotalPage(totalPage);
-                        return roleReadDTO;})
-                    .collect(Collectors.toList());
+        List<Role> roleList = rolePage.getContent();
 
-        } 
-            
-        return null;
+        if (roleList.isEmpty())
+            return null;
+
+        return fillAllDTO(roleList, rolePage.getTotalPages());
     }
 
     @Override
@@ -104,11 +101,10 @@ public class RoleServiceImpl implements RoleService {
     public RoleReadDTO getDTOById(long roleId) throws Exception {
         Role role = getById(roleId);
 
-        if (role == null) {
+        if (role == null) 
             return null;
-        }
 
-        return modelMapper.map(role, RoleReadDTO.class);
+        return fillDTO(role);
     }
 
     @Override
@@ -120,9 +116,8 @@ public class RoleServiceImpl implements RoleService {
         List<Role> roleList = 
                 roleRepository.findAllByRoleIdInAndIsDeletedIsFalse(roleIdCollection);
 
-        if (roleList.isEmpty()) {
+        if (roleList.isEmpty()) 
             return null;
-        }
 
         return roleList;
     }
@@ -130,44 +125,44 @@ public class RoleServiceImpl implements RoleService {
     public List<RoleReadDTO> getAllDTOByIdIn(Collection<Long> roleIdCollection) throws Exception {
         List<Role> roleList = getAllByIdIn(roleIdCollection);
 
-        if (roleList == null) {
+        if (roleList == null) 
             return null;
-        }
 
-        return roleList.stream()
-                .map(role -> modelMapper.map(role, RoleReadDTO.class))
-                .collect(Collectors.toList());
-    }
-    @Override
-    public Map<Long, Role> mapRoleIdRoleByIdIn(Collection<Long> roleIdCollection) throws Exception {
-        List<Role> roleList = getAllByIdIn(roleIdCollection);
-
-        if (roleList == null) {
-            return new HashMap<>();
-        }
-
-        return roleList.stream()
-                .collect(Collectors.toMap(Role::getRoleId, Function.identity()));
+        return fillAllDTO(roleList, null);
     }
     @Override
     public Map<Long, RoleReadDTO> mapRoleIdRoleDTOByIdIn(Collection<Long> roleIdCollection) throws Exception {
         List<RoleReadDTO> roleDTOList = getAllDTOByIdIn(roleIdCollection);
-        if (roleDTOList == null) {
+        if (roleDTOList == null) 
             return new HashMap<>();
-        }
 
         return roleDTOList.stream()
                 .collect(Collectors.toMap(RoleReadDTO::getRoleId, Function.identity()));
     }
 
     @Override
+    public Role getByRoleName(String roleName) throws Exception {
+        return roleRepository
+                .findByRoleNameAndIsDeletedIsFalse(roleName)
+                .orElse(null);
+    }
+    @Override
+    public RoleReadDTO getDTOByRoleName(String roleName) throws Exception {
+        Role role = getByRoleName(roleName);
+
+        if (role == null)
+            return null;
+
+        return fillDTO(role);
+    }
+    
+    @Override
     public List<Role> getAllByRoleNameContains(String roleName) throws Exception {
         List<Role> roleList =
                 roleRepository.findAllByRoleNameContainsAndIsDeletedIsFalse(roleName);
 
-        if (roleList.isEmpty()) {
+        if (roleList.isEmpty()) 
             return null;
-        }
 
         return roleList;
     }
@@ -175,26 +170,60 @@ public class RoleServiceImpl implements RoleService {
     public List<RoleReadDTO> getAllDTOByRoleNameContains(String roleName) throws Exception {
         List<Role> roleList = getAllByRoleNameContains(roleName);
 
-        if (roleList == null) {
+        if (roleList == null) 
             return null;
-        }
 
-        return roleList.stream()
-                .map(role -> modelMapper.map(role, RoleReadDTO.class))
-                .collect(Collectors.toList());
+        return fillAllDTO(roleList, null);
+    }
+    @Override
+    public Page<Role> getPageAllByRoleNameContains(Pageable paging, String roleName) throws Exception {
+        Page<Role> rolePage =
+                roleRepository.findAllByRoleNameContainsAndIsDeletedIsFalse(roleName, paging);
+
+        if (rolePage.isEmpty())
+            return null;
+
+        return rolePage;
+    }
+    @Override
+    public List<RoleReadDTO> getAllDTOInPagingByRoleNameContains(Pageable paging, String roleName) throws Exception {
+        Page<Role> rolePage = getPageAllByRoleNameContains(paging, roleName);
+
+        if (rolePage == null)
+            return null;
+
+        List<Role> roleList = rolePage.getContent();
+
+        if (roleList.isEmpty())
+            return null;
+
+        return fillAllDTO(roleList, rolePage.getTotalPages());
     }
 
     /* UPDATE */
     @Override
     public Role updateRole(Role updatedRole) throws Exception {
-        Role role = getById(updatedRole.getRoleId());
+        Role oldRole = getById(updatedRole.getRoleId());
 
-        if (role == null) {
-            return null;
-            /* Not found by Id, return null */
-        }
+        if (oldRole == null)
+            return null; /* Not found by Id, return null */
 
         String errorMsg = "";
+
+        /* Check FK */
+        if (oldRole.getUpdatedBy() != null)  {
+            if (!oldRole.getUpdatedBy().equals(updatedRole.getUpdatedBy())) {
+                if (!userService.existsById(updatedRole.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRole.getUpdatedBy()
+                            + "'. Which violate constraint: FK_Role_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (!userService.existsById(updatedRole.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRole.getUpdatedBy()
+                        + "'. Which violate constraint: FK_Role_User_UpdatedBy. ";
+            }
+        }
 
         /* Check duplicate */
         if (roleRepository
@@ -204,9 +233,11 @@ public class RoleServiceImpl implements RoleService {
             errorMsg += "Already exists another Role with name: '" + updatedRole.getRoleName() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
+
+        updatedRole.setCreatedAt(oldRole.getCreatedAt());
+        updatedRole.setCreatedBy(oldRole.getCreatedBy());
 
         return roleRepository.saveAndFlush(updatedRole);
     }
@@ -216,11 +247,10 @@ public class RoleServiceImpl implements RoleService {
 
         updatedRole = updateRole(updatedRole);
 
-        if (updatedRole == null) {
+        if (updatedRole == null) 
             return null;
-        }
 
-        return modelMapper.map(updatedRole, RoleReadDTO.class);
+        return fillDTO(updatedRole);
     }
 
     /* DELETE */
@@ -237,5 +267,22 @@ public class RoleServiceImpl implements RoleService {
         roleRepository.saveAndFlush(role);
 
         return true;
+    }
+
+    /* Utils */
+    private RoleReadDTO fillDTO(Role role) throws Exception {
+        return modelMapper.map(role, RoleReadDTO.class);
+    }
+
+    private List<RoleReadDTO> fillAllDTO(Collection<Role> roleCollection, Integer totalPage) throws Exception {
+        return roleCollection.stream()
+                .map(role -> {
+                    RoleReadDTO roleDTO =
+                            modelMapper.map(role, RoleReadDTO.class);
+
+                    roleDTO.setTotalPage(totalPage);
+
+                    return roleDTO;})
+                .collect(Collectors.toList());
     }
 }

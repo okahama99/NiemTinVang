@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface LocationRepository extends JpaRepository<Location, Long> {
-        Page<Location> findAllByIsDeletedIsFalse(Pageable pageable);
+        Page<Location> findAllByIsDeletedIsFalse(Pageable paging);
 
         Location getByAddressNumberAndIsDeletedIsFalse (String addressNumber);
 

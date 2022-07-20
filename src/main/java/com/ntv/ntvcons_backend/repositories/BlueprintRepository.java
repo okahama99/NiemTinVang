@@ -12,11 +12,12 @@ import java.util.Optional;
 
 @Repository
 public interface BlueprintRepository extends JpaRepository<Blueprint, Long> {
-    Page<Blueprint> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<Blueprint> findAllByIsDeletedIsFalse(Pageable paging);
 
     Blueprint getByBlueprintNameAndIsDeletedIsFalse(String bluePrintName);
 
     /* Id */
+    boolean existsByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
     Optional<Blueprint> findByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
     List<Blueprint> findAllByBlueprintIdInAndIsDeletedIsFalse(Collection<Long> blueprintIdCollection);
     /* Id & projectId & blueprintName */

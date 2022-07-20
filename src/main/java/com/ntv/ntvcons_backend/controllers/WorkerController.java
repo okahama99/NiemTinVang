@@ -2,11 +2,10 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
-import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
-import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
-import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
-import com.ntv.ntvcons_backend.services.user.UserService;
+import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
+import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
+import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
+import com.ntv.ntvcons_backend.services.worker.WorkerService;
 import com.ntv.ntvcons_backend.utils.ThanhUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -20,30 +19,29 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Controller
-@RequestMapping("/user")
-public class UserController {
+@RequestMapping("/worker")
+public class WorkerController {
     @Autowired
-    private UserService userService;
+    private WorkerService workerService;
     @Autowired
     private ThanhUtil thanhUtil;
-
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     //@PreAuthorize("hasAnyRole('Admin','Staff')")
-    @PostMapping(value = "/v1/createUser", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createUser(@Valid @RequestBody UserCreateDTO userDTO){
+    @PostMapping(value = "/v1/createWorker", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createWorker(@Valid @RequestBody WorkerCreateDTO workerDTO){
         try {
-            UserReadDTO newUserDTO = userService.createUserByDTO(userDTO);
+            WorkerReadDTO newWorkerDTO = workerService.createWorkerByDTO(workerDTO);
 
-            return ResponseEntity.ok().body(newUserDTO);
+            return ResponseEntity.ok().body(newWorkerDTO);
         } catch (IllegalArgumentException iAE) {
             /* Catch not found Role by roleId, which violate FK constraint */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error creating User", e.getMessage()));
+                    new ErrorResponse("Error creating Worker", e.getMessage()));
         }
     }
 
@@ -55,73 +53,55 @@ public class UserController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<UserReadDTO> userDTOList =
-                    userService.getAllDTOInPaging(
+            List<WorkerReadDTO> workerDTOList =
+                    workerService.getAllDTOInPaging(
                             thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
-            if (userDTOList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No User found");
+            if (workerDTOList == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Worker found");
             }
 
-            return ResponseEntity.ok().body(userDTOList);
+            return ResponseEntity.ok().body(workerDTOList);
         } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
             /* Catch invalid sortBy */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for User", e.getMessage()));
+                    new ErrorResponse("Error searching for Worker", e.getMessage()));
         }
     }
 
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
-                                             @RequestParam SearchType.USER searchType) {
+                                             @RequestParam SearchType.WORKER searchType) {
         try {
-            UserReadDTO userDTO;
+            WorkerReadDTO workerDTO;
 
             switch (searchType) {
                 case BY_ID:
-                    userDTO = userService.getDTOById(Long.parseLong(searchParam));
+                    workerDTO = workerService.getDTOById(Long.parseLong(searchParam));
 
-                    if (userDTO == null) {
+                    if (workerDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with Id: '" + searchParam + "'. ");
+                                .body("No Worker found with Id: '" + searchParam + "'. ");
                     }
                     break;
 
-                case BY_USERNAME:
-                    userDTO = userService.getDTOByUsername(searchParam);
+                case BY_CITIZEN_ID:
+                    workerDTO = workerService.getDTOByCitizenId(searchParam);
 
-                    if (userDTO == null) {
+                    if (workerDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with username: '" + searchParam + "'. ");
-                    }
-                    break;
-
-                case BY_PHONE:
-                    userDTO = userService.getDTOByPhone(searchParam);
-
-                    if (userDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with phone: '" + searchParam + "'. ");
-                    }
-                    break;
-                    
-                case BY_EMAIL:
-                    userDTO = userService.getDTOByEmail(searchParam);
-
-                    if (userDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with email: '" + searchParam + "'. ");
+                                .body("No Worker found with citizenId: '" + searchParam + "'. ");
                     }
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity User");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Worker");
             }
 
-            return ResponseEntity.ok().body(userDTO);
+            return ResponseEntity.ok().body(workerDTO);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
@@ -133,23 +113,15 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "Error searching for User with ";
+            String errorMsg = "Error searching for Worker with ";
 
             switch (searchType) {
                 case BY_ID:
                     errorMsg += "Id: '" + searchParam + "'. ";
                     break;
 
-                case BY_USERNAME:
-                    errorMsg += "name: '" + searchParam + "'. ";
-                    break;
-
-                case BY_PHONE:
-                    errorMsg += "phone: '" + searchParam + "'. ";
-                    break;
-
-                case BY_EMAIL:
-                    errorMsg += "email: '" + searchParam + "'. ";
+                case BY_CITIZEN_ID:
+                    errorMsg += "citizenId: '" + searchParam + "'. ";
                     break;
             }
 
@@ -160,7 +132,7 @@ public class UserController {
     //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                                @RequestParam SearchType.ALL_USER searchType,
+                                                @RequestParam SearchType.ALL_WORKER searchType,
                                                 @RequestParam int pageNo,
                                                 @RequestParam int pageSize,
                                                 @RequestParam String sortBy,
@@ -168,54 +140,54 @@ public class UserController {
         try {
             Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
-            List<UserReadDTO> userDTOList;
+            List<WorkerReadDTO> workerDTOList;
 
             switch (searchType) {
-                case BY_ROLE_ID:
-                    userDTOList =
-                            userService.getAllDTOInPagingByRoleId(paging, Long.parseLong(searchParam));
+                case BY_FULL_NAME:
+                    workerDTOList =
+                            workerService.getAllDTOInPagingByFullName(paging, searchParam);
 
-                    if (userDTOList == null) {
+                    if (workerDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with roleId: '" + searchParam + "'. ");
+                                .body("No Worker found with fullName : '" + searchParam + "'. ");
                     }
                     break;
 
-                case BY_USERNAME_CONTAINS:
-                    userDTOList =
-                            userService.getAllDTOInPagingByUsernameContains(paging, searchParam);
+                case BY_FULL_NAME_CONTAINS:
+                    workerDTOList =
+                            workerService.getAllDTOInPagingByFullNameContains(paging, searchParam);
 
-                    if (userDTOList == null) {
+                    if (workerDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with username contains: '" + searchParam + "'. ");
+                                .body("No Worker found with fullName contains: '" + searchParam + "'. ");
                     }
                     break;
 
-                case BY_PHONE_CONTAINS:
-                    userDTOList =
-                            userService.getAllDTOInPagingByPhoneContains(paging, searchParam);
+                case BY_CITIZEN_ID_CONTAINS:
+                    workerDTOList =
+                            workerService.getAllDTOInPagingByCitizenIdContains(paging, searchParam);
 
-                    if (userDTOList == null) {
+                    if (workerDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with phone contains: '" + searchParam + "'. ");
+                                .body("No Worker found with citizenId contains: '" + searchParam + "'. ");
                     }
                     break;
 
-                case BY_EMAIL_CONTAINS:
-                    userDTOList =
-                            userService.getAllDTOInPagingByEmailContains(paging, searchParam);
+                case BY_ADDRESS_ID:
+                    workerDTOList =
+                            workerService.getAllDTOInPagingByAddressId(paging, Long.parseLong(searchParam));
 
-                    if (userDTOList == null) {
+                    if (workerDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No User found with email contains: '" + searchParam + "'. ");
+                                .body("No Worker found with locationId (addressId): '" + searchParam + "'. ");
                     }
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity User");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Worker");
             }
 
-            return ResponseEntity.ok().body(userDTOList);
+            return ResponseEntity.ok().body(workerDTOList);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                   new ErrorResponse(
@@ -227,23 +199,23 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "Error searching for User with ";
+            String errorMsg = "Error searching for Worker with ";
 
             switch (searchType) {
-                case BY_ROLE_ID:
-                    errorMsg += "roleId: '" + searchParam + "'. ";
+                case BY_FULL_NAME:
+                    errorMsg += "fullName: '" + searchParam + "'. ";
                     break;
 
-                case BY_USERNAME_CONTAINS:
-                    errorMsg += "username contains: '" + searchParam + "'. ";
+                case BY_FULL_NAME_CONTAINS:
+                    errorMsg += "fullName contains: '" + searchParam + "'. ";
                     break;
 
-                case BY_PHONE_CONTAINS:
-                    errorMsg += "phone contains: '" + searchParam + "'. ";
+                case BY_CITIZEN_ID_CONTAINS:
+                    errorMsg += "citizenId contains: '" + searchParam + "'. ";
                     break;
 
-                case BY_EMAIL_CONTAINS:
-                    errorMsg += "email contains: '" + searchParam + "'. ";
+                case BY_ADDRESS_ID:
+                    errorMsg += "locationId (addressId): '" + searchParam + "'. ";
                     break;
             }
 
@@ -253,42 +225,41 @@ public class UserController {
 
     /* UPDATE */
     //@PreAuthorize("hasAnyRole('Admin','Staff')")
-    @PutMapping(value = "/v1/updateUser", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateUser(@Valid @RequestBody UserUpdateDTO userDTO){
+    @PutMapping(value = "/v1/updateWorker", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateWorker(@Valid @RequestBody WorkerUpdateDTO workerDTO){
         try {
-            UserReadDTO updatedUserDTO = userService.updateUserByDTO(userDTO);
+            WorkerReadDTO updatedWorkerDTO = workerService.updateWorkerByDTO(workerDTO);
 
-            if (updatedUserDTO == null) {
+            if (updatedWorkerDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No User found with Id: '" + userDTO.getUserId() + "'. ");
+                        .body("No Worker found with Id: '" + workerDTO.getWorkerId() + "'. ");
             }
 
-            return ResponseEntity.ok().body(updatedUserDTO);
+            return ResponseEntity.ok().body(updatedWorkerDTO);
         } catch (IllegalArgumentException iAE) {
-            /* Catch not found Role by roleId, which violate FK constraint */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating User with Id: '" + userDTO.getUserId() + "'. ",
+                    new ErrorResponse("Error updating Worker with Id: '" + workerDTO.getWorkerId() + "'. ",
                             e.getMessage()));
         }
     }
 
     /* DELETE */
     //@PreAuthorize("hasAnyRole('Admin','Staff')")
-    @DeleteMapping(value = "/v1/deleteUser/{userId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteUser(@PathVariable(name = "userId") long userId){
+    @DeleteMapping(value = "/v1/deleteWorker/{workerId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteWorker(@PathVariable(name = "workerId") long workerId){
         try {
-            if (!userService.deleteUser(userId)) {
+            if (!workerService.deleteWorker(workerId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No User found with Id: '" + userId + "'. ");
+                        .body("No Worker found with Id: '" + workerId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted User with Id: '" + userId + "'. ");
+            return ResponseEntity.ok().body("Deleted Worker with Id: '" + workerId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting User with Id: '" + userId + "'. ", e.getMessage()));
+                    new ErrorResponse("Error deleting Worker with Id: '" + workerId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

@@ -8,6 +8,7 @@ import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
+import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,7 +16,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
-public interface ProjectService {
+public interface ProjectService extends BaseService {
     /* CREATE */
     boolean createProject(CreateProjectModel createProjectModel) throws Exception;
 

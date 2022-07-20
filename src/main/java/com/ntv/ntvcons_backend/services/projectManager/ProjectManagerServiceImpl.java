@@ -5,6 +5,7 @@ import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.ProjectManager;
+import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.repositories.ProjectManagerRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -12,9 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -67,37 +66,30 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                     + newProjectManager.getManagerId() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return projectManagerRepository.saveAndFlush(newProjectManager);
     }
     @Override
     public ProjectManagerReadDTO createProjectManagerByDTO(ProjectManagerCreateDTO newProjectManagerDTO) throws Exception {
+        /* TODO: use later or skip forever
         modelMapper.typeMap(ProjectManagerCreateDTO.class, ProjectManager.class)
                 .addMappings(mapper -> {
-                    mapper.skip(ProjectManager::setAssignDate);});
+                    mapper.skip(ProjectManager::setAssignDate);});*/
 
         ProjectManager newProjectManager = modelMapper.map(newProjectManagerDTO, ProjectManager.class);
 
-        newProjectManager.setAssignDate(
-                LocalDateTime.parse(newProjectManagerDTO.getAssignDate(), dateTimeFormatter));
-
         newProjectManager = createProjectManager(newProjectManager);
 
-        ProjectManagerReadDTO projectManagerDTO = modelMapper.map(newProjectManager, ProjectManagerReadDTO.class);
-
-        projectManagerDTO.setManager(userService.getDTOById(newProjectManager.getManagerId()));
-
-        return projectManagerDTO;
+        return fillDTO(newProjectManager);
     }
 
     @Override
     public List<ProjectManager> createBulkProjectManager(List<ProjectManager> newProjectManagerList) throws Exception {
         StringBuilder errorMsg = new StringBuilder();
 
-        Map<Long, List<Long>> projectIdManagerIdMap = new HashMap<>();
+        Map<Long, List<Long>> projectIdManagerIdListMap = new HashMap<>();
         Set<Long> projectIdSet = new HashSet<>();
         Set<Long> managerIdSet = new HashSet<>();
         Set<Long> createdBySet = new HashSet<>();
@@ -110,10 +102,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             createdBySet.add(newProjectManager.getCreatedBy());
 
             /* Check duplicate 1 (within input) */
-            tmpManagerIdList = projectIdManagerIdMap.get(newProjectManager.getProjectId());
+            tmpManagerIdList = projectIdManagerIdListMap.get(newProjectManager.getProjectId());
 
             if (tmpManagerIdList == null) {
-                projectIdManagerIdMap.put(
+                projectIdManagerIdListMap.put(
                         newProjectManager.getProjectId(),
                         new ArrayList<>(Collections.singletonList(newProjectManager.getManagerId())));
             } else {
@@ -126,7 +118,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                             .append(newProjectManager.getManagerId()).append("'. ");
                 } else {
                        tmpManagerIdList.add(newProjectManager.getManagerId());
-                       projectIdManagerIdMap.put(newProjectManager.getProjectId(), tmpManagerIdList);
+                       projectIdManagerIdListMap.put(newProjectManager.getProjectId(), tmpManagerIdList);
                 }
             }
         }
@@ -167,39 +159,19 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     }
     @Override
     public List<ProjectManagerReadDTO> createBulkProjectManagerByDTO(List<ProjectManagerCreateDTO> newProjectManagerDTOList) throws Exception {
+        /* TODO: use later or skip forever
         modelMapper.typeMap(ProjectManagerCreateDTO.class, ProjectManager.class)
                 .addMappings(mapper -> {
-                    mapper.skip(ProjectManager::setAssignDate);});
+                    mapper.skip(ProjectManager::setAssignDate);});*/
 
         List<ProjectManager> projectManagerList =
                 newProjectManagerDTOList.stream()
-                        .map(projectManagerDTO -> {
-                            ProjectManager projectManager =
-                                    modelMapper.map(projectManagerDTO, ProjectManager.class);
-
-                            projectManager.setAssignDate(
-                                    LocalDateTime.parse(projectManagerDTO.getAssignDate(), dateTimeFormatter));
-
-                            return projectManager;})
+                        .map(projectManagerDTO -> modelMapper.map(projectManagerDTO, ProjectManager.class))
                         .collect(Collectors.toList());
 
         projectManagerList = createBulkProjectManager(projectManagerList);
 
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, null);
     }
 
     /* READ */
@@ -207,9 +179,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public Page<ProjectManager> getPageAll(Pageable paging) throws Exception {
         Page<ProjectManager> projectManagerPage = projectManagerRepository.findAllByIsDeletedIsFalse(paging);
 
-        if (projectManagerPage.isEmpty()) {
+        if (projectManagerPage.isEmpty()) 
             return null;
-        }
 
         return projectManagerPage;
     }
@@ -217,35 +188,15 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOInPaging(Pageable paging) throws Exception {
         Page<ProjectManager> projectManagerPage = getPageAll(paging);
 
-        if (projectManagerPage == null) {
+        if (projectManagerPage == null) 
             return null;
-        }
 
         List<ProjectManager> projectManagerList = projectManagerPage.getContent();
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectManagerPage.getTotalPages();
-
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    projectManagerDTO.setTotalPage(totalPage);
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, projectManagerPage.getTotalPages());
     }
 
     @Override
@@ -258,15 +209,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public ProjectManagerReadDTO getDTOById(long projectManagerId) throws Exception {
         ProjectManager projectManager = getById(projectManagerId);
 
-        if (projectManager == null) {
+        if (projectManager == null) 
             return null;
-        }
 
-        ProjectManagerReadDTO projectManagerDTO = modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-        projectManagerDTO.setManager(userService.getDTOById(projectManager.getManagerId()));
-
-        return projectManagerDTO;
+        return fillDTO(projectManager);
     }
 
     @Override
@@ -274,9 +220,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         List<ProjectManager> projectManagerList =
                 projectManagerRepository.findAllByProjectManagerIdInAndIsDeletedIsFalse(projectManagerIdCollection);
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
         return projectManagerList;
     }
@@ -284,25 +229,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOByIdIn(Collection<Long> projectManagerIdCollection) throws Exception {
         List<ProjectManager> projectManagerList = getAllByIdIn(projectManagerIdCollection);
 
-        if (projectManagerList == null) {
+        if (projectManagerList == null) 
             return null;
-        }
 
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, null);
     }
 
     @Override
@@ -310,9 +240,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         List<ProjectManager> projectManagerList =
                 projectManagerRepository.findAllByManagerIdAndIsDeletedIsFalse(managerId);
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
         return projectManagerList;
     }
@@ -320,34 +249,18 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOByManagerId(long managerId) throws Exception {
         List<ProjectManager> projectManagerList = getAllByManagerId(managerId);
 
-        if (projectManagerList == null) {
+        if (projectManagerList == null) 
             return null;
-        }
 
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, null);
     }
     @Override
     public Page<ProjectManager> getPageAllByManagerId(Pageable paging, long managerId) throws Exception {
         Page<ProjectManager> projectManagerPage =
                 projectManagerRepository.findAllByManagerIdAndIsDeletedIsFalse(managerId, paging);
 
-        if (projectManagerPage.isEmpty()) {
+        if (projectManagerPage.isEmpty()) 
             return null;
-        }
 
         return projectManagerPage;
     }
@@ -355,35 +268,15 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOInPagingByManagerId(Pageable paging, long managerId) throws Exception {
         Page<ProjectManager> projectManagerPage = getPageAllByManagerId(paging, managerId);
 
-        if (projectManagerPage == null) {
+        if (projectManagerPage == null) 
             return null;
-        }
 
         List<ProjectManager> projectManagerList = projectManagerPage.getContent();
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectManagerPage.getTotalPages();
-
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    projectManagerDTO.setTotalPage(totalPage);
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, projectManagerPage.getTotalPages());
     }
 
     @Override
@@ -391,9 +284,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         List<ProjectManager> projectManagerList =
                 projectManagerRepository.findAllByManagerIdInAndIsDeletedIsFalse(managerIdCollection);
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
         return projectManagerList;
     }
@@ -401,34 +293,18 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOByManagerIdIn(Collection<Long> managerIdCollection) throws Exception {
         List<ProjectManager> projectManagerList = getAllByManagerIdIn(managerIdCollection);
 
-        if (projectManagerList == null) {
+        if (projectManagerList == null) 
             return null;
-        }
 
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, null);
     }
     @Override
     public Page<ProjectManager> getPageAllByManagerIdIn(Pageable paging, Collection<Long> managerIdCollection) throws Exception {
         Page<ProjectManager> projectManagerPage =
                 projectManagerRepository.findAllByManagerIdInAndIsDeletedIsFalse(managerIdCollection, paging);
 
-        if (projectManagerPage.isEmpty()) {
+        if (projectManagerPage.isEmpty()) 
             return null;
-        }
 
         return projectManagerPage;
     }
@@ -436,35 +312,15 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOInPagingByManagerIdIn(Pageable paging, Collection<Long> managerIdCollection) throws Exception {
         Page<ProjectManager> projectManagerPage = getPageAllByManagerIdIn(paging, managerIdCollection);
 
-        if (projectManagerPage == null) {
+        if (projectManagerPage == null) 
             return null;
-        }
 
         List<ProjectManager> projectManagerList = projectManagerPage.getContent();
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectManagerPage.getTotalPages();
-
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    projectManagerDTO.setTotalPage(totalPage);
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, projectManagerPage.getTotalPages());
     }
 
     @Override
@@ -472,9 +328,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         List<ProjectManager> projectManagerList =
                 projectManagerRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
         return projectManagerList;
     }
@@ -482,34 +337,18 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOByProjectId(long projectId) throws Exception {
         List<ProjectManager> projectManagerList = getAllByProjectId(projectId);
 
-        if (projectManagerList == null) {
+        if (projectManagerList == null) 
             return null;
-        }
 
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, null);
     }
     @Override
     public Page<ProjectManager> getPageAllByProjectId(Pageable paging, long projectId) throws Exception {
         Page<ProjectManager> projectManagerPage =
                 projectManagerRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
 
-        if (projectManagerPage.isEmpty()) {
+        if (projectManagerPage.isEmpty()) 
             return null;
-        }
 
         return projectManagerPage;
     }
@@ -517,35 +356,15 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOInPagingByProjectId(Pageable paging, long projectId) throws Exception {
         Page<ProjectManager> projectManagerPage = getPageAllByProjectId(paging, projectId);
 
-        if (projectManagerPage == null) {
+        if (projectManagerPage == null) 
             return null;
-        }
 
         List<ProjectManager> projectManagerList = projectManagerPage.getContent();
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectManagerPage.getTotalPages();
-
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    projectManagerDTO.setTotalPage(totalPage);
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, projectManagerPage.getTotalPages());
     }
 
     @Override
@@ -553,9 +372,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         List<ProjectManager> projectManagerList =
                 projectManagerRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
         return projectManagerList;
     }
@@ -563,34 +381,47 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<ProjectManager> projectManagerList = getAllByProjectIdIn(projectIdCollection);
 
-        if (projectManagerList == null) {
+        if (projectManagerList == null) 
             return null;
+
+        return fillAllDTO(projectManagerList, null);
+    }
+    @Override
+    public Map<Long, List<ProjectManagerReadDTO>> mapProjectIdProjectManagerDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<ProjectManagerReadDTO> projectManagerDTOList = getAllDTOByProjectIdIn(projectIdCollection);
+
+        if (projectManagerDTOList == null) 
+            return new HashMap<>();
+
+        Map<Long, List<ProjectManagerReadDTO>> projectIdProjectManagerDTOListMap = new HashMap<>();
+
+        long tmpProjectId;
+        List<ProjectManagerReadDTO> tmpProjectManagerDTOList;
+
+        for (ProjectManagerReadDTO projectManagerDTO : projectManagerDTOList) {
+
+            tmpProjectId = projectManagerDTO.getProjectId();
+            tmpProjectManagerDTOList = projectIdProjectManagerDTOListMap.get(tmpProjectId);
+
+            if (tmpProjectManagerDTOList == null) {
+                projectIdProjectManagerDTOListMap
+                        .put(tmpProjectId, new ArrayList<>(Collections.singletonList(projectManagerDTO)));
+            } else {
+                tmpProjectManagerDTOList.add(projectManagerDTO);
+
+                projectIdProjectManagerDTOListMap.put(tmpProjectId, tmpProjectManagerDTOList);
+            }
         }
 
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return projectIdProjectManagerDTOListMap;
     }
     @Override
     public Page<ProjectManager> getPageAllByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
         Page<ProjectManager> projectManagerPage =
                 projectManagerRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection, paging);
 
-        if (projectManagerPage.isEmpty()) {
+        if (projectManagerPage.isEmpty()) 
             return null;
-        }
 
         return projectManagerPage;
     }
@@ -598,35 +429,15 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public List<ProjectManagerReadDTO> getAllDTOInPagingByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
         Page<ProjectManager> projectManagerPage = getPageAllByProjectIdIn(paging, projectIdCollection);
 
-        if (projectManagerPage == null) {
+        if (projectManagerPage == null) 
             return null;
-        }
 
         List<ProjectManager> projectManagerList = projectManagerPage.getContent();
 
-        if (projectManagerList.isEmpty()) {
+        if (projectManagerList.isEmpty()) 
             return null;
-        }
 
-        int totalPage = projectManagerPage.getTotalPages();
-
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
-
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    projectManagerDTO.setTotalPage(totalPage);
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, projectManagerPage.getTotalPages());
     }
 
     /* UPDATE */
@@ -634,11 +445,17 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public ProjectManager updateProjectManager(ProjectManager updatedProjectManager) throws Exception {
         ProjectManager oldProjectManager = getById(updatedProjectManager.getProjectManagerId());
 
-        if(oldProjectManager == null) {
+        if (oldProjectManager == null) 
             return null;
-        }
 
         String errorMsg = "";
+
+        /* Check input */
+        if (updatedProjectManager.getRemoveDate() != null) {
+            if (updatedProjectManager.getRemoveDate().isBefore(oldProjectManager.getAssignDate())) {
+                errorMsg += "Invalid Input: removeDate is before assignDate. ";
+            }
+        }
 
         /* Check FK (if changed) */
         if (!oldProjectManager.getProjectId().equals(updatedProjectManager.getProjectId())) {
@@ -679,9 +496,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                     + updatedProjectManager.getManagerId() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) {
+        if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
-        }
 
         return projectManagerRepository.saveAndFlush(updatedProjectManager);
     }
@@ -695,43 +511,44 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         ProjectManager updatedProjectManager =
                 modelMapper.map(updatedProjectManagerDTO, ProjectManager.class);
 
-        updatedProjectManager.setAssignDate(
-                LocalDateTime.parse(updatedProjectManagerDTO.getAssignDate(), dateTimeFormatter));
+        boolean updateAssignDate = false;
+        if (updatedProjectManagerDTO.getRemoveDate() != null) {
+            updateAssignDate = true;
+
+            updatedProjectManager.setAssignDate(
+                    LocalDateTime.parse(updatedProjectManagerDTO.getAssignDate(), dateTimeFormatter));
+        }
 
         if (updatedProjectManagerDTO.getRemoveDate() != null) {
             updatedProjectManager.setRemoveDate(
                     LocalDateTime.parse(updatedProjectManagerDTO.getRemoveDate(), dateTimeFormatter));
 
-            if (updatedProjectManager.getRemoveDate().isBefore(updatedProjectManager.getAssignDate())) {
-                throw new IllegalArgumentException("removeDate is before assignDate");
+            if (updateAssignDate) {
+                if (updatedProjectManager.getRemoveDate().isBefore(updatedProjectManager.getAssignDate())) {
+                    throw new IllegalArgumentException("removeDate is before assignDate");
+                }
             }
         }
 
         updatedProjectManager = updateProjectManager(updatedProjectManager);
 
-        if (updatedProjectManager == null) {
+        if (updatedProjectManager == null) 
             return null;
-        }
 
-        ProjectManagerReadDTO projectManagerDTO =
-                modelMapper.map(updatedProjectManager, ProjectManagerReadDTO.class);
-
-        /* Get associated User */
-        projectManagerDTO.setManager(userService.getDTOById(updatedProjectManager.getManagerId()));
-
-        return projectManagerDTO;
+        return fillDTO(updatedProjectManager);
     }
 
     @Override
     public List<ProjectManager> updateBulkProjectManager(List<ProjectManager> updatedProjectManagerList) throws Exception {
         Set<Long> projectManagerIdSet = new HashSet<>();
-        Map<Long, List<Long>> projectIdManagerIdMap = new HashMap<>();
-        Set<Long> oldProjectIdSet = new HashSet<>();
-        Set<Long> oldManagerIdSet = new HashSet<>();
-        Set<Long> oldUpdatedBySet = new HashSet<>();
+        Map<Long, List<Long>> projectIdManagerIdListMap = new HashMap<>();
+
         Set<Long> updatedProjectIdSet = new HashSet<>();
         Set<Long> updatedManagerIdSet = new HashSet<>();
         Set<Long> updatedUpdatedBySet = new HashSet<>();
+
+        Map<Long, ProjectManager> projectManagerIdUpdatedProjectManagerMap = new HashMap<>();
+
         List<Long> tmpManagerIdList;
         boolean isDuplicated = false;
 
@@ -743,10 +560,13 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             updatedManagerIdSet.add(updatedProjectManager.getManagerId());
             updatedUpdatedBySet.add(updatedProjectManager.getManagerId());
 
+            projectManagerIdUpdatedProjectManagerMap
+                    .put(updatedProjectManager.getProjectManagerId(), updatedProjectManager);
+
             /* Check duplicate 1 (within input) */
-            tmpManagerIdList = projectIdManagerIdMap.get(updatedProjectManager.getProjectId());
+            tmpManagerIdList = projectIdManagerIdListMap.get(updatedProjectManager.getProjectId());
             if (tmpManagerIdList == null) {
-                projectIdManagerIdMap.put(
+                projectIdManagerIdListMap.put(
                         updatedProjectManager.getProjectId(),
                         new ArrayList<>(Collections.singletonList(updatedProjectManager.getManagerId())));
             } else {
@@ -758,22 +578,50 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                             .append(updatedProjectManager.getManagerId()).append("'. ");
                 } else {
                     tmpManagerIdList.add(updatedProjectManager.getManagerId());
-                    projectIdManagerIdMap.put(updatedProjectManager.getProjectId(), tmpManagerIdList);
+                    projectIdManagerIdListMap.put(updatedProjectManager.getProjectId(), tmpManagerIdList);
                 }
             }
         }
 
         List<ProjectManager> oldProjectManagerList = getAllByIdIn(projectManagerIdSet);
 
-        if (oldProjectManagerList == null) {
+        if (oldProjectManagerList == null) 
             return null;
-        }
+
+        Set<Long> oldProjectIdSet = new HashSet<>();
+        Set<Long> oldManagerIdSet = new HashSet<>();
+        Set<Long> oldUpdatedBySet = new HashSet<>();
+
+        Map<Long, Long> projectManagerIdCreatedByMap = new HashMap<>();
+        Map<Long, LocalDateTime> projectManagerIdCreatedAtMap = new HashMap<>();
 
         for (ProjectManager oldProjectManager : oldProjectManagerList) {
             oldProjectIdSet.add(oldProjectManager.getProjectId());
             oldManagerIdSet.add(oldProjectManager.getManagerId());
             if (oldProjectManager.getUpdatedBy() != null) {
                 oldUpdatedBySet.add(oldProjectManager.getManagerId());
+            }
+
+            projectManagerIdCreatedByMap.put(oldProjectManager.getProjectManagerId(), oldProjectManager.getCreatedBy());
+            projectManagerIdCreatedAtMap.put(oldProjectManager.getProjectManagerId(), oldProjectManager.getCreatedAt());
+
+            ProjectManager updatedProjectManager =
+                    projectManagerIdUpdatedProjectManagerMap.get(oldProjectManager.getProjectManagerId());
+
+            if (updatedProjectManager.getAssignDate() == null) {
+                if (updatedProjectManager.getRemoveDate() != null){
+                    if (updatedProjectManager.getRemoveDate().isBefore(oldProjectManager.getAssignDate())) {
+                        errorMsg.append("Invalid Input: removeDate is before assignDate. ")
+                                .append("At ProjectManager with id: '")
+                                .append(oldProjectManager.getProjectManagerId())
+                                .append("'. ");
+                    }
+                }
+
+                updatedProjectManager.setAssignDate(oldProjectManager.getAssignDate());
+
+                projectManagerIdUpdatedProjectManagerMap
+                        .put(oldProjectManager.getProjectManagerId(), updatedProjectManager);
             }
         }
 
@@ -786,18 +634,21 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         /* If there are updated projectId, need to recheck FK */
         if (!updatedProjectIdSet.isEmpty()) {
             if (!projectService.existsAllByIdIn(updatedProjectIdSet)) {
-                errorMsg.append("1 or more Project not found with Id. Which violate constraint: FK_ProjectManager_Project. ");
+                errorMsg.append("1 or more Project not found with Id. ")
+                        .append("Which violate constraint: FK_ProjectManager_Project. ");
             }
         }
         /* If there are updated userId, need to recheck FK */
         if (!updatedManagerIdSet.isEmpty()) {
             if (!userService.existsAllByIdIn(updatedManagerIdSet)) {
-                errorMsg.append("1 or more User not found with Id. Which violate constraint: FK_ProjectManager_User_ManagerId. ");
+                errorMsg.append("1 or more User not found with Id. ")
+                        .append("Which violate constraint: FK_ProjectManager_User_ManagerId. ");
             }
         }
         if (!updatedUpdatedBySet.isEmpty()) {
             if (!userService.existsAllByIdIn(updatedUpdatedBySet)) {
-                errorMsg.append("1 or more User not found with Id. Which violate constraint: FK_ProjectManager_User_UpdatedBy. ");
+                errorMsg.append("1 or more User not found with Id. ")
+                        .append("Which violate constraint: FK_ProjectManager_User_UpdatedBy. ");
             }
         }
 
@@ -823,6 +674,16 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             throw new IllegalArgumentException(errorMsg.toString());
         }
 
+        updatedProjectManagerList =
+                updatedProjectManagerList.stream()
+                        .peek(projectManager -> {
+                            projectManager.setCreatedAt(
+                                    projectManagerIdCreatedAtMap.get(projectManager.getProjectManagerId()));
+
+                            projectManager.setCreatedBy(
+                                    projectManagerIdCreatedByMap.get(projectManager.getProjectManagerId()));})
+                        .collect(Collectors.toList());
+
         return projectManagerRepository.saveAllAndFlush(updatedProjectManagerList);
     }
     @Override
@@ -832,44 +693,49 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                     mapper.skip(ProjectManager::setAssignDate);
                     mapper.skip(ProjectManager::setRemoveDate);});
 
+        StringBuilder errorMsg = new StringBuilder();
+        
         List<ProjectManager> projectManagerList =
                 updatedProjectManagerDTOList.stream()
                         .map(projectManagerDTO -> {
                             ProjectManager projectManager =
                                     modelMapper.map(projectManagerDTO, ProjectManager.class);
 
-                            projectManager.setAssignDate(
-                                    LocalDateTime.parse(projectManagerDTO.getAssignDate(), dateTimeFormatter));
+                            boolean updateAssignDate = false;
+                            if (projectManagerDTO.getRemoveDate() != null) {
+                                updateAssignDate = true;
+
+                                projectManager.setAssignDate(
+                                        LocalDateTime.parse(projectManagerDTO.getAssignDate(), dateTimeFormatter));
+                            }
 
                             if (projectManagerDTO.getRemoveDate() != null) {
                                 projectManager.setRemoveDate(
                                         LocalDateTime.parse(projectManagerDTO.getRemoveDate(), dateTimeFormatter));
 
-                                if (projectManager.getRemoveDate().isBefore(projectManager.getAssignDate())) {
-                                    throw new IllegalArgumentException("removeDate is before assignDate");
+                                if (updateAssignDate) {
+                                    if (projectManager.getRemoveDate().isBefore(projectManager.getAssignDate())) {
+                                        errorMsg.append("Invalid input: removeDate is before assignDate. ")
+                                                .append("At ProjectManager with id: '")
+                                                .append(projectManager.getProjectManagerId())
+                                                .append("'. ");
+                                    }
                                 }
                             }
 
                             return projectManager;})
                         .collect(Collectors.toList());
 
+        if (!errorMsg.toString().trim().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg.toString());
+        }
+
         projectManagerList = updateBulkProjectManager(projectManagerList);
 
-        Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(
-                        projectManagerList.stream()
-                                .map(ProjectManager::getManagerId)
-                                .collect(Collectors.toSet()));
+        if (projectManagerList == null)
+            return null;
 
-        return projectManagerList.stream()
-                .map(projectManager -> {
-                    ProjectManagerReadDTO projectManagerDTO =
-                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
-
-                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
-
-                    return projectManagerDTO;})
-                .collect(Collectors.toList());
+        return fillAllDTO(projectManagerList, null);
     }
 
     /* DELETE */
@@ -877,7 +743,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public boolean deleteProjectManager(long projectManagerId) throws Exception {
         ProjectManager projectManager = getById(projectManagerId);
 
-        if(projectManager == null) {
+        if (projectManager == null) {
             return false;
         }
 
@@ -891,7 +757,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public boolean deleteAllByUserId(long userId) throws Exception {
         List<ProjectManager> projectManagerList = getAllByManagerId(userId);
 
-        if(projectManagerList == null) {
+        if (projectManagerList == null) {
             return false;
         }
 
@@ -909,7 +775,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public boolean deleteAllByProjectId(long projectId) throws Exception {
         List<ProjectManager> projectManagerList = getAllByProjectId(projectId);
 
-        if(projectManagerList == null) {
+        if (projectManagerList == null) {
             return false;
         }
 
@@ -921,5 +787,38 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         projectManagerRepository.saveAllAndFlush(projectManagerList);
 
         return true;
+    }
+
+    /* Utils */
+    private ProjectManagerReadDTO fillDTO(ProjectManager projectManager) throws Exception {
+        ProjectManagerReadDTO projectManagerDTO =
+                modelMapper.map(projectManager, ProjectManagerReadDTO.class);
+
+        /* Get associated User (Manager) */
+        projectManagerDTO.setManager(userService.getDTOById(projectManager.getManagerId()));
+
+        return projectManagerDTO;
+    }
+
+    private List<ProjectManagerReadDTO> fillAllDTO(Collection<ProjectManager> projectManagerCollection, Integer totalPage) throws Exception {
+        Set<Long> managerIdSet =
+                projectManagerCollection.stream()
+                        .map(ProjectManager::getManagerId)
+                        .collect(Collectors.toSet());
+
+        /* Get associated User (Manager) */
+        Map<Long, UserReadDTO> userIdUserDTOMap = userService.mapUserIdUserDTOByIdIn(managerIdSet);
+
+        return projectManagerCollection.stream()
+                .map(projectManager -> {
+                    ProjectManagerReadDTO projectManagerDTO =
+                            modelMapper.map(projectManager, ProjectManagerReadDTO.class);
+
+                    projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
+
+                    projectManagerDTO.setTotalPage(totalPage);
+
+                    return projectManagerDTO;})
+                .collect(Collectors.toList());
     }
 }

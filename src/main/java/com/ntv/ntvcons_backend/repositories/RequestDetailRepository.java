@@ -12,15 +12,24 @@ import java.util.Optional;
 
 @Repository
 public interface RequestDetailRepository extends JpaRepository<RequestDetail, Long> {
-    Page<RequestDetail> findAllByIsDeletedIsFalse(Pageable pageable);
+    Page<RequestDetail> findAllByIsDeletedIsFalse(Pageable paging);
 
 
     /* Id */
     Optional<RequestDetail> findByRequestDetailIdAndIsDeletedIsFalse(long requestDetailId);
     List<RequestDetail> findAllByRequestDetailIdInAndIsDeletedIsFalse(Collection<Long> requestDetailIdCollection);
+    /* Id & requestId & itemDesc & itemPrice */
+    boolean existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndIsDeletedIsFalse
+            (long requestId, String itemDesc, double itemPrice, long requestDetailId);
 
 
     /* requestId */
     List<RequestDetail> findAllByRequestIdAndIsDeletedIsFalse(long requestId);
+    Page<RequestDetail> findAllByRequestIdAndIsDeletedIsFalse(long requestId, Pageable paging);
     List<RequestDetail> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
+    Page<RequestDetail> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection, Pageable paging);
+
+
+    /* Id & requestId & itemDesc & itemPrice */
+    boolean existsByRequestIdAndItemDescAndItemPriceAndIsDeletedIsFalse(long requestId, String itemDesc, double itemPrice);
 }

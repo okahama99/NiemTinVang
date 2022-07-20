@@ -54,7 +54,6 @@ public class SearchType {
     }
     public enum ALL_REPORT_DETAIL {
         BY_REPORT_ID,
-        BY_ITEM_DESC,
     }
 
     public enum REQUEST_DETAIL {
@@ -62,7 +61,6 @@ public class SearchType {
     }
     public enum ALL_REQUEST_DETAIL {
         BY_REQUEST_ID,
-        BY_ITEM_DESC,
     }
 
     public enum FILE_TYPE {
@@ -77,26 +75,26 @@ public class SearchType {
 
     public enum REPORT {
         BY_ID,
-        BY_NAME,
     }
     public enum ALL_REPORT {
+        BY_NAME,
+        BY_NAME_CONTAINS,
         BY_PROJECT_ID,
         BY_REPORTER_ID,
         BY_REPORT_TYPE_ID,
-        BY_NAME_CONTAINS,
         BY_REPORT_DATE,
     }
 
     public enum REQUEST {
         BY_ID,
-        BY_NAME,
     }
     public enum ALL_REQUEST {
+        BY_NAME,
+        BY_NAME_CONTAINS,
         BY_PROJECT_ID,
         BY_REQUESTER_ID,
         BY_VERIFIER_ID,
         BY_REQUEST_TYPE_ID,
-        BY_NAME_CONTAINS,
         BY_REQUEST_DATE,
     }
 
@@ -120,11 +118,24 @@ public class SearchType {
         BY_ID,
         BY_USERNAME,
         BY_PHONE,
+        BY_EMAIL,
     }
     public enum ALL_USER {
         BY_ROLE_ID,
         BY_USERNAME_CONTAINS,
         BY_PHONE_CONTAINS,
+        BY_EMAIL_CONTAINS
+    }
+
+    public enum WORKER {
+        BY_ID,
+        BY_CITIZEN_ID,
+    }
+    public enum ALL_WORKER {
+        BY_FULL_NAME,
+        BY_FULL_NAME_CONTAINS,
+        BY_CITIZEN_ID_CONTAINS,
+        BY_ADDRESS_ID,
     }
 
     public enum ROLE {
@@ -137,9 +148,9 @@ public class SearchType {
 
     public enum TASK {
         BY_ID,
-        BY_NAME,
     }
     public enum ALL_TASK {
+        BY_NAME,
         BY_NAME_CONTAINS,
         BY_PROJECT_ID,
         BY_PLAN_START_DATE,

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface ProjectManagerService {
     /* CREATE */
@@ -45,6 +46,7 @@ public interface ProjectManagerService {
 
     List<ProjectManager> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
     List<ProjectManagerReadDTO> getAllDTOByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+    Map<Long, List<ProjectManagerReadDTO>> mapProjectIdProjectManagerDTOListByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
     Page<ProjectManager> getPageAllByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception;
     List<ProjectManagerReadDTO> getAllDTOInPagingByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception;
 
