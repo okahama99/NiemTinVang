@@ -1228,6 +1228,16 @@ public class RequestServiceImpl implements RequestService{
         requestDTO.setRequestType(
                 requestTypeService.getDTOById(request.getRequestTypeId()));
 
+        /* Get associated Requester */
+        requestDTO.setRequester(
+                userService.getDTOById(request.getRequesterId()));
+
+        /* Get associated Verifier */
+        if (request.getVerifierId() != null) {
+            requestDTO.setVerifier(
+                    userService.getDTOById(request.getVerifierId()));
+        }
+
         /* Get associated RequestDetail */
         requestDTO.setRequestDetailList(
                 requestDetailService.getAllDTOByRequestId(request.getRequestTypeId()));
@@ -1237,12 +1247,15 @@ public class RequestServiceImpl implements RequestService{
 
     private List<RequestReadDTO> fillAllDTO(Collection<Request> requestCollection, Integer totalPage) throws Exception{
         Set<Long> requestTypeIdSet = new HashSet<>();
-        Set<Long> requesterIdSet = new HashSet<>();
+        Set<Long> userIdSet = new HashSet<>();
         Set<Long> requestIdSet = new HashSet<>();
 
         for (Request request : requestCollection) {
             requestTypeIdSet.add(request.getRequestTypeId());
-            requesterIdSet.add(request.getRequesterId());
+            userIdSet.add(request.getRequesterId());
+            if (request.getVerifierId() != null)
+                userIdSet.add(request.getVerifierId());
+
             requestIdSet.add(request.getRequestId());
         }
 
@@ -1250,9 +1263,9 @@ public class RequestServiceImpl implements RequestService{
         Map<Long, RequestTypeReadDTO> requestTypeIdRequestTypeDTOMap =
                 requestTypeService.mapRequestTypeIdRequestTypeDTOByIdIn(requestTypeIdSet);
 
-        /* Get associated Requester */
+        /* Get associated Requester & Verifier */
         Map<Long, UserReadDTO> userIdUserDTOMap =
-                userService.mapUserIdUserDTOByIdIn(requesterIdSet);
+                userService.mapUserIdUserDTOByIdIn(userIdSet);
 
         /* Get associated RequestDetail */
         Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
@@ -1265,6 +1278,9 @@ public class RequestServiceImpl implements RequestService{
 
                     requestDTO.setRequestType(requestTypeIdRequestTypeDTOMap.get(request.getRequestTypeId()));
                     requestDTO.setRequester(userIdUserDTOMap.get(request.getRequesterId()));
+
+                    if (request.getVerifierId() != null)
+                        requestDTO.setVerifier(userIdUserDTOMap.get(request.getVerifierId()));
 
                     requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(request.getRequestId()));
 

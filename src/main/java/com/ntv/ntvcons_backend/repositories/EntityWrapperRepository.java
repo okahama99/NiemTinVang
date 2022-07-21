@@ -12,68 +12,68 @@ import java.util.Optional;
 
 @Repository
 public interface EntityWrapperRepository extends JpaRepository<EntityWrapper, Long> {
-    List<EntityWrapper> findAllByIsDeletedIsFalse();
-    Page<EntityWrapper> findAllByIsDeletedIsFalse(Pageable paging);
+    List<EntityWrapper> findAllByStatusNotContains(String status);
+    Page<EntityWrapper> findAllByStatusNotContains(String status, Pageable paging);
 
 
     /* Id */
-    boolean existsByEntityWrapperIdAndIsDeletedIsFalse(long entityWrapperId);
-    Optional<EntityWrapper> findByEntityWrapperIdAndIsDeletedIsFalse(long entityWrapperId);
-    List<EntityWrapper> findAllByEntityWrapperIdInAndIsDeletedIsFalse(Collection<Long> entityWrapperIdCollection);
+    boolean existsByEntityWrapperIdAndStatusNotContains(long entityWrapperId, String status);
+    Optional<EntityWrapper> findByEntityWrapperIdAndStatusNotContains(long entityWrapperId, String status);
+    List<EntityWrapper> findAllByEntityWrapperIdInAndStatusNotContains(Collection<Long> entityWrapperIdCollection, String status);
 
 
     /* blueprintId */
-    boolean existsByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
-    Optional<EntityWrapper> findByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
-    List<EntityWrapper> findAllByBlueprintIdInAndIsDeletedIsFalse(Collection<Long> blueprintIdCollection);
-    List<EntityWrapper> findAllByBlueprintIdNotNullAndIsDeletedIsFalse();
+    boolean existsByBlueprintIdAndStatusNotContains(long blueprintId, String status);
+    Optional<EntityWrapper> findByBlueprintIdAndStatusNotContains(long blueprintId, String status);
+    List<EntityWrapper> findAllByBlueprintIdInAndStatusNotContains(Collection<Long> blueprintIdCollection, String status);
+    List<EntityWrapper> findAllByBlueprintIdNotNullAndStatusNotContains(String status);
 
 
     /* postId */
-    boolean existsByPostIdAndIsDeletedIsFalse(long postId);
-    Optional<EntityWrapper> findByPostIdAndIsDeletedIsFalse(long postId);
-    List<EntityWrapper> findAllByPostIdInAndIsDeletedIsFalse(Collection<Long> postIdCollection);
-    List<EntityWrapper> findAllByPostIdNotNullAndIsDeletedIsFalse();
+    boolean existsByPostIdAndStatusNotContains(long postId, String status);
+    Optional<EntityWrapper> findByPostIdAndStatusNotContains(long postId, String status);
+    List<EntityWrapper> findAllByPostIdInAndStatusNotContains(Collection<Long> postIdCollection, String status);
+    List<EntityWrapper> findAllByPostIdNotNullAndStatusNotContains(String status);
 
 
     /* projectId */
-    boolean existsByProjectIdAndIsDeletedIsFalse(long projectId);
-    Optional<EntityWrapper> findByProjectIdAndIsDeletedIsFalse(long projectId);
-    List<EntityWrapper> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIDCollection);
-    List<EntityWrapper> findAllByProjectIdNotNullAndIsDeletedIsFalse();
+    boolean existsByProjectIdAndStatusNotContains(long projectId, String status);
+    Optional<EntityWrapper> findByProjectIdAndStatusNotContains(long projectId, String status);
+    List<EntityWrapper> findAllByProjectIdInAndStatusNotContains(Collection<Long> projectIDCollection, String status);
+    List<EntityWrapper> findAllByProjectIdNotNullAndStatusNotContains(String status);
 
 
     /* reportId */
-    boolean existsByReportIdAndIsDeletedIsFalse(long reportId);
-    Optional<EntityWrapper> findByReportIdAndIsDeletedIsFalse(long reportId);
-    List<EntityWrapper> findAllByReportIdInAndIsDeletedIsFalse(Collection<Long> reportIdCollection);
-    List<EntityWrapper> findAllByReportIdNotNullAndIsDeletedIsFalse();
+    boolean existsByReportIdAndStatusNotContains(long reportId, String status);
+    Optional<EntityWrapper> findByReportIdAndStatusNotContains(long reportId, String status);
+    List<EntityWrapper> findAllByReportIdInAndStatusNotContains(Collection<Long> reportIdCollection, String status);
+    List<EntityWrapper> findAllByReportIdNotNullAndStatusNotContains(String status);
 
 
     /* requestId */
-    boolean existsByRequestIdAndIsDeletedIsFalse(long requestId);
-    Optional<EntityWrapper> findByRequestIdAndIsDeletedIsFalse(long requestId);
-    List<EntityWrapper> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
-    List<EntityWrapper> findAllByRequestIdNotNullAndIsDeletedIsFalse();
+    boolean existsByRequestIdAndStatusNotContains(long requestId, String status);
+    Optional<EntityWrapper> findByRequestIdAndStatusNotContains(long requestId, String status);
+    List<EntityWrapper> findAllByRequestIdInAndStatusNotContains(Collection<Long> requestIdCollection, String status);
+    List<EntityWrapper> findAllByRequestIdNotNullAndStatusNotContains(String status);
 
 
     /* taskId */
-    boolean existsByTaskIdAndIsDeletedIsFalse(long taskId);
-    Optional<EntityWrapper> findByTaskIdAndIsDeletedIsFalse(long taskId);
-    List<EntityWrapper> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
-    List<EntityWrapper> findAllByTaskIdNotNullAndIsDeletedIsFalse();
+    boolean existsByTaskIdAndStatusNotContains(long taskId, String status);
+    Optional<EntityWrapper> findByTaskIdAndStatusNotContains(long taskId, String status);
+    List<EntityWrapper> findAllByTaskIdInAndStatusNotContains(Collection<Long> taskIdCollection, String status);
+    List<EntityWrapper> findAllByTaskIdNotNullAndStatusNotContains(String status);
 
 
     /* userId */
-    boolean existsByUserIdAndIsDeletedIsFalse(long userId);
-    Optional<EntityWrapper> findByUserIdAndIsDeletedIsFalse(long userId);
-    List<EntityWrapper> findAllByUserIdInAndIsDeletedIsFalse(Collection<Long> userIdCollection);
-    List<EntityWrapper> findAllByUserIdNotNullAndIsDeletedIsFalse();
+    boolean existsByUserIdAndStatusNotContains(long userId, String status);
+    Optional<EntityWrapper> findByUserIdAndStatusNotContains(long userId, String status);
+    List<EntityWrapper> findAllByUserIdInAndStatusNotContains(Collection<Long> userIdCollection, String status);
+    List<EntityWrapper> findAllByUserIdNotNullAndStatusNotContains(String status);
 
 
     /* workerId */
-    boolean existsByWorkerIdAndIsDeletedIsFalse(long workerId);
-    Optional<EntityWrapper> findByWorkerIdAndIsDeletedIsFalse(long workerId);
-    List<EntityWrapper> findAllByWorkerIdInAndIsDeletedIsFalse(Collection<Long> workerIdCollection);
-    List<EntityWrapper> findAllByWorkerIdNotNullAndIsDeletedIsFalse();
+    boolean existsByWorkerIdAndStatusNotContains(long workerId, String status);
+    Optional<EntityWrapper> findByWorkerIdAndStatusNotContains(long workerId, String status);
+    List<EntityWrapper> findAllByWorkerIdInAndStatusNotContains(Collection<Long> workerIdCollection, String status);
+    List<EntityWrapper> findAllByWorkerIdNotNullAndStatusNotContains(String status);
 }

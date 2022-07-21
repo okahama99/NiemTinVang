@@ -12,31 +12,35 @@ import java.util.Optional;
 
 @Repository
 public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long> {
-    Page<ExternalFile> findAllByIsDeletedIsFalse(Pageable paging);
+    List<ExternalFile> findAllByStatusNotContains(String status);
+    Page<ExternalFile> findAllByStatusNotContains(String status, Pageable paging);
+
 
     /* Id */
-    boolean existsByFileIdAndIsDeletedIsFalse(long fileId);
-    Optional<ExternalFile> findByFileIdAndIsDeletedIsFalse(long fileId);
-    boolean existsAllByFileIdInAndIsDeletedIsFalse(Collection<Long> fileIdCollection);
-    List<ExternalFile> findAllByFileIdInAndIsDeletedIsFalse(Collection<Long> fileIdCollection);
+    boolean existsByFileIdAndStatusNotContains(long fileId, String status);
+    Optional<ExternalFile> findByFileIdAndStatusNotContains(long fileId, String status);
+    boolean existsAllByFileIdInAndStatusNotContains(Collection<Long> fileIdCollection, String status);
+    List<ExternalFile> findAllByFileIdInAndStatusNotContains(Collection<Long> fileIdCollection, String status);
+    /* Id & fileLink */
+    boolean existsByFileLinkAndFileIdNotAndStatusNotContains(String fileLink, long fileId, String status);
 
 
     /* fileName */
-    Optional<ExternalFile> findByFileNameAndIsDeletedIsFalse(String fileName);
-    List<ExternalFile> findAllByFileNameContainsAndIsDeletedIsFalse(String fileName);
-    Page<ExternalFile> findAllByFileNameContainsAndIsDeletedIsFalse(String fileName, Pageable paging);
+    Optional<ExternalFile> findByFileNameAndStatusNotContains(String fileName, String status);
+    List<ExternalFile> findAllByFileNameContainsAndStatusNotContains(String fileName, String status);
+    Page<ExternalFile> findAllByFileNameContainsAndStatusNotContains(String fileName, Pageable paging, String status);
 
 
     /* fileLink */
-    boolean existsByFileLinkAndIsDeletedIsFalse(String fileLink);
-    Optional<ExternalFile> findByFileLinkAndIsDeletedIsFalse(String fileLink);
-    List<ExternalFile> findAllByFileLinkContainsAndIsDeletedIsFalse(String fileLink);
-    Page<ExternalFile> findAllByFileLinkContainsAndIsDeletedIsFalse(String fileLink, Pageable paging);
+    boolean existsByFileLinkAndStatusNotContains(String fileLink, String status);
+    Optional<ExternalFile> findByFileLinkAndStatusNotContains(String fileLink, String status);
+    List<ExternalFile> findAllByFileLinkContainsAndStatusNotContains(String fileLink, String status);
+    Page<ExternalFile> findAllByFileLinkContainsAndStatusNotContains(String fileLink, Pageable paging, String status);
 
 
     /* filetypeId */
-    List<ExternalFile> findAllByFileTypeIdAndIsDeletedIsFalse(long filetypeId);
-    Page<ExternalFile> findAllByFileTypeIdAndIsDeletedIsFalse(long filetypeId, Pageable paging);
-    List<ExternalFile> findAllByFileTypeIdInAndIsDeletedIsFalse(Collection<Long> fileTypeIdCollection);
-    Page<ExternalFile> findAllByFileTypeIdInAndIsDeletedIsFalse(Collection<Long> fileTypeIdCollection, Pageable paging);
+    List<ExternalFile> findAllByFileTypeIdAndStatusNotContains(long filetypeId, String status);
+    Page<ExternalFile> findAllByFileTypeIdAndStatusNotContains(long filetypeId, Pageable paging, String status);
+    List<ExternalFile> findAllByFileTypeIdInAndStatusNotContains(Collection<Long> fileTypeIdCollection, String status);
+    Page<ExternalFile> findAllByFileTypeIdInAndStatusNotContains(Collection<Long> fileTypeIdCollection, Pageable paging, String status);
 }

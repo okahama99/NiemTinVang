@@ -13,23 +13,31 @@ import java.util.Optional;
 @Repository
 public interface ExternalFileEntityWrapperPairingRepository
         extends JpaRepository<ExternalFileEntityWrapperPairing, Long> {
-    Page<ExternalFileEntityWrapperPairing> findAllByIsDeletedIsFalse(Pageable paging);
+    List<ExternalFileEntityWrapperPairing> findAllByStatusNotContains(String status);
+    Page<ExternalFileEntityWrapperPairing> findAllByStatusNotContains(String status, Pageable paging);
 
 
     /* Id */
-    Optional<ExternalFileEntityWrapperPairing> findByPairingIdAndIsDeletedIsFalse(long pairingId);
-    List<ExternalFileEntityWrapperPairing> findAllByPairingIdInAndIsDeletedIsFalse
-            (Collection<Long> pairingIdCollection);
+    boolean existsByPairingIdAndStatusNotContains(long pairingId, String status);
+    Optional<ExternalFileEntityWrapperPairing> findByPairingIdAndStatusNotContains(long pairingId, String status);
+    List<ExternalFileEntityWrapperPairing> findAllByPairingIdInAndStatusNotContains
+            (Collection<Long> pairingIdCollection, String status);
+    /* Id & entityWrapperId & externalFileId */
+    boolean existsByEntityWrapperIdAndExternalFileIdAndPairingIdIsNotAndStatusNotContains
+            (long entityWrapperId, long externalFileId, long pairingId, String status);
 
 
     /* entityWrapperId */
-    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdAndIsDeletedIsFalse(long entityWrapperId);
-    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdInAndIsDeletedIsFalse
-            (Collection<Long> entityWrapperIdCollection);
+    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdAndStatusNotContains(long entityWrapperId, String status);
+    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdInAndStatusNotContains
+            (Collection<Long> entityWrapperIdCollection, String status);
 
 
     /* externalFileId */
-    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdAndIsDeletedIsFalse(long externalFileId);
-    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdInAndIsDeletedIsFalse
-            (Collection<Long> externalFileIdCollection);
+    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdAndStatusNotContains(long externalFileId, String status);
+    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdInAndStatusNotContains
+            (Collection<Long> externalFileIdCollection, String status);
+    /* entityWrapperId & externalFileId */
+    boolean existsByEntityWrapperIdAndExternalFileIdAndStatusNotContains
+            (long entityWrapperId, long externalFileId, String status);
 }

@@ -1,27 +1,28 @@
 package com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing;
 
-import com.ntv.ntvcons_backend.entities.ExternalFile;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
-import com.ntv.ntvcons_backend.repositories.EntityWrapperRepository;
 import com.ntv.ntvcons_backend.repositories.ExternalFileEntityWrapperPairingRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
+import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFileEntityWrapperPairingService {
     @Autowired
-    private ExternalFileEntityWrapperPairingRepository eFEWPRepository;
+    private ExternalFileEntityWrapperPairingRepository eFEWPairingRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private UserService userService;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private EntityWrapperService entityWrapperService;
@@ -29,53 +30,310 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
     @Autowired
     private ExternalFileService externalFileService;
 
+    private final String DELETED = Status.DELETED.getStringValue();
+
     /* CREATE */
     @Override
-    public ExternalFileEntityWrapperPairing createPairing(long externalFileId, long entityWrapperId) throws Exception {
-        return null;
+    public ExternalFileEntityWrapperPairing createPairing(ExternalFileEntityWrapperPairing newPairing) throws Exception {
+        String errorMsg = "";
+
+        /* Check FK */
+        if (entityWrapperService.existsById(newPairing.getEntityWrapperId())) {
+            errorMsg += "No EntityWrapper found with Id: '" + newPairing.getEntityWrapperId()
+                    + "'. Which violate constraint: FK_EFEWP_EntityWrapper. ";
+        }
+        if (externalFileService.existsById(newPairing.getExternalFileId())) {
+            errorMsg += "No ExternalFile found with Id: '" + newPairing.getExternalFileId()
+                    + "'. Which violate constraint: FK_EFEWP_ExternalFile. ";
+        }
+        if (userService.existsById(newPairing.getCreatedBy())) {
+            errorMsg += "No User (CreatedBy) found with Id: '" + newPairing.getCreatedBy()
+                    + "'. Which violate constraint: FK_EFEWP_User_CreatedBy. ";
+        }
+
+        /* Check duplicate */
+        if (eFEWPairingRepository
+                .existsByEntityWrapperIdAndExternalFileIdAndStatusNotContains(
+                        newPairing.getEntityWrapperId(),
+                        newPairing.getExternalFileId(),
+                        DELETED)) {
+            errorMsg += "Already exists another EWEFPairing relationship between with EntityWrapper with Id: '"
+                    + newPairing.getEntityWrapperId()
+                    + "' and ExternalFile with Id: '"
+                    + newPairing.getExternalFileId() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty())
+            throw new IllegalArgumentException(errorMsg);
+
+        return eFEWPairingRepository.saveAndFlush(newPairing);
     }
 
     /* READ */
     @Override
-    public Page<ExternalFileEntityWrapperPairing> getPageAll(Pageable paging) throws Exception {
-        return null;
+    public List<ExternalFileEntityWrapperPairing> getAll() throws Exception {
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                eFEWPairingRepository.findAllByStatusNotContains(DELETED);
+
+        if (eFEWPairingList.isEmpty())
+            return null;
+
+        return eFEWPairingList;
     }
 
     @Override
+    public boolean existsById(long pairingId) throws Exception {
+        return eFEWPairingRepository
+                .existsByPairingIdAndStatusNotContains(pairingId, DELETED);
+    }
+    @Override
     public ExternalFileEntityWrapperPairing getById(long pairingId) throws Exception {
-        return null;
+        return eFEWPairingRepository
+                .findByPairingIdAndStatusNotContains(pairingId, DELETED)
+                .orElse(null);
     }
 
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByEntityWrapperId(long entityWrapperId) throws Exception {
-        return null;
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                eFEWPairingRepository.findAllByEntityWrapperIdAndStatusNotContains(entityWrapperId, DELETED);
+
+        if (eFEWPairingList.isEmpty())
+            return null;
+
+        return eFEWPairingList;
     }
 
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception {
-        return null;
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                eFEWPairingRepository.findAllByEntityWrapperIdInAndStatusNotContains(entityWrapperIdCollection, DELETED);
+
+        if (eFEWPairingList.isEmpty())
+            return null;
+
+        return eFEWPairingList;
+    }
+    @Override
+    public Map<Long, List<Long>> mapEntityWrapperIdExternalFileIdListByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception {
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                getAllByEntityWrapperIdIn(entityWrapperIdCollection);
+
+        if (eFEWPairingList == null)
+            return new HashMap<>();
+
+        Map<Long, List<Long>> entityWrapperIdExternalFileIdListMap = new HashMap<>();
+
+        long tmpEntityWrapperId;
+        long tmpExternalFileId;
+        List<Long> tmpExternalFileIdList;
+
+        for (ExternalFileEntityWrapperPairing eFEWPairing : eFEWPairingList) {
+            tmpEntityWrapperId = eFEWPairing.getEntityWrapperId();
+            tmpExternalFileId = eFEWPairing.getExternalFileId();
+            tmpExternalFileIdList = entityWrapperIdExternalFileIdListMap.get(tmpEntityWrapperId);
+
+            if (tmpExternalFileIdList == null) {
+                entityWrapperIdExternalFileIdListMap
+                        .put(tmpEntityWrapperId, new ArrayList<>(Collections.singletonList(tmpExternalFileId)));
+            } else {
+                tmpExternalFileIdList.add(tmpExternalFileId);
+
+                entityWrapperIdExternalFileIdListMap
+                        .put(tmpEntityWrapperId, tmpExternalFileIdList);
+            }
+        }
+
+        return entityWrapperIdExternalFileIdListMap;
     }
 
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByExternalFileId(long externalFileId) throws Exception {
-        return null;
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                eFEWPairingRepository.findAllByExternalFileIdAndStatusNotContains(externalFileId, DELETED);
+
+        if (eFEWPairingList.isEmpty())
+            return null;
+
+        return eFEWPairingList;
     }
 
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByExternalFileIdIn(Collection<Long> externalFileIdCollection) throws Exception {
-        return null;
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                eFEWPairingRepository.findAllByExternalFileIdInAndStatusNotContains(externalFileIdCollection, DELETED);
+
+        if (eFEWPairingList.isEmpty())
+            return null;
+
+        return eFEWPairingList;
+    }
+    @Override
+    public Map<Long, List<Long>> mapExternalFileIdEntityWrapperIdListByByExternalFileIdIn(Collection<Long> externalFileIdCollection) throws Exception {
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                getAllByExternalFileIdIn(externalFileIdCollection);
+
+        if (eFEWPairingList == null)
+            return new HashMap<>();
+
+        Map<Long, List<Long>> externalFileIdEntityWrapperIdListMap = new HashMap<>();
+
+        long tmpExternalFileId;
+        long tmpEntityWrapperId;
+        List<Long> tmpEntityWrapperIdList;
+
+        for (ExternalFileEntityWrapperPairing eFEWPairing : eFEWPairingList) {
+            tmpExternalFileId = eFEWPairing.getExternalFileId();
+            tmpEntityWrapperId = eFEWPairing.getEntityWrapperId();
+            tmpEntityWrapperIdList = externalFileIdEntityWrapperIdListMap.get(tmpEntityWrapperId);
+
+            if (tmpEntityWrapperIdList == null) {
+                externalFileIdEntityWrapperIdListMap
+                        .put(tmpExternalFileId, new ArrayList<>(Collections.singletonList(tmpEntityWrapperId)));
+            } else {
+                tmpEntityWrapperIdList.add(tmpEntityWrapperId);
+
+                externalFileIdEntityWrapperIdListMap
+                        .put(tmpExternalFileId, tmpEntityWrapperIdList);
+            }
+        }
+
+        return externalFileIdEntityWrapperIdListMap;
     }
 
     /* UPDATE */
     @Override
     public ExternalFileEntityWrapperPairing updatePairing(ExternalFileEntityWrapperPairing updatedPairing) throws Exception {
-        return null;
+        ExternalFileEntityWrapperPairing oldPairing = getById(updatedPairing.getPairingId());
+
+        if (oldPairing == null)
+            return null;
+
+        String errorMsg = "";
+
+        /* Check FK */
+        if (!oldPairing.getEntityWrapperId().equals(updatedPairing.getEntityWrapperId())) {
+            if (entityWrapperService.existsById(updatedPairing.getEntityWrapperId())) {
+                errorMsg += "No EntityWrapper found with Id: '" + updatedPairing.getEntityWrapperId()
+                        + "'. Which violate constraint: FK_EFEWP_EntityWrapper. ";
+            }
+        }
+        if (!oldPairing.getEntityWrapperId().equals(updatedPairing.getEntityWrapperId())) {
+            if (externalFileService.existsById(updatedPairing.getExternalFileId())) {
+                errorMsg += "No ExternalFile found with Id: '" + updatedPairing.getExternalFileId()
+                        + "'. Which violate constraint: FK_EFEWP_ExternalFile. ";
+            }
+        }
+        if (oldPairing.getUpdatedBy() != null) {
+            if (oldPairing.getUpdatedBy().equals(updatedPairing.getUpdatedBy())) {
+                if (userService.existsById(updatedPairing.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedPairing.getUpdatedBy()
+                            + "'. Which violate constraint: FK_EFEWP_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (userService.existsById(updatedPairing.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedPairing.getUpdatedBy()
+                        + "'. Which violate constraint: FK_EFEWP_User_UpdatedBy. ";
+            }
+        }
+
+        /* Check duplicate */
+        if (eFEWPairingRepository
+                .existsByEntityWrapperIdAndExternalFileIdAndPairingIdIsNotAndStatusNotContains(
+                        updatedPairing.getEntityWrapperId(),
+                        updatedPairing.getExternalFileId(),
+                        updatedPairing.getPairingId(),
+                        DELETED)) {
+            errorMsg += "Already exists another EWEFPairing relationship between with EntityWrapper with Id: '"
+                    + updatedPairing.getEntityWrapperId()
+                    + "' and ExternalFile with Id: '"
+                    + updatedPairing.getExternalFileId() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty())
+            throw new IllegalArgumentException(errorMsg);
+
+        return eFEWPairingRepository.saveAndFlush(updatedPairing);
     }
 
     /* DELETE */
     @Override
     public boolean deletePairing(long pairingId) throws Exception {
-        return false;
+        ExternalFileEntityWrapperPairing eFEWPairing = getById(pairingId);
+
+        if (eFEWPairing == null)
+            return false;
+
+        eFEWPairing.setStatus(Status.DELETED);
+        eFEWPairingRepository.saveAndFlush(eFEWPairing);
+
+        return true;
     }
 
+    @Override
+    public boolean deleteAllByEntityWrapperId(long entityWrapperId) throws Exception {
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                getAllByEntityWrapperId(entityWrapperId);
+
+        if (eFEWPairingList == null)
+            return false;
+
+        eFEWPairingList = eFEWPairingList.stream()
+                .peek(eFEWPairing -> eFEWPairing.setStatus(Status.DELETED))
+                .collect(Collectors.toList());
+
+        eFEWPairingRepository.saveAllAndFlush(eFEWPairingList);
+
+        return true;
+    }
+    @Override
+    public boolean deleteAllByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception {
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                getAllByEntityWrapperIdIn(entityWrapperIdCollection);
+
+        if (eFEWPairingList == null)
+            return false;
+
+        eFEWPairingList = eFEWPairingList.stream()
+                .peek(eFEWPairing -> eFEWPairing.setStatus(Status.DELETED))
+                .collect(Collectors.toList());
+
+        eFEWPairingRepository.saveAllAndFlush(eFEWPairingList);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteAllByExternalFileId(long fileId) throws Exception {
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                getAllByExternalFileId(fileId);
+
+        if (eFEWPairingList == null)
+            return false;
+
+        eFEWPairingList = eFEWPairingList.stream()
+                .peek(eFEWPairing -> eFEWPairing.setStatus(Status.DELETED))
+                .collect(Collectors.toList());
+
+        eFEWPairingRepository.saveAllAndFlush(eFEWPairingList);
+
+        return true;
+    }
+    @Override
+    public boolean deleteAllByExternalFileIdIn(Collection<Long> fileIdCollection) throws Exception {
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                getAllByExternalFileIdIn(fileIdCollection);
+
+        if (eFEWPairingList == null)
+            return false;
+
+        eFEWPairingList = eFEWPairingList.stream()
+                .peek(eFEWPairing -> eFEWPairing.setStatus(Status.DELETED))
+                .collect(Collectors.toList());
+
+        eFEWPairingRepository.saveAllAndFlush(eFEWPairingList);
+
+        return true;
+    }
 }

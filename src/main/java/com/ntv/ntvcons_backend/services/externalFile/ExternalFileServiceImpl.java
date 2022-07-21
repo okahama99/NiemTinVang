@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.externalFile;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileUpdateDTO;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +31,8 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
+
+    private final String DELETED = Status.DELETED.getStringValue();
 
     /* CREATE */
     @Override
@@ -45,7 +49,9 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         /* Check duplicate */
         if (externalFileRepository
-                .existsByFileLinkAndIsDeletedIsFalse(newFile.getFileLink())) {
+                .existsByFileLinkAndStatusNotContains(
+                        newFile.getFileLink(),
+                        DELETED)) {
             errorMsg += "Already exists another ExternalFile with link: '"
                     + newFile.getFileLink() + "'. ";
         }
@@ -68,7 +74,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public Page<ExternalFile> getPageAll(Pageable paging) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByIsDeletedIsFalse(paging);
+                externalFileRepository.findAllByStatusNotContains(DELETED, paging);
 
         if (filePage.isEmpty())
             return null;
@@ -93,12 +99,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public boolean existsById(long fileId) throws Exception {
         return externalFileRepository
-                .existsByFileIdAndIsDeletedIsFalse(fileId);
+                .existsByFileIdAndStatusNotContains(fileId, DELETED);
     }
     @Override
     public ExternalFile getById(long fileId) throws Exception {
         return externalFileRepository
-                .findByFileIdAndIsDeletedIsFalse(fileId)
+                .findByFileIdAndStatusNotContains(fileId, DELETED)
                 .orElse(null);
     }
     @Override
@@ -114,12 +120,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public boolean existsAllByIdIn(Collection<Long> fileIdCollection) throws Exception {
         return externalFileRepository
-                .existsAllByFileIdInAndIsDeletedIsFalse(fileIdCollection);
+                .existsAllByFileIdInAndStatusNotContains(fileIdCollection, DELETED);
     }
     @Override
     public List<ExternalFile> getAllByIdIn(Collection<Long> fileIdCollection) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileIdInAndIsDeletedIsFalse(fileIdCollection);
+                externalFileRepository.findAllByFileIdInAndStatusNotContains(fileIdCollection, DELETED);
 
         if (fileList.isEmpty())
             return null;
@@ -136,38 +142,20 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return fillAllDTO(fileList, null);
     }
     @Override
-    public Map<Long, List<ExternalFileReadDTO>> mapFileTypeDTOExternalFileDTOListByIdIn(Collection<Long> fileIdCollection) throws Exception {
+    public Map<Long, ExternalFileReadDTO> mapFileIdExternalFileDTOListByIdIn(Collection<Long> fileIdCollection) throws Exception {
         List<ExternalFileReadDTO> fileDTOList = getAllDTOByIdIn(fileIdCollection);
 
         if (fileDTOList == null)
             return new HashMap<>();
 
-        Map<Long, List<ExternalFileReadDTO>> fileTypeDTOExternalFileDTOListMap = new HashMap<>();
-
-        long tmpFileTypeId;
-        List<ExternalFileReadDTO> tmpFileDTOList;
-
-        for (ExternalFileReadDTO fileDTO : fileDTOList) {
-            tmpFileTypeId = fileDTO.getFileType().getFileTypeId();
-            tmpFileDTOList = fileTypeDTOExternalFileDTOListMap.get(tmpFileTypeId);
-
-            if (tmpFileDTOList == null) {
-                fileTypeDTOExternalFileDTOListMap
-                        .put(tmpFileTypeId, new ArrayList<>(Collections.singletonList(fileDTO)));
-            } else {
-                tmpFileDTOList.add(fileDTO);
-
-                fileTypeDTOExternalFileDTOListMap.put(tmpFileTypeId, fileDTOList);
-            }
-        }
-
-        return fileTypeDTOExternalFileDTOListMap;
+        return fileDTOList.stream()
+                .collect(Collectors.toMap(ExternalFileReadDTO::getFileId, Function.identity()));
     }
 
     @Override
     public List<ExternalFile> getAllByFileTypeId(long fileTypeId) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileTypeIdAndIsDeletedIsFalse(fileTypeId);
+                externalFileRepository.findAllByFileTypeIdAndStatusNotContains(fileTypeId, DELETED);
 
         if (fileList.isEmpty())
             return null;
@@ -186,7 +174,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public Page<ExternalFile> getPageAllByFileTypeId(Pageable paging, long fileTypeId) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileTypeIdAndIsDeletedIsFalse(fileTypeId, paging);
+                externalFileRepository.findAllByFileTypeIdAndStatusNotContains(fileTypeId, paging, DELETED);
 
         if (filePage.isEmpty())
             return null;
@@ -211,7 +199,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public List<ExternalFile> getAllByFileTypeIdIn(Collection<Long> fileTypeIdCollection) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileTypeIdInAndIsDeletedIsFalse(fileTypeIdCollection);
+                externalFileRepository.findAllByFileTypeIdInAndStatusNotContains(fileTypeIdCollection, DELETED);
 
         if (fileList.isEmpty())
             return null;
@@ -230,7 +218,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public Page<ExternalFile> getPageAllByFileTypeIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileTypeIdInAndIsDeletedIsFalse(fileTypeIdCollection, paging);
+                externalFileRepository.findAllByFileTypeIdInAndStatusNotContains(fileTypeIdCollection, paging, DELETED);
 
         if (filePage.isEmpty())
             return null;
@@ -255,7 +243,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public List<ExternalFile> getAllByNameContains(String fileName) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileNameContainsAndIsDeletedIsFalse(fileName);
+                externalFileRepository.findAllByFileNameContainsAndStatusNotContains(fileName, DELETED);
 
         if (fileList.isEmpty())
             return null;
@@ -274,7 +262,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public Page<ExternalFile> getPageAllByNameContains(Pageable paging, String fileName) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileNameContainsAndIsDeletedIsFalse(fileName, paging);
+                externalFileRepository.findAllByFileNameContainsAndStatusNotContains(fileName, paging, DELETED);
 
         if (filePage.isEmpty())
             return null;
@@ -299,22 +287,89 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     /* UPDATE */
     @Override
     public ExternalFile updateExternalFile(ExternalFile updatedFile) throws Exception {
-        return null;
+        ExternalFile oldFile = getById(updatedFile.getFileId());
+
+        if (oldFile == null)
+            return null;
+
+        String errorMsg = "";
+
+        /* TODO: check url link validate */
+
+        /* Check FK */
+        if (oldFile.getUpdatedBy() != null) {
+            if (!oldFile.getUpdatedBy().equals(updatedFile.getUpdatedBy())) {
+                if (userService.existsById(updatedFile.getUpdatedBy())) {
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedFile.getUpdatedBy()
+                            + "'. Which violate constraint: FK_ExternalFile_User_UpdatedBy. ";
+                }
+            }
+        } else {
+            if (userService.existsById(updatedFile.getUpdatedBy())) {
+                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedFile.getUpdatedBy()
+                        + "'. Which violate constraint: FK_ExternalFile_User_UpdatedBy. ";
+            }
+        }
+
+        /* Check duplicate */
+        if (externalFileRepository
+                .existsByFileLinkAndFileIdNotAndStatusNotContains(
+                        updatedFile.getFileLink(),
+                        updatedFile.getFileId(),
+                        DELETED)) {
+            errorMsg += "Already exists another ExternalFile with link: '"
+                    + updatedFile.getFileLink() + "'. ";
+        }
+
+        if (!errorMsg.trim().isEmpty())
+            throw new IllegalArgumentException(errorMsg);
+
+        updatedFile.setCreatedAt(oldFile.getCreatedAt());
+        updatedFile.setCreatedBy(oldFile.getCreatedBy());
+
+        return externalFileRepository.saveAndFlush(updatedFile);
     }
     @Override
     public ExternalFileReadDTO updateExternalFileByDTO(ExternalFileUpdateDTO updatedFileDTO) throws Exception {
-        return null;
+        ExternalFile updatedFile = modelMapper.map(updatedFileDTO, ExternalFile.class);
+
+        updatedFile = createExternalFile(updatedFile);
+
+        if (updatedFile == null)
+            return null;
+
+        return fillDTO(updatedFile);
     }
 
     /* DELETE */
     @Override
     public boolean deleteExternalFile(long fileId) throws Exception {
-        return false;
+        ExternalFile file = getById(fileId);
+
+        if (file == null)
+            return false;
+
+        file.setStatus(Status.DELETED);
+        externalFileRepository.saveAndFlush(file);
+
+        return true;
     }
 
     @Override
     public boolean deleteAllByIdIn(Collection<Long> fileIdCollection) throws Exception {
-        return false;
+        List<ExternalFile> fileList = getAllByIdIn(fileIdCollection);
+
+        if (fileList == null)
+            return false;
+
+
+        fileList = fileList.stream()
+                .peek(file -> file.setStatus(Status.DELETED))
+                .collect(Collectors.toList());
+
+        externalFileRepository.saveAllAndFlush(fileList);
+
+        return true;
     }
 
     /* Utils */

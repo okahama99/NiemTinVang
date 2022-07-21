@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.entities;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,8 +46,8 @@ public class EntityWrapper extends BaseEntity {
     @Column(name = "workerId")
     private Long workerId;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
+    @Column(name = "status")
+    private Status status;
 
     /** For CREATE only */
     public EntityWrapper(long entityId, EntityType type) {
@@ -59,7 +60,7 @@ public class EntityWrapper extends BaseEntity {
         this.userId = null;
         this.workerId = null;
         this.taskId = null;
-        this.isDeleted = false;
+        this.status = Status.ACTIVE;
 
         switch (type) {
             case BLUEPRINT_ENTITY:
