@@ -102,9 +102,9 @@ public class ReportServiceImpl implements ReportService {
         newReport.setReportDate(
                 LocalDateTime.parse(newReportDTO.getReportDate(), dateTimeFormatter));
 
-        if (newReport.getReportDate().isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("reportDate can't be in the future");
-        }
+//        if (newReport.getReportDate().isAfter(LocalDateTime.now())) {
+//            throw new IllegalArgumentException("reportDate can't be in the future");
+//        }
 
         newReport = createReport(newReport);
 
@@ -600,9 +600,9 @@ public class ReportServiceImpl implements ReportService {
         updatedReport.setReportDate(
                 LocalDateTime.parse(updatedReportDTO.getReportDate(), dateTimeFormatter));
 
-        if (updatedReport.getReportDate().isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("reportDate can't be in the future");
-        }
+//        if (updatedReport.getReportDate().isAfter(LocalDateTime.now())) {
+//            throw new IllegalArgumentException("reportDate can't be in the future");
+//        }
 
         updatedReport = updateReport(updatedReport);
 

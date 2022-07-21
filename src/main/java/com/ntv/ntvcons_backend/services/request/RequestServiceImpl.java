@@ -142,8 +142,8 @@ public class RequestServiceImpl implements RequestService{
         newRequest.setRequestDate(
                 LocalDateTime.parse(newRequestDTO.getRequestDate(), dateTimeFormatter));
 
-        if (newRequest.getRequestDate().isAfter(LocalDateTime.now())) 
-            throw new IllegalArgumentException("requestDate can't be in the future");
+//        if (newRequest.getRequestDate().isAfter(LocalDateTime.now()))
+//            throw new IllegalArgumentException("requestDate can't be in the future");
 
         newRequest = createRequest(newRequest);
 
@@ -1055,15 +1055,15 @@ public class RequestServiceImpl implements RequestService{
         updatedRequest.setRequestDate(
                 LocalDateTime.parse(updatedRequestDTO.getRequestDate(), dateTimeFormatter));
 
-        if (updatedRequest.getRequestDate().isAfter(LocalDateTime.now())) 
-            throw new IllegalArgumentException("requestDate can't be in the future");
+//        if (updatedRequest.getRequestDate().isAfter(LocalDateTime.now()))
+//            throw new IllegalArgumentException("requestDate can't be in the future");
         
         if (updatedRequestDTO.getVerifyDate() != null) {
             updatedRequest.setVerifyDate(
                     LocalDateTime.parse(updatedRequestDTO.getRequestDate(), dateTimeFormatter));
             
-            if (updatedRequest.getVerifyDate().isAfter(LocalDateTime.now()))
-                throw new IllegalArgumentException("verifyDate can't be in the future");
+//            if (updatedRequest.getVerifyDate().isAfter(LocalDateTime.now()))
+//                throw new IllegalArgumentException("verifyDate can't be in the future");
             
             if (updatedRequest.getVerifyDate().isBefore(updatedRequest.getRequestDate())) 
                 throw new IllegalArgumentException("verifyDate is before requestDate");

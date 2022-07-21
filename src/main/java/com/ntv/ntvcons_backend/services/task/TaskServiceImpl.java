@@ -666,8 +666,8 @@ public class TaskServiceImpl implements TaskService{
                     LocalDateTime.parse(updatedTaskDTO.getActualStartDate(), dateTimeFormatter));
 
             /* Nếu đã thực tế thì làm sao tương lai, tương lai thì nó là kế hoạch rồi */
-            if (updatedTask.getActualStartDate().isAfter(LocalDateTime.now()))
-                throw new IllegalArgumentException("actualStartDate can't be in the future");
+//            if (updatedTask.getActualStartDate().isAfter(LocalDateTime.now()))
+//                throw new IllegalArgumentException("actualStartDate can't be in the future");
         }
 
         if (updatedTaskDTO.getActualEndDate() != null) {
@@ -675,8 +675,8 @@ public class TaskServiceImpl implements TaskService{
                     LocalDateTime.parse(updatedTaskDTO.getActualEndDate(), dateTimeFormatter));
 
             /* Nếu đã thực tế thì làm sao tương lai, tương lai thì nó là kế hoạch rồi */
-            if (updatedTask.getActualEndDate().isAfter(LocalDateTime.now()))
-                throw new IllegalArgumentException("actualEndDate can't be in the future");
+//            if (updatedTask.getActualEndDate().isAfter(LocalDateTime.now()))
+//                throw new IllegalArgumentException("actualEndDate can't be in the future");
 
             if (hasActualStartDate)
                 if (updatedTask.getActualEndDate().isBefore(updatedTask.getActualStartDate()))
