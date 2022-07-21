@@ -3,7 +3,6 @@ package com.ntv.ntvcons_backend.services.post;
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.Enum.Status;
 import com.ntv.ntvcons_backend.entities.*;
-import com.ntv.ntvcons_backend.entities.PostCategoryModels.ShowPostCategoryModel;
 import com.ntv.ntvcons_backend.entities.PostModels.CreatePostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
@@ -104,9 +103,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<ShowPostCategoryModel> getCategoryForCreatePost() {
-        List<ShowPostCategoryModel> postCategoryModelList = postCategoryRepository.findAllByStatus(Status.ACTIVE);
+    public List<PostCategory> getCategoryForCreatePost() {
+        List<PostCategory> postCategoryModelList = postCategoryRepository.findAllByStatus(Status.ACTIVE);
         return postCategoryModelList;
+    }
+
+    @Override
+    public Post getPostById(Long postId) {
+        Optional<Post> post = postRepository.findByPostIdAndStatus(postId, Status.ACTIVE);
+        if(post.isPresent())
+        {
+            return post.get();
+        }
+        return null;
     }
 
     @Override
@@ -151,7 +160,297 @@ public class PostServiceImpl implements PostService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Post> pagingResult = postRepository.findByPostCategoryIdAndIsDeletedIsFalse(postCategoryId, paging);
+        Page<Post> pagingResult = postRepository.findAllByPostCategoryIdAndStatus(postCategoryId,Status.ACTIVE, paging);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
+
+                @Override
+                protected ShowPostModel doForward(Post post) {
+                    ShowPostModel model = new ShowPostModel();
+
+                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
+                    if(postCategory.isPresent())
+                    {
+                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
+                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
+                    }else{
+                        model.setPostCategoryDesc(null);
+                        model.setPostCategoryName(null);
+                    }
+
+                    model.setPostId(post.getPostId());
+                    model.setPostCategoryId(post.getPostCategoryId());
+                    model.setAuthorName(post.getAuthorName());
+                    model.setPostTitle(post.getPostTitle());
+                    model.setOwnerName(post.getOwnerName());
+                    model.setAddress(post.getAddress());
+                    model.setScale(post.getScale());
+                    model.setStatus(post.getStatus());
+
+                    model.setCreatedAt(post.getCreatedAt());
+                    model.setCreatedBy(post.getCreatedBy());
+                    model.setUpdatedAt(post.getCreatedAt());
+                    model.setUpdatedBy(post.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Post doBackward(ShowPostModel showPostModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowPostModel>();
+        }
+    }
+
+    @Override
+    public List<ShowPostModel> getPostByScale(String scale, int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<Post> pagingResult = postRepository.findAllByScaleAndStatus(scale,Status.ACTIVE, paging);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
+
+                @Override
+                protected ShowPostModel doForward(Post post) {
+                    ShowPostModel model = new ShowPostModel();
+
+                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
+                    if(postCategory.isPresent())
+                    {
+                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
+                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
+                    }else{
+                        model.setPostCategoryDesc(null);
+                        model.setPostCategoryName(null);
+                    }
+
+                    model.setPostId(post.getPostId());
+                    model.setPostCategoryId(post.getPostCategoryId());
+                    model.setAuthorName(post.getAuthorName());
+                    model.setPostTitle(post.getPostTitle());
+                    model.setOwnerName(post.getOwnerName());
+                    model.setAddress(post.getAddress());
+                    model.setScale(post.getScale());
+                    model.setStatus(post.getStatus());
+
+                    model.setCreatedAt(post.getCreatedAt());
+                    model.setCreatedBy(post.getCreatedBy());
+                    model.setUpdatedAt(post.getCreatedAt());
+                    model.setUpdatedBy(post.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Post doBackward(ShowPostModel showPostModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowPostModel>();
+        }
+    }
+
+    @Override
+    public List<ShowPostModel> getPostByAuthorName(String authorName, int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<Post> pagingResult = postRepository.findAllByAuthorNameAndStatus(authorName,Status.ACTIVE, paging);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
+
+                @Override
+                protected ShowPostModel doForward(Post post) {
+                    ShowPostModel model = new ShowPostModel();
+
+                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
+                    if(postCategory.isPresent())
+                    {
+                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
+                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
+                    }else{
+                        model.setPostCategoryDesc(null);
+                        model.setPostCategoryName(null);
+                    }
+
+                    model.setPostId(post.getPostId());
+                    model.setPostCategoryId(post.getPostCategoryId());
+                    model.setAuthorName(post.getAuthorName());
+                    model.setPostTitle(post.getPostTitle());
+                    model.setOwnerName(post.getOwnerName());
+                    model.setAddress(post.getAddress());
+                    model.setScale(post.getScale());
+                    model.setStatus(post.getStatus());
+
+                    model.setCreatedAt(post.getCreatedAt());
+                    model.setCreatedBy(post.getCreatedBy());
+                    model.setUpdatedAt(post.getCreatedAt());
+                    model.setUpdatedBy(post.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Post doBackward(ShowPostModel showPostModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowPostModel>();
+        }
+    }
+
+    @Override
+    public List<ShowPostModel> getPostByPostTitle(String postTitle, int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<Post> pagingResult = postRepository.findAllByPostTitleAndStatus(postTitle,Status.ACTIVE, paging);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
+
+                @Override
+                protected ShowPostModel doForward(Post post) {
+                    ShowPostModel model = new ShowPostModel();
+
+                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
+                    if(postCategory.isPresent())
+                    {
+                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
+                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
+                    }else{
+                        model.setPostCategoryDesc(null);
+                        model.setPostCategoryName(null);
+                    }
+
+                    model.setPostId(post.getPostId());
+                    model.setPostCategoryId(post.getPostCategoryId());
+                    model.setAuthorName(post.getAuthorName());
+                    model.setPostTitle(post.getPostTitle());
+                    model.setOwnerName(post.getOwnerName());
+                    model.setAddress(post.getAddress());
+                    model.setScale(post.getScale());
+                    model.setStatus(post.getStatus());
+
+                    model.setCreatedAt(post.getCreatedAt());
+                    model.setCreatedBy(post.getCreatedBy());
+                    model.setUpdatedAt(post.getCreatedAt());
+                    model.setUpdatedBy(post.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Post doBackward(ShowPostModel showPostModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowPostModel>();
+        }
+    }
+
+    @Override
+    public List<ShowPostModel> getPostByOwnerName(String ownerName, int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<Post> pagingResult = postRepository.findAllByOwnerNameAndStatus(ownerName,Status.ACTIVE, paging);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
+
+                @Override
+                protected ShowPostModel doForward(Post post) {
+                    ShowPostModel model = new ShowPostModel();
+
+                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
+                    if(postCategory.isPresent())
+                    {
+                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
+                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
+                    }else{
+                        model.setPostCategoryDesc(null);
+                        model.setPostCategoryName(null);
+                    }
+
+                    model.setPostId(post.getPostId());
+                    model.setPostCategoryId(post.getPostCategoryId());
+                    model.setAuthorName(post.getAuthorName());
+                    model.setPostTitle(post.getPostTitle());
+                    model.setOwnerName(post.getOwnerName());
+                    model.setAddress(post.getAddress());
+                    model.setScale(post.getScale());
+                    model.setStatus(post.getStatus());
+
+                    model.setCreatedAt(post.getCreatedAt());
+                    model.setCreatedBy(post.getCreatedBy());
+                    model.setUpdatedAt(post.getCreatedAt());
+                    model.setUpdatedBy(post.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Post doBackward(ShowPostModel showPostModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowPostModel>();
+        }
+    }
+
+    @Override
+    public List<ShowPostModel> getPostByAddress(String address, int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<Post> pagingResult = postRepository.findAllByAddressAndStatus(address,Status.ACTIVE, paging);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);

@@ -1,7 +1,10 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.Enum.Status;
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.entities.PostCategoryModels.ShowPostCategoryModel;
+import com.ntv.ntvcons_backend.entities.Post;
+import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostModels.CreatePostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
@@ -33,7 +36,7 @@ public class PostController {
     //@PreAuthorize("hasAnyRole('Staff','Admin')")
     @PostMapping(value = "/v1/createPost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createPost(@RequestBody CreatePostModel createPostModel){
-        if(postRepository.existsByAddressAndIsDeletedIsFalse(createPostModel.getAddress())){
+        if(postRepository.existsByAddressAndStatus(createPostModel.getAddress(), Status.ACTIVE)){
             return ResponseEntity.ok().body("Địa chỉ đã tồn tại dự án khác.");
         }else{
             if(!postCategoryRepository.existsById(createPostModel.getPostCategoryId())){
@@ -48,8 +51,165 @@ public class PostController {
         }
 
     }
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.POST searchType) {
+        try {
+            Post post;
 
-    /* READ */
+            switch (searchType) {
+                case BY_POST_ID:
+                    post = postService.getPostById(Long.parseLong(searchParam));
+
+                    if (post == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Post found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Post");
+            }
+
+            return ResponseEntity.ok().body(post);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for Post with ";
+
+            switch (searchType) {
+                case BY_POST_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
+    }
+
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
+                                                @RequestParam SearchType.ALL_POST searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortType) {
+        try {
+            List<ShowPostModel> post;
+
+            switch (searchType) {
+
+                case BY_POST_CATEGORY_ID:
+                    post = postService.getPostByPostCategory(Long.parseLong(searchParam), pageNo, pageSize, sortBy, sortType);
+
+                    if (post == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Post found with PostCategoryId: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_SCALE:
+                    post = postService.getPostByScale(searchParam, pageNo, pageSize, sortBy, sortType);
+
+                    if (post == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Post found with Scale: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_AUTHOR_NAME:
+                    post = postService.getPostByAuthorName(searchParam, pageNo, pageSize, sortBy, sortType);
+
+                    if (post == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Post found with Author Name: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_POST_TITLE:
+                    post = postService.getPostByPostTitle(searchParam, pageNo, pageSize, sortBy, sortType);
+
+                    if (post == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Post found with Post Title: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_OWNER_NAME:
+                    post = postService.getPostByOwnerName(searchParam, pageNo, pageSize, sortBy, sortType);
+
+                    if (post == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Post found with Owner Name: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_ADDRESS:
+                    post = postService.getPostByAddress(searchParam, pageNo, pageSize, sortBy, sortType);
+
+                    if (post == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Post found with Address: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity Post");
+            }
+
+            return ResponseEntity.ok().body(post);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for Post with ";
+
+            switch (searchType) {
+
+                case BY_POST_CATEGORY_ID:
+                    errorMsg += "PostCategoryId: '" + searchParam + "'. ";
+                    break;
+
+                case BY_AUTHOR_NAME:
+                    errorMsg += "Author Name: '" + searchParam + "'. ";
+                    break;
+
+                case BY_POST_TITLE:
+                    errorMsg += "Post Title: '" + searchParam + "'. ";
+                    break;
+
+                case BY_OWNER_NAME:
+                    errorMsg += "Owner Name: '" + searchParam + "'. ";
+                    break;
+
+                case BY_ADDRESS:
+                    errorMsg += "Address: '" + searchParam + "'. ";
+                    break;
+
+                case BY_SCALE:
+                    errorMsg += "Scale: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
+    }
+
     //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
@@ -77,36 +237,11 @@ public class PostController {
     //@PreAuthorize("hasAnyRole('Admin','Staff')")
     @GetMapping(value = "/v1/getCategoryForCreatePost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getCategoryForCreatePost() {
-            List<ShowPostCategoryModel> requests = postService.getCategoryForCreatePost();
-            if (requests == null) {
+            List<PostCategory> categoryModelList = postService.getCategoryForCreatePost();
+            if (categoryModelList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No PostCategory found");
             }
-            return ResponseEntity.ok().body(requests);
-    }
-
-    //@PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
-    @GetMapping(value = "/v1/getPostByPostCategory", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getPostByPostCategory(@RequestParam Long postCategoryId,
-                                                 @RequestParam int pageNo,
-                                                 @RequestParam int pageSize,
-                                                 @RequestParam String sortBy,
-                                                 @RequestParam boolean sortTypeAsc) {
-        try {
-            List<ShowPostModel> requests = postService.getPostByPostCategory(postCategoryId, pageNo, pageSize, sortBy, sortTypeAsc);
-
-            if (requests == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Post found");
-            }
-
-            return ResponseEntity.ok().body(requests);
-        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
-            /* Catch invalid sortBy */
-            return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for Request", e.getMessage()));
-        }
+            return ResponseEntity.ok().body(categoryModelList);
     }
 
     /* UPDATE */

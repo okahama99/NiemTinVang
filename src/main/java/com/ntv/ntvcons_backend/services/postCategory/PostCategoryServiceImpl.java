@@ -82,6 +82,104 @@ public class PostCategoryServiceImpl implements PostCategoryService {
     }
 
     @Override
+    public List<ShowPostCategoryModel> getByPostCategoryName(String postCategoryName, int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<PostCategory> pagingResult = postCategoryRepository.findByPostCategoryNameAndStatus(postCategoryName, paging, Status.ACTIVE);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowPostCategoryModel> modelResult = pagingResult.map(new Converter<PostCategory, ShowPostCategoryModel>() {
+
+                @Override
+                protected ShowPostCategoryModel doForward(PostCategory postCategory) {
+                    ShowPostCategoryModel model = new ShowPostCategoryModel();
+
+                    model.setPostCategoryId(postCategory.getPostCategoryId());
+                    model.setPostCategoryDesc(postCategory.getPostCategoryDesc());
+                    model.setPostCategoryName(postCategory.getPostCategoryName());
+                    model.setStatus(postCategory.getStatus());
+
+                    model.setCreatedAt(postCategory.getCreatedAt());
+                    model.setCreatedBy(postCategory.getCreatedBy());
+                    model.setUpdatedAt(postCategory.getCreatedAt());
+                    model.setUpdatedBy(postCategory.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected PostCategory doBackward(ShowPostCategoryModel showPostCategoryModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowPostCategoryModel>();
+        }
+    }
+
+    @Override
+    public List<ShowPostCategoryModel> getByPostCategoryDesc(String postCategoryDesc, int pageNo, int pageSize, String sortBy, boolean sortType) {
+        Pageable paging;
+        if(sortType) {
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
+        }else{
+            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        }
+
+        Page<PostCategory> pagingResult = postCategoryRepository.findByPostCategoryDescAndStatus(postCategoryDesc, paging, Status.ACTIVE);
+
+        if(pagingResult.hasContent()){
+            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
+
+            Page<ShowPostCategoryModel> modelResult = pagingResult.map(new Converter<PostCategory, ShowPostCategoryModel>() {
+
+                @Override
+                protected ShowPostCategoryModel doForward(PostCategory postCategory) {
+                    ShowPostCategoryModel model = new ShowPostCategoryModel();
+
+                    model.setPostCategoryId(postCategory.getPostCategoryId());
+                    model.setPostCategoryDesc(postCategory.getPostCategoryDesc());
+                    model.setPostCategoryName(postCategory.getPostCategoryName());
+                    model.setStatus(postCategory.getStatus());
+
+                    model.setCreatedAt(postCategory.getCreatedAt());
+                    model.setCreatedBy(postCategory.getCreatedBy());
+                    model.setUpdatedAt(postCategory.getCreatedAt());
+                    model.setUpdatedBy(postCategory.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected PostCategory doBackward(ShowPostCategoryModel showPostCategoryModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        }else{
+            return new ArrayList<ShowPostCategoryModel>();
+        }
+    }
+
+    @Override
+    public PostCategory getPostCategoryById(Long postCategoryId) {
+        Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(postCategoryId, Status.ACTIVE);
+        if(postCategory.isPresent())
+        {
+            return postCategory.get();
+        }
+        return null;
+    }
+
+    @Override
     public boolean updatePostCategory(UpdatePostCategoryModel updatePostCategoryModel) {
         PostCategory postCategory = postCategoryRepository.findById(updatePostCategoryModel.getPostCategoryId()).orElse(null);
         if(postCategory != null)

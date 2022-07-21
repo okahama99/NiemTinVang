@@ -1,10 +1,14 @@
 package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.Enum.Status;
+import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.entities.Post;
+import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.CreatePostCategoryModel;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.ShowPostCategoryModel;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.UpdatePostCategoryModel;
+import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
 import com.ntv.ntvcons_backend.repositories.PostCategoryRepository;
 import com.ntv.ntvcons_backend.services.postCategory.PostCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +66,107 @@ public class PostCategoryController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Request", e.getMessage()));
+        }
+    }
+
+    @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
+                                             @RequestParam SearchType.POST_CATEGORY searchType) {
+        try {
+            PostCategory postCategory;
+
+            switch (searchType) {
+                case BY_POST_CATEGORY_ID:
+                    postCategory = postCategoryService.getPostCategoryById(Long.parseLong(searchParam));
+
+                    if (postCategory == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No PostCategory found with Id: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity PostCategory");
+            }
+
+            return ResponseEntity.ok().body(postCategory);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchType: '" + searchType
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for PostCategory with ";
+
+            switch (searchType) {
+                case BY_POST_CATEGORY_ID:
+                    errorMsg += "Id: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
+    }
+
+    @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
+                                                @RequestParam SearchType.ALL_POST_CATEGORY searchType,
+                                                @RequestParam int pageNo,
+                                                @RequestParam int pageSize,
+                                                @RequestParam String sortBy,
+                                                @RequestParam boolean sortType) {
+        try {
+            List<ShowPostCategoryModel> postCategory;
+
+            switch (searchType) {
+
+                case BY_POST_CATEGORY_NAME:
+                    postCategory = postCategoryService.getByPostCategoryName(searchParam, pageNo, pageSize, sortBy, sortType);
+
+                    if (postCategory == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No PostCategory found with PostCategoryName: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_POST_CATEGORY_DESC:
+                    postCategory = postCategoryService.getByPostCategoryDesc(searchParam, pageNo, pageSize, sortBy, sortType);
+
+                    if (postCategory == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No PostCategory found with PostCategoryDesc: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Invalid SearchType used for entity PostCategory");
+            }
+
+            return ResponseEntity.ok().body(postCategory);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for PostCategory with ";
+
+            switch (searchType) {
+
+                case BY_POST_CATEGORY_DESC:
+                    errorMsg += "PostCategoryDesc: '" + searchParam + "'. ";
+                    break;
+
+                case BY_POST_CATEGORY_NAME:
+                    errorMsg += "PostCategoryName: '" + searchParam + "'. ";
+                    break;
+            }
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
         }
     }
 

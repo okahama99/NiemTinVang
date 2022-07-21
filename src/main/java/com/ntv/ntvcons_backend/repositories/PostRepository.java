@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.Enum.Status;
 import com.ntv.ntvcons_backend.entities.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,15 +17,20 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     /* Id */
-    Optional<Post> findByPostIdAndIsDeletedIsFalse(long postId);
-    List<Post> findAllByPostIdInAndIsDeletedIsFalse(Collection<Long> postIdCollection);
+    Optional<Post> findByPostIdAndStatus(long postId, Status status);
+    List<Post> findAllByPostIdInAndStatus(Collection<Long> postIdCollection);
 
+    boolean existsByAddressAndStatus(String address, Status status);
 
-    /* postTitle */
-    Optional<Post> findByPostTitleAndIsDeletedIsFalse(String postTitle);
-    List<Post> findAllByPostTitleContainsAndIsDeletedIsFalse(String postTitleCollection);
+    Page<Post> findAllByPostCategoryIdAndStatus(Long postCategoryId, Status status, Pageable pageable);
 
-    boolean existsByAddressAndIsDeletedIsFalse(String address);
+    Page<Post> findAllByScaleAndStatus(String scale, Status status, Pageable pageable);
 
-    Page<Post> findByPostCategoryIdAndIsDeletedIsFalse(Long postCategoryId, Pageable pageable);
+    Page<Post> findAllByAuthorNameAndStatus(String authorName, Status status, Pageable pageable);
+
+    Page<Post> findAllByPostTitleAndStatus(String postTitle, Status status, Pageable pageable);
+
+    Page<Post> findAllByOwnerNameAndStatus(String ownerName, Status status, Pageable pageable);
+
+    Page<Post> findAllByAddressAndStatus(String address, Status status, Pageable pageable);
 }
