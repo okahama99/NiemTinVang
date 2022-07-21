@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.services.entityWrapper;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.EntityWrapper;
 import com.ntv.ntvcons_backend.repositories.EntityWrapperRepository;
 import com.ntv.ntvcons_backend.services.BaseService;
@@ -29,6 +30,8 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Autowired
     private UserService userService;
 
+    private final String DELETED = Status.DELETED.getStringValue();
+
     /* CREATE */
     @Override
     public EntityWrapper createEntityWrapper(long entityId, EntityType type, long createdBy) throws Exception {
@@ -44,51 +47,51 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                     + "'. Which violate constraint: FK_EntityWrapper_User_CreatedBy. ";
         }
         if (!entityService.existsById(entityId)) {
-            errorMsg += "No " + type.EntityName + " found with Id: '" + createdBy
+            errorMsg += "No " + type.getEntityName() + " found with Id: '" + createdBy
                     + "'. Which violate constraint: "
-                    + "FK_EntityWrapper_" + type.EntityName +  "_" + type.EntityIdPCName + ". ";
+                    + "FK_EntityWrapper_" + type.getEntityName() +  "_" + type.getEntityIdPCName() + ". ";
         }
 
         /* Check duplicate */
         boolean isDuplicated = false;
         switch (type) {
             case BLUEPRINT_ENTITY:
-                if (entityWrapperRepository.existsByBlueprintIdAndIsDeletedIsFalse(entityId))
+                if (entityWrapperRepository.existsByBlueprintIdAndStatusNotContains(entityId, DELETED))
                     isDuplicated = true;
                 break;
 
             case POST_ENTITY:
-                if (entityWrapperRepository.existsByPostIdAndIsDeletedIsFalse(entityId))
+                if (entityWrapperRepository.existsByPostIdAndStatusNotContains(entityId, DELETED))
                     isDuplicated = true;
                 break;
 
             case PROJECT_ENTITY:
-                if (entityWrapperRepository.existsByProjectIdAndIsDeletedIsFalse(entityId))
+                if (entityWrapperRepository.existsByProjectIdAndStatusNotContains(entityId, DELETED))
                     isDuplicated = true;
                 break;
 
             case REPORT_ENTITY:
-                if (entityWrapperRepository.existsByReportIdAndIsDeletedIsFalse(entityId))
+                if (entityWrapperRepository.existsByReportIdAndStatusNotContains(entityId, DELETED))
                     isDuplicated = true;
                 break;
 
             case REQUEST_ENTITY:
-                if (entityWrapperRepository.existsByRequestIdAndIsDeletedIsFalse(entityId))
+                if (entityWrapperRepository.existsByRequestIdAndStatusNotContains(entityId, DELETED))
                     isDuplicated = true;
                 break;
 
             case TASK_ENTITY:
-                if (entityWrapperRepository.existsByTaskIdAndIsDeletedIsFalse(entityId))
+                if (entityWrapperRepository.existsByTaskIdAndStatusNotContains(entityId, DELETED))
                     isDuplicated = true;
                 break;
 
             case USER_ENTITY:
-                if (entityWrapperRepository.existsByUserIdAndIsDeletedIsFalse(entityId))
+                if (entityWrapperRepository.existsByUserIdAndStatusNotContains(entityId, DELETED))
                     isDuplicated = true;
                 break;
 
             case WORKER_ENTITY:
-                if (entityWrapperRepository.existsByWorkerIdAndIsDeletedIsFalse(entityId))
+                if (entityWrapperRepository.existsByWorkerIdAndStatusNotContains(entityId, DELETED))
                     isDuplicated = true;
                 break;
 
@@ -98,7 +101,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
 
         if (isDuplicated)
             errorMsg += "Already exists another EntityWrapper with "
-                    + type.EntityIdCCName + ": '" + entityId + "'. ";
+                    + type.getEntityIdCCName() + ": '" + entityId + "'. ";
 
         if (!errorMsg.trim().isEmpty())
             throw new IllegalArgumentException(errorMsg);
@@ -114,7 +117,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Override
     public List<EntityWrapper> getAll() throws Exception {
         List<EntityWrapper> entityWrapperList =
-                entityWrapperRepository.findAllByIsDeletedIsFalse();
+                entityWrapperRepository.findAllByStatusNotContains(DELETED);
 
         if (entityWrapperList.isEmpty())
             return null;
@@ -123,9 +126,14 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     }
 
     @Override
+    public boolean existsById(long entityWrapperId) throws Exception {
+        return entityWrapperRepository
+                .existsByEntityWrapperIdAndStatusNotContains(entityWrapperId, DELETED);
+    }
+    @Override
     public EntityWrapper getById(long entityWrapperId) throws Exception {
         return entityWrapperRepository
-                .findByEntityWrapperIdAndIsDeletedIsFalse(entityWrapperId)
+                .findByEntityWrapperIdAndStatusNotContains(entityWrapperId, DELETED)
                 .orElse(null);
     }
 
@@ -136,42 +144,42 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         switch (type) {
             case BLUEPRINT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByBlueprintIdNotNullAndIsDeletedIsFalse();
+                        entityWrapperRepository.findAllByBlueprintIdNotNullAndStatusNotContains(DELETED);
                 break;
 
             case POST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByPostIdNotNullAndIsDeletedIsFalse();
+                        entityWrapperRepository.findAllByPostIdNotNullAndStatusNotContains(DELETED);
                 break;
 
             case PROJECT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByProjectIdNotNullAndIsDeletedIsFalse();
+                        entityWrapperRepository.findAllByProjectIdNotNullAndStatusNotContains(DELETED);
                 break;
 
             case REPORT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByReportIdNotNullAndIsDeletedIsFalse();
+                        entityWrapperRepository.findAllByReportIdNotNullAndStatusNotContains(DELETED);
                 break;
 
             case REQUEST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByRequestIdNotNullAndIsDeletedIsFalse();
+                        entityWrapperRepository.findAllByRequestIdNotNullAndStatusNotContains(DELETED);
                 break;
 
             case TASK_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByTaskIdNotNullAndIsDeletedIsFalse();
+                        entityWrapperRepository.findAllByTaskIdNotNullAndStatusNotContains(DELETED);
                 break;
 
             case USER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByUserIdNotNullAndIsDeletedIsFalse();
+                        entityWrapperRepository.findAllByUserIdNotNullAndStatusNotContains(DELETED);
                 break;
 
             case WORKER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByWorkerIdNotNullAndIsDeletedIsFalse();
+                        entityWrapperRepository.findAllByWorkerIdNotNullAndStatusNotContains(DELETED);
                 break;
 
             default:
@@ -185,6 +193,65 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     }
 
     @Override
+    public boolean existsByEntityIdAndEntityType(long entityID, EntityType type) throws Exception {
+        boolean exists = false;
+
+        switch (type) {
+            case BLUEPRINT_ENTITY:
+                exists =
+                        entityWrapperRepository
+                                .existsByBlueprintIdAndStatusNotContains(entityID, DELETED);
+                break;
+
+            case POST_ENTITY:
+                exists =
+                        entityWrapperRepository
+                                .existsByPostIdAndStatusNotContains(entityID, DELETED);
+                break;
+
+            case PROJECT_ENTITY:
+                exists =
+                        entityWrapperRepository
+                                .existsByProjectIdAndStatusNotContains(entityID, DELETED);
+                break;
+
+            case REPORT_ENTITY:
+                exists =
+                        entityWrapperRepository
+                                .existsByReportIdAndStatusNotContains(entityID, DELETED);
+                break;
+
+            case REQUEST_ENTITY:
+                exists =
+                        entityWrapperRepository
+                                .existsByRequestIdAndStatusNotContains(entityID, DELETED);
+                break;
+
+            case TASK_ENTITY:
+                exists =
+                        entityWrapperRepository
+                                .existsByTaskIdAndStatusNotContains(entityID, DELETED);
+                break;
+
+            case USER_ENTITY:
+                exists =
+                        entityWrapperRepository
+                                .existsByUserIdAndStatusNotContains(entityID, DELETED);
+                break;
+
+            case WORKER_ENTITY:
+                exists =
+                        entityWrapperRepository
+                                .existsByWorkerIdAndStatusNotContains(entityID, DELETED);
+                break;
+
+            default:
+                throw new IllegalArgumentException("Invalid EntityType used, no such type exists!");
+        }
+
+        return exists;
+    }
+    @Override
     public EntityWrapper getByEntityIdAndEntityType(long entityID, EntityType type) throws Exception {
         EntityWrapper entityWrapper = null;
 
@@ -192,56 +259,56 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
             case BLUEPRINT_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByBlueprintIdAndIsDeletedIsFalse(entityID)
+                                .findByBlueprintIdAndStatusNotContains(entityID, DELETED)
                                 .orElse(null);
                 break;
 
             case POST_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByPostIdAndIsDeletedIsFalse(entityID)
+                                .findByPostIdAndStatusNotContains(entityID, DELETED)
                                 .orElse(null);
                 break;
 
             case PROJECT_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByProjectIdAndIsDeletedIsFalse(entityID)
+                                .findByProjectIdAndStatusNotContains(entityID, DELETED)
                                 .orElse(null);
                 break;
 
             case REPORT_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByReportIdAndIsDeletedIsFalse(entityID)
+                                .findByReportIdAndStatusNotContains(entityID, DELETED)
                                 .orElse(null);
                 break;
 
             case REQUEST_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByRequestIdAndIsDeletedIsFalse(entityID)
+                                .findByRequestIdAndStatusNotContains(entityID, DELETED)
                                 .orElse(null);
                 break;
 
             case TASK_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByTaskIdAndIsDeletedIsFalse(entityID)
+                                .findByTaskIdAndStatusNotContains(entityID, DELETED)
                                 .orElse(null);
                 break;
 
             case USER_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByUserIdAndIsDeletedIsFalse(entityID)
+                                .findByUserIdAndStatusNotContains(entityID, DELETED)
                                 .orElse(null);
                 break;
 
             case WORKER_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByWorkerIdAndIsDeletedIsFalse(entityID)
+                                .findByWorkerIdAndStatusNotContains(entityID, DELETED)
                                 .orElse(null);
                 break;
 
@@ -259,42 +326,42 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         switch (type) {
             case BLUEPRINT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByBlueprintIdInAndIsDeletedIsFalse(entityIdCollection);
+                        entityWrapperRepository.findAllByBlueprintIdInAndStatusNotContains(entityIdCollection, DELETED);
                 break;
 
             case POST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByPostIdInAndIsDeletedIsFalse(entityIdCollection);
+                        entityWrapperRepository.findAllByPostIdInAndStatusNotContains(entityIdCollection, DELETED);
                 break;
 
             case PROJECT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByProjectIdInAndIsDeletedIsFalse(entityIdCollection);
+                        entityWrapperRepository.findAllByProjectIdInAndStatusNotContains(entityIdCollection, DELETED);
                 break;
 
             case REPORT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByReportIdInAndIsDeletedIsFalse(entityIdCollection);
+                        entityWrapperRepository.findAllByReportIdInAndStatusNotContains(entityIdCollection, DELETED);
                 break;
 
             case REQUEST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByRequestIdInAndIsDeletedIsFalse(entityIdCollection);
+                        entityWrapperRepository.findAllByRequestIdInAndStatusNotContains(entityIdCollection, DELETED);
                 break;
 
             case TASK_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByTaskIdInAndIsDeletedIsFalse(entityIdCollection);
+                        entityWrapperRepository.findAllByTaskIdInAndStatusNotContains(entityIdCollection, DELETED);
                 break;
 
             case USER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByUserIdInAndIsDeletedIsFalse(entityIdCollection);
+                        entityWrapperRepository.findAllByUserIdInAndStatusNotContains(entityIdCollection, DELETED);
                 break;
 
             case WORKER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByWorkerIdInAndIsDeletedIsFalse(entityIdCollection);
+                        entityWrapperRepository.findAllByWorkerIdInAndStatusNotContains(entityIdCollection, DELETED);
                 break;
 
             default:
@@ -385,7 +452,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         if (entityWrapper == null)
             return false;
 
-        entityWrapper.setIsDeleted(true);
+        entityWrapper.setStatus(Status.DELETED);
         entityWrapperRepository.saveAndFlush(entityWrapper);
 
         return true;
@@ -398,7 +465,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         if (entityWrapper == null)
             return false;
 
-        entityWrapper.setIsDeleted(true);
+        entityWrapper.setStatus(Status.DELETED);
         entityWrapperRepository.saveAndFlush(entityWrapper);
 
         return true;

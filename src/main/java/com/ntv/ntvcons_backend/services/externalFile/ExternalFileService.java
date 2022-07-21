@@ -27,7 +27,7 @@ public interface ExternalFileService {
     boolean existsAllByIdIn(Collection<Long> fileIdCollection) throws Exception;
     List<ExternalFile> getAllByIdIn(Collection<Long> fileIdCollection) throws Exception;
     List<ExternalFileReadDTO> getAllDTOByIdIn(Collection<Long> fileIdCollection) throws Exception;
-    Map<Long, List<ExternalFileReadDTO>> mapFileTypeDTOExternalFileDTOListByIdIn(Collection<Long> fileIdCollection) throws Exception;
+    Map<Long, ExternalFileReadDTO> mapFileIdExternalFileDTOListByIdIn(Collection<Long> fileIdCollection) throws Exception;
 
     List<ExternalFile> getAllByFileTypeId(long fileTypeId) throws Exception;
     List<ExternalFileReadDTO> getAllDTOByFileTypeId(long fileTypeId) throws Exception;

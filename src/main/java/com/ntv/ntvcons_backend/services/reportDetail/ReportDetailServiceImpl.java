@@ -440,7 +440,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
             reportDetailIdSet.add(updatedReportDetail.getReportDetailId());
             updatedReportIdSet.add(tmpReportId);
-            updatedUpdatedBySet.add(updatedReportDetail.getUpdatedBy());
+            if (updatedReportDetail.getUpdatedBy() != null)
+                updatedUpdatedBySet.add(updatedReportDetail.getUpdatedBy());
 
             tmpItemDescItemPriceListMap = reportIdItemDescItemPriceListMapMap.get(tmpReportId);
 

@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.entities;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,7 +30,7 @@ public class ExternalFile extends BaseEntity {
     @Column(name = "fileLink", nullable = false, length = 100, unique = true)
     private String fileLink;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
+    @Column(name = "status")
+    private Status status;
 
 }

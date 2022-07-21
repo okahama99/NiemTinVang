@@ -14,10 +14,12 @@ public interface EntityWrapperService {
     /* READ */
     List<EntityWrapper> getAll() throws Exception;
 
+    boolean existsById(long entityWrapperId) throws Exception;
     EntityWrapper getById(long entityWrapperId) throws Exception;
 
     List<EntityWrapper> getAllByEntityType(EntityType type) throws Exception;
 
+    boolean existsByEntityIdAndEntityType(long entityID, EntityType type) throws Exception;
     EntityWrapper getByEntityIdAndEntityType(long entityID, EntityType type) throws Exception;
 
     List<EntityWrapper> getAllByEntityIdInAndEntityType(Collection<Long> entityIdCollection, EntityType type) throws Exception;

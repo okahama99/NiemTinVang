@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.dtos;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import net.minidev.json.annotate.JsonIgnore;
@@ -22,6 +23,10 @@ public abstract class BaseCreateDTO implements Serializable {
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
     private final LocalDateTime createdAt = LocalDateTime.now();
+
+    @JsonIgnore /* No serialize/deserialize */
+    @ApiModelProperty(hidden = true) /* No show on swagger */
+    private final Status status = Status.ACTIVE;
 
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */

@@ -1,7 +1,10 @@
 package com.ntv.ntvcons_backend.services.project;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
@@ -15,20 +18,20 @@ import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
-import com.ntv.ntvcons_backend.entities.Location;
+import com.ntv.ntvcons_backend.entities.*;
 import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
-import com.ntv.ntvcons_backend.entities.Project;
-import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
-import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.repositories.LocationRepository;
 import com.ntv.ntvcons_backend.repositories.ProjectRepository;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
+import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
+import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
@@ -65,6 +68,12 @@ public class ProjectServiceImpl implements ProjectService{
     private LocationRepository locationRepository;
     @Autowired
     private BlueprintService blueprintService;
+    @Autowired
+    private EntityWrapperService entityWrapperService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
+    @Autowired
+    private ExternalFileService externalFileService;
     @Lazy
     @Autowired
     private UserService userService;
@@ -80,6 +89,8 @@ public class ProjectServiceImpl implements ProjectService{
     private ReportService reportService;
     @Autowired
     private RequestService requestService;
+
+    private final EntityType ENTITY_TYPE = EntityType.PROJECT_ENTITY;
 
     /* READ */
     @Override
@@ -133,8 +144,6 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public Project createProject(Project newProject) throws Exception {
-        /* TODO: also create EntityWrapper for project */
-
         String errorMsg = "";
 
         /* Check FK */
@@ -224,8 +233,13 @@ public class ProjectServiceImpl implements ProjectService{
 
         long newProjectId = newProject.getProjectId();
 
+        /* Create associate EntityWrapper */
+        entityWrapperService
+                .createEntityWrapper(newProjectId, ENTITY_TYPE, newProject.getCreatedBy());
+
         /* Set REQUIRED FK projectId to blueprint after create Project */
-        newProjectDTO.getBlueprint().setProjectId(newProjectId);
+        BlueprintCreateDTO blueprintDTO = newProjectDTO.getBlueprint();
+        blueprintDTO.setProjectId(newProjectId);
         /* Create associated Blueprint */
         blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
 
@@ -932,6 +946,8 @@ public class ProjectServiceImpl implements ProjectService{
         ProjectReadDTO projectDTO = modelMapper.map(project, ProjectReadDTO.class);
 
         /* NOT NULL */
+        /*EntityWrapper entityWrapper =
+                entityWrapperService.getByEntityIdAndEntityType(projectId, ENTITY_TYPE);*/
         projectDTO.setLocation(locationService.getDTOById(project.getLocationId()));
         projectDTO.setBlueprint(blueprintService.getDTOByProjectId(projectId));
 
@@ -940,7 +956,7 @@ public class ProjectServiceImpl implements ProjectService{
         projectDTO.setReportList(reportService.getAllDTOByProjectId(projectId));
         projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(projectId));
-        /* TODO: ProjectWorkerList */
+        projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(projectId));
 
         return projectDTO;
     }
@@ -953,6 +969,59 @@ public class ProjectServiceImpl implements ProjectService{
             locationIdSet.add(project.getLocationId());
             projectIdSet.add(project.getProjectId());
         }
+
+        /* Get associated EntityWrapper => EWEFPairing => ExternalFile */
+        /* TODO: test fisrt */
+        /* Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap = new HashMap<>();
+
+        Map<Long, Long> projectIdEntityWrapperIdMap =
+                entityWrapperService.mapEntityIdEntityWrapperIdByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
+
+        if (!projectIdEntityWrapperIdMap.isEmpty()) {
+            Set<Long> entityWrapperIdSet = new HashSet<>(projectIdEntityWrapperIdMap.values());
+
+            Map<Long, List<Long>> entityWrapperIdExternalFileIdListMap =
+                    eFEWPairingService
+                            .mapEntityWrapperIdExternalFileIdListByEntityWrapperIdIn(entityWrapperIdSet);
+
+            if (!entityWrapperIdExternalFileIdListMap.isEmpty()) {
+                Set<Long> fileIdSet = new HashSet<>();
+
+                List<Long> tmpFileIdList;
+
+                for (Long entityWrapperId : entityWrapperIdExternalFileIdListMap.keySet()) {
+                    tmpFileIdList = entityWrapperIdExternalFileIdListMap.get(entityWrapperId);
+
+                    if (tmpFileIdList != null && !tmpFileIdList.isEmpty())
+                        fileIdSet.addAll(tmpFileIdList);
+                }
+
+                if (!fileIdSet.isEmpty()) {
+                    Map<Long, ExternalFileReadDTO> fileIdExternalFileDTOMap =
+                            externalFileService.mapFileIdExternalFileDTOListByIdIn(fileIdSet);
+
+                    Long tmpEntityWrapperId;
+                    ExternalFileReadDTO tmpFileDTO;
+                    List<ExternalFileReadDTO> tmpFileDTOList;
+
+                    for (Long projectId : projectIdEntityWrapperIdMap.keySet()) {
+                        tmpEntityWrapperId = projectIdEntityWrapperIdMap.get(projectId);
+                        
+                        tmpFileDTOList = new ArrayList<>();
+
+                        tmpFileIdList = entityWrapperIdExternalFileIdListMap.get(tmpEntityWrapperId);
+
+                        for (Long fileId : tmpFileIdList) {
+                            tmpFileDTO = fileIdExternalFileDTOMap.get(fileId);
+
+                            tmpFileDTOList.add(tmpFileDTO);
+                        }
+
+                        projectIdExternalFileDTOListMap.put(projectId, tmpFileDTOList);
+                    }
+                }
+            }
+        }*/
 
         /* Get associated Location */
         Map<Long, LocationReadDTO> locationIdLocationDTOMap =

@@ -10,15 +10,27 @@ public enum EntityType {
     USER_ENTITY("User", "userId", "UserId"),
     WORKER_ENTITY("Worker", "workerId", "WorkerId");
 
-    public final String EntityName;
+    private final String EntityName;
     /** camelCase */
-    public final String EntityIdCCName;
+    private final String EntityIdCCName;
     /** PascalCase */
-    public final String EntityIdPCName;
+    private final String EntityIdPCName;
 
     EntityType(String entityName, String entityIdCCName, String entityIdPCName) {
         EntityName = entityName;
         EntityIdCCName = entityIdCCName;
         EntityIdPCName = entityIdPCName;
+    }
+
+    public String getEntityName() {
+        return EntityName;
+    }
+
+    public String getEntityIdCCName() {
+        return EntityIdCCName;
+    }
+
+    public String getEntityIdPCName() {
+        return EntityIdPCName;
     }
 }
