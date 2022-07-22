@@ -18,9 +18,9 @@ public interface PostCategoryRepository extends JpaRepository<PostCategory, Long
 
     List<PostCategory> findAllByStatus(Status status);
 
-    Page<PostCategory> findByPostCategoryNameAndStatus(String postCategoryName, Pageable pageable, Status status);
+    Page<PostCategory> findByPostCategoryNameContainingAndStatus(String postCategoryName, Pageable pageable, Status status);
 
-    Page<PostCategory> findByPostCategoryDescAndStatus(String postCategoryDesc, Pageable pageable, Status status);
+    Page<PostCategory> findByPostCategoryDescContainingAndStatus(String postCategoryDesc, Pageable pageable, Status status);
 
     PostCategory findByPostCategoryNameAndStatus(String categoryName, Status status);
 }

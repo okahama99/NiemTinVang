@@ -17,20 +17,20 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     /* Id */
-    Optional<Post> findByPostIdAndStatus(long postId, Status status);
-    List<Post> findAllByPostIdInAndStatus(Collection<Long> postIdCollection);
+    Optional<Post> findByPostIdAndIsDeletedIsFalse(long postId);
+    List<Post> findAllByPostIdInAndIsDeletedIsFalse(Collection<Long> postIdCollection);
 
-    boolean existsByAddressAndStatus(String address, Status status);
+    boolean existsByAddressAndIsDeletedIsFalse(String address);
 
-    Page<Post> findAllByPostCategoryIdAndStatus(Long postCategoryId, Status status, Pageable pageable);
+    Page<Post> findAllByPostCategoryIdAndIsDeletedIsFalse(Long postCategoryId, Pageable pageable);
 
-    Page<Post> findAllByScaleAndStatus(String scale, Status status, Pageable pageable);
+    Page<Post> findAllByScaleContainingAndIsDeletedIsFalse(String scale, Pageable pageable);
 
-    Page<Post> findAllByAuthorNameAndStatus(String authorName, Status status, Pageable pageable);
+    Page<Post> findAllByAuthorNameContainingAndIsDeletedIsFalse(String authorName, Pageable pageable);
 
-    Page<Post> findAllByPostTitleAndStatus(String postTitle, Status status, Pageable pageable);
+    Page<Post> findAllByPostTitleContainingAndIsDeletedIsFalse(String postTitle, Pageable pageable);
 
-    Page<Post> findAllByOwnerNameAndStatus(String ownerName, Status status, Pageable pageable);
+    Page<Post> findAllByOwnerNameContainingAndIsDeletedIsFalse(String ownerName, Pageable pageable);
 
-    Page<Post> findAllByAddressAndStatus(String address, Status status, Pageable pageable);
+    Page<Post> findAllByAddressContainingAndIsDeletedIsFalse(String address, Pageable pageable);
 }

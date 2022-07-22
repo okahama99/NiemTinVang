@@ -36,7 +36,7 @@ public class PostController {
     //@PreAuthorize("hasAnyRole('Staff','Admin')")
     @PostMapping(value = "/v1/createPost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createPost(@RequestBody CreatePostModel createPostModel){
-        if(postRepository.existsByAddressAndStatus(createPostModel.getAddress(), Status.ACTIVE)){
+        if(postRepository.existsByAddressAndIsDeletedIsFalse(createPostModel.getAddress())){
             return ResponseEntity.ok().body("Địa chỉ đã tồn tại dự án khác.");
         }else{
             if(!postCategoryRepository.existsById(createPostModel.getPostCategoryId())){

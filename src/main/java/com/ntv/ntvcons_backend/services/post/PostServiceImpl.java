@@ -110,7 +110,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Post getPostById(Long postId) {
-        Optional<Post> post = postRepository.findByPostIdAndStatus(postId, Status.ACTIVE);
+        Optional<Post> post = postRepository.findByPostIdAndIsDeletedIsFalse(postId);
         if(post.isPresent())
         {
             return post.get();
@@ -160,7 +160,7 @@ public class PostServiceImpl implements PostService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Post> pagingResult = postRepository.findAllByPostCategoryIdAndStatus(postCategoryId,Status.ACTIVE, paging);
+        Page<Post> pagingResult = postRepository.findAllByPostCategoryIdAndIsDeletedIsFalse(postCategoryId, paging);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
@@ -218,7 +218,7 @@ public class PostServiceImpl implements PostService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Post> pagingResult = postRepository.findAllByScaleAndStatus(scale,Status.ACTIVE, paging);
+        Page<Post> pagingResult = postRepository.findAllByScaleContainingAndIsDeletedIsFalse(scale, paging);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
@@ -276,7 +276,7 @@ public class PostServiceImpl implements PostService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Post> pagingResult = postRepository.findAllByAuthorNameAndStatus(authorName,Status.ACTIVE, paging);
+        Page<Post> pagingResult = postRepository.findAllByAuthorNameContainingAndIsDeletedIsFalse(authorName, paging);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
@@ -334,7 +334,7 @@ public class PostServiceImpl implements PostService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Post> pagingResult = postRepository.findAllByPostTitleAndStatus(postTitle,Status.ACTIVE, paging);
+        Page<Post> pagingResult = postRepository.findAllByPostTitleContainingAndIsDeletedIsFalse(postTitle, paging);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
@@ -392,7 +392,7 @@ public class PostServiceImpl implements PostService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Post> pagingResult = postRepository.findAllByOwnerNameAndStatus(ownerName,Status.ACTIVE, paging);
+        Page<Post> pagingResult = postRepository.findAllByOwnerNameContainingAndIsDeletedIsFalse(ownerName, paging);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
@@ -450,7 +450,7 @@ public class PostServiceImpl implements PostService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Post> pagingResult = postRepository.findAllByAddressAndStatus(address,Status.ACTIVE, paging);
+        Page<Post> pagingResult = postRepository.findAllByAddressContainingAndIsDeletedIsFalse(address, paging);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);

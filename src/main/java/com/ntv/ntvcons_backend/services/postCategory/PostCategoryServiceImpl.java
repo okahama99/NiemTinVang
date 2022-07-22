@@ -90,7 +90,7 @@ public class PostCategoryServiceImpl implements PostCategoryService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<PostCategory> pagingResult = postCategoryRepository.findByPostCategoryNameAndStatus(postCategoryName, paging, Status.ACTIVE);
+        Page<PostCategory> pagingResult = postCategoryRepository.findByPostCategoryNameContainingAndStatus(postCategoryName, paging, Status.ACTIVE);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
@@ -134,7 +134,7 @@ public class PostCategoryServiceImpl implements PostCategoryService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<PostCategory> pagingResult = postCategoryRepository.findByPostCategoryDescAndStatus(postCategoryDesc, paging, Status.ACTIVE);
+        Page<PostCategory> pagingResult = postCategoryRepository.findByPostCategoryDescContainingAndStatus(postCategoryDesc, paging, Status.ACTIVE);
 
         if(pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
