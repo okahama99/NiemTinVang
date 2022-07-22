@@ -2,7 +2,6 @@ package com.ntv.ntvcons_backend.repositories;
 
 import com.ntv.ntvcons_backend.Enum.Status;
 import com.ntv.ntvcons_backend.entities.PostCategory;
-import com.ntv.ntvcons_backend.entities.PostCategoryModels.ShowPostCategoryModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +16,11 @@ public interface PostCategoryRepository extends JpaRepository<PostCategory, Long
 
     Optional<PostCategory> findByPostCategoryIdAndStatus(Long postCategoryId, Status status);
 
-    List<ShowPostCategoryModel> findAllByStatus(Status status);
+    List<PostCategory> findAllByStatus(Status status);
+
+    Page<PostCategory> findByPostCategoryNameContainingAndStatus(String postCategoryName, Pageable pageable, Status status);
+
+    Page<PostCategory> findByPostCategoryDescContainingAndStatus(String postCategoryDesc, Pageable pageable, Status status);
 
     PostCategory findByPostCategoryNameAndStatus(String categoryName, Status status);
 }

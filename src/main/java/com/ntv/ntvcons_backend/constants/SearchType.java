@@ -170,4 +170,26 @@ public class SearchType {
         BY_REMOVE_DATE,
     }
 
+    public enum POST{
+        BY_POST_ID,
+    }
+
+    public enum ALL_POST{
+        BY_POST_CATEGORY_ID,
+        BY_AUTHOR_NAME,
+        BY_POST_TITLE,
+        BY_OWNER_NAME,
+        BY_ADDRESS,
+        BY_SCALE,
+    }
+
+    public enum  POST_CATEGORY{
+        BY_POST_CATEGORY_ID,
+    }
+
+    public enum ALL_POST_CATEGORY{
+        BY_POST_CATEGORY_NAME,
+        BY_POST_CATEGORY_DESC,
+    }
+
 }
