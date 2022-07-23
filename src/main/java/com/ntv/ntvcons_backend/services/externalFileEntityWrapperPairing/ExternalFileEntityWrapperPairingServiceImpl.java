@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
 import com.ntv.ntvcons_backend.repositories.ExternalFileEntityWrapperPairingRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
@@ -103,6 +104,22 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
 
         return eFEWPairingList;
     }
+    @Override
+    public List<ExternalFileReadDTO> getAllExternalFileDTOByEntityWrapperId(long entityWrapperId) throws Exception {
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList =
+                getAllByEntityWrapperId(entityWrapperId);
+
+        if (eFEWPairingList == null)
+            return null;
+
+        Set<Long> fileIdSet = new HashSet<>();
+
+        for (ExternalFileEntityWrapperPairing eFEWPairing : eFEWPairingList) {
+            fileIdSet.add(eFEWPairing.getExternalFileId());
+        }
+
+        return externalFileService.getAllDTOByIdIn(fileIdSet);
+    }
 
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception {
@@ -115,36 +132,57 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
         return eFEWPairingList;
     }
     @Override
-    public Map<Long, List<Long>> mapEntityWrapperIdExternalFileIdListByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception {
+    public Map<Long, List<ExternalFileReadDTO>> mapEntityWrapperIdExternalFileDTOListByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception {
         List<ExternalFileEntityWrapperPairing> eFEWPairingList =
                 getAllByEntityWrapperIdIn(entityWrapperIdCollection);
 
         if (eFEWPairingList == null)
             return new HashMap<>();
 
-        Map<Long, List<Long>> entityWrapperIdExternalFileIdListMap = new HashMap<>();
+        Set<Long> fileIdSet = new HashSet<>();
+
+        for (ExternalFileEntityWrapperPairing eFEWPairing : eFEWPairingList) {
+            fileIdSet.add(eFEWPairing.getExternalFileId());
+        }
+
+        Map<Long, ExternalFileReadDTO> fileIdFileDTOMap =
+                externalFileService.mapFileIdExternalFileDTOByIdIn(fileIdSet);
+
+        if (fileIdFileDTOMap.isEmpty())
+            return new HashMap<>();
+
+        Map<Long, List<ExternalFileReadDTO>> entityWrapperIdExternalFileDTOListMap = new HashMap<>();
 
         long tmpEntityWrapperId;
-        long tmpExternalFileId;
-        List<Long> tmpExternalFileIdList;
+        long tmpFileId;
+        ExternalFileReadDTO tmpFileDTO;
+        List<ExternalFileReadDTO> tmpFileDTOList;
 
         for (ExternalFileEntityWrapperPairing eFEWPairing : eFEWPairingList) {
             tmpEntityWrapperId = eFEWPairing.getEntityWrapperId();
-            tmpExternalFileId = eFEWPairing.getExternalFileId();
-            tmpExternalFileIdList = entityWrapperIdExternalFileIdListMap.get(tmpEntityWrapperId);
+            tmpFileId = eFEWPairing.getExternalFileId();
+            tmpFileDTOList = entityWrapperIdExternalFileDTOListMap.get(tmpEntityWrapperId);
 
-            if (tmpExternalFileIdList == null) {
-                entityWrapperIdExternalFileIdListMap
-                        .put(tmpEntityWrapperId, new ArrayList<>(Collections.singletonList(tmpExternalFileId)));
+            if (tmpFileDTOList == null) {
+                tmpFileDTO = fileIdFileDTOMap.get(tmpFileId);
+
+                if (tmpFileDTO != null) {
+                    entityWrapperIdExternalFileDTOListMap
+                            .put(tmpEntityWrapperId, new ArrayList<>(Collections.singletonList(tmpFileDTO)));
+                }
             } else {
-                tmpExternalFileIdList.add(tmpExternalFileId);
+                tmpFileDTO = fileIdFileDTOMap.get(tmpFileId);
 
-                entityWrapperIdExternalFileIdListMap
-                        .put(tmpEntityWrapperId, tmpExternalFileIdList);
+                if (tmpFileDTO != null) {
+                    tmpFileDTOList.add(tmpFileDTO);
+
+                    entityWrapperIdExternalFileDTOListMap
+                            .put(tmpEntityWrapperId, tmpFileDTOList);
+                }
             }
         }
 
-        return entityWrapperIdExternalFileIdListMap;
+        return entityWrapperIdExternalFileDTOListMap;
     }
 
     @Override
@@ -169,36 +207,57 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
         return eFEWPairingList;
     }
     @Override
-    public Map<Long, List<Long>> mapExternalFileIdEntityWrapperIdListByByExternalFileIdIn(Collection<Long> externalFileIdCollection) throws Exception {
+    public Map<Long, List<ExternalFileReadDTO>> mapEntityWrapperIdExternalFileDTOListByExternalFileIdIn(Collection<Long> externalFileIdCollection) throws Exception {
         List<ExternalFileEntityWrapperPairing> eFEWPairingList =
                 getAllByExternalFileIdIn(externalFileIdCollection);
 
         if (eFEWPairingList == null)
             return new HashMap<>();
 
-        Map<Long, List<Long>> externalFileIdEntityWrapperIdListMap = new HashMap<>();
-
-        long tmpExternalFileId;
-        long tmpEntityWrapperId;
-        List<Long> tmpEntityWrapperIdList;
+        Set<Long> fileIdSet = new HashSet<>();
 
         for (ExternalFileEntityWrapperPairing eFEWPairing : eFEWPairingList) {
-            tmpExternalFileId = eFEWPairing.getExternalFileId();
+            fileIdSet.add(eFEWPairing.getExternalFileId());
+        }
+
+        Map<Long, ExternalFileReadDTO> fileIdFileDTOMap =
+                externalFileService.mapFileIdExternalFileDTOByIdIn(fileIdSet);
+
+        if (fileIdFileDTOMap.isEmpty())
+            return new HashMap<>();
+
+        Map<Long, List<ExternalFileReadDTO>> entityWrapperIdExternalFileDTOListMap = new HashMap<>();
+
+        long tmpEntityWrapperId;
+        long tmpFileId;
+        ExternalFileReadDTO tmpFileDTO;
+        List<ExternalFileReadDTO> tmpFileDTOList;
+
+        for (ExternalFileEntityWrapperPairing eFEWPairing : eFEWPairingList) {
             tmpEntityWrapperId = eFEWPairing.getEntityWrapperId();
-            tmpEntityWrapperIdList = externalFileIdEntityWrapperIdListMap.get(tmpEntityWrapperId);
+            tmpFileId = eFEWPairing.getExternalFileId();
+            tmpFileDTOList = entityWrapperIdExternalFileDTOListMap.get(tmpEntityWrapperId);
 
-            if (tmpEntityWrapperIdList == null) {
-                externalFileIdEntityWrapperIdListMap
-                        .put(tmpExternalFileId, new ArrayList<>(Collections.singletonList(tmpEntityWrapperId)));
+            if (tmpFileDTOList == null) {
+                tmpFileDTO = fileIdFileDTOMap.get(tmpFileId);
+
+                if (tmpFileDTO != null) {
+                    entityWrapperIdExternalFileDTOListMap
+                            .put(tmpEntityWrapperId, new ArrayList<>(Collections.singletonList(tmpFileDTO)));
+                }
             } else {
-                tmpEntityWrapperIdList.add(tmpEntityWrapperId);
+                tmpFileDTO = fileIdFileDTOMap.get(tmpFileId);
 
-                externalFileIdEntityWrapperIdListMap
-                        .put(tmpExternalFileId, tmpEntityWrapperIdList);
+                if (tmpFileDTO != null) {
+                    tmpFileDTOList.add(tmpFileDTO);
+
+                    entityWrapperIdExternalFileDTOListMap
+                            .put(tmpEntityWrapperId, tmpFileDTOList);
+                }
             }
         }
 
-        return externalFileIdEntityWrapperIdListMap;
+        return entityWrapperIdExternalFileDTOListMap;
     }
 
     /* UPDATE */
