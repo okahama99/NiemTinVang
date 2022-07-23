@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,7 @@ public class WorkerController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PostMapping(value = "/v1/createWorker", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createWorker(@Valid @RequestBody WorkerCreateDTO workerDTO){
         try {
@@ -46,7 +47,7 @@ public class WorkerController {
     }
 
     /* READ */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -72,6 +73,7 @@ public class WorkerController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.WORKER searchType) {
@@ -129,7 +131,7 @@ public class WorkerController {
         }
     }
 
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_WORKER searchType,
@@ -224,7 +226,7 @@ public class WorkerController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PutMapping(value = "/v1/updateWorker", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateWorker(@Valid @RequestBody WorkerUpdateDTO workerDTO){
         try {
@@ -247,7 +249,7 @@ public class WorkerController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @DeleteMapping(value = "/v1/deleteWorker/{workerId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteWorker(@PathVariable(name = "workerId") long workerId){
         try {

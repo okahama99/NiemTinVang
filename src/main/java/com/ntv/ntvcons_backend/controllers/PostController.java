@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class PostController {
     private PostCategoryRepository postCategoryRepository;
 
     /* CREATE */
-    //@PreAuthorize("hasAnyRole('Staff','Admin')")
+    @PreAuthorize("hasAnyAuthority('24','64')")
     @PostMapping(value = "/v1/createPost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createPost(@RequestBody CreatePostModel createPostModel){
         if(postRepository.existsByAddressAndIsDeletedIsFalse(createPostModel.getAddress())){
@@ -51,6 +52,8 @@ public class PostController {
         }
 
     }
+
+    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.POST searchType) {
@@ -95,6 +98,7 @@ public class PostController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_POST searchType,
@@ -210,7 +214,7 @@ public class PostController {
         }
     }
 
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -234,7 +238,7 @@ public class PostController {
         }
     }
 
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @GetMapping(value = "/v1/getCategoryForCreatePost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getCategoryForCreatePost() {
             List<PostCategory> categoryModelList = postService.getCategoryForCreatePost();
@@ -245,7 +249,7 @@ public class PostController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PutMapping(value = "/v1/updatePost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updatePost(@RequestBody UpdatePostModel updatePostModel) {
         boolean result = postService.updatePost(updatePostModel);
@@ -258,7 +262,7 @@ public class PostController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasAnyRole('Admin')")
+    @PreAuthorize("hasAnyAuthority('64')")
     @DeleteMapping(value = "/v1/deletePost/{postId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deletePost(@PathVariable(name = "postId") Long postId) {
         try {

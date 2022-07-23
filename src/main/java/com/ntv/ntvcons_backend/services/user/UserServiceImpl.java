@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -33,6 +34,9 @@ public class UserServiceImpl implements UserService{
     private TaskAssignmentService taskAssignmentService;
     @Autowired
     private ProjectManagerService projectManagerService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /* CREATE */
     @Override
@@ -70,7 +74,7 @@ public class UserServiceImpl implements UserService{
 
             newUser.setCreatedBy(newUser.getUserId());
         }
-
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         return userRepository.saveAndFlush(newUser);
     }
     @Override

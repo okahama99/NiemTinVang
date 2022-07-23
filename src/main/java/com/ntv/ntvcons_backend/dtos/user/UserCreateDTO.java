@@ -2,9 +2,7 @@ package com.ntv.ntvcons_backend.dtos.user;
 
 import com.ntv.ntvcons_backend.constants.Regex;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.constraints.*;
@@ -14,6 +12,8 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO */
     @Positive
     @NotNull(message = "roleId REQUIRED for create")
@@ -50,4 +50,6 @@ public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
     private final Boolean isDeleted = false;
+
+    private String password;
 }

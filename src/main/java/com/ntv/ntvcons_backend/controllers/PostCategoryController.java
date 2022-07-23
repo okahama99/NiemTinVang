@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class PostCategoryController {
     PostCategoryService postCategoryService;
 
     /* CREATE */
-    //@PreAuthorize("hasAnyRole('Admin')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PostMapping(value = "/v1/createPostCategory", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createPostCategory(@RequestBody CreatePostCategoryModel createPostCategoryModel){
         if((postCategoryRepository.findByPostCategoryNameAndStatus(createPostCategoryModel.getPostCategoryName(), Status.ACTIVE)) != null){
@@ -46,6 +47,7 @@ public class PostCategoryController {
     }
 
     /* READ */
+    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -69,6 +71,7 @@ public class PostCategoryController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.POST_CATEGORY searchType) {
@@ -113,6 +116,7 @@ public class PostCategoryController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_POST_CATEGORY searchType,
@@ -171,7 +175,7 @@ public class PostCategoryController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PutMapping(value = "/v1/updatePostCategory", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updatePostCategory(@RequestBody UpdatePostCategoryModel updatePostCategoryModel) {
         boolean result = postCategoryService.updatePostCategory(updatePostCategoryModel);
@@ -184,7 +188,7 @@ public class PostCategoryController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasAnyRole('Admin')")
+    @PreAuthorize("hasAnyAuthority('64')")
     @DeleteMapping(value = "/v1/deletePostCategory/{postCategoryId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deletePostCategory(@PathVariable(name = "postCategoryId") Long postCategoryId) {
         try {
