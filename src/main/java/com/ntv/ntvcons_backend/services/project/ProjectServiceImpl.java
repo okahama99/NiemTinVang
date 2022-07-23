@@ -1076,7 +1076,7 @@ public class ProjectServiceImpl implements ProjectService{
                     projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectWorkerList(projectIdProjectWorkerDTOListMap.get(tmpProjectId));
-                    projectDTO.setFileList(projectIdExternalFileDTOListMap.get(tmpProjectId));
+                    /*projectDTO.setFileList(projectIdExternalFileDTOListMap.get(tmpProjectId));*/
 
                     projectDTO.setTotalPage(totalPage);
 
