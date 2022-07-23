@@ -23,7 +23,7 @@ public interface EntityWrapperService {
     EntityWrapper getByEntityIdAndEntityType(long entityID, EntityType type) throws Exception;
 
     List<EntityWrapper> getAllByEntityIdInAndEntityType(Collection<Long> entityIdCollection, EntityType type) throws Exception;
-    Map<Long, Long> mapEntityIdEntityWrapperIdByEntityIdInAndEntityType(Collection<Long> entityIdCollection, EntityType type) throws Exception;
+    Map<Long, Long> mapEntityWrapperIdEntityIdByEntityIdInAndEntityType(Collection<Long> entityIdCollection, EntityType type) throws Exception;
 
     /* UPDATE */
 

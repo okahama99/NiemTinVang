@@ -19,9 +19,13 @@ public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO
     @NotNull(message = "roleId REQUIRED for create")
     private Long roleId;
 
-    @Size(max = 50, message = "username max length: 100 characters")
+    @Size(max = 50, message = "username max length: 50 characters")
     @NotNull(message = "username REQUIRED for create")
     private String username;
+
+    @Size(max = 100, message = "fullName max length: 100 characters")
+    @NotNull(message = "fullName REQUIRED for create")
+    private String fullName;
 
     @Pattern(regexp = Regex.PHONE_REGEX_1, message = "Need to match pattern '0 + (9-14) digits'")
     @NotNull(message = "phone REQUIRED for create")

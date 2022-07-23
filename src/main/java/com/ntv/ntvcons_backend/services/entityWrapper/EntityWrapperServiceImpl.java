@@ -375,63 +375,79 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     }
 
     @Override
-    public Map<Long, Long> mapEntityIdEntityWrapperIdByEntityIdInAndEntityType(Collection<Long> entityIdCollection, EntityType type) throws Exception {
+    public Map<Long, Long> mapEntityWrapperIdEntityIdByEntityIdInAndEntityType(Collection<Long> entityIdCollection, EntityType type) throws Exception {
         List<EntityWrapper> entityWrapperList = getAllByEntityIdInAndEntityType(entityIdCollection, type);
 
         if (entityWrapperList == null)
             return new HashMap<>();
 
-        Map<Long, Long> entityIdEntityWrapperIdMap = new HashMap<>();
+        Map<Long, Long> entityWrapperIdEntityIdMap = new HashMap<>();
 
         switch (type) {
             case BLUEPRINT_ENTITY:
-                entityIdEntityWrapperIdMap =
+                entityWrapperIdEntityIdMap =
                         entityWrapperList.stream()
-                                .collect(Collectors.toMap(EntityWrapper::getBlueprintId, EntityWrapper::getEntityWrapperId));
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getBlueprintId));
                 break;
 
             case POST_ENTITY:
-                entityIdEntityWrapperIdMap =
+                entityWrapperIdEntityIdMap =
                         entityWrapperList.stream()
-                                .collect(Collectors.toMap(EntityWrapper::getPostId, EntityWrapper::getEntityWrapperId));
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getPostId));
                 break;
 
             case PROJECT_ENTITY:
-                entityIdEntityWrapperIdMap =
+                entityWrapperIdEntityIdMap =
                         entityWrapperList.stream()
-                                .collect(Collectors.toMap(EntityWrapper::getProjectId, EntityWrapper::getEntityWrapperId));
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getProjectId));
                 break;
 
             case REPORT_ENTITY:
-                entityIdEntityWrapperIdMap =
+                entityWrapperIdEntityIdMap =
                         entityWrapperList.stream()
-                                .collect(Collectors.toMap(EntityWrapper::getReportId, EntityWrapper::getEntityWrapperId));
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getReportId));
                 break;
 
             case REQUEST_ENTITY:
-                entityIdEntityWrapperIdMap =
+                entityWrapperIdEntityIdMap =
                         entityWrapperList.stream()
-                                .collect(Collectors.toMap(EntityWrapper::getRequestId, EntityWrapper::getEntityWrapperId));
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getRequestId));
                 break;
 
             case TASK_ENTITY:
-                entityIdEntityWrapperIdMap =
+                entityWrapperIdEntityIdMap =
                         entityWrapperList.stream()
-                                .collect(Collectors.toMap(EntityWrapper::getTaskId, EntityWrapper::getEntityWrapperId));
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getTaskId));
 
                 break;
 
             case USER_ENTITY:
-                entityIdEntityWrapperIdMap =
+                entityWrapperIdEntityIdMap =
                         entityWrapperList.stream()
-                                .collect(Collectors.toMap(EntityWrapper::getUserId, EntityWrapper::getEntityWrapperId));
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getUserId));
 
                 break;
 
             case WORKER_ENTITY:
-                entityIdEntityWrapperIdMap =
+                entityWrapperIdEntityIdMap =
                         entityWrapperList.stream()
-                                .collect(Collectors.toMap(EntityWrapper::getWorkerId, EntityWrapper::getEntityWrapperId));
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getWorkerId));
 
                 break;
 
@@ -439,7 +455,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                 throw new IllegalArgumentException("Invalid EntityType used, no such type exists!");
         }
 
-        return entityIdEntityWrapperIdMap;
+        return entityWrapperIdEntityIdMap;
     }
 
     /* UPDATE */

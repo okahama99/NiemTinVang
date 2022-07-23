@@ -142,7 +142,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return fillAllDTO(fileList, null);
     }
     @Override
-    public Map<Long, ExternalFileReadDTO> mapFileIdExternalFileDTOListByIdIn(Collection<Long> fileIdCollection) throws Exception {
+    public Map<Long, ExternalFileReadDTO> mapFileIdExternalFileDTOByIdIn(Collection<Long> fileIdCollection) throws Exception {
         List<ExternalFileReadDTO> fileDTOList = getAllDTOByIdIn(fileIdCollection);
 
         if (fileDTOList == null)

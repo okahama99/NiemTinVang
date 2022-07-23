@@ -15,6 +15,7 @@ import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
@@ -918,7 +919,40 @@ public class ProjectServiceImpl implements ProjectService{
             }
         }
 
-        /* TODO: Update associated ProjectWorker if changed */
+        /* Update associated ProjectWorker if changed */
+        if (updatedProjectDTO.getProjectWorkerList() != null) {
+            /* Just in case */
+            updatedProjectDTO.setProjectWorkerList(
+                    updatedProjectDTO.getProjectWorkerList().stream()
+                            .peek(projectWorkerDTO -> projectWorkerDTO.setProjectId(updatedProjectId))
+                            .collect(Collectors.toList()));
+
+            /* TODO: reuse when login done
+            modelMapper.typeMap(ProjectManagerUpdateDTO.class, ProjectManagerCreateDTO.class)
+                    .addMappings(mapper -> {
+                        mapper.map(ProjectWorkerUpdateDTO::getUpdatedBy, ProjectWorkerCreateDTO::setCreatedBy);});*/
+
+            List<ProjectWorkerCreateDTO> newProjectWorkerDTOList = new ArrayList<>();
+            List<ProjectWorkerUpdateDTO> updatedProjectWorkerDTOList = new ArrayList<>();
+
+            for (ProjectWorkerUpdateDTO projectWorkerDTO : updatedProjectDTO.getProjectWorkerList()) {
+                if (projectWorkerDTO.getProjectWorkerId() <= 0) {
+                    newProjectWorkerDTOList.add(modelMapper.map(projectWorkerDTO, ProjectWorkerCreateDTO.class));
+                } else {
+                    updatedProjectWorkerDTOList.add(projectWorkerDTO);
+                }
+            }
+
+            /* Create associated ProjectManager */
+            if (!newProjectWorkerDTOList.isEmpty()) {
+                projectWorkerService.createBulkProjectWorkerByDTO(newProjectWorkerDTOList);
+            }
+
+            /* Update associated ProjectManager */
+            if (!updatedProjectWorkerDTOList.isEmpty()) {
+                projectWorkerService.updateBulkProjectWorkerByDTO(updatedProjectWorkerDTOList);
+            }
+        }
 
         return fillDTO(updatedProject);
     }
@@ -946,8 +980,6 @@ public class ProjectServiceImpl implements ProjectService{
         ProjectReadDTO projectDTO = modelMapper.map(project, ProjectReadDTO.class);
 
         /* NOT NULL */
-        /*EntityWrapper entityWrapper =
-                entityWrapperService.getByEntityIdAndEntityType(projectId, ENTITY_TYPE);*/
         projectDTO.setLocation(locationService.getDTOById(project.getLocationId()));
         projectDTO.setBlueprint(blueprintService.getDTOByProjectId(projectId));
 
@@ -957,6 +989,15 @@ public class ProjectServiceImpl implements ProjectService{
         projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(projectId));
+
+        /* TODO: test first
+        EntityWrapper entityWrapper =
+                entityWrapperService.getByEntityIdAndEntityType(projectId, ENTITY_TYPE);
+        if (entityWrapper != null) {
+            projectDTO.setFileList(
+                    eFEWPairingService
+                            .getAllExternalFileDTOByEntityWrapperId(entityWrapper.getEntityWrapperId()));
+        }*/
 
         return projectDTO;
     }
@@ -969,59 +1010,6 @@ public class ProjectServiceImpl implements ProjectService{
             locationIdSet.add(project.getLocationId());
             projectIdSet.add(project.getProjectId());
         }
-
-        /* Get associated EntityWrapper => EWEFPairing => ExternalFile */
-        /* TODO: test fisrt */
-        /* Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap = new HashMap<>();
-
-        Map<Long, Long> projectIdEntityWrapperIdMap =
-                entityWrapperService.mapEntityIdEntityWrapperIdByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
-
-        if (!projectIdEntityWrapperIdMap.isEmpty()) {
-            Set<Long> entityWrapperIdSet = new HashSet<>(projectIdEntityWrapperIdMap.values());
-
-            Map<Long, List<Long>> entityWrapperIdExternalFileIdListMap =
-                    eFEWPairingService
-                            .mapEntityWrapperIdExternalFileIdListByEntityWrapperIdIn(entityWrapperIdSet);
-
-            if (!entityWrapperIdExternalFileIdListMap.isEmpty()) {
-                Set<Long> fileIdSet = new HashSet<>();
-
-                List<Long> tmpFileIdList;
-
-                for (Long entityWrapperId : entityWrapperIdExternalFileIdListMap.keySet()) {
-                    tmpFileIdList = entityWrapperIdExternalFileIdListMap.get(entityWrapperId);
-
-                    if (tmpFileIdList != null && !tmpFileIdList.isEmpty())
-                        fileIdSet.addAll(tmpFileIdList);
-                }
-
-                if (!fileIdSet.isEmpty()) {
-                    Map<Long, ExternalFileReadDTO> fileIdExternalFileDTOMap =
-                            externalFileService.mapFileIdExternalFileDTOListByIdIn(fileIdSet);
-
-                    Long tmpEntityWrapperId;
-                    ExternalFileReadDTO tmpFileDTO;
-                    List<ExternalFileReadDTO> tmpFileDTOList;
-
-                    for (Long projectId : projectIdEntityWrapperIdMap.keySet()) {
-                        tmpEntityWrapperId = projectIdEntityWrapperIdMap.get(projectId);
-                        
-                        tmpFileDTOList = new ArrayList<>();
-
-                        tmpFileIdList = entityWrapperIdExternalFileIdListMap.get(tmpEntityWrapperId);
-
-                        for (Long fileId : tmpFileIdList) {
-                            tmpFileDTO = fileIdExternalFileDTOMap.get(fileId);
-
-                            tmpFileDTOList.add(tmpFileDTO);
-                        }
-
-                        projectIdExternalFileDTOListMap.put(projectId, tmpFileDTOList);
-                    }
-                }
-            }
-        }*/
 
         /* Get associated Location */
         Map<Long, LocationReadDTO> locationIdLocationDTOMap =
@@ -1046,6 +1034,31 @@ public class ProjectServiceImpl implements ProjectService{
         Map<Long, List<ProjectWorkerReadDTO>> projectIdProjectWorkerDTOListMap =
                 projectWorkerService.mapProjectIdProjectWorkerDTOListByProjectIdIn(projectIdSet);
 
+        /* Get associated EntityWrapper => EWEFPairing => ExternalFile */
+        /* TODO: test first
+        Map<Long, Long> entityWrapperIdProjectIdMap = new HashMap<>();
+        Map<Long, List<ExternalFileReadDTO>> entityWrapperIdExternalFileDTOListMap = new HashMap<>();
+        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap = new HashMap<>();
+
+        entityWrapperIdProjectIdMap =
+                entityWrapperService
+                        .mapEntityWrapperIdEntityIdByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
+
+        Set<Long> entityWrapperIdSet = entityWrapperIdProjectIdMap.keySet();
+
+        if (!entityWrapperIdSet.isEmpty()) {
+            entityWrapperIdExternalFileDTOListMap =
+                    eFEWPairingService.mapEntityWrapperIdExternalFileDTOListByEntityWrapperIdIn(entityWrapperIdSet);
+
+            if (!entityWrapperIdExternalFileDTOListMap.isEmpty()) {
+                for (Long entityWrapperId : entityWrapperIdSet) {
+                    projectIdExternalFileDTOListMap.put(
+                            entityWrapperIdProjectIdMap.get(entityWrapperId),
+                            entityWrapperIdExternalFileDTOListMap.get(entityWrapperId));
+                }
+            }
+        }*/
+
         return projectCollection.stream()
                 .map(project -> {
                     ProjectReadDTO projectDTO =
@@ -1063,6 +1076,7 @@ public class ProjectServiceImpl implements ProjectService{
                     projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectWorkerList(projectIdProjectWorkerDTOListMap.get(tmpProjectId));
+                    projectDTO.setFileList(projectIdExternalFileDTOListMap.get(tmpProjectId));
 
                     projectDTO.setTotalPage(totalPage);
 

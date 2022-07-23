@@ -3,16 +3,18 @@ package com.ntv.ntvcons_backend.dtos;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import net.minidev.json.annotate.JsonIgnore;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public abstract class BaseReadDTO implements Serializable {
-    @JsonInclude(Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL) /* if null => no return JSON */
     private Status status;
 
     private Long createdBy;
@@ -21,6 +23,9 @@ public abstract class BaseReadDTO implements Serializable {
     private Long updatedBy;
     private LocalDateTime updatedAt;
 
-    @JsonInclude(Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL) /* if null => no return JSON */
+    private List<ExternalFileReadDTO> fileList;
+
+    @JsonInclude(Include.NON_NULL) /* if null => no return JSON */
     private Integer totalPage;
 }
