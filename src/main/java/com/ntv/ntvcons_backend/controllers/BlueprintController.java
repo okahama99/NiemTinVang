@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,7 +30,7 @@ public class BlueprintController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createBlueprint(@Valid @RequestBody BlueprintCreateDTO blueprintDTO) {
         try {
@@ -47,7 +48,7 @@ public class BlueprintController {
     }
 
     /* READ */
-    //@PreAuthorize("hasAnyRole('Admin','Staff','Customer')")
+    @PreAuthorize("hasAnyAuthority('64','24','14')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -71,6 +72,7 @@ public class BlueprintController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','24','14')")
     @GetMapping(value = "/v1.1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllAlt1(@RequestParam int pageNo,
                                              @RequestParam int pageSize,
@@ -96,6 +98,7 @@ public class BlueprintController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','24','14')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.BLUEPRINT searchType) {
@@ -166,6 +169,7 @@ public class BlueprintController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','24','14')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_BLUEPRINT searchType,
@@ -243,15 +247,15 @@ public class BlueprintController {
             return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
         }
     }
-    
-    ////@PreAuthorize("hasRole('ROLE_ADMIN')")
+
+    @PreAuthorize("hasAnyAuthority('64','24','14')")
     @GetMapping(value = "/v1/checkDuplicate", produces = "application/json;charset=UTF-8")
     public @ResponseBody String checkDuplicate(@RequestParam String blueprintName) {
         return blueprintService.checkDuplicate(blueprintName);
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateBlueprint(@Valid @RequestBody BlueprintUpdateDTO blueprintDTO) {
         try {
@@ -274,7 +278,7 @@ public class BlueprintController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasAnyRole('Admin')")
+    @PreAuthorize("hasAnyAuthority('64')")
     @DeleteMapping(value = "/v1/deleteBlueprint/{blueprintId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteBlueprint(@PathVariable(name = "blueprintId") long blueprintId) {
         try {

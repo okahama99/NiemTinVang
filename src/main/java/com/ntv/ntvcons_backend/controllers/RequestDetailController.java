@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -29,6 +30,7 @@ public class RequestDetailController {
 
     /* ================================================ Ver 1 ================================================ */
     /*CREATE*/
+    @PreAuthorize("hasAnyAuthority('54','64','14','24')")
     @PostMapping(value = "/v1/createRequestDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequestDetail(@Valid @RequestBody RequestDetailCreateDTO requestDetailDTO) {
         try {
@@ -47,7 +49,7 @@ public class RequestDetailController {
     }
 
     /* READ */
-    //@PreAuthorize("hasAnyRole('Engineer','Admin','Customer','Staff')")
+    @PreAuthorize("hasAnyAuthority('54','64','14','24')")
     @GetMapping(value = "/v1/getAllRequestDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllRequestDetail(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -72,7 +74,7 @@ public class RequestDetailController {
         }
     }
 
-    //@PreAuthorize("hasAnyRole('Engineer','Admin','Customer','Staff')")
+    @PreAuthorize("hasAnyAuthority('54','64','14','24')")
     @GetMapping(value = "/v1/getAllById", produces = "application/json;charset=UTF-8")
     public @ResponseBody
     List<RequestDetail> getAllById(@RequestParam Long requestId) {
@@ -80,6 +82,7 @@ public class RequestDetailController {
         return requestDetail;
     }
 
+    @PreAuthorize("hasAnyAuthority('54','64','14','24')")
     @GetMapping(value = "/v1.1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -106,6 +109,7 @@ public class RequestDetailController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('54','64','14','24')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.REQUEST_DETAIL searchType) {
@@ -150,6 +154,7 @@ public class RequestDetailController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('54','64','14','24')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_REQUEST_DETAIL searchType,
@@ -202,6 +207,7 @@ public class RequestDetailController {
     }
 
     /* UPDATE */
+    @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateRequestDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequestDetail(@Valid @RequestBody RequestDetailUpdateDTO requestDetailDTO) {
         try {
@@ -226,7 +232,7 @@ public class RequestDetailController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasAnyRole('Engineer','Admin')")
+    @PreAuthorize("hasAnyAuthority('54','64')")
     @DeleteMapping(value = "/v1/deleteRequestDetail/{requestDetailId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRequestDetail(@PathVariable(name = "requestDetailId") long requestDetailId) {
         try {

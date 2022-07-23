@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class TaskController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasAnyRole('Admin')")
+    @PreAuthorize("hasAnyAuthority('64')")
     @PostMapping(value = "/v1/createTask", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO) {
         try {
@@ -44,7 +45,7 @@ public class TaskController {
     }
 
     /* READ */
-    //@PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
+    @PreAuthorize("hasAnyAuthority('64','14','24','54')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -70,6 +71,7 @@ public class TaskController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','14','24','54')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.TASK searchType) {
@@ -114,7 +116,7 @@ public class TaskController {
         }
     }
 
-    //@PreAuthorize("hasAnyRole('Admin','Customer','Staff','Engineer')")
+    @PreAuthorize("hasAnyAuthority('64','14','24','54')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_TASK searchType,
@@ -194,7 +196,7 @@ public class TaskController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasAnyRole('Admin')")
+    @PreAuthorize("hasAnyAuthority('64')")
     @PutMapping(value = "/v1/updateTask", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO) {
         try {
@@ -217,7 +219,7 @@ public class TaskController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasAnyRole('Admin')")
+    @PreAuthorize("hasAnyAuthority('64')")
     @DeleteMapping(value ="/v1/deleteTask/{taskId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteTask(@PathVariable(name = "taskId") long taskId) {
         try {

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,7 +29,7 @@ public class ReportDetailController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasAnyRole('Engineer')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createReportDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createReportDetail(@Valid @RequestBody ReportDetailCreateDTO reportDetailDTO){
         try {
@@ -46,7 +47,7 @@ public class ReportDetailController {
     }
 
     /* READ */
-    //@PreAuthorize("hasAnyRole('Engineer','Admin','Staff','Customer')")
+    @PreAuthorize("hasAnyAuthority('54','64','14','24')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -71,7 +72,8 @@ public class ReportDetailController {
                     new ErrorResponse("Error searching for Report", e.getMessage()));
         }
     }
-    
+
+    @PreAuthorize("hasAnyAuthority('54','64','24','14')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.REPORT_DETAIL searchType) {
@@ -117,6 +119,7 @@ public class ReportDetailController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('54','64','24','14')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_REPORT_DETAIL searchType,
@@ -170,7 +173,7 @@ public class ReportDetailController {
     }
     
     /* UPDATE */
-    //@PreAuthorize("hasAnyRole('Engineer')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateReportDetail", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateReportDetail(@Valid @RequestBody ReportDetailUpdateDTO reportDetailDTO){
         try {
@@ -194,7 +197,7 @@ public class ReportDetailController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasAnyRole('Engineer','Admin')")
+    @PreAuthorize("hasAnyAuthority('54','64')")
     @DeleteMapping(value = "/v1/deleteReportDetail/{reportDetailId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteReportDetail(@PathVariable(name = "reportDetailId") long reportDetailId){
         try {

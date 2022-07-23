@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -27,6 +28,7 @@ public class ProjectManagerController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
+    @PreAuthorize("hasAnyAuthority('64')")
     @PostMapping(value = "/v1/createProjectManager", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProjectManager(@Valid @RequestBody ProjectManagerCreateDTO projectManagerDTO) {
         try {
@@ -46,6 +48,7 @@ public class ProjectManagerController {
     }
 
     /* READ */
+    @PreAuthorize("hasAnyAuthority('64')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -70,7 +73,8 @@ public class ProjectManagerController {
                     new ErrorResponse("Error searching for ProjectManager", e.getMessage()));
         }
     }
-    
+
+    @PreAuthorize("hasAnyAuthority('64')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.PROJECT_MANAGER searchType) {
@@ -115,6 +119,7 @@ public class ProjectManagerController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_PROJECT_MANAGER searchType,
@@ -181,7 +186,7 @@ public class ProjectManagerController {
     }
     
     /* UPDATE */
-    //@PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('64')")
     @PutMapping(value = "/v1/updateProjectManager", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProjectManager(@Valid @RequestBody ProjectManagerUpdateDTO projectManagerDTO){
         try {
@@ -202,6 +207,7 @@ public class ProjectManagerController {
     }
 
     /* DELETE */
+    @PreAuthorize("hasAnyAuthority('64')")
     @DeleteMapping(value = "/v1/deleteProjectManager/{projectManagerId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteProjectManager(@PathVariable(name = "projectManagerId") long projectManagerId){
         // TODO:

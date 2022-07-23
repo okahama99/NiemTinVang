@@ -4,7 +4,6 @@ import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
-import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import com.ntv.ntvcons_backend.utils.ThanhUtil;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,9 +28,10 @@ public class UserController {
     private ThanhUtil thanhUtil;
 
 
+
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PostMapping(value = "/v1/createUser", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createUser(@Valid @RequestBody UserCreateDTO userDTO){
         try {
@@ -48,7 +49,7 @@ public class UserController {
     }
 
     /* READ */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -74,6 +75,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.USER searchType) {
@@ -157,7 +159,7 @@ public class UserController {
         }
     }
 
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_USER searchType,
@@ -252,7 +254,7 @@ public class UserController {
     }
 
     /* UPDATE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @PutMapping(value = "/v1/updateUser", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UserUpdateDTO userDTO){
         try {
@@ -276,7 +278,7 @@ public class UserController {
     }
 
     /* DELETE */
-    //@PreAuthorize("hasAnyRole('Admin','Staff')")
+    @PreAuthorize("hasAnyAuthority('64','24')")
     @DeleteMapping(value = "/v1/deleteUser/{userId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteUser(@PathVariable(name = "userId") long userId){
         try {
@@ -291,5 +293,7 @@ public class UserController {
                     new ErrorResponse("Error deleting User with Id: '" + userId + "'. ", e.getMessage()));
         }
     }
+
+
     /* ================================================ Ver 1 ================================================ */
 }
