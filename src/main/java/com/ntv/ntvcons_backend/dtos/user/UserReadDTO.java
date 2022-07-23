@@ -13,6 +13,7 @@ public class UserReadDTO extends BaseReadDTO {
     private Long userId;
     private RoleReadDTO role;
     private String username;
+    private String fullName;
     private String phone;
     private String email;
 }

@@ -21,8 +21,12 @@ public class UserUpdateDTO extends BaseUpdateDTO {
     private Long roleId;
 
     @NotNull(message = "username REQUIRED for update")
-    @Size(max = 50, message = "username max length: 100 characters")
+    @Size(max = 50, message = "username max length: 50 characters")
     private String username;
+
+    @NotNull(message = "fullName REQUIRED for update")
+    @Size(max = 100, message = "fullName max length: 100 characters")
+    private String fullName;
 
     @NotNull(message = "phone REQUIRED for update")
     @Pattern(regexp = Regex.PHONE_REGEX_1, message = "Need to match pattern '0 + (9-14) digits'")
