@@ -31,7 +31,6 @@ public class UserController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
     @PostMapping(value = "/v1/createUser", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createUser(@Valid @RequestBody UserCreateDTO userDTO){
         try {
