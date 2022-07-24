@@ -47,7 +47,7 @@ public class PostCategoryController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -71,7 +71,7 @@ public class PostCategoryController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.POST_CATEGORY searchType) {
@@ -116,7 +116,7 @@ public class PostCategoryController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14','54','4')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_POST_CATEGORY searchType,
