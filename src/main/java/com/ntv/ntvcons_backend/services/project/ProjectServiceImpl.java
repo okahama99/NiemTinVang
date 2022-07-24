@@ -73,8 +73,6 @@ public class ProjectServiceImpl implements ProjectService{
     private EntityWrapperService entityWrapperService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
-    @Autowired
-    private ExternalFileService externalFileService;
     @Lazy
     @Autowired
     private UserService userService;
@@ -989,15 +987,9 @@ public class ProjectServiceImpl implements ProjectService{
         projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(projectId));
-
-        /* TODO: test first
-        EntityWrapper entityWrapper =
-                entityWrapperService.getByEntityIdAndEntityType(projectId, ENTITY_TYPE);
-        if (entityWrapper != null) {
-            projectDTO.setFileList(
-                    eFEWPairingService
-                            .getAllExternalFileDTOByEntityWrapperId(entityWrapper.getEntityWrapperId()));
-        }*/
+        projectDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(projectId, ENTITY_TYPE));
 
         return projectDTO;
     }
@@ -1033,31 +1025,10 @@ public class ProjectServiceImpl implements ProjectService{
         /* Get associated ProjectWorker */
         Map<Long, List<ProjectWorkerReadDTO>> projectIdProjectWorkerDTOListMap =
                 projectWorkerService.mapProjectIdProjectWorkerDTOListByProjectIdIn(projectIdSet);
-
-        /* Get associated EntityWrapper => EWEFPairing => ExternalFile */
-        /* TODO: test first
-        Map<Long, Long> entityWrapperIdProjectIdMap = new HashMap<>();
-        Map<Long, List<ExternalFileReadDTO>> entityWrapperIdExternalFileDTOListMap = new HashMap<>();
-        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap = new HashMap<>();
-
-        entityWrapperIdProjectIdMap =
-                entityWrapperService
-                        .mapEntityWrapperIdEntityIdByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
-
-        Set<Long> entityWrapperIdSet = entityWrapperIdProjectIdMap.keySet();
-
-        if (!entityWrapperIdSet.isEmpty()) {
-            entityWrapperIdExternalFileDTOListMap =
-                    eFEWPairingService.mapEntityWrapperIdExternalFileDTOListByEntityWrapperIdIn(entityWrapperIdSet);
-
-            if (!entityWrapperIdExternalFileDTOListMap.isEmpty()) {
-                for (Long entityWrapperId : entityWrapperIdSet) {
-                    projectIdExternalFileDTOListMap.put(
-                            entityWrapperIdProjectIdMap.get(entityWrapperId),
-                            entityWrapperIdExternalFileDTOListMap.get(entityWrapperId));
-                }
-            }
-        }*/
+        /* Get associated ExternalFile */
+        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
 
         return projectCollection.stream()
                 .map(project -> {
@@ -1076,7 +1047,8 @@ public class ProjectServiceImpl implements ProjectService{
                     projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectWorkerList(projectIdProjectWorkerDTOListMap.get(tmpProjectId));
-                    /*projectDTO.setFileList(projectIdExternalFileDTOListMap.get(tmpProjectId));*/
+                    projectDTO.setFileList(
+                            projectIdExternalFileDTOListMap.get(tmpProjectId));
 
                     projectDTO.setTotalPage(totalPage);
 

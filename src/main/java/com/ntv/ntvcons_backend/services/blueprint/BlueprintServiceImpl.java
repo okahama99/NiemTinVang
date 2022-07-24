@@ -1,14 +1,25 @@
 package com.ntv.ntvcons_backend.services.blueprint;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
+import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
+import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
+import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
+import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
+import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
@@ -37,6 +48,12 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
+    @Autowired
+    private EntityWrapperService entityWrapperService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
+
+    private final EntityType ENTITY_TYPE = EntityType.BLUEPRINT_ENTITY;
 
     /* CREATE */
     @Override
@@ -74,8 +91,6 @@ public class BlueprintServiceImpl implements BlueprintService {
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
 
-        /* TODO: create EntityWrapper for blueprint */
-
         return blueprintRepository.saveAndFlush(newBlueprint);
     }
     @Override
@@ -83,6 +98,11 @@ public class BlueprintServiceImpl implements BlueprintService {
         Blueprint newBlueprint = modelMapper.map(newBlueprintDTO, Blueprint.class);
 
         newBlueprint = createBlueprint(newBlueprint);
+        long newBlueprintId = newBlueprint.getBlueprintId();
+
+        /* Create associate EntityWrapper */
+        entityWrapperService
+                .createEntityWrapper(newBlueprintId, ENTITY_TYPE, newBlueprint.getCreatedBy());
 
         return fillDTO(newBlueprint);
     }
@@ -553,14 +573,36 @@ public class BlueprintServiceImpl implements BlueprintService {
 
     /* Utils */
     private BlueprintReadDTO fillDTO(Blueprint blueprint) throws Exception {
-        return modelMapper.map(blueprint, BlueprintReadDTO.class);
+        long blueprintId = blueprint.getBlueprintId();
+
+        BlueprintReadDTO blueprintDTO = modelMapper.map(blueprint, BlueprintReadDTO.class);
+
+        blueprintDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(blueprintId, ENTITY_TYPE));
+
+        return blueprintDTO;
     }
 
     private List<BlueprintReadDTO> fillAllDTO(Collection<Blueprint> blueprintCollection, Integer totalPage) throws Exception {
+        Set<Long> blueprintIdSet = new HashSet<>();
+
+        for (Blueprint blueprint : blueprintCollection) {
+            blueprintIdSet.add(blueprint.getBlueprintId());
+        }
+
+        /* Get associated ExternalFile */
+        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(blueprintIdSet, ENTITY_TYPE);
+
         return blueprintCollection.stream()
                 .map(blueprint -> {
                     BlueprintReadDTO blueprintDTO =
                             modelMapper.map(blueprint, BlueprintReadDTO.class);
+
+                    blueprintDTO.setFileList(
+                            projectIdExternalFileDTOListMap.get(blueprint.getBlueprintId()));
 
                     blueprintDTO.setTotalPage(totalPage);
 

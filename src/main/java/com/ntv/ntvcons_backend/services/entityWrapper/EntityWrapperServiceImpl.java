@@ -6,6 +6,7 @@ import com.ntv.ntvcons_backend.entities.EntityWrapper;
 import com.ntv.ntvcons_backend.repositories.EntityWrapperRepository;
 import com.ntv.ntvcons_backend.services.BaseService;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintServiceImpl;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.post.PostServiceImpl;
 import com.ntv.ntvcons_backend.services.project.ProjectServiceImpl;
 import com.ntv.ntvcons_backend.services.report.ReportServiceImpl;
@@ -29,6 +30,8 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
     private final String DELETED = Status.DELETED.getStringValue();
 
@@ -468,6 +471,9 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         if (entityWrapper == null)
             return false;
 
+        /* Delete all associated EFEWPairing */
+        eFEWPairingService.deleteAllByEntityWrapperId(entityWrapper.getEntityWrapperId());
+
         entityWrapper.setStatus(Status.DELETED);
         entityWrapperRepository.saveAndFlush(entityWrapper);
 
@@ -475,14 +481,41 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     }
 
     @Override
-    public boolean deleteByEntityIdAndEntityType(long entityWrapperID, EntityType type) throws Exception {
-        EntityWrapper entityWrapper = getByEntityIdAndEntityType(entityWrapperID, type);
+    public boolean deleteByEntityIdAndEntityType(long entityID, EntityType type) throws Exception {
+        EntityWrapper entityWrapper = getByEntityIdAndEntityType(entityID, type);
 
         if (entityWrapper == null)
             return false;
 
+        /* Delete all associated EFEWPairing */
+        eFEWPairingService.deleteAllByEntityWrapperId(entityWrapper.getEntityWrapperId());
+
         entityWrapper.setStatus(Status.DELETED);
         entityWrapperRepository.saveAndFlush(entityWrapper);
+
+        return true;
+    }
+    @Override
+    public boolean deleteAllByEntityIdInAndEntityType(Collection<Long> entityIDCollection, EntityType type) throws Exception {
+        List<EntityWrapper> entityWrapperList =
+                getAllByEntityIdInAndEntityType(entityIDCollection, type);
+
+        if (entityWrapperList == null)
+            return false;
+
+        Set<Long> entityWrapperIdSet = new HashSet<>();
+
+        entityWrapperList = entityWrapperList.stream()
+                .peek(entityWrapper -> {
+                    entityWrapperIdSet.add(entityWrapper.getEntityWrapperId());
+
+                    entityWrapper.setStatus(Status.DELETED);})
+                .collect(Collectors.toList());
+
+        /* Delete all associated EFEWPairing */
+        eFEWPairingService.deleteAllByEntityWrapperIdIn(entityWrapperIdSet);
+
+        entityWrapperRepository.saveAllAndFlush(entityWrapperList);
 
         return true;
     }
