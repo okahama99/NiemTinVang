@@ -53,7 +53,6 @@ public class PostController {
 
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.POST searchType) {
@@ -98,7 +97,6 @@ public class PostController {
         }
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_POST searchType,
@@ -214,7 +212,6 @@ public class PostController {
         }
     }
 
-    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
