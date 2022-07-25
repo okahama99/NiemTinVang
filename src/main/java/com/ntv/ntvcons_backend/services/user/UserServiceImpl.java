@@ -495,9 +495,9 @@ public class UserServiceImpl implements UserService{
         userDTO.setRole(
                 roleService.getDTOById(user.getRoleId()));
         /* Get associated ExternalFile */
-        userDTO.setFileList(
-                eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(user.getUserId(), ENTITY_TYPE));
+//        userDTO.setFileList(
+//                eFEWPairingService
+//                        .getAllExternalFileDTOByEntityIdAndEntityType(user.getUserId(), ENTITY_TYPE));
 
         return userDTO;
     }
@@ -515,9 +515,9 @@ public class UserServiceImpl implements UserService{
         Map<Long, RoleReadDTO> roleIdRoleDTOMap =
                 roleService.mapRoleIdRoleDTOByIdIn(roleIdSet);
         /* Get associated ExternalFile */
-        Map<Long, List<ExternalFileReadDTO>> userIdExternalFileDTOListMap =
-                eFEWPairingService
-                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(userIdSet, ENTITY_TYPE);
+//        Map<Long, List<ExternalFileReadDTO>> userIdExternalFileDTOListMap =
+//                eFEWPairingService
+//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(userIdSet, ENTITY_TYPE);
 
         return userCollection.stream()
                 .map(user -> {
@@ -526,8 +526,8 @@ public class UserServiceImpl implements UserService{
 
                     userReadDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
 
-                    userReadDTO.setFileList(
-                            userIdExternalFileDTOListMap.get(user.getUserId()));
+//                    userReadDTO.setFileList(
+//                            userIdExternalFileDTOListMap.get(user.getUserId()));
 
                     userReadDTO.setTotalPage(totalPage);
 

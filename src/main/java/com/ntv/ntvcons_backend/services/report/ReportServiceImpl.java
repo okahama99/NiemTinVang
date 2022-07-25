@@ -758,9 +758,9 @@ public class ReportServiceImpl implements ReportService {
         /* Get associated TaskReport */
         reportDTO.setTaskReportList(taskReportService.getAllDTOByReportId(reportId));
         /* Get associated ExternalFile */
-        reportDTO.setFileList(
-                eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(reportId, ENTITY_TYPE));
+//        reportDTO.setFileList(
+//                eFEWPairingService
+//                        .getAllExternalFileDTOByEntityIdAndEntityType(reportId, ENTITY_TYPE));
 
         return reportDTO;
     }
@@ -785,9 +785,9 @@ public class ReportServiceImpl implements ReportService {
         Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
                 taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
         /* Get associated ExternalFile */
-        Map<Long, List<ExternalFileReadDTO>> reportIdExternalFileDTOListMap =
-                eFEWPairingService
-                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(reportIdSet, ENTITY_TYPE);
+//        Map<Long, List<ExternalFileReadDTO>> reportIdExternalFileDTOListMap =
+//                eFEWPairingService
+//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(reportIdSet, ENTITY_TYPE);
 
         return reportCollection.stream()
                 .map(report -> {
@@ -802,8 +802,8 @@ public class ReportServiceImpl implements ReportService {
                     /* Nullable */
                     reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(tmpReportId));
                     reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(tmpReportId));
-                    reportDTO.setFileList(
-                            reportIdExternalFileDTOListMap.get(tmpReportId));
+//                    reportDTO.setFileList(
+//                            reportIdExternalFileDTOListMap.get(tmpReportId));
 
                     reportDTO.setTotalPage(totalPage);
 

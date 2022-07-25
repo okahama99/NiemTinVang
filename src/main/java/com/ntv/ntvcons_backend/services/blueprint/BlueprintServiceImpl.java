@@ -577,9 +577,9 @@ public class BlueprintServiceImpl implements BlueprintService {
 
         BlueprintReadDTO blueprintDTO = modelMapper.map(blueprint, BlueprintReadDTO.class);
 
-        blueprintDTO.setFileList(
-                eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(blueprintId, ENTITY_TYPE));
+//        blueprintDTO.setFileList(
+//                eFEWPairingService
+//                        .getAllExternalFileDTOByEntityIdAndEntityType(blueprintId, ENTITY_TYPE));
 
         return blueprintDTO;
     }
@@ -592,17 +592,17 @@ public class BlueprintServiceImpl implements BlueprintService {
         }
 
         /* Get associated ExternalFile */
-        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
-                eFEWPairingService
-                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(blueprintIdSet, ENTITY_TYPE);
+//        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
+//                eFEWPairingService
+//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(blueprintIdSet, ENTITY_TYPE);
 
         return blueprintCollection.stream()
                 .map(blueprint -> {
                     BlueprintReadDTO blueprintDTO =
                             modelMapper.map(blueprint, BlueprintReadDTO.class);
 
-                    blueprintDTO.setFileList(
-                            projectIdExternalFileDTOListMap.get(blueprint.getBlueprintId()));
+//                    blueprintDTO.setFileList(
+//                            projectIdExternalFileDTOListMap.get(blueprint.getBlueprintId()));
 
                     blueprintDTO.setTotalPage(totalPage);
 
