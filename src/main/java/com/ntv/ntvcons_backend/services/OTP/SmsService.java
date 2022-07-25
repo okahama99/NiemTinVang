@@ -15,7 +15,7 @@ public class SmsService {
 
     private final String AUTH_TOKEN = "aa35023988e6a949e6baf43e89faa251";
 
-    private final String FROM_NUMBER = "+84 389 037 476";
+    private final String FROM_NUMBER = "+84389037476";
 
     public void send(SmsModel sms) {
         Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
