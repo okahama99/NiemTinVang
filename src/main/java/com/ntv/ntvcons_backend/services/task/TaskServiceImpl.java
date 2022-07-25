@@ -753,9 +753,9 @@ public class TaskServiceImpl implements TaskService{
         taskDTO.setTaskReportList(
                 taskReportService.getAllDTOByTaskId(taskId));
         /* Get associated ExternalFile */
-        taskDTO.setFileList(
-                eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(taskId, ENTITY_TYPE));
+//        taskDTO.setFileList(
+//                eFEWPairingService
+//                        .getAllExternalFileDTOByEntityIdAndEntityType(taskId, ENTITY_TYPE));
 
         return taskDTO;
     }
@@ -775,9 +775,9 @@ public class TaskServiceImpl implements TaskService{
         Map<Long, List<TaskReportReadDTO>> taskIdTaskReportDTOListMap =
                 taskReportService.mapTaskIdTaskReportDTOListByTaskIdIn(taskIdSet);
         /* Get associated ExternalFile */
-        Map<Long, List<ExternalFileReadDTO>> taskIdExternalFileDTOListMap =
-                eFEWPairingService
-                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(taskIdSet, ENTITY_TYPE);
+//        Map<Long, List<ExternalFileReadDTO>> taskIdExternalFileDTOListMap =
+//                eFEWPairingService
+//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(taskIdSet, ENTITY_TYPE);
 
         return taskCollection.stream()
                 .map(task -> {
@@ -788,8 +788,8 @@ public class TaskServiceImpl implements TaskService{
 
                     taskReadDTO.setTaskAssignment(taskIdTaskAssignmentDTOMap.get(tmpTaskID));
                     taskReadDTO.setTaskReportList(taskIdTaskReportDTOListMap.get(tmpTaskID));
-                    taskReadDTO.setFileList(
-                            taskIdExternalFileDTOListMap.get(tmpTaskID));
+//                    taskReadDTO.setFileList(
+//                            taskIdExternalFileDTOListMap.get(tmpTaskID));
 
                     taskReadDTO.setTotalPage(totalPage);
 

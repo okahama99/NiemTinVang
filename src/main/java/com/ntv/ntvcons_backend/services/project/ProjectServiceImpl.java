@@ -987,9 +987,9 @@ public class ProjectServiceImpl implements ProjectService{
         projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(projectId));
-        projectDTO.setFileList(
-                eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(projectId, ENTITY_TYPE));
+//        projectDTO.setFileList(
+//                eFEWPairingService
+//                        .getAllExternalFileDTOByEntityIdAndEntityType(projectId, ENTITY_TYPE));
 
         return projectDTO;
     }
@@ -1026,9 +1026,9 @@ public class ProjectServiceImpl implements ProjectService{
         Map<Long, List<ProjectWorkerReadDTO>> projectIdProjectWorkerDTOListMap =
                 projectWorkerService.mapProjectIdProjectWorkerDTOListByProjectIdIn(projectIdSet);
         /* Get associated ExternalFile */
-        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
-                eFEWPairingService
-                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
+//        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
+//                eFEWPairingService
+//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
 
         return projectCollection.stream()
                 .map(project -> {
@@ -1047,8 +1047,8 @@ public class ProjectServiceImpl implements ProjectService{
                     projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectWorkerList(projectIdProjectWorkerDTOListMap.get(tmpProjectId));
-                    projectDTO.setFileList(
-                            projectIdExternalFileDTOListMap.get(tmpProjectId));
+//                    projectDTO.setFileList(
+//                            projectIdExternalFileDTOListMap.get(tmpProjectId));
 
                     projectDTO.setTotalPage(totalPage);
 

@@ -461,9 +461,9 @@ public class WorkerServiceImpl implements WorkerService {
         workerDTO.setAddress(
                 locationService.getDTOById(worker.getAddressId()));
         /* Get associated ExternalFile */
-        workerDTO.setFileList(
-                eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(worker.getWorkerId(), ENTITY_TYPE));
+//        workerDTO.setFileList(
+//                eFEWPairingService
+//                        .getAllExternalFileDTOByEntityIdAndEntityType(worker.getWorkerId(), ENTITY_TYPE));
 
         return workerDTO;
     }
@@ -481,9 +481,9 @@ public class WorkerServiceImpl implements WorkerService {
         Map<Long, LocationReadDTO> locationIdLocationDTOMap =
                 locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
         /* Get associated ExternalFile */
-        Map<Long, List<ExternalFileReadDTO>> workerIdExternalFileDTOListMap =
-                eFEWPairingService
-                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(workerIdSet, ENTITY_TYPE);
+//        Map<Long, List<ExternalFileReadDTO>> workerIdExternalFileDTOListMap =
+//                eFEWPairingService
+//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(workerIdSet, ENTITY_TYPE);
 
         return workerCollection.stream()
                 .map(worker -> {
@@ -492,8 +492,8 @@ public class WorkerServiceImpl implements WorkerService {
 
                     workerReadDTO.setAddress(locationIdLocationDTOMap.get(worker.getAddressId()));
 
-                    workerReadDTO.setFileList(
-                            workerIdExternalFileDTOListMap.get(worker.getWorkerId()));
+//                    workerReadDTO.setFileList(
+//                            workerIdExternalFileDTOListMap.get(worker.getWorkerId()));
 
                     workerReadDTO.setTotalPage(totalPage);
 

@@ -1292,9 +1292,9 @@ public class RequestServiceImpl implements RequestService{
         requestDTO.setRequestDetailList(
                 requestDetailService.getAllDTOByRequestId(requestId));
         /* Get associated ExternalFile */
-        requestDTO.setFileList(
-                eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(requestId, ENTITY_TYPE));
+//        requestDTO.setFileList(
+//                eFEWPairingService
+//                        .getAllExternalFileDTOByEntityIdAndEntityType(requestId, ENTITY_TYPE));
 
         return requestDTO;
     }
@@ -1325,9 +1325,9 @@ public class RequestServiceImpl implements RequestService{
         Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
                 requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
         /* Get associated ExternalFile */
-        Map<Long, List<ExternalFileReadDTO>> requestIdExternalFileDTOListMap =
-                eFEWPairingService
-                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
+//        Map<Long, List<ExternalFileReadDTO>> requestIdExternalFileDTOListMap =
+//                eFEWPairingService
+//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
         return requestCollection.stream()
                 .map(request -> {
@@ -1343,8 +1343,8 @@ public class RequestServiceImpl implements RequestService{
                         requestDTO.setVerifier(userIdUserDTOMap.get(request.getVerifierId()));
 
                     requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(tmpRequestId));
-                    requestDTO.setFileList(
-                            requestIdExternalFileDTOListMap.get(tmpRequestId));
+//                    requestDTO.setFileList(
+//                            requestIdExternalFileDTOListMap.get(tmpRequestId));
 
                     requestDTO.setTotalPage(totalPage);
 
