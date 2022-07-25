@@ -34,7 +34,7 @@ public class PostController {
     private PostCategoryRepository postCategoryRepository;
 
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('24','64')")
+    @PreAuthorize("hasAnyAuthority('24','54')")
     @PostMapping(value = "/v1/createPost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createPost(@RequestBody CreatePostModel createPostModel){
         if(postRepository.existsByAddressAndIsDeletedIsFalse(createPostModel.getAddress())){
@@ -235,7 +235,7 @@ public class PostController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getCategoryForCreatePost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getCategoryForCreatePost() {
             List<PostCategory> categoryModelList = postService.getCategoryForCreatePost();
@@ -246,7 +246,7 @@ public class PostController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updatePost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updatePost(@RequestBody UpdatePostModel updatePostModel) {
         boolean result = postService.updatePost(updatePostModel);
@@ -259,7 +259,7 @@ public class PostController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deletePost/{postId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deletePost(@PathVariable(name = "postId") Long postId) {
         try {

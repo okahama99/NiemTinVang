@@ -28,7 +28,7 @@ public class LocationController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createLocation", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createLocation(@Valid @RequestBody LocationCreateDTO locationDTO) {
         try {
@@ -46,7 +46,7 @@ public class LocationController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -70,7 +70,7 @@ public class LocationController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1.1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllAlt1(@RequestParam int pageNo,
                                              @RequestParam int pageSize,
@@ -96,7 +96,7 @@ public class LocationController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.LOCATION searchType) {
@@ -220,7 +220,7 @@ public class LocationController {
 //        }
 //    }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1/checkDuplicate", produces = "application/json;charset=UTF-8")
     public @ResponseBody String checkDuplicate(@RequestParam String addressNumber) {
         String result = locationService.checkDuplicate(addressNumber);
@@ -228,7 +228,7 @@ public class LocationController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateLocation", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateLocation(@Valid @RequestBody LocationUpdateDTO locationDTO) {
         try {
@@ -250,7 +250,7 @@ public class LocationController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteLocation/{locationId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteLocation(@PathVariable(name = "locationId") long locationId) {
         try {

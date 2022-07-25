@@ -48,7 +48,7 @@ public class UserController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -74,7 +74,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.USER searchType) {
@@ -158,7 +158,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_USER searchType,
@@ -253,7 +253,7 @@ public class UserController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateUser", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateUser(@Valid @RequestBody UserUpdateDTO userDTO){
         try {
@@ -277,7 +277,7 @@ public class UserController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @DeleteMapping(value = "/v1/deleteUser/{userId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteUser(@PathVariable(name = "userId") long userId){
         try {

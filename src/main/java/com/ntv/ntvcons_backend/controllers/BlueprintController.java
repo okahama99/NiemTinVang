@@ -30,7 +30,7 @@ public class BlueprintController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createBlueprint(@Valid @RequestBody BlueprintCreateDTO blueprintDTO) {
         try {
@@ -48,7 +48,7 @@ public class BlueprintController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -72,7 +72,7 @@ public class BlueprintController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1.1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllAlt1(@RequestParam int pageNo,
                                              @RequestParam int pageSize,
@@ -98,7 +98,7 @@ public class BlueprintController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.BLUEPRINT searchType) {
@@ -169,7 +169,7 @@ public class BlueprintController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_BLUEPRINT searchType,
@@ -248,14 +248,14 @@ public class BlueprintController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14')")
     @GetMapping(value = "/v1/checkDuplicate", produces = "application/json;charset=UTF-8")
     public @ResponseBody String checkDuplicate(@RequestParam String blueprintName) {
         return blueprintService.checkDuplicate(blueprintName);
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateBlueprint(@Valid @RequestBody BlueprintUpdateDTO blueprintDTO) {
         try {
@@ -278,7 +278,7 @@ public class BlueprintController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteBlueprint/{blueprintId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteBlueprint(@PathVariable(name = "blueprintId") long blueprintId) {
         try {

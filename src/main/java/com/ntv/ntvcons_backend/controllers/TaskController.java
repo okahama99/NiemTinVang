@@ -27,7 +27,7 @@ public class TaskController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createTask", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO) {
         try {
@@ -45,7 +45,7 @@ public class TaskController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64','14','24','54')")
+    @PreAuthorize("hasAnyAuthority('54','14','24','44')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -71,7 +71,7 @@ public class TaskController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','14','24','54')")
+    @PreAuthorize("hasAnyAuthority('54','14','24','44')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.TASK searchType) {
@@ -116,7 +116,7 @@ public class TaskController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','14','24','54')")
+    @PreAuthorize("hasAnyAuthority('54','14','24','44')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_TASK searchType,
@@ -196,7 +196,7 @@ public class TaskController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateTask", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO) {
         try {
@@ -219,7 +219,7 @@ public class TaskController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value ="/v1/deleteTask/{taskId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteTask(@PathVariable(name = "taskId") long taskId) {
         try {

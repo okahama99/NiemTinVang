@@ -28,7 +28,7 @@ public class ProjectManagerController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createProjectManager", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProjectManager(@Valid @RequestBody ProjectManagerCreateDTO projectManagerDTO) {
         try {
@@ -48,7 +48,7 @@ public class ProjectManagerController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -74,7 +74,7 @@ public class ProjectManagerController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.PROJECT_MANAGER searchType) {
@@ -119,7 +119,7 @@ public class ProjectManagerController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_PROJECT_MANAGER searchType,
@@ -186,7 +186,7 @@ public class ProjectManagerController {
     }
     
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateProjectManager", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProjectManager(@Valid @RequestBody ProjectManagerUpdateDTO projectManagerDTO){
         try {
@@ -207,7 +207,7 @@ public class ProjectManagerController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteProjectManager/{projectManagerId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteProjectManager(@PathVariable(name = "projectManagerId") long projectManagerId){
         // TODO:

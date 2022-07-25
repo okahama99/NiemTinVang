@@ -28,7 +28,7 @@ public class ReportTypeController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createReportType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createReportType(@Valid @RequestBody ReportTypeCreateDTO reportTypeDTO){
         try {
@@ -42,7 +42,7 @@ public class ReportTypeController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64','54')")
+    @PreAuthorize("hasAnyAuthority('54','44')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -68,7 +68,7 @@ public class ReportTypeController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','54')")
+    @PreAuthorize("hasAnyAuthority('54','44')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.REPORT_TYPE searchType) {
@@ -126,7 +126,7 @@ public class ReportTypeController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','54')")
+    @PreAuthorize("hasAnyAuthority('54','44')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam, 
                                                 @RequestParam SearchType.ALL_REPORT_TYPE searchType,
@@ -179,7 +179,7 @@ public class ReportTypeController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateReportType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateReportType(@Valid @RequestBody ReportTypeUpdateDTO reportTypeDTO){
         try {
@@ -199,7 +199,7 @@ public class ReportTypeController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteReportType/{reportTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteReportType(@PathVariable(name = "reportTypeId") long reportTypeId){
         try {

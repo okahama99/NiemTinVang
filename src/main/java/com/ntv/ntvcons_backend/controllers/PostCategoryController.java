@@ -31,7 +31,7 @@ public class PostCategoryController {
     PostCategoryService postCategoryService;
 
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createPostCategory", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createPostCategory(@RequestBody CreatePostCategoryModel createPostCategoryModel){
         if((postCategoryRepository.findByPostCategoryNameAndStatus(createPostCategoryModel.getPostCategoryName(), Status.ACTIVE)) != null){
@@ -172,7 +172,7 @@ public class PostCategoryController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64','24')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updatePostCategory", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updatePostCategory(@RequestBody UpdatePostCategoryModel updatePostCategoryModel) {
         boolean result = postCategoryService.updatePostCategory(updatePostCategoryModel);
@@ -185,7 +185,7 @@ public class PostCategoryController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deletePostCategory/{postCategoryId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deletePostCategory(@PathVariable(name = "postCategoryId") Long postCategoryId) {
         try {

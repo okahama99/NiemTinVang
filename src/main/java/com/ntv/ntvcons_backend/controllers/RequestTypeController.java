@@ -28,7 +28,7 @@ public class RequestTypeController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createRequestType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequestType(@Valid @RequestBody RequestTypeCreateDTO requestTypeDTO){
         try {
@@ -47,7 +47,7 @@ public class RequestTypeController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64','54')")
+    @PreAuthorize("hasAnyAuthority('54','44')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -74,7 +74,7 @@ public class RequestTypeController {
     }
 
 
-    @PreAuthorize("hasAnyAuthority('64','54')")
+    @PreAuthorize("hasAnyAuthority('54','44')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.REQUEST_TYPE searchType) {
@@ -132,7 +132,7 @@ public class RequestTypeController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','54')")
+    @PreAuthorize("hasAnyAuthority('54','44')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_REQUEST_TYPE searchType,
@@ -185,7 +185,7 @@ public class RequestTypeController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateRequestType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequestType(@Valid @RequestBody RequestTypeUpdateDTO requestTypeDTO){
         try {
@@ -205,7 +205,7 @@ public class RequestTypeController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64')")
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteRequestType/{requestTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteRequestType(@PathVariable(name = "requestTypeId") long requestTypeId){
         try {

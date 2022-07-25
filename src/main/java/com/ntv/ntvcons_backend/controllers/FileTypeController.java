@@ -28,7 +28,7 @@ public class FileTypeController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('64','24','14','54')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @PostMapping(value = "/v1/createFileType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createFileType(@Valid @RequestBody FileTypeCreateDTO fileTypeDTO) {
         try {
@@ -46,7 +46,7 @@ public class FileTypeController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('64','24','14','54')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -73,7 +73,7 @@ public class FileTypeController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14','54')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.FILE_TYPE searchType) {
@@ -144,7 +144,7 @@ public class FileTypeController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('64','24','14','54')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_FILE_TYPE searchType,
@@ -211,7 +211,7 @@ public class FileTypeController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('64','24','14','54')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @PutMapping(value = "/v1/updateFileType", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateFileType(@Valid @RequestBody FileTypeUpdateDTO fileTypeDTO) {
         try {
@@ -235,7 +235,7 @@ public class FileTypeController {
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('64','24','14','54')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @DeleteMapping(value = "/v1/deleteFileType/{fileTypeId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteFileType(@PathVariable(name = "fileTypeId") long fileTypeId) {
         try {
