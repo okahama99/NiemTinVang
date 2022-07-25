@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.services.report;
 
+import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.SearchOption;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
@@ -13,6 +15,8 @@ import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Report;
 import com.ntv.ntvcons_backend.repositories.ReportRepository;
+import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.reportDetail.ReportDetailService;
 import com.ntv.ntvcons_backend.services.reportType.ReportTypeService;
@@ -50,6 +54,12 @@ public class ReportServiceImpl implements ReportService {
     private ReportDetailService reportDetailService;
     @Autowired
     private TaskReportService taskReportService;
+    @Autowired
+    private EntityWrapperService entityWrapperService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
+
+    private final EntityType ENTITY_TYPE = EntityType.REPORT_ENTITY;
 
     /* CREATE */
     @Override
@@ -86,8 +96,6 @@ public class ReportServiceImpl implements ReportService {
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
 
-        /* TODO: create EntityWrapper for report */
-
         return reportRepository.saveAndFlush(newReport);
     }
     @Override
@@ -108,13 +116,17 @@ public class ReportServiceImpl implements ReportService {
 
         newReport = createReport(newReport);
 
-        long reportId = newReport.getReportId();
+        long newReportId = newReport.getReportId();
+
+        /* Create associated EntityWrapper */
+        entityWrapperService
+                .createEntityWrapper(newReportId, ENTITY_TYPE, newReport.getCreatedBy());
 
         /* Create associated ReportDetail; Set required FK reportId */
         List<ReportDetailCreateDTO> newReportDetailDTOList = newReportDTO.getReportDetailList();
         if (newReportDetailDTOList != null) {
             newReportDetailDTOList = newReportDetailDTOList.stream()
-                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportId))
+                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(newReportId))
                     .collect(Collectors.toList());
 
             reportDetailService.createBulkReportDetailByDTOList(newReportDetailDTOList);
@@ -124,7 +136,7 @@ public class ReportServiceImpl implements ReportService {
         List<TaskReportCreateDTO> newTaskReportDTOList = newReportDTO.getTaskReportList();
         if (newTaskReportDTOList != null) {
             newTaskReportDTOList = newTaskReportDTOList.stream()
-                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(reportId))
+                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(newReportId))
                     .collect(Collectors.toList());
 
             taskReportService.createBulkTaskReportByDTOList(newTaskReportDTOList);
@@ -689,13 +701,13 @@ public class ReportServiceImpl implements ReportService {
     public boolean deleteReport(long reportId) throws Exception {
         Report report = getById(reportId);
         
-        if (report == null) {
-            return false;
-            /* Not found with Id */
-        }
+        if (report == null)
+            return false; /* Not found with Id */
 
         /* Delete all associate detail */
         reportDetailService.deleteAllByReportId(reportId);
+        /* Delete associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteByEntityIdAndEntityType(reportId, ENTITY_TYPE);
 
         report.setIsDeleted(true);
         reportRepository.saveAndFlush(report);
@@ -707,10 +719,8 @@ public class ReportServiceImpl implements ReportService {
     public boolean deleteAllByProjectId(long projectId) throws Exception {
         List<Report> reportList = getAllByProjectId(projectId);
 
-        if (reportList == null) {
-            return false;
-            /* Not found with projectId */
-        }
+        if (reportList == null)
+            return false; /* Not found with projectId */
 
         /* Set to avoid duplicate */
         Set<Long> reportIdSet = new HashSet<>();
@@ -718,12 +728,14 @@ public class ReportServiceImpl implements ReportService {
         reportList = reportList.stream()
                 .peek(report -> {
                     reportIdSet.add(report.getReportId());
-                    report.setIsDeleted(true);
-                })
+
+                    report.setIsDeleted(true);})
                 .collect(Collectors.toList());
 
         /* Delete all associate detail */
         reportDetailService.deleteAllByReportIdIn(reportIdSet);
+        /* Delete associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteAllByEntityIdInAndEntityType(reportIdSet, ENTITY_TYPE);
 
         reportRepository.saveAllAndFlush(reportList);
 
@@ -745,6 +757,10 @@ public class ReportServiceImpl implements ReportService {
         reportDTO.setReportDetailList(reportDetailService.getAllDTOByReportId(reportId));
         /* Get associated TaskReport */
         reportDTO.setTaskReportList(taskReportService.getAllDTOByReportId(reportId));
+        /* Get associated ExternalFile */
+        reportDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(reportId, ENTITY_TYPE));
 
         return reportDTO;
     }
@@ -768,18 +784,26 @@ public class ReportServiceImpl implements ReportService {
         /* Get associated TaskReport */
         Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
                 taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
+        /* Get associated ExternalFile */
+        Map<Long, List<ExternalFileReadDTO>> reportIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(reportIdSet, ENTITY_TYPE);
 
         return reportCollection.stream()
                 .map(report -> {
                     ReportReadDTO reportDTO =
                             modelMapper.map(report, ReportReadDTO.class);
 
+                    long tmpReportId = report.getReportId();
+
                     /* NOT NULL */
                     reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
 
                     /* Nullable */
-                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(report.getReportId()));
-                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(report.getReportId()));
+                    reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(tmpReportId));
+                    reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(tmpReportId));
+                    reportDTO.setFileList(
+                            reportIdExternalFileDTOListMap.get(tmpReportId));
 
                     reportDTO.setTotalPage(totalPage);
 

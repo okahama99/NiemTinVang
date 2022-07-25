@@ -1,6 +1,8 @@
 package com.ntv.ntvcons_backend.services.request;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailUpdateDTO;
@@ -18,6 +20,8 @@ import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestVerifierModel;
 import com.ntv.ntvcons_backend.repositories.*;
+import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
 import com.ntv.ntvcons_backend.services.requestType.RequestTypeService;
@@ -62,6 +66,12 @@ public class RequestServiceImpl implements RequestService{
     private RequestDetailService requestDetailService;
     @Autowired
     private RequestDetailRepository requestDetailRepository;
+    @Autowired
+    private EntityWrapperService entityWrapperService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
+
+    private final EntityType ENTITY_TYPE = EntityType.REQUEST_ENTITY;
 
     /* CREATE */
     @Override
@@ -126,8 +136,6 @@ public class RequestServiceImpl implements RequestService{
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
 
-        /* TODO: create EntityWrapper for request */
-
         return requestRepository.saveAndFlush(newRequest);
     }
     @Override
@@ -147,14 +155,18 @@ public class RequestServiceImpl implements RequestService{
 
         newRequest = createRequest(newRequest);
 
-        long requestId = newRequest.getRequestId();
+        long newRequestId = newRequest.getRequestId();
+
+        /* Create associated EntityWrapper */
+        entityWrapperService
+                .createEntityWrapper(newRequestId, ENTITY_TYPE, newRequest.getCreatedBy());
 
         /* Create associated RequestDetail; Set required FK requestId */
         /* Already check NOT NULL & size > 1 */
         List<RequestDetailCreateDTO> newRequestDetailDTOList = newRequestDTO.getRequestDetailList();
 
         newRequestDetailDTOList = newRequestDetailDTOList.stream()
-                .peek(newRequestDetailDTO -> newRequestDetailDTO.setRequestId(requestId))
+                .peek(newRequestDetailDTO -> newRequestDetailDTO.setRequestId(newRequestId))
                 .collect(Collectors.toList());
 
         requestDetailService.createBulkRequestDetailByDTOList(newRequestDetailDTOList);
@@ -1120,9 +1132,13 @@ public class RequestServiceImpl implements RequestService{
     public boolean deleteRequest(Long requestId) throws Exception {
         Request request = getById(requestId);
 
-        if (request == null){
+        if (request == null)
             return false;
-        }
+
+        /* Delete all associate detail */
+        requestDetailService.deleteAllByRequestId(requestId);
+        /* Delete associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteByEntityIdAndEntityType(requestId, ENTITY_TYPE);
 
         request.setIsDeleted(true);
         requestRepository.saveAndFlush(request);
@@ -1134,14 +1150,22 @@ public class RequestServiceImpl implements RequestService{
     public boolean deleteAllByProjectId(long projectId) throws Exception {
         List<Request> requestList = getAllByProjectId(projectId);
 
-        if (requestList == null){
+        if (requestList == null)
             return false;
-        }
 
-        requestList =
-                requestList.stream()
-                        .peek(request -> request.setIsDeleted(true))
-                        .collect(Collectors.toList());
+        Set<Long> requestIdSet = new HashSet<>();
+
+        requestList = requestList.stream()
+                .peek(request -> {
+                    requestIdSet.add(request.getRequesterId());
+
+                    request.setIsDeleted(true);})
+                .collect(Collectors.toList());
+
+        /* Delete all associate detail */
+        requestDetailService.deleteAllByRequestIdIn(requestIdSet);
+        /* Delete all associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteAllByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
         requestRepository.saveAllAndFlush(requestList);
 
@@ -1151,14 +1175,22 @@ public class RequestServiceImpl implements RequestService{
     public boolean deleteAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Request> requestList = getAllByProjectIdIn(projectIdCollection);
 
-        if (requestList == null){
+        if (requestList == null)
             return false;
-        }
 
-        requestList =
-                requestList.stream()
-                        .peek(request -> request.setIsDeleted(true))
-                        .collect(Collectors.toList());
+        Set<Long> requestIdSet = new HashSet<>();
+
+        requestList = requestList.stream()
+                .peek(request -> {
+                    requestIdSet.add(request.getRequesterId());
+
+                    request.setIsDeleted(true);})
+                .collect(Collectors.toList());
+
+        /* Delete all associate detail */
+        requestDetailService.deleteAllByRequestIdIn(requestIdSet);
+        /* Delete all associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteAllByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
         requestRepository.saveAllAndFlush(requestList);
 
@@ -1179,14 +1211,22 @@ public class RequestServiceImpl implements RequestService{
             requestSet.addAll(requestList);
         }
 
-        if (requestSet.isEmpty()){
+        if (requestSet.isEmpty())
             return false;
-        }
 
-        requestSet =
-                requestSet.stream()
-                        .peek(request -> request.setIsDeleted(true))
-                        .collect(Collectors.toSet());
+        Set<Long> requestIdSet = new HashSet<>();
+
+        requestSet = requestSet.stream()
+                .peek(request -> {
+                    requestIdSet.add(request.getRequesterId());
+
+                    request.setIsDeleted(true);})
+                .collect(Collectors.toSet());
+
+        /* Delete all associate detail */
+        requestDetailService.deleteAllByRequestIdIn(requestIdSet);
+        /* Delete all associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteAllByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
         requestRepository.saveAllAndFlush(requestSet);
 
@@ -1206,14 +1246,22 @@ public class RequestServiceImpl implements RequestService{
             requestSet.addAll(requestList);
         }
 
-        if (requestSet.isEmpty()){
+        if (requestSet.isEmpty())
             return false;
-        }
 
-        requestSet =
-                requestSet.stream()
-                        .peek(request -> request.setIsDeleted(true))
-                        .collect(Collectors.toSet());
+        Set<Long> requestIdSet = new HashSet<>();
+
+        requestSet = requestSet.stream()
+                .peek(request -> {
+                    requestIdSet.add(request.getRequesterId());
+
+                    request.setIsDeleted(true);})
+                .collect(Collectors.toSet());
+
+        /* Delete all associate detail */
+        requestDetailService.deleteAllByRequestIdIn(requestIdSet);
+        /* Delete all associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteAllByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
         requestRepository.saveAllAndFlush(requestSet);
 
@@ -1222,6 +1270,8 @@ public class RequestServiceImpl implements RequestService{
 
     /* Utils */
     private RequestReadDTO fillDTO(Request request) throws Exception{
+        long requestId = request.getRequestId();
+
         RequestReadDTO requestDTO = modelMapper.map(request, RequestReadDTO.class);
 
         /* Get associated RequestType */
@@ -1240,7 +1290,11 @@ public class RequestServiceImpl implements RequestService{
 
         /* Get associated RequestDetail */
         requestDTO.setRequestDetailList(
-                requestDetailService.getAllDTOByRequestId(request.getRequestTypeId()));
+                requestDetailService.getAllDTOByRequestId(requestId));
+        /* Get associated ExternalFile */
+        requestDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(requestId, ENTITY_TYPE));
 
         return requestDTO;
     }
@@ -1270,11 +1324,17 @@ public class RequestServiceImpl implements RequestService{
         /* Get associated RequestDetail */
         Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
                 requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
+        /* Get associated ExternalFile */
+        Map<Long, List<ExternalFileReadDTO>> requestIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
         return requestCollection.stream()
                 .map(request -> {
                     RequestReadDTO requestDTO =
                             modelMapper.map(request, RequestReadDTO.class);
+
+                    long tmpRequestId = request.getRequestId();
 
                     requestDTO.setRequestType(requestTypeIdRequestTypeDTOMap.get(request.getRequestTypeId()));
                     requestDTO.setRequester(userIdUserDTOMap.get(request.getRequesterId()));
@@ -1282,7 +1342,9 @@ public class RequestServiceImpl implements RequestService{
                     if (request.getVerifierId() != null)
                         requestDTO.setVerifier(userIdUserDTOMap.get(request.getVerifierId()));
 
-                    requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(request.getRequestId()));
+                    requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(tmpRequestId));
+                    requestDTO.setFileList(
+                            requestIdExternalFileDTOListMap.get(tmpRequestId));
 
                     requestDTO.setTotalPage(totalPage);
 

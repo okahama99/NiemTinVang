@@ -1,5 +1,7 @@
 package com.ntv.ntvcons_backend.services.worker;
 
+import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateOptionDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
@@ -9,6 +11,8 @@ import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Worker;
 import com.ntv.ntvcons_backend.repositories.WorkerRepository;
+import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
@@ -37,6 +41,12 @@ public class WorkerServiceImpl implements WorkerService {
     private LocationService locationService;
     @Autowired
     private ProjectWorkerService projectWorkerService;
+    @Autowired
+    private EntityWrapperService entityWrapperService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
+
+    private final EntityType ENTITY_TYPE = EntityType.WORKER_ENTITY;
 
     /* CREATE */
     @Override
@@ -76,6 +86,10 @@ public class WorkerServiceImpl implements WorkerService {
         newWorker.setAddressId(locationDTO.getLocationId());
 
         newWorker = createWorker(newWorker);
+
+        /* Create associated EntityWrapper */
+        entityWrapperService
+                .createEntityWrapper(newWorker.getWorkerId(), ENTITY_TYPE, newWorker.getCreatedBy());
 
         return fillDTO(newWorker);
     }
@@ -430,6 +444,9 @@ public class WorkerServiceImpl implements WorkerService {
         /* Delete all associated projectWorker */
         projectWorkerService.deleteAllByWorkerId(workerId);
 
+        /* Delete associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteByEntityIdAndEntityType(workerId, ENTITY_TYPE);
+
         worker.setIsDeleted(true);
         workerRepository.saveAndFlush(worker);
 
@@ -443,20 +460,30 @@ public class WorkerServiceImpl implements WorkerService {
         /* Get associated Location */
         workerDTO.setAddress(
                 locationService.getDTOById(worker.getAddressId()));
+        /* Get associated ExternalFile */
+        workerDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(worker.getWorkerId(), ENTITY_TYPE));
 
         return workerDTO;
     }
 
     private List<WorkerReadDTO> fillAllDTO(Collection<Worker> workerCollection, Integer totalPage) throws Exception {
         Set<Long> locationIdSet = new HashSet<>();
+        Set<Long> workerIdSet = new HashSet<>();
 
         for (Worker worker : workerCollection) {
             locationIdSet.add(worker.getAddressId());
+            workerIdSet.add(worker.getWorkerId());
         }
 
         /* Get associated Location */
         Map<Long, LocationReadDTO> locationIdLocationDTOMap =
                 locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
+        /* Get associated ExternalFile */
+        Map<Long, List<ExternalFileReadDTO>> workerIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(workerIdSet, ENTITY_TYPE);
 
         return workerCollection.stream()
                 .map(worker -> {
@@ -464,6 +491,9 @@ public class WorkerServiceImpl implements WorkerService {
                             modelMapper.map(worker, WorkerReadDTO.class);
 
                     workerReadDTO.setAddress(locationIdLocationDTOMap.get(worker.getAddressId()));
+
+                    workerReadDTO.setFileList(
+                            workerIdExternalFileDTOListMap.get(worker.getWorkerId()));
 
                     workerReadDTO.setTotalPage(totalPage);
 

@@ -659,14 +659,47 @@ public class RequestDetailServiceImpl implements RequestDetailService {
 
     /* DELETE */
     @Override
-    public boolean deleteRequestDetail(Long requestDetailId) {
-        RequestDetail requestDetail = requestDetailRepository.findById(requestDetailId).orElse(null);
-        if (requestDetail != null){
-            requestDetail.setIsDeleted(true);
-            requestDetailRepository.saveAndFlush(requestDetail);
-            return true;
-        }
-        return false;
+    public boolean deleteRequestDetail(long requestDetailId) throws Exception {
+        RequestDetail requestDetail = getById(requestDetailId);
+
+        if (requestDetail == null)
+            return false;
+
+        requestDetail.setIsDeleted(true);
+        requestDetailRepository.saveAndFlush(requestDetail);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteAllByRequestId(long requestId) throws Exception {
+        List<RequestDetail> requestDetailList = getAllByRequestId(requestId);
+
+        if (requestDetailList == null)
+            return false;
+
+        requestDetailList = requestDetailList.stream()
+                .peek(requestDetail -> requestDetail.setIsDeleted(true))
+                .collect(Collectors.toList());
+
+        requestDetailRepository.saveAllAndFlush(requestDetailList);
+
+        return true;
+    }
+    @Override
+    public boolean deleteAllByRequestIdIn(Collection<Long> requestIdCollection) throws Exception {
+        List<RequestDetail> requestDetailList = getAllByRequestIdIn(requestIdCollection);
+
+        if (requestDetailList == null)
+            return false;
+
+        requestDetailList = requestDetailList.stream()
+                .peek(requestDetail -> requestDetail.setIsDeleted(true))
+                .collect(Collectors.toList());
+
+        requestDetailRepository.saveAllAndFlush(requestDetailList);
+
+        return true;
     }
 
     /* Utils */

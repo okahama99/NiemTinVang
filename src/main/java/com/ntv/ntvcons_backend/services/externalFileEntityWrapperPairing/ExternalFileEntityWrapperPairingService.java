@@ -1,9 +1,8 @@
 package com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing;
 
+import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.Collection;
 import java.util.List;
@@ -21,15 +20,17 @@ public interface ExternalFileEntityWrapperPairingService {
     ExternalFileEntityWrapperPairing getById(long pairingId) throws Exception;
 
     List<ExternalFileEntityWrapperPairing> getAllByEntityWrapperId(long entityWrapperId) throws Exception;
-    List<ExternalFileReadDTO> getAllExternalFileDTOByEntityWrapperId(long entityWrapperId) throws Exception;
+    List<ExternalFileReadDTO> getAllExternalFileDTOByEntityIdAndEntityType(long entityId, EntityType type) throws Exception;
 
     List<ExternalFileEntityWrapperPairing> getAllByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception;
-    Map<Long, List<ExternalFileReadDTO>> mapEntityWrapperIdExternalFileDTOListByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception;
+    Map<Long, List<ExternalFileReadDTO>> mapEntityWrapperIdExternalFileDTOListByEntityWrapperIdIn
+            (Collection<Long> entityWrapperIdCollection) throws Exception;
+    Map<Long, List<ExternalFileReadDTO>> mapEntityIdExternalFileDTOListByEntityIdInAndEntityType
+            (Collection<Long> entityIdCollection, EntityType type) throws Exception;
 
     List<ExternalFileEntityWrapperPairing> getAllByExternalFileId(long externalFileId) throws Exception;
 
     List<ExternalFileEntityWrapperPairing> getAllByExternalFileIdIn(Collection<Long> externalFileIdCollection) throws Exception;
-    Map<Long, List<ExternalFileReadDTO>> mapEntityWrapperIdExternalFileDTOListByExternalFileIdIn(Collection<Long> externalFileIdCollection) throws Exception;
 
     /* UPDATE */
     ExternalFileEntityWrapperPairing updatePairing(ExternalFileEntityWrapperPairing updatedPairing) throws Exception;

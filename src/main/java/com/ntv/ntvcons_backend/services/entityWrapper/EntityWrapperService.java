@@ -29,5 +29,6 @@ public interface EntityWrapperService {
 
     /* DELETE */
     boolean deleteEntityWrapper(long entityWrapperID) throws Exception;
-    boolean deleteByEntityIdAndEntityType(long entityWrapperID, EntityType type) throws Exception;
+    boolean deleteByEntityIdAndEntityType(long entityID, EntityType type) throws Exception;
+    boolean deleteAllByEntityIdInAndEntityType(Collection<Long> entityIDCollection, EntityType type) throws Exception;
 }

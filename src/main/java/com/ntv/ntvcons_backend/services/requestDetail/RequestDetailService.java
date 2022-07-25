@@ -60,5 +60,8 @@ public interface RequestDetailService {
     List<RequestDetailReadDTO> updateBulkRequestDetailByDTOList(List<RequestDetailUpdateDTO> updatedRequestDetailDTOList) throws Exception;
 
     /* DELETE */
-    boolean deleteRequestDetail(Long requestDetailId);
+    boolean deleteRequestDetail(long requestDetailId) throws Exception;
+
+    boolean deleteAllByRequestId(long requestId) throws Exception;
+    boolean deleteAllByRequestIdIn(Collection<Long> requestIdCollection) throws Exception;
 }

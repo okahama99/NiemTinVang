@@ -23,6 +23,10 @@ public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO
     @NotNull(message = "username REQUIRED for create")
     private String username;
 
+    @Size(max = 128, message = "password max length: 100 characters")
+//    @NotNull(message = "password REQUIRED for create")
+    private String password;
+
     @Size(max = 100, message = "fullName max length: 100 characters")
     @NotNull(message = "fullName REQUIRED for create")
     private String fullName;
@@ -50,6 +54,4 @@ public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
     private final Boolean isDeleted = false;
-
-    private String password;
 }

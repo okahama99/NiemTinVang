@@ -1,11 +1,15 @@
 package com.ntv.ntvcons_backend.services.user;
 
+import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
+import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.role.RoleService;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
@@ -34,9 +38,14 @@ public class UserServiceImpl implements UserService{
     private TaskAssignmentService taskAssignmentService;
     @Autowired
     private ProjectManagerService projectManagerService;
-
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EntityWrapperService entityWrapperService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
+
+    private final EntityType ENTITY_TYPE = EntityType.USER_ENTITY;
 
     /* CREATE */
     @Override
@@ -69,12 +78,16 @@ public class UserServiceImpl implements UserService{
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
 
+        if (newUser.getPassword() != null) {
+            newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        }
+
         if (newUser.getCreatedBy() == null) { /* Self created */
             newUser = userRepository.saveAndFlush(newUser);
 
             newUser.setCreatedBy(newUser.getUserId());
         }
-        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+
         return userRepository.saveAndFlush(newUser);
     }
     @Override
@@ -82,6 +95,10 @@ public class UserServiceImpl implements UserService{
         User newUser = modelMapper.map(newUserDTO, User.class);
 
         newUser = createUser(newUser);
+
+        /* Create associated EntityWrapper */
+        entityWrapperService
+                .createEntityWrapper(newUser.getUserId(), ENTITY_TYPE, newUser.getCreatedBy());
 
         return fillDTO(newUser);
     }
@@ -455,11 +472,14 @@ public class UserServiceImpl implements UserService{
             /* Not found by Id */
         }
 
-        /* Delete all associated taskAssignment */
+        /* Delete all associated TaskAssignment */
         taskAssignmentService.deleteAllByUserId(userId);
 
-        /* Delete all associated projectManager */
+        /* Delete all associated ProjectManager */
         projectManagerService.deleteAllByUserId(userId);
+
+        /* Delete associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteByEntityIdAndEntityType(userId, ENTITY_TYPE);
 
         user.setIsDeleted(true);
         userRepository.saveAndFlush(user);
@@ -474,20 +494,30 @@ public class UserServiceImpl implements UserService{
         /* Get associated Role */
         userDTO.setRole(
                 roleService.getDTOById(user.getRoleId()));
+        /* Get associated ExternalFile */
+        userDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(user.getUserId(), ENTITY_TYPE));
 
         return userDTO;
     }
 
     private List<UserReadDTO> fillAllDTO(Collection<User> userCollection, Integer totalPage) throws Exception {
         Set<Long> roleIdSet = new HashSet<>();
+        Set<Long> userIdSet = new HashSet<>();
 
         for (User user : userCollection) {
             roleIdSet.add(user.getRoleId());
+            userIdSet.add(user.getUserId());
         }
 
         /* Get associated Role */
         Map<Long, RoleReadDTO> roleIdRoleDTOMap =
                 roleService.mapRoleIdRoleDTOByIdIn(roleIdSet);
+        /* Get associated ExternalFile */
+        Map<Long, List<ExternalFileReadDTO>> userIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(userIdSet, ENTITY_TYPE);
 
         return userCollection.stream()
                 .map(user -> {
@@ -495,6 +525,9 @@ public class UserServiceImpl implements UserService{
                             modelMapper.map(user, UserReadDTO.class);
 
                     userReadDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
+
+                    userReadDTO.setFileList(
+                            userIdExternalFileDTOListMap.get(user.getUserId()));
 
                     userReadDTO.setTotalPage(totalPage);
 
