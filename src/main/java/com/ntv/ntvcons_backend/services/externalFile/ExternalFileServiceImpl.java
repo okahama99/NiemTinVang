@@ -32,7 +32,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Autowired
     private UserService userService;
 
-    private final String DELETED = Status.DELETED.getStringValue();
+    private final Status DELETED = Status.DELETED;
 
     /* CREATE */
     @Override
@@ -49,7 +49,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         /* Check duplicate */
         if (externalFileRepository
-                .existsByFileLinkAndStatusNotContains(
+                .existsByFileLinkAndStatusNot(
                         newFile.getFileLink(),
                         DELETED)) {
             errorMsg += "Already exists another ExternalFile with link: '"
@@ -74,7 +74,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public Page<ExternalFile> getPageAll(Pageable paging) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByStatusNotContains(DELETED, paging);
+                externalFileRepository.findAllByStatusNot(DELETED, paging);
 
         if (filePage.isEmpty())
             return null;
@@ -99,12 +99,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public boolean existsById(long fileId) throws Exception {
         return externalFileRepository
-                .existsByFileIdAndStatusNotContains(fileId, DELETED);
+                .existsByFileIdAndStatusNot(fileId, DELETED);
     }
     @Override
     public ExternalFile getById(long fileId) throws Exception {
         return externalFileRepository
-                .findByFileIdAndStatusNotContains(fileId, DELETED)
+                .findByFileIdAndStatusNot(fileId, DELETED)
                 .orElse(null);
     }
     @Override
@@ -120,12 +120,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public boolean existsAllByIdIn(Collection<Long> fileIdCollection) throws Exception {
         return externalFileRepository
-                .existsAllByFileIdInAndStatusNotContains(fileIdCollection, DELETED);
+                .existsAllByFileIdInAndStatusNot(fileIdCollection, DELETED);
     }
     @Override
     public List<ExternalFile> getAllByIdIn(Collection<Long> fileIdCollection) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileIdInAndStatusNotContains(fileIdCollection, DELETED);
+                externalFileRepository.findAllByFileIdInAndStatusNot(fileIdCollection, DELETED);
 
         if (fileList.isEmpty())
             return null;
@@ -155,7 +155,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public List<ExternalFile> getAllByFileTypeId(long fileTypeId) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileTypeIdAndStatusNotContains(fileTypeId, DELETED);
+                externalFileRepository.findAllByFileTypeIdAndStatusNot(fileTypeId, DELETED);
 
         if (fileList.isEmpty())
             return null;
@@ -174,7 +174,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public Page<ExternalFile> getPageAllByFileTypeId(Pageable paging, long fileTypeId) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileTypeIdAndStatusNotContains(fileTypeId, paging, DELETED);
+                externalFileRepository.findAllByFileTypeIdAndStatusNot(fileTypeId, paging, DELETED);
 
         if (filePage.isEmpty())
             return null;
@@ -199,7 +199,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public List<ExternalFile> getAllByFileTypeIdIn(Collection<Long> fileTypeIdCollection) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileTypeIdInAndStatusNotContains(fileTypeIdCollection, DELETED);
+                externalFileRepository.findAllByFileTypeIdInAndStatusNot(fileTypeIdCollection, DELETED);
 
         if (fileList.isEmpty())
             return null;
@@ -218,7 +218,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public Page<ExternalFile> getPageAllByFileTypeIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileTypeIdInAndStatusNotContains(fileTypeIdCollection, paging, DELETED);
+                externalFileRepository.findAllByFileTypeIdInAndStatusNot(fileTypeIdCollection, paging, DELETED);
 
         if (filePage.isEmpty())
             return null;
@@ -243,7 +243,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public List<ExternalFile> getAllByNameContains(String fileName) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileNameContainsAndStatusNotContains(fileName, DELETED);
+                externalFileRepository.findAllByFileNameContainsAndStatusNot(fileName, DELETED);
 
         if (fileList.isEmpty())
             return null;
@@ -262,7 +262,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Override
     public Page<ExternalFile> getPageAllByNameContains(Pageable paging, String fileName) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileNameContainsAndStatusNotContains(fileName, paging, DELETED);
+                externalFileRepository.findAllByFileNameContainsAndStatusNot(fileName, paging, DELETED);
 
         if (filePage.isEmpty())
             return null;
@@ -313,7 +313,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         /* Check duplicate */
         if (externalFileRepository
-                .existsByFileLinkAndFileIdNotAndStatusNotContains(
+                .existsByFileLinkAndFileIdNotAndStatusNot(
                         updatedFile.getFileLink(),
                         updatedFile.getFileId(),
                         DELETED)) {

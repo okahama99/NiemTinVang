@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.ExternalFile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,35 +13,35 @@ import java.util.Optional;
 
 @Repository
 public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long> {
-    List<ExternalFile> findAllByStatusNotContains(String status);
-    Page<ExternalFile> findAllByStatusNotContains(String status, Pageable paging);
+    List<ExternalFile> findAllByStatusNot(Status status);
+    Page<ExternalFile> findAllByStatusNot(Status status, Pageable paging);
 
 
     /* Id */
-    boolean existsByFileIdAndStatusNotContains(long fileId, String status);
-    Optional<ExternalFile> findByFileIdAndStatusNotContains(long fileId, String status);
-    boolean existsAllByFileIdInAndStatusNotContains(Collection<Long> fileIdCollection, String status);
-    List<ExternalFile> findAllByFileIdInAndStatusNotContains(Collection<Long> fileIdCollection, String status);
+    boolean existsByFileIdAndStatusNot(long fileId, Status status);
+    Optional<ExternalFile> findByFileIdAndStatusNot(long fileId, Status status);
+    boolean existsAllByFileIdInAndStatusNot(Collection<Long> fileIdCollection, Status status);
+    List<ExternalFile> findAllByFileIdInAndStatusNot(Collection<Long> fileIdCollection, Status status);
     /* Id & fileLink */
-    boolean existsByFileLinkAndFileIdNotAndStatusNotContains(String fileLink, long fileId, String status);
+    boolean existsByFileLinkAndFileIdNotAndStatusNot(String fileLink, long fileId, Status status);
 
 
     /* fileName */
-    Optional<ExternalFile> findByFileNameAndStatusNotContains(String fileName, String status);
-    List<ExternalFile> findAllByFileNameContainsAndStatusNotContains(String fileName, String status);
-    Page<ExternalFile> findAllByFileNameContainsAndStatusNotContains(String fileName, Pageable paging, String status);
+    Optional<ExternalFile> findByFileNameAndStatusNot(String fileName, Status status);
+    List<ExternalFile> findAllByFileNameContainsAndStatusNot(String fileName, Status status);
+    Page<ExternalFile> findAllByFileNameContainsAndStatusNot(String fileName, Pageable paging, Status status);
 
 
     /* fileLink */
-    boolean existsByFileLinkAndStatusNotContains(String fileLink, String status);
-    Optional<ExternalFile> findByFileLinkAndStatusNotContains(String fileLink, String status);
-    List<ExternalFile> findAllByFileLinkContainsAndStatusNotContains(String fileLink, String status);
-    Page<ExternalFile> findAllByFileLinkContainsAndStatusNotContains(String fileLink, Pageable paging, String status);
+    boolean existsByFileLinkAndStatusNot(String fileLink, Status status);
+    Optional<ExternalFile> findByFileLinkAndStatusNot(String fileLink, Status status);
+    List<ExternalFile> findAllByFileLinkContainsAndStatusNot(String fileLink, Status status);
+    Page<ExternalFile> findAllByFileLinkContainsAndStatusNot(String fileLink, Pageable paging, Status status);
 
 
     /* filetypeId */
-    List<ExternalFile> findAllByFileTypeIdAndStatusNotContains(long filetypeId, String status);
-    Page<ExternalFile> findAllByFileTypeIdAndStatusNotContains(long filetypeId, Pageable paging, String status);
-    List<ExternalFile> findAllByFileTypeIdInAndStatusNotContains(Collection<Long> fileTypeIdCollection, String status);
-    Page<ExternalFile> findAllByFileTypeIdInAndStatusNotContains(Collection<Long> fileTypeIdCollection, Pageable paging, String status);
+    List<ExternalFile> findAllByFileTypeIdAndStatusNot(long filetypeId, Status status);
+    Page<ExternalFile> findAllByFileTypeIdAndStatusNot(long filetypeId, Pageable paging, Status status);
+    List<ExternalFile> findAllByFileTypeIdInAndStatusNot(Collection<Long> fileTypeIdCollection, Status status);
+    Page<ExternalFile> findAllByFileTypeIdInAndStatusNot(Collection<Long> fileTypeIdCollection, Pageable paging, Status status);
 }

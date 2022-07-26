@@ -5,7 +5,6 @@ import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Task;
-import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface TaskService extends BaseService {
+public interface TaskService {
     /* CREATE */
     Task createTask(Task newTask) throws Exception;
     TaskReadDTO createTaskByDTO(TaskCreateDTO newTaskDTO) throws Exception;

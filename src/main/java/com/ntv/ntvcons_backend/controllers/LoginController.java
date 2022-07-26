@@ -31,12 +31,19 @@ public class LoginController {
 
     @PostMapping(value = "/login", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> login(@RequestBody UserLoginModel user){
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
         Map<String, String> response = new HashMap<>(2);
+
         String token = jwtUtil.generateTokenNew(authentication);
+
         response.put("status", "success");
         response.put("token", token);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+
+        return ResponseEntity.ok().body(response);
     }
 }

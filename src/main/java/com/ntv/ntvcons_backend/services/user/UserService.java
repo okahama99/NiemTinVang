@@ -4,7 +4,6 @@ import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
 import com.ntv.ntvcons_backend.entities.User;
-import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface UserService extends BaseService {
+public interface UserService {
     /* CREATE */
     User createUser(User newUser) throws Exception;
     UserReadDTO createUserByDTO(UserCreateDTO newUserDTO) throws Exception;

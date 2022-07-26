@@ -7,7 +7,6 @@ import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
-import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface BlueprintService extends BaseService { /* TODO: throws Exception for controller to handle */
+public interface BlueprintService { /* TODO: throws Exception for controller to handle */
     /* CREATE */
     void createProjectBlueprint(CreateBlueprintModel createBluePrintModel);
 

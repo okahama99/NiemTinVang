@@ -24,6 +24,10 @@ public class UserUpdateDTO extends BaseUpdateDTO {
     @Size(max = 50, message = "username max length: 50 characters")
     private String username;
 
+    @Size(max = 128, message = "password max length: 128 characters")
+//    @NotNull(message = "password REQUIRED for update")
+    private String password;
+
     @NotNull(message = "fullName REQUIRED for update")
     @Size(max = 100, message = "fullName max length: 100 characters")
     private String fullName;

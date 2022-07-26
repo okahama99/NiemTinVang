@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.EntityWrapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,68 +13,68 @@ import java.util.Optional;
 
 @Repository
 public interface EntityWrapperRepository extends JpaRepository<EntityWrapper, Long> {
-    List<EntityWrapper> findAllByStatusNotContains(String status);
-    Page<EntityWrapper> findAllByStatusNotContains(String status, Pageable paging);
+    List<EntityWrapper> findAllByStatusNot(Status status);
+    Page<EntityWrapper> findAllByStatusNot(Status status, Pageable paging);
 
 
     /* Id */
-    boolean existsByEntityWrapperIdAndStatusNotContains(long entityWrapperId, String status);
-    Optional<EntityWrapper> findByEntityWrapperIdAndStatusNotContains(long entityWrapperId, String status);
-    List<EntityWrapper> findAllByEntityWrapperIdInAndStatusNotContains(Collection<Long> entityWrapperIdCollection, String status);
+    boolean existsByEntityWrapperIdAndStatusNot(long entityWrapperId, Status status);
+    Optional<EntityWrapper> findByEntityWrapperIdAndStatusNot(long entityWrapperId, Status status);
+    List<EntityWrapper> findAllByEntityWrapperIdInAndStatusNot(Collection<Long> entityWrapperIdCollection, Status status);
 
 
     /* blueprintId */
-    boolean existsByBlueprintIdAndStatusNotContains(long blueprintId, String status);
-    Optional<EntityWrapper> findByBlueprintIdAndStatusNotContains(long blueprintId, String status);
-    List<EntityWrapper> findAllByBlueprintIdInAndStatusNotContains(Collection<Long> blueprintIdCollection, String status);
-    List<EntityWrapper> findAllByBlueprintIdNotNullAndStatusNotContains(String status);
+    boolean existsByBlueprintIdAndStatusNot(long blueprintId, Status status);
+    Optional<EntityWrapper> findByBlueprintIdAndStatusNot(long blueprintId, Status status);
+    List<EntityWrapper> findAllByBlueprintIdInAndStatusNot(Collection<Long> blueprintIdCollection, Status status);
+    List<EntityWrapper> findAllByBlueprintIdNotNullAndStatusNot(Status status);
 
 
     /* postId */
-    boolean existsByPostIdAndStatusNotContains(long postId, String status);
-    Optional<EntityWrapper> findByPostIdAndStatusNotContains(long postId, String status);
-    List<EntityWrapper> findAllByPostIdInAndStatusNotContains(Collection<Long> postIdCollection, String status);
-    List<EntityWrapper> findAllByPostIdNotNullAndStatusNotContains(String status);
+    boolean existsByPostIdAndStatusNot(long postId, Status status);
+    Optional<EntityWrapper> findByPostIdAndStatusNot(long postId, Status status);
+    List<EntityWrapper> findAllByPostIdInAndStatusNot(Collection<Long> postIdCollection, Status status);
+    List<EntityWrapper> findAllByPostIdNotNullAndStatusNot(Status status);
 
 
     /* projectId */
-    boolean existsByProjectIdAndStatusNotContains(long projectId, String status);
-    Optional<EntityWrapper> findByProjectIdAndStatusNotContains(long projectId, String status);
-    List<EntityWrapper> findAllByProjectIdInAndStatusNotContains(Collection<Long> projectIDCollection, String status);
-    List<EntityWrapper> findAllByProjectIdNotNullAndStatusNotContains(String status);
+    boolean existsByProjectIdAndStatusNot(long projectId, Status status);
+    Optional<EntityWrapper> findByProjectIdAndStatusNot(long projectId, Status status);
+    List<EntityWrapper> findAllByProjectIdInAndStatusNot(Collection<Long> projectIDCollection, Status status);
+    List<EntityWrapper> findAllByProjectIdNotNullAndStatusNot(Status status);
 
 
     /* reportId */
-    boolean existsByReportIdAndStatusNotContains(long reportId, String status);
-    Optional<EntityWrapper> findByReportIdAndStatusNotContains(long reportId, String status);
-    List<EntityWrapper> findAllByReportIdInAndStatusNotContains(Collection<Long> reportIdCollection, String status);
-    List<EntityWrapper> findAllByReportIdNotNullAndStatusNotContains(String status);
+    boolean existsByReportIdAndStatusNot(long reportId, Status status);
+    Optional<EntityWrapper> findByReportIdAndStatusNot(long reportId, Status status);
+    List<EntityWrapper> findAllByReportIdInAndStatusNot(Collection<Long> reportIdCollection, Status status);
+    List<EntityWrapper> findAllByReportIdNotNullAndStatusNot(Status status);
 
 
     /* requestId */
-    boolean existsByRequestIdAndStatusNotContains(long requestId, String status);
-    Optional<EntityWrapper> findByRequestIdAndStatusNotContains(long requestId, String status);
-    List<EntityWrapper> findAllByRequestIdInAndStatusNotContains(Collection<Long> requestIdCollection, String status);
-    List<EntityWrapper> findAllByRequestIdNotNullAndStatusNotContains(String status);
+    boolean existsByRequestIdAndStatusNot(long requestId, Status status);
+    Optional<EntityWrapper> findByRequestIdAndStatusNot(long requestId, Status status);
+    List<EntityWrapper> findAllByRequestIdInAndStatusNot(Collection<Long> requestIdCollection, Status status);
+    List<EntityWrapper> findAllByRequestIdNotNullAndStatusNot(Status status);
 
 
     /* taskId */
-    boolean existsByTaskIdAndStatusNotContains(long taskId, String status);
-    Optional<EntityWrapper> findByTaskIdAndStatusNotContains(long taskId, String status);
-    List<EntityWrapper> findAllByTaskIdInAndStatusNotContains(Collection<Long> taskIdCollection, String status);
-    List<EntityWrapper> findAllByTaskIdNotNullAndStatusNotContains(String status);
+    boolean existsByTaskIdAndStatusNot(long taskId, Status status);
+    Optional<EntityWrapper> findByTaskIdAndStatusNot(long taskId, Status status);
+    List<EntityWrapper> findAllByTaskIdInAndStatusNot(Collection<Long> taskIdCollection, Status status);
+    List<EntityWrapper> findAllByTaskIdNotNullAndStatusNot(Status status);
 
 
     /* userId */
-    boolean existsByUserIdAndStatusNotContains(long userId, String status);
-    Optional<EntityWrapper> findByUserIdAndStatusNotContains(long userId, String status);
-    List<EntityWrapper> findAllByUserIdInAndStatusNotContains(Collection<Long> userIdCollection, String status);
-    List<EntityWrapper> findAllByUserIdNotNullAndStatusNotContains(String status);
+    boolean existsByUserIdAndStatusNot(long userId, Status status);
+    Optional<EntityWrapper> findByUserIdAndStatusNot(long userId, Status status);
+    List<EntityWrapper> findAllByUserIdInAndStatusNot(Collection<Long> userIdCollection, Status status);
+    List<EntityWrapper> findAllByUserIdNotNullAndStatusNot(Status status);
 
 
     /* workerId */
-    boolean existsByWorkerIdAndStatusNotContains(long workerId, String status);
-    Optional<EntityWrapper> findByWorkerIdAndStatusNotContains(long workerId, String status);
-    List<EntityWrapper> findAllByWorkerIdInAndStatusNotContains(Collection<Long> workerIdCollection, String status);
-    List<EntityWrapper> findAllByWorkerIdNotNullAndStatusNotContains(String status);
+    boolean existsByWorkerIdAndStatusNot(long workerId, Status status);
+    Optional<EntityWrapper> findByWorkerIdAndStatusNot(long workerId, Status status);
+    List<EntityWrapper> findAllByWorkerIdInAndStatusNot(Collection<Long> workerIdCollection, Status status);
+    List<EntityWrapper> findAllByWorkerIdNotNullAndStatusNot(Status status);
 }

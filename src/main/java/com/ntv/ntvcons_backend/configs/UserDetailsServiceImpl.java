@@ -9,22 +9,22 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-
     @Autowired
     UserRepository userRepository;
-
 
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsernameAndIsDeletedIsFalse(username).get();
-        if (user == null){
+        Optional<User> user = userRepository.findByUsernameAndIsDeletedIsFalse(username);
+
+        if (!user.isPresent()){
             throw new UsernameNotFoundException(username);
         }
 
-        return com.ntv.ntvcons_backend.configs.UserDetails.build(user);
+        return UserDetailsImpl.build(user.get());
     }
 }

@@ -23,7 +23,7 @@ public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO
     @NotNull(message = "username REQUIRED for create")
     private String username;
 
-    @Size(max = 128, message = "password max length: 100 characters")
+    @Size(max = 128, message = "password max length: 128 characters")
 //    @NotNull(message = "password REQUIRED for create")
     private String password;
 
