@@ -1,9 +1,7 @@
 package com.ntv.ntvcons_backend.configs;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.entities.User;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -12,35 +10,38 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public class UserDetails implements org.springframework.security.core.userdetails.UserDetails {
+public class UserDetailsImpl implements org.springframework.security.core.userdetails.UserDetails {
     private static final long serialVersionUID = 1L;
 
     //private static SimpleJpaRepository<Role, Long> roleRepository;
-
-
 
     private Long userID;
     private Collection<? extends GrantedAuthority> authorities;
     @JsonIgnore
     private String username;
     private String password;
-    public UserDetails(Long id,String username,String password,
+
+    public UserDetailsImpl(Long id, String username, String password,
                            Collection<? extends GrantedAuthority> authorities) {
-        this.userID=id;
-        this.username=username;
-        this.password=password;
+        this.userID = id;
+        this.username = username;
+        this.password = password;
         this.authorities = authorities;
 
     }
-    public static UserDetails build(User user) {
+
+    public static UserDetailsImpl build(User user) {
         List<GrantedAuthority> authorities = new ArrayList<>();
+
         authorities.add(new SimpleGrantedAuthority(String.valueOf(user.getRoleId())));
-        return new UserDetails(
+
+        return new UserDetailsImpl(
                 user.getUserId(),
                 user.getUsername(),
                 user.getPassword(),
                 authorities);
     }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -94,7 +95,7 @@ public class UserDetails implements org.springframework.security.core.userdetail
             return true;
         if (obj == null || getClass() != obj.getClass())
             return false;
-        UserDetails user = (UserDetails) obj;
+        UserDetailsImpl user = (UserDetailsImpl) obj;
         return Objects.equals(userID, user.userID);
     }
 }

@@ -4,7 +4,6 @@ import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Worker;
-import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface WorkerService extends BaseService {
+public interface WorkerService {
     /* CREATE */
     Worker createWorker(Worker newWorker) throws Exception;
     WorkerReadDTO createWorkerByDTO(WorkerCreateDTO newWorkerDTO) throws Exception;

@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import com.ntv.ntvcons_backend.configs.UserDetails;
+import com.ntv.ntvcons_backend.configs.UserDetailsImpl;
 
 import java.util.Date;
 // xí m, 2 cái trùng tên kìa
@@ -76,7 +76,7 @@ public class JwtUtil {
 //        Long userID = user.getId();
 //        Role role = user.getRole();
 
-        UserDetails userPrincipal=(UserDetails) authentication.getPrincipal();
+        UserDetailsImpl userPrincipal=(UserDetailsImpl) authentication.getPrincipal();
         User user = userRepository.getById(userPrincipal.getUserID());
 
         // Tạo chuỗi json web token từ id của user.

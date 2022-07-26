@@ -23,7 +23,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
         List<User> findAllByUserIdInAndIsDeletedIsFalse(Collection<Long> userIdCollection);
         /* !Id & (username || phone || email) */
         boolean existsByUsernameOrPhoneOrEmailAndUserIdIsNotAndIsDeletedIsFalse
-                (String username, String phone, String email, long userId);
+        (String username, String phone, String email, long userId);
+        /* !Id & (username || phone) */
+        boolean existsByUsernameOrPhoneAndUserIdIsNotAndIsDeletedIsFalse
+                (String username, String phone, long userId);
 
 
         /* roleId */
@@ -51,4 +54,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
         Page<User> findAllByEmailContainsAndIsDeletedIsFalse(String email, Pageable paging);
         /* username || phone || email */
         boolean existsByUsernameOrPhoneOrEmailAndIsDeletedIsFalse(String username, String phone, String email);
+        /* username || phone */
+        boolean existsByUsernameOrPhoneAndIsDeletedIsFalse(String username, String phone);
 }

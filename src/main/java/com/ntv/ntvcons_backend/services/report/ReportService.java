@@ -5,7 +5,6 @@ import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
 import com.ntv.ntvcons_backend.entities.Report;
-import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface ReportService extends BaseService { /* TODO: throws Exception for controller to handle */
+public interface ReportService { /* TODO: throws Exception for controller to handle */
     /* CREATE */
     Report createReport(Report newReport) throws Exception;
     ReportReadDTO createReportByDTO(ReportCreateDTO newReportDTO) throws Exception;

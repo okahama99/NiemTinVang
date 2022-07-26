@@ -27,12 +27,10 @@ public class UserController {
     @Autowired
     private ThanhUtil thanhUtil;
 
-
-
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PostMapping(value = "/v1/createUser", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createUser(@Valid @RequestBody UserCreateDTO userDTO){
+    public ResponseEntity<Object> createUser(@Valid @RequestBody UserCreateDTO userDTO) {
         try {
             UserReadDTO newUserDTO = userService.createUserByDTO(userDTO);
 
@@ -42,6 +40,8 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
+
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating User", e.getMessage()));
         }

@@ -65,14 +65,24 @@ public class UserServiceImpl implements UserService{
         }
 
         /* Check duplicate */
-        if (userRepository
-                .existsByUsernameOrPhoneOrEmailAndIsDeletedIsFalse(
-                        newUser.getUsername(),
-                        newUser.getPhone(),
-                        newUser.getEmail())) {
-            errorMsg += "Already exists another User with username: '" + newUser.getUsername()
-                    + "', or with phone: '" + newUser.getPhone()
-                    + "', or with email: '" + newUser.getEmail() + "'. ";
+        if (newUser.getEmail() != null) {
+            if (userRepository
+                    .existsByUsernameOrPhoneOrEmailAndIsDeletedIsFalse(
+                            newUser.getUsername(),
+                            newUser.getPhone(),
+                            newUser.getEmail())) {
+                errorMsg += "Already exists another User with username: '" + newUser.getUsername()
+                        + "', or with phone: '" + newUser.getPhone()
+                        + "', or with email: '" + newUser.getEmail() + "'. ";
+            }
+        } else {
+            if (userRepository
+                    .existsByUsernameOrPhoneAndIsDeletedIsFalse(
+                            newUser.getUsername(),
+                            newUser.getPhone())) {
+                errorMsg += "Already exists another User with username: '" + newUser.getUsername()
+                        + "', or with phone: '" + newUser.getPhone() + "'. ";
+            }
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -434,19 +444,35 @@ public class UserServiceImpl implements UserService{
         }
 
         /* Check duplicate */
-        if (userRepository
-                .existsByUsernameOrPhoneOrEmailAndUserIdIsNotAndIsDeletedIsFalse(
-                        updatedUser.getUsername(),
-                        updatedUser.getPhone(),
-                        updatedUser.getEmail(),
-                        updatedUser.getUserId())) {
-            errorMsg += "Already exists another User with username: '" + updatedUser.getUsername()
-                    + "', or with phone: '" + updatedUser.getPhone()
-                    + "', or with email: '" + updatedUser.getEmail() + "'. ";
+        if (updatedUser.getEmail() != null) {
+            if (userRepository
+                    .existsByUsernameOrPhoneOrEmailAndUserIdIsNotAndIsDeletedIsFalse(
+                            updatedUser.getUsername(),
+                            updatedUser.getPhone(),
+                            updatedUser.getEmail(),
+                            updatedUser.getUserId())) {
+                errorMsg += "Already exists another User with username: '" + updatedUser.getUsername()
+                        + "', or with phone: '" + updatedUser.getPhone()
+                        + "', or with email: '" + updatedUser.getEmail() + "'. ";
+            }
+        } else {
+            if (userRepository
+                    .existsByUsernameOrPhoneAndUserIdIsNotAndIsDeletedIsFalse(
+                            updatedUser.getUsername(),
+                            updatedUser.getPhone(),
+                            updatedUser.getUserId())) {
+                errorMsg += "Already exists another User with username: '" + updatedUser.getUsername()
+                        + "', or with phone: '" + updatedUser.getPhone() + "'. ";
+            }
         }
+
 
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
+
+        if (updatedUser.getPassword() != null) {
+            updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
 
         updatedUser.setCreatedAt(oldUser.getCreatedAt());
         updatedUser.setCreatedBy(oldUser.getCreatedBy());

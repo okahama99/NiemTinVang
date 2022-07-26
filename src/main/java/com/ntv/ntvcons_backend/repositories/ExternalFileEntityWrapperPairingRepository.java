@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,31 +14,31 @@ import java.util.Optional;
 @Repository
 public interface ExternalFileEntityWrapperPairingRepository
         extends JpaRepository<ExternalFileEntityWrapperPairing, Long> {
-    List<ExternalFileEntityWrapperPairing> findAllByStatusNotContains(String status);
-    Page<ExternalFileEntityWrapperPairing> findAllByStatusNotContains(String status, Pageable paging);
+    List<ExternalFileEntityWrapperPairing> findAllByStatusNot(Status status);
+    Page<ExternalFileEntityWrapperPairing> findAllByStatusNot(Status status, Pageable paging);
 
 
     /* Id */
-    boolean existsByPairingIdAndStatusNotContains(long pairingId, String status);
-    Optional<ExternalFileEntityWrapperPairing> findByPairingIdAndStatusNotContains(long pairingId, String status);
-    List<ExternalFileEntityWrapperPairing> findAllByPairingIdInAndStatusNotContains
-            (Collection<Long> pairingIdCollection, String status);
+    boolean existsByPairingIdAndStatusNot(long pairingId, Status status);
+    Optional<ExternalFileEntityWrapperPairing> findByPairingIdAndStatusNot(long pairingId, Status status);
+    List<ExternalFileEntityWrapperPairing> findAllByPairingIdInAndStatusNot
+            (Collection<Long> pairingIdCollection, Status status);
     /* Id & entityWrapperId & externalFileId */
-    boolean existsByEntityWrapperIdAndExternalFileIdAndPairingIdIsNotAndStatusNotContains
-            (long entityWrapperId, long externalFileId, long pairingId, String status);
+    boolean existsByEntityWrapperIdAndExternalFileIdAndPairingIdIsNotAndStatusNot
+            (long entityWrapperId, long externalFileId, long pairingId, Status status);
 
 
     /* entityWrapperId */
-    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdAndStatusNotContains(long entityWrapperId, String status);
-    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdInAndStatusNotContains
-            (Collection<Long> entityWrapperIdCollection, String status);
+    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdAndStatusNot(long entityWrapperId, Status status);
+    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdInAndStatusNot
+            (Collection<Long> entityWrapperIdCollection, Status status);
 
 
     /* externalFileId */
-    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdAndStatusNotContains(long externalFileId, String status);
-    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdInAndStatusNotContains
-            (Collection<Long> externalFileIdCollection, String status);
+    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdAndStatusNot(long externalFileId, Status status);
+    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdInAndStatusNot
+            (Collection<Long> externalFileIdCollection, Status status);
     /* entityWrapperId & externalFileId */
-    boolean existsByEntityWrapperIdAndExternalFileIdAndStatusNotContains
-            (long entityWrapperId, long externalFileId, String status);
+    boolean existsByEntityWrapperIdAndExternalFileIdAndStatusNot
+            (long entityWrapperId, long externalFileId, Status status);
 }

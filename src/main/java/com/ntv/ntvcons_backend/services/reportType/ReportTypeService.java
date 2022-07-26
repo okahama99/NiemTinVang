@@ -4,7 +4,6 @@ import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeUpdateDTO;
 import com.ntv.ntvcons_backend.entities.ReportType;
-import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface ReportTypeService extends BaseService {
+public interface ReportTypeService {
     /* CREATE */
     ReportType createReportType(ReportType newReportType) throws Exception;
     ReportTypeReadDTO createReportTypeByDTO(ReportTypeCreateDTO newReportTypeDTO) throws Exception;
@@ -21,7 +20,6 @@ public interface ReportTypeService extends BaseService {
     Page<ReportType> getPageAll(Pageable paging) throws Exception;
     List<ReportTypeReadDTO> getAllDTOInPaging(Pageable paging) throws Exception;
 
-    @Override
     boolean existsById(long reportTypeId) throws Exception;
     ReportType getById(long reportTypeId) throws Exception;
     ReportTypeReadDTO getDTOById(long reportTypeId) throws Exception;

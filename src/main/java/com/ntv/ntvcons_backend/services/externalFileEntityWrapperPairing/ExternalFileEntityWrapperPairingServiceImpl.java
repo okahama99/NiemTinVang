@@ -33,7 +33,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
     @Autowired
     private ExternalFileService externalFileService;
 
-    private final String DELETED = Status.DELETED.getStringValue();
+    private final Status DELETED = Status.DELETED;
 
     /* CREATE */
     @Override
@@ -56,7 +56,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
 
         /* Check duplicate */
         if (eFEWPairingRepository
-                .existsByEntityWrapperIdAndExternalFileIdAndStatusNotContains(
+                .existsByEntityWrapperIdAndExternalFileIdAndStatusNot(
                         newPairing.getEntityWrapperId(),
                         newPairing.getExternalFileId(),
                         DELETED)) {
@@ -76,7 +76,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
     @Override
     public List<ExternalFileEntityWrapperPairing> getAll() throws Exception {
         List<ExternalFileEntityWrapperPairing> eFEWPairingList =
-                eFEWPairingRepository.findAllByStatusNotContains(DELETED);
+                eFEWPairingRepository.findAllByStatusNot(DELETED);
 
         if (eFEWPairingList.isEmpty())
             return null;
@@ -87,19 +87,19 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
     @Override
     public boolean existsById(long pairingId) throws Exception {
         return eFEWPairingRepository
-                .existsByPairingIdAndStatusNotContains(pairingId, DELETED);
+                .existsByPairingIdAndStatusNot(pairingId, DELETED);
     }
     @Override
     public ExternalFileEntityWrapperPairing getById(long pairingId) throws Exception {
         return eFEWPairingRepository
-                .findByPairingIdAndStatusNotContains(pairingId, DELETED)
+                .findByPairingIdAndStatusNot(pairingId, DELETED)
                 .orElse(null);
     }
 
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByEntityWrapperId(long entityWrapperId) throws Exception {
         List<ExternalFileEntityWrapperPairing> eFEWPairingList =
-                eFEWPairingRepository.findAllByEntityWrapperIdAndStatusNotContains(entityWrapperId, DELETED);
+                eFEWPairingRepository.findAllByEntityWrapperIdAndStatusNot(entityWrapperId, DELETED);
 
         if (eFEWPairingList.isEmpty())
             return null;
@@ -132,7 +132,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByEntityWrapperIdIn(Collection<Long> entityWrapperIdCollection) throws Exception {
         List<ExternalFileEntityWrapperPairing> eFEWPairingList =
-                eFEWPairingRepository.findAllByEntityWrapperIdInAndStatusNotContains(entityWrapperIdCollection, DELETED);
+                eFEWPairingRepository.findAllByEntityWrapperIdInAndStatusNot(entityWrapperIdCollection, DELETED);
 
         if (eFEWPairingList.isEmpty())
             return null;
@@ -223,7 +223,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByExternalFileId(long externalFileId) throws Exception {
         List<ExternalFileEntityWrapperPairing> eFEWPairingList =
-                eFEWPairingRepository.findAllByExternalFileIdAndStatusNotContains(externalFileId, DELETED);
+                eFEWPairingRepository.findAllByExternalFileIdAndStatusNot(externalFileId, DELETED);
 
         if (eFEWPairingList.isEmpty())
             return null;
@@ -234,7 +234,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
     @Override
     public List<ExternalFileEntityWrapperPairing> getAllByExternalFileIdIn(Collection<Long> externalFileIdCollection) throws Exception {
         List<ExternalFileEntityWrapperPairing> eFEWPairingList =
-                eFEWPairingRepository.findAllByExternalFileIdInAndStatusNotContains(externalFileIdCollection, DELETED);
+                eFEWPairingRepository.findAllByExternalFileIdInAndStatusNot(externalFileIdCollection, DELETED);
 
         if (eFEWPairingList.isEmpty())
             return null;
@@ -281,7 +281,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
 
         /* Check duplicate */
         if (eFEWPairingRepository
-                .existsByEntityWrapperIdAndExternalFileIdAndPairingIdIsNotAndStatusNotContains(
+                .existsByEntityWrapperIdAndExternalFileIdAndPairingIdIsNotAndStatusNot(
                         updatedPairing.getEntityWrapperId(),
                         updatedPairing.getExternalFileId(),
                         updatedPairing.getPairingId(),

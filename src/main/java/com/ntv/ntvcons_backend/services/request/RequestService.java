@@ -8,7 +8,6 @@ import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestVerifierModel;
-import com.ntv.ntvcons_backend.services.BaseService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface RequestService extends BaseService {
+public interface RequestService {
     /* CREATE */
     boolean createRequest(CreateRequestModel createRequestModel);
 
