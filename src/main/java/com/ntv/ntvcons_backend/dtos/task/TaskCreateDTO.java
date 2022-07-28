@@ -41,5 +41,6 @@ public class TaskCreateDTO extends BaseCreateDTO {
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     private String planEndDate;
 
-    private TaskAssignmentCreateDTO taskAssignment;
+    @Positive
+    private Long assigneeId;
 }

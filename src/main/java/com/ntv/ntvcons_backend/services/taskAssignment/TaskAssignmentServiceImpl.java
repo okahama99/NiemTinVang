@@ -425,10 +425,58 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
     /* DELETE */
     @Override
+    public boolean removeTaskAssignment(long assignmentId) throws Exception {
+        TaskAssignment taskAssignment = getById(assignmentId);
+
+        if (taskAssignment == null)
+            return false;
+
+        taskAssignment.setStatus(Status.REMOVED);
+        taskAssignmentRepository.saveAndFlush(taskAssignment);
+
+        return true;
+    }
+
+    @Override
+    public boolean removeAllByUserId(long userId) throws Exception {
+        List<TaskAssignment> taskAssignmentList = getAllByAssignerId(userId);
+
+        if (taskAssignmentList == null) {
+            taskAssignmentList = getAllByAssigneeId(userId);
+
+            if (taskAssignmentList == null) {
+                return false;
+            }
+        }
+
+        taskAssignmentList =
+                taskAssignmentList.stream()
+                        .peek(taskAssignment -> taskAssignment.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        taskAssignmentRepository.saveAllAndFlush(taskAssignmentList);
+
+        return true;
+    }
+
+    @Override
+    public boolean removeByTaskId(long taskId) throws Exception {
+        TaskAssignment taskAssignment = getByTaskId(taskId);
+
+        if (taskAssignment == null)
+            return false;
+
+        taskAssignment.setStatus(Status.REMOVED);
+        taskAssignmentRepository.saveAndFlush(taskAssignment);
+
+        return true;
+    }
+
+    @Override
     public boolean deleteTaskAssignment(long assignmentId) throws Exception {
         TaskAssignment taskAssignment = getById(assignmentId);
 
-        if (taskAssignment == null) 
+        if (taskAssignment == null)
             return false;
 
         taskAssignment.setStatus(Status.DELETED);
@@ -463,7 +511,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     public boolean deleteByTaskId(long taskId) throws Exception {
         TaskAssignment taskAssignment = getByTaskId(taskId);
 
-        if (taskAssignment == null) 
+        if (taskAssignment == null)
             return false;
 
         taskAssignment.setStatus(Status.DELETED);

@@ -11,6 +11,7 @@ import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.entities.Task;
+import com.ntv.ntvcons_backend.entities.TaskAssignment;
 import com.ntv.ntvcons_backend.repositories.TaskRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
@@ -96,6 +97,7 @@ public class TaskServiceImpl implements TaskService{
                     mapper.skip(Task::setPlanEndDate);});
 
         Task newTask = modelMapper.map(newTaskDTO, Task.class);
+        long createdBy = newTask.getCreatedBy();
 
         /* Already check NOT NULL */
         newTask.setPlanStartDate(
@@ -119,12 +121,12 @@ public class TaskServiceImpl implements TaskService{
                 .createEntityWrapper(newTaskId, ENTITY_TYPE, newTask.getCreatedBy());
 
         /* Create associated TaskAssignment (if present) */
-        TaskAssignmentCreateDTO taskAssignmentDTO = newTaskDTO.getTaskAssignment();
-        if (taskAssignmentDTO != null) {
-            /* Set required FK */
-            taskAssignmentDTO.setTaskId(newTaskId);
+        Long assigneeId = newTaskDTO.getAssigneeId();
+        if (assigneeId != null) {
+            TaskAssignmentCreateDTO taskAssignmentDTO =
+                    new TaskAssignmentCreateDTO(newTaskId, createdBy, assigneeId);
 
-            taskAssignmentService.createTaskAssignmentByDTO(newTaskDTO.getTaskAssignment());
+            taskAssignmentService.createTaskAssignmentByDTO(taskAssignmentDTO);
         }
 
         return fillDTO(newTask);
@@ -667,6 +669,7 @@ public class TaskServiceImpl implements TaskService{
                     mapper.skip(Task::setActualEndDate);});
 
         Task updatedTask = modelMapper.map(updatedTaskDTO, Task.class);
+        long updatedBy = updatedTask.getUpdatedBy();
 
         /* Already check NOT NULL */
         updatedTask.setPlanStartDate(
@@ -710,16 +713,38 @@ public class TaskServiceImpl implements TaskService{
         if (updatedTask == null) 
             return null;
 
-        long taskId = updatedTask.getTaskId();
+        long updatedTaskId = updatedTask.getTaskId();
 
         /* Update TaskAssignment (if present) */
-        TaskAssignmentUpdateDTO taskAssignmentDTO = updatedTaskDTO.getTaskAssignment();
-        if (taskAssignmentDTO != null) {
-            /* Reset FK just in case */
-            taskAssignmentDTO.setTaskId(taskId);
+        Long assigneeId = updatedTaskDTO.getAssigneeId();
+        if (assigneeId != null) {
+            TaskAssignment taskAssignment = taskAssignmentService.getByTaskId(updatedTaskId);
 
-            if (taskAssignmentService.updateTaskAssignmentByDTO(taskAssignmentDTO) == null)
-                throw new IllegalArgumentException("No TaskAssignment found with taskId: '" + taskId + "' to update");
+            if (taskAssignment == null) {
+                TaskAssignmentCreateDTO taskAssignmentDTO =
+                        new TaskAssignmentCreateDTO(updatedTaskId, updatedBy, assigneeId);
+
+                taskAssignmentService.createTaskAssignmentByDTO(taskAssignmentDTO);
+            } else {
+                if (assigneeId <= 0) { /* assigneeId <= 0 to remove */
+                    /* Task 1-1 TaskAssignment */
+                    taskAssignmentService.removeByTaskId(updatedTaskId);
+                } else {
+                    if (!taskAssignment.getAssigneeId().equals(assigneeId)) {
+                        /* Task 1-1 TaskAssignment */
+                        taskAssignmentService.removeByTaskId(updatedTaskId);
+
+                        TaskAssignmentUpdateDTO taskAssignmentDTO =
+                                new TaskAssignmentUpdateDTO(
+                                        taskAssignment.getAssignmentId(),
+                                        updatedTaskId, updatedBy, assigneeId,
+                                        LocalDateTime.now().format(dateTimeFormatter), null);
+
+                        if (taskAssignmentService.updateTaskAssignmentByDTO(taskAssignmentDTO) == null)
+                            throw new IllegalArgumentException("No TaskAssignment found with taskId: '" + updatedTaskId + "' to update");
+                    }
+                }
+            }
         }
 
         return fillDTO(updatedTask);

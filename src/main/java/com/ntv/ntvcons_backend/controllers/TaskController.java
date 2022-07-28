@@ -6,6 +6,7 @@ import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.services.task.TaskService;
+import com.ntv.ntvcons_backend.utils.JwtUtil;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -24,13 +25,21 @@ public class TaskController {
     private TaskService taskService;
     @Autowired
     private MiscUtil miscUtil;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createTask", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO) {
+    public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO,
+                                             @RequestHeader(name = "Authorization") String token) {
         try {
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId != null) {
+                taskDTO.setCreatedBy(userId);
+            }
+
             TaskReadDTO newTaskDTO = taskService.createTaskByDTO(taskDTO);
 
             return ResponseEntity.ok().body(newTaskDTO);
@@ -198,8 +207,14 @@ public class TaskController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateTask", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO) {
+    public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO,
+                                             @RequestHeader(name = "Authorization") String token) {
         try {
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId != null) {
+                taskDTO.setUpdatedBy(userId);
+            }
+
             TaskReadDTO updatedTaskDTO = taskService.updateTaskByDTO(taskDTO);
 
             if (updatedTaskDTO == null) {

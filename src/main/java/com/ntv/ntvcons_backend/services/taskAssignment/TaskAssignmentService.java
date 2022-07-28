@@ -51,6 +51,12 @@ public interface TaskAssignmentService {
     TaskAssignmentReadDTO updateTaskAssignmentByDTO(TaskAssignmentUpdateDTO updatedTaskAssignmentDTO) throws Exception;
 
     /* DELETE */
+    boolean removeTaskAssignment(long assignmentId) throws Exception;
+
+    boolean removeAllByUserId(long userId) throws Exception;
+
+    boolean removeByTaskId(long taskId) throws Exception;
+
     boolean deleteTaskAssignment(long assignmentId) throws Exception;
 
     /** Cascade when delete User */

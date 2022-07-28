@@ -2,8 +2,7 @@ package com.ntv.ntvcons_backend.utils;
 
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.entities.User;
-import com.ntv.ntvcons_backend.repositories.RoleRepository;
-import com.ntv.ntvcons_backend.repositories.UserRepository;
+import com.ntv.ntvcons_backend.services.role.RoleService;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
@@ -17,38 +16,15 @@ import java.util.Date;
 @Component
 @Slf4j
 public class JwtUtil {
-
-    // Đoạn JWT_SECRET này là bí mật, chỉ có phía server biết
-    private final String JWT_SECRET = "provip123";
-
-    //Thời gian có hiệu lực của chuỗi jwt
-    private final long JWT_EXPIRATION = 10800000L;
-
     @Autowired
     private UserService userService;
-
     @Autowired
-    RoleRepository roleRepository;
+    private RoleService roleService;
 
-    @Autowired
-    UserRepository userRepository;
-
-    // Tạo ra jwt từ thông tin user
-    public String generateToken(User user) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
-        Long userID = user.getUserId();
-        Role role = roleRepository.findById(user.getRoleId()).get();
-        // Tạo chuỗi json web token từ id của user.
-        return Jwts.builder()
-                .setSubject(Long.toString(userID))
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
-                .claim("role", role.getRoleName())
-                .claim("id", user.getUserId())
-                .compact();
-    }
+    /** Đoạn JWT_SECRET này là bí mật, chỉ có phía server biết */
+    private final String JWT_SECRET = "provip123";
+    /** Thời gian có hiệu lực của chuỗi jwt */
+    private final long JWT_EXPIRATION = 10800000L;
 
     //hàm này có dùng ko ko m, tụi t chỉ xài otp phone thôi
 //    public String generateTokenEmail(String email){
@@ -64,20 +40,40 @@ public class JwtUtil {
 //                .claim("role", user.getRole().getName())
 //                .claim("id", user.getId())
 //                .claim("avatar", userProfile.getAvatar())
-//                .claim("userName", user.getUsername())
+//                .claim("username", user.getUsername())
 //                .claim("email", user.getEmail())
 //                .claim("phone", user.getPhone())
 //                .compact();
 //    }
+    // Tạo ra jwt từ thông tin user
 
-    public String generateTokenNew(Authentication authentication) {
+    @Deprecated
+    public String generateToken(User user) throws Exception {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
-//        Long userID = user.getId();
-//        Role role = user.getRole();
 
-        UserDetailsImpl userPrincipal=(UserDetailsImpl) authentication.getPrincipal();
-        User user = userRepository.getById(userPrincipal.getUserID());
+        Long userID = user.getUserId();
+
+        Role role = roleService.getById(user.getRoleId());
+
+        // Tạo chuỗi json web token từ id của user.
+        return Jwts.builder()
+                .setSubject(Long.toString(userID))
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
+                .claim("id", user.getUserId())
+                .claim("username", user.getUsername())
+                .claim("role", role.getRoleName())
+                .compact();
+    }
+
+    public String generateTokenV2(Authentication authentication) throws Exception {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
+
+        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        User user = userService.getById(userPrincipal.getUserID());
 
         // Tạo chuỗi json web token từ id của user.
         return Jwts.builder()
@@ -85,13 +81,14 @@ public class JwtUtil {
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
-                .claim("role", userPrincipal.getAuthorities())
                 .claim("id", userPrincipal.getUserID())
-                .claim("userName", user.getUsername())
+                .claim("username", user.getUsername())
+                .claim("role", userPrincipal.getAuthorities())
                 .claim("email", user.getEmail())
                 .claim("phone", user.getPhone())
                 .compact();
     }
+
     public Long getUserIdFromJWT(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(JWT_SECRET)
@@ -100,13 +97,14 @@ public class JwtUtil {
 
         return Long.parseLong(claims.getSubject());
     }
+
     public String getUserNameFromJWT(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(JWT_SECRET)
                 .parseClaimsJws(token)
                 .getBody();
 
-        return Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token).getBody().getSubject();
+        return claims.get("username", String.class);
     }
 
     public boolean validateToken(String authToken) {
