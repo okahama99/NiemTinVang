@@ -16,7 +16,7 @@ import javax.validation.constraints.Size;
 public class LocationUpdateDTO extends BaseUpdateDTO {
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long locationId;
 
     @ApiModelProperty(example = "Lô E2a-7",
@@ -63,7 +63,7 @@ public class LocationUpdateDTO extends BaseUpdateDTO {
     /** <b>*Required</b> */
     @ApiModelProperty(example = "10.841139984351623, 106.80988203281531",
             notes = "NOT NULL; size <= 100") /* Hint for Swagger */
-    @NotNull(message = "Coordinate REQUIRED for update")
+    @NotNull(message = "Coordinate REQUIRED for Update")
     @Size(max = 100, message = "coordinate max length: 100 characters")
     private String coordinate;
 }

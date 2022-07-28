@@ -15,20 +15,20 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class ExternalFileUpdateDTO extends BaseUpdateDTO {
     @Positive
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long fileId;
 
     @ApiModelProperty(example = "File xxx dự án yyy") /* Hint for Swagger */
     @Size(max = 100, message = "fileName max length: 100 characters")
-    @NotNull(message = "fileName REQUIRED for update")
+    @NotNull(message = "fileName REQUIRED for Update")
     private String fileName;
 
     @ApiModelProperty(example = "https://imgur.com/gallery/seX0ozh") /* Hint for Swagger */
     @Size(max = 100, message = "fileLink max length: 100 characters")
-    @NotNull(message = "fileLink REQUIRED for update")
+    @NotNull(message = "fileLink REQUIRED for Update")
     private String fileLink;
 
     @Positive
-    @NotNull(message = "fileTypeId REQUIRED for update")
+    @NotNull(message = "fileTypeId REQUIRED for Update")
     private Long fileTypeId;
 }

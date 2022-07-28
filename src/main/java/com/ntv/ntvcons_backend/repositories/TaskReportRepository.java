@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.TaskReport;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,27 +13,36 @@ import java.util.Optional;
 
 @Repository
 public interface TaskReportRepository extends JpaRepository<TaskReport, Long> {
-    Page<TaskReport> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<TaskReport> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByTaskReportIdAndIsDeletedIsFalse(long taskReportId);
-    Optional<TaskReport> findByTaskReportIdAndIsDeletedIsFalse(long taskReportId);
-    List<TaskReport> findAllByTaskReportIdInAndIsDeletedIsFalse(Collection<Long> taskReportIdCollection);
+    boolean existsByTaskReportIdAndStatusNotIn
+            (long taskReportId, Collection<Status> statusCollection);
+    Optional<TaskReport> findByTaskReportIdAndStatusNotIn
+            (long taskReportId, Collection<Status> statusCollection);
+    List<TaskReport> findAllByTaskReportIdInAndStatusNotIn
+            (Collection<Long> taskReportIdCollection, Collection<Status> statusCollection);
     /* Id & reportId & taskId & taskProgress */
     /** Check duplicate reportId & taskId & taskProgress for update */
-    boolean existsByReportIdAndTaskIdAndTaskReportIdIsNotAndIsDeletedIsFalse
-            (long reportId, long taskId, long taskReportId);
+    boolean existsByReportIdAndTaskIdAndTaskReportIdIsNotAndStatusNotIn
+            (long reportId, long taskId, long taskReportId, Collection<Status> statusCollection);
 
 
     /* reportId */
-    List<TaskReport> findAllByReportIdAndIsDeletedIsFalse(long reportId);
-    List<TaskReport> findAllByReportIdInAndIsDeletedIsFalse(Collection<Long> reportIdCollection);
+    List<TaskReport> findAllByReportIdAndStatusNotIn
+            (long reportId, Collection<Status> statusCollection);
+    List<TaskReport> findAllByReportIdInAndStatusNotIn
+            (Collection<Long> reportIdCollection, Collection<Status> statusCollection);
 
 
     /* taskId */
-    List<TaskReport> findAllByTaskIdAndIsDeletedIsFalse(long taskId);
-    List<TaskReport> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
+    List<TaskReport> findAllByTaskIdAndStatusNotIn
+            (long taskId, Collection<Status> statusCollection);
+    List<TaskReport> findAllByTaskIdInAndStatusNotIn
+            (Collection<Long> taskIdCollection, Collection<Status> statusCollection);
     /* Id & reportId & taskId */
-    boolean existsByReportIdAndTaskIdAndIsDeletedIsFalse(long reportId, long taskId);
+    boolean existsByReportIdAndTaskIdAndStatusNotIn
+            (long reportId, long taskId, Collection<Status> statusCollection);
 }

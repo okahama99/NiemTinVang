@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,21 +13,31 @@ import java.util.Optional;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
-        Page<Role> findAllByIsDeletedIsFalse(Pageable paging);
+        Page<Role> findAllByStatusNotIn
+                (Collection<Status> statusCollection, Pageable paging);
 
 
         /* Id */
-        boolean existsByRoleIdAndIsDeletedIsFalse(long roleId);
-        Optional<Role> findByRoleIdAndIsDeletedIsFalse(long roleId);
-        boolean existsAllByRoleIdInAndIsDeletedIsFalse(Collection<Long> roleIdCollection);
-        List<Role> findAllByRoleIdInAndIsDeletedIsFalse(Collection<Long> roleIdCollection);
+        boolean existsByRoleIdAndStatusNotIn
+                (long roleId, Collection<Status> statusCollection);
+        Optional<Role> findByRoleIdAndStatusNotIn
+                (long roleId, Collection<Status> statusCollection);
+        boolean existsAllByRoleIdInAndStatusNotIn
+                (Collection<Long> roleIdCollection, Collection<Status> statusCollection);
+        List<Role> findAllByRoleIdInAndStatusNotIn
+                (Collection<Long> roleIdCollection, Collection<Status> statusCollection);
         /* Id & roleName */
         /** Check duplicate roleName for update */
-        boolean existsByRoleNameAndRoleIdIsNotAndIsDeletedIsFalse(String roleName, long roleId);
+        boolean existsByRoleNameAndRoleIdIsNotAndStatusNotIn
+                (String roleName, long roleId, Collection<Status> statusCollection);
 
         /* roleName */
-        boolean existsByRoleNameAndIsDeletedIsFalse(String roleName);
-        Optional<Role> findByRoleNameAndIsDeletedIsFalse(String roleName);
-        List<Role> findAllByRoleNameContainsAndIsDeletedIsFalse(String roleName);
-        Page<Role> findAllByRoleNameContainsAndIsDeletedIsFalse(String roleName, Pageable paging);
+        boolean existsByRoleNameAndStatusNotIn
+                (String roleName, Collection<Status> statusCollection);
+        Optional<Role> findByRoleNameAndStatusNotIn
+                (String roleName, Collection<Status> statusCollection);
+        List<Role> findAllByRoleNameContainsAndStatusNotIn
+                (String roleName, Collection<Status> statusCollection);
+        Page<Role> findAllByRoleNameContainsAndStatusNotIn
+                (String roleName, Collection<Status> statusCollection, Pageable paging);
 }

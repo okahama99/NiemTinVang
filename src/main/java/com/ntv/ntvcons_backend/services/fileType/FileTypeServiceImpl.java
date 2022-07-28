@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.fileType;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.fileType.FileTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.fileType.FileTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.fileType.FileTypeUpdateDTO;
@@ -30,6 +31,8 @@ public class FileTypeServiceImpl implements FileTypeService{
     @Autowired
     private UserService userService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public FileType createFileType(FileType newFileType) throws Exception {
@@ -43,11 +46,11 @@ public class FileTypeServiceImpl implements FileTypeService{
 
         /* Check duplicate */
         if (fileTypeRepository
-                .existsByFileTypeNameOrFileTypeExtensionAndIsDeletedIsFalse(
+                .existsByFileTypeNameAndStatusNotIn(
                         newFileType.getFileTypeName(),
-                        newFileType.getFileTypeExtension())) {
-            errorMsg += "Already exists another FileType with fileTypeName: '" + newFileType.getFileTypeName()
-                    + "'. Or with fileTypeExtension: '" + newFileType.getFileTypeExtension() + "'. ";
+                        N_D_S_STATUS_LIST)) {
+            errorMsg += "Already exists another FileType with fileTypeName: '"
+                    + newFileType.getFileTypeName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -67,7 +70,8 @@ public class FileTypeServiceImpl implements FileTypeService{
     /* READ */
     @Override
     public Page<FileType> getPageAll(Pageable paging) throws Exception {
-        Page<FileType> fileTypePage = fileTypeRepository.findAllByIsDeletedIsFalse(paging);
+        Page<FileType> fileTypePage =
+                fileTypeRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (fileTypePage.isEmpty()) 
             return null;
@@ -92,7 +96,7 @@ public class FileTypeServiceImpl implements FileTypeService{
     @Override
     public FileType getById(long fileTypeId) throws Exception {
         return fileTypeRepository
-                .findByFileTypeIdAndIsDeletedIsFalse(fileTypeId)
+                .findByFileTypeIdAndStatusNotIn(fileTypeId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -107,7 +111,8 @@ public class FileTypeServiceImpl implements FileTypeService{
 
     @Override
     public List<FileType> getAllByIdIn(Collection<Long> fileTypeIdCollection) throws Exception {
-        List<FileType> fileTypeList = fileTypeRepository.findAllByFileTypeIdInAndIsDeletedIsFalse(fileTypeIdCollection);
+        List<FileType> fileTypeList =
+                fileTypeRepository.findAllByFileTypeIdInAndStatusNotIn(fileTypeIdCollection, N_D_S_STATUS_LIST);
 
         if (fileTypeList.isEmpty()) 
             return null;
@@ -137,7 +142,7 @@ public class FileTypeServiceImpl implements FileTypeService{
     @Override
     public FileType getByFileTypeName(String fileTypeName) throws Exception {
         return fileTypeRepository
-                .findByFileTypeNameAndIsDeletedIsFalse(fileTypeName)
+                .findByFileTypeNameAndStatusNotIn(fileTypeName, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -153,7 +158,7 @@ public class FileTypeServiceImpl implements FileTypeService{
     @Override
     public List<FileType> getAllByFileTypeNameContains(String fileTypeName) throws Exception {
         List<FileType> fileTypeList =
-                fileTypeRepository.findAllByFileTypeNameContainsAndIsDeletedIsFalse(fileTypeName);
+                fileTypeRepository.findAllByFileTypeNameContainsAndStatusNotIn(fileTypeName, N_D_S_STATUS_LIST);
 
         if (fileTypeList.isEmpty()) 
             return null;
@@ -172,7 +177,7 @@ public class FileTypeServiceImpl implements FileTypeService{
     @Override
     public Page<FileType> getPageAllByFileTypeNameContains(Pageable paging, String fileTypeName) throws Exception {
         Page<FileType> fileTypePage =
-                fileTypeRepository.findAllByFileTypeNameContainsAndIsDeletedIsFalse(fileTypeName, paging);
+                fileTypeRepository.findAllByFileTypeNameContainsAndStatusNotIn(fileTypeName, N_D_S_STATUS_LIST, paging);
 
         if (fileTypePage.isEmpty()) 
             return null;
@@ -183,72 +188,12 @@ public class FileTypeServiceImpl implements FileTypeService{
     public List<FileTypeReadDTO> getAllDTOInPagingByFileTypeNameContains(Pageable paging, String fileTypeName) throws Exception {
         Page<FileType> fileTypePage = getPageAllByFileTypeNameContains(paging, fileTypeName);
 
-        if (fileTypePage == null) 
+        if (fileTypePage == null)
             return null;
 
         List<FileType> fileTypeList = fileTypePage.getContent();
 
-        if (fileTypeList.isEmpty()) 
-            return null;
-
-        return fillAllDTO(fileTypeList, fileTypePage.getTotalPages());
-    }
-
-    @Override
-    public FileType getByFileTypeExtension(String fileTypeExtension) throws Exception {
-        return fileTypeRepository
-                .findByFileTypeExtensionAndIsDeletedIsFalse(fileTypeExtension)
-                .orElse(null);
-    }
-    @Override
-    public FileTypeReadDTO getDTOByFileTypeExtension(String fileTypeExtension) throws Exception {
-        FileType fileType = getByFileTypeExtension(fileTypeExtension);
-
-        if (fileType == null) 
-            return null;
-
-        return fillDTO(fileType);
-    }
-
-    @Override
-    public List<FileType> getAllByFileTypeExtensionContains(String fileTypeExtension) throws Exception {
-        List<FileType> fileTypeList =
-                fileTypeRepository.findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(fileTypeExtension);
-
-        if (fileTypeList.isEmpty()) 
-            return null;
-
-        return fileTypeList;
-    }
-    @Override
-    public List<FileTypeReadDTO> getAllDTOByFileTypeExtensionContains(String fileTypeExtension) throws Exception {
-        List<FileType> fileTypeList = getAllByFileTypeExtensionContains(fileTypeExtension);
-
-        if (fileTypeList == null) 
-            return null;
-
-        return fillAllDTO(fileTypeList, null);
-    }
-    @Override
-    public Page<FileType> getPageAllByFileTypeExtensionContains(Pageable paging, String fileTypeExtension) throws Exception {
-        Page<FileType> fileTypePage =
-                fileTypeRepository.findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(fileTypeExtension, paging);
-
-        if (fileTypePage.isEmpty()) 
-            return null;
-
-        return fileTypePage;
-    }
-    @Override
-    public List<FileTypeReadDTO> getAllDTOInPagingByFileTypeExtensionContains(Pageable paging, String fileTypeExtension) throws Exception {
-        Page<FileType> fileTypePage = getPageAllByFileTypeExtensionContains(paging, fileTypeExtension);
-
-        if (fileTypePage == null) 
-            return null;
-
-        List<FileType> fileTypeList = fileTypePage.getContent();
-
-        if (fileTypeList.isEmpty()) 
+        if (fileTypeList.isEmpty())
             return null;
 
         return fillAllDTO(fileTypeList, fileTypePage.getTotalPages());
@@ -281,12 +226,12 @@ public class FileTypeServiceImpl implements FileTypeService{
 
         /* Check duplicate */
         if (fileTypeRepository
-                .existsByFileTypeNameOrFileTypeExtensionAndFileTypeIdIsNotAndIsDeletedIsFalse(
+                .existsByFileTypeNameAndFileTypeIdIsNotAndStatusNotIn(
                         updatedFileType.getFileTypeName(),
-                        updatedFileType.getFileTypeExtension(),
-                        updatedFileType.getFileTypeId())) {
-            errorMsg += "Already exists another FileType with fileTypeName: '" + updatedFileType.getFileTypeName()
-                    + "'. Or with fileTypeExtension: '" + updatedFileType.getFileTypeExtension() + "'. ";
+                        updatedFileType.getFileTypeId(),
+                        N_D_S_STATUS_LIST)) {
+            errorMsg += "Already exists another FileType with fileTypeName: '"
+                    + updatedFileType.getFileTypeName() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty()) 
@@ -319,8 +264,7 @@ public class FileTypeServiceImpl implements FileTypeService{
             /* Not found with Id */
         }
 
-        fileType.setIsDeleted(true);
-//      TODO:  fileType.setStatus(Status.DELETED);
+        fileType.setStatus(Status.DELETED);
         fileTypeRepository.saveAndFlush(fileType);
 
         return true;

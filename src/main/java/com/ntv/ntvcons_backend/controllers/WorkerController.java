@@ -6,7 +6,7 @@ import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
 import com.ntv.ntvcons_backend.services.worker.WorkerService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -25,7 +25,7 @@ public class WorkerController {
     @Autowired
     private WorkerService workerService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -56,7 +56,7 @@ public class WorkerController {
         try {
             List<WorkerReadDTO> workerDTOList =
                     workerService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (workerDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Worker found");
@@ -140,7 +140,7 @@ public class WorkerController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<WorkerReadDTO> workerDTOList;
 

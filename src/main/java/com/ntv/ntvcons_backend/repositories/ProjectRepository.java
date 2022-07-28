@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.Project;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,69 +14,104 @@ import java.util.Optional;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    Page<Project> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<Project> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByProjectIdAndIsDeletedIsFalse(long projectId);
-    Optional<Project> findByProjectIdAndIsDeletedIsFalse(long projectId);
-    boolean existsAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
-    List<Project> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
-    Page<Project> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable paging);
+    boolean existsByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection);
+    Optional<Project> findByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection);
+    boolean existsAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
+    List<Project> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
+    Page<Project> findAllByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection, Pageable paging);
     /* Id & projectName */
-    boolean existsByProjectNameAndProjectIdIsNotAndIsDeletedIsFalse(String projectName, long projectId);
+    /** Check duplicate for Update */
+    boolean existsByProjectNameAndProjectIdIsNotAndStatusNotIn
+            (String projectName, long projectId, Collection<Status> statusCollection);
 
 
     /* projectName */
-    Optional<Project> findByProjectNameAndIsDeletedIsFalse(String projectName);
-    Project getByProjectNameAndIsDeletedIsFalse(String projectName); /* Redundant, use above with .orElse() */
-    List<Project> findAllByProjectNameContainsAndIsDeletedIsFalse(String projectName);
-    Page<Project> findAllByProjectNameContainsAndIsDeletedIsFalse(String projectName, Pageable paging);
-    /* projectName */
-    boolean existsByProjectNameAndIsDeletedIsFalse(String projectName);
+    /** Check duplicate for Update */
+    boolean existsByProjectNameAndStatusNotIn
+            (String projectName, Collection<Status> statusCollection);
+    Optional<Project> findByProjectNameAndStatusNotIn
+            (String projectName, Collection<Status> statusCollection);
+    Project getByProjectNameAndStatusNotIn
+            (String projectName, Collection<Status> statusCollection); /* Redundant, use above with .orElse() */
+    List<Project> findAllByProjectNameContainsAndStatusNotIn
+            (String projectName, Collection<Status> statusCollection);
+    Page<Project> findAllByProjectNameContainsAndStatusNotIn
+            (String projectName, Collection<Status> statusCollection, Pageable paging);
 
 
     /* locationId */
-    List<Project> findAllByLocationIdAndIsDeletedIsFalse(long locationId);
-    Page<Project> findAllByLocationIdAndIsDeletedIsFalse(long locationId, Pageable paging);
-    List<Project> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Long> locationIdCollection);
-    Page<Project> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Long> locationIdCollection, Pageable paging);
+    List<Project> findAllByLocationIdAndStatusNotIn
+            (long locationId, Collection<Status> statusCollection);
+    Page<Project> findAllByLocationIdAndStatusNotIn
+            (long locationId, Collection<Status> statusCollection, Pageable paging);
+    List<Project> findAllByLocationIdInAndStatusNotIn
+            (Collection<Long> locationIdCollection, Collection<Status> statusCollection);
+    Page<Project> findAllByLocationIdInAndStatusNotIn
+            (Collection<Long> locationIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* planStartDate */
-    List<Project> findAllByPlanStartDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
-    List<Project> findAllByPlanStartDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
-    List<Project> findAllByPlanStartDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
+    List<Project> findAllByPlanStartDateAfterAndStatusNotIn
+            (LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<Project> findAllByPlanStartDateBeforeAndStatusNotIn
+            (LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<Project> findAllByPlanStartDateBetweenAndStatusNotIn
+            (LocalDateTime from, LocalDateTime to, Collection<Status> statusCollection);
     /* planEndDate */
-    List<Project> findAllByPlanEndDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
-    List<Project> findAllByPlanEndDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
-    List<Project> findAllByPlanEndDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
+    List<Project> findAllByPlanEndDateAfterAndStatusNotIn
+            (LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<Project> findAllByPlanEndDateBeforeAndStatusNotIn
+            (LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<Project> findAllByPlanEndDateBetweenAndStatusNotIn
+            (LocalDateTime from, LocalDateTime to, Collection<Status> statusCollection);
     /* planStartDate & planEndDate in range */
-    List<Project> findAllByPlanEndDateAfterAndPlanEndDateBeforeAndIsDeletedIsFalse
-            (LocalDateTime afterDate, LocalDateTime beforeDate);
+    List<Project> findAllByPlanEndDateAfterAndPlanEndDateBeforeAndStatusNotIn
+            (LocalDateTime afterDate, LocalDateTime beforeDate, Collection<Status> statusCollection);
 
 
     /* actualStartDate */
-    List<Project> findAllByActualStartDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
-    List<Project> findAllByActualStartDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
-    List<Project> findAllByActualStartDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
+    List<Project> findAllByActualStartDateAfterAndStatusNotIn
+            (LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<Project> findAllByActualStartDateBeforeAndStatusNotIn
+            (LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<Project> findAllByActualStartDateBetweenAndStatusNotIn
+            (LocalDateTime from, LocalDateTime to, Collection<Status> statusCollection);
     /* actualEndDate */
-    List<Project> findAllByActualEndDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
-    List<Project> findAllByActualEndDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
-    List<Project> findAllByActualEndDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
+    List<Project> findAllByActualEndDateAfterAndStatusNotIn
+            (LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<Project> findAllByActualEndDateBeforeAndStatusNotIn
+            (LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<Project> findAllByActualEndDateBetweenAndStatusNotIn
+            (LocalDateTime from, LocalDateTime to, Collection<Status> statusCollection);
     /* actualStartDate & ActualEndDate in range */
-    List<Project> findAllByActualEndDateAfterAndActualEndDateBeforeAndIsDeletedIsFalse
-            (LocalDateTime afterDate, LocalDateTime beforeDate);
+    List<Project> findAllByActualEndDateAfterAndActualEndDateBeforeAndStatusNotIn
+            (LocalDateTime afterDate, LocalDateTime beforeDate, Collection<Status> statusCollection);
 
 
     /* estimatedCost */
-    List<Project> findAllByEstimatedCostGreaterThanEqualAndIsDeletedIsFalse(double minCost);
-    List<Project> findAllByEstimatedCostLessThanEqualAndIsDeletedIsFalse(double maxCost);
-    List<Project> findAllByEstimatedCostBetweenAndIsDeletedIsFalse(double minCost, double maxCost);
+    List<Project> findAllByEstimatedCostGreaterThanEqualAndStatusNotIn
+            (double minCost, Collection<Status> statusCollection);
+    List<Project> findAllByEstimatedCostLessThanEqualAndStatusNotIn
+            (double maxCost, Collection<Status> statusCollection);
+    List<Project> findAllByEstimatedCostBetweenAndStatusNotIn
+            (double minCost, double maxCost, Collection<Status> statusCollection);
 
 
     /* actualCost */
-    List<Project> findAllByActualCostGreaterThanEqualAndIsDeletedIsFalse(double minCost);
-    List<Project> findAllByActualCostLessThanEqualAndIsDeletedIsFalse(double maxCost);
-    List<Project> findAllByActualCostBetweenAndIsDeletedIsFalse(double minCost, double maxCost);
+    List<Project> findAllByActualCostGreaterThanEqualAndStatusNotIn
+            (double minCost, Collection<Status> statusCollection);
+    List<Project> findAllByActualCostLessThanEqualAndStatusNotIn
+            (double maxCost, Collection<Status> statusCollection);
+    List<Project> findAllByActualCostBetweenAndStatusNotIn
+            (double minCost, double maxCost, Collection<Status> statusCollection);
 }

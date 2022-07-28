@@ -1,6 +1,6 @@
 package com.ntv.ntvcons_backend;
 
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.boot.SpringApplication;
@@ -33,8 +33,8 @@ public class NtvConsBackendApplication {
 	}
 
 	@Bean
-	public ThanhUtil thanhUtil() {
-		return new ThanhUtil();
+	public MiscUtil thanhUtil() {
+		return new MiscUtil();
 	}
 
 	public static void main(String[] args) {

@@ -14,7 +14,7 @@ import com.ntv.ntvcons_backend.repositories.ProjectRepository;
 import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
 import com.ntv.ntvcons_backend.services.request.RequestService;
 import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -32,7 +32,7 @@ public class RequestController {
     @Autowired
     private RequestService requestService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
@@ -125,7 +125,7 @@ public class RequestController {
         try {
             List<RequestReadDTO> requestList =
                     requestService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (requestList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found");
@@ -196,7 +196,7 @@ public class RequestController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<RequestReadDTO> requestDTOList;
 

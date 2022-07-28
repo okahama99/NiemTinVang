@@ -6,7 +6,7 @@ import com.ntv.ntvcons_backend.dtos.role.RoleCreateDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleUpdateDTO;
 import com.ntv.ntvcons_backend.services.role.RoleService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -24,7 +24,7 @@ public class RoleController {
     @Autowired
     private RoleService roleService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -55,7 +55,7 @@ public class RoleController {
         try {
             List<RoleReadDTO> roleDTOList =
                     roleService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (roleDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Role found");
@@ -140,7 +140,7 @@ public class RoleController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
             
             List<RoleReadDTO> roleDTOList;
 

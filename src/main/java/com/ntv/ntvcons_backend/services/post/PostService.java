@@ -5,6 +5,7 @@ import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostModels.CreatePostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -13,29 +14,29 @@ public interface PostService {
     boolean createPost(CreatePostModel createPostModel);
 
     /* READ */;
-    List<ShowPostModel> getAllAvailablePost(int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<ShowPostModel> getAllAvailablePost(Pageable paging);
 
-    List<ShowPostModel> getPostByPostCategory(Long postCategoryId, int pageNo, int pageSize, String sortBy, boolean sortType);
+    Post getById(Long postId);
 
-    List<ShowPostModel> getPostByScale(String scale, int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<ShowPostModel> getAllModelByPostCategoryId(Long postCategoryId, Pageable paging);
 
-    List<ShowPostModel> getPostByAuthorName(String authorName, int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<ShowPostModel> getAllModelByAuthorNameContains(String authorName, Pageable paging);
 
-    List<ShowPostModel> getPostByPostTitle(String postTitle, int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<ShowPostModel> getAllModelByPostTitleContains(String postTitle, Pageable paging);
 
-    List<ShowPostModel> getPostByOwnerName(String ownerName, int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<ShowPostModel> getAllModelByOwnerNameContains(String ownerName, Pageable paging);
 
-    List<ShowPostModel> getPostByAddress(String address, int pageNo, int pageSize, String sortBy, boolean sortType);
+    boolean existsByAddress(String address);
+    List<ShowPostModel> getAllModelByAddressContains(String address, Pageable paging);
 
-    List<PostCategory> getCategoryForCreatePost();
+    List<ShowPostModel> getAllModelByScaleContains(String scale, Pageable paging);
 
-    Post getPostById(Long postId);
+    /* Ko nên để đây, cần thì gọi api của postCategory */
+    List<PostCategory> getAllPostCategoryForCreatePost();
 
     /* UPDATE */
     boolean updatePost(UpdatePostModel updatePostModel);
 
     /* DELETE */
     boolean deletePost(Long postId);
-
-
 }

@@ -1,18 +1,18 @@
 package com.ntv.ntvcons_backend.services.post;
 
 import com.google.common.base.Converter;
-import com.ntv.ntvcons_backend.Enum.Status;
-import com.ntv.ntvcons_backend.entities.*;
+import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.entities.Post;
+import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostModels.CreatePostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
 import com.ntv.ntvcons_backend.repositories.PostCategoryRepository;
 import com.ntv.ntvcons_backend.repositories.PostRepository;
+import com.ntv.ntvcons_backend.services.postCategory.PostCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,16 +22,20 @@ import java.util.Optional;
 
 @Service
 public class PostServiceImpl implements PostService {
-
     @Autowired
-    PostRepository postRepository;
-
+    private PostRepository postRepository;
     @Autowired
-    PostCategoryRepository postCategoryRepository;
+    private PostCategoryRepository postCategoryRepository;
+    @Autowired
+    private PostCategoryService postCategoryService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
+    /* CREATE */
     @Override
     public boolean createPost(CreatePostModel createPostModel) {
         Post post = new Post();
+
         post.setAddress(createPostModel.getAddress());
         post.setPostCategoryId(createPostModel.getPostCategoryId());
         post.setPostTitle(createPostModel.getPostTitle());
@@ -40,470 +44,173 @@ public class PostServiceImpl implements PostService {
         post.setOwnerName(createPostModel.getOwnerName());
         post.setStatus(Status.ACTIVE);
         post.setCreatedAt(LocalDateTime.now());
+
         postRepository.saveAndFlush(post);
+
         return true;
     }
 
+    /* READ */
     @Override
-    public List<ShowPostModel> getAllAvailablePost(int pageNo, int pageSize, String sortBy, boolean sortType) {
-        Pageable paging;
-        if(sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
+    public List<ShowPostModel> getAllAvailablePost(Pageable paging) {
+        Page<Post> pagingResult =
+                postRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
-        Page<Post> pagingResult = postRepository.findAllByIsDeletedIsFalse(paging);
-
-        if(pagingResult.hasContent()){
-            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
-
-            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
-
-                @Override
-                protected ShowPostModel doForward(Post post) {
-                    ShowPostModel model = new ShowPostModel();
-
-                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
-                    if(postCategory.isPresent())
-                    {
-                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
-                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
-                    }else{
-                        model.setPostCategoryDesc(null);
-                        model.setPostCategoryName(null);
-                    }
-
-                    model.setPostId(post.getPostId());
-                    model.setPostCategoryId(post.getPostCategoryId());
-                    model.setAuthorName(post.getAuthorName());
-                    model.setPostTitle(post.getPostTitle());
-                    model.setOwnerName(post.getOwnerName());
-                    model.setAddress(post.getAddress());
-                    model.setScale(post.getScale());
-                    model.setStatus(post.getStatus());
-
-                    model.setCreatedAt(post.getCreatedAt());
-                    model.setCreatedBy(post.getCreatedBy());
-                    model.setUpdatedAt(post.getCreatedAt());
-                    model.setUpdatedBy(post.getUpdatedBy());
-                    model.setTotalPage(totalPage);
-                    return model;
-                }
-
-                @Override
-                protected Post doBackward(ShowPostModel showPostModel) {
-                    return null;
-                }
-            });
-            return modelResult.getContent();
-        }else{
-            return new ArrayList<ShowPostModel>();
-        }
+        return fillAllShowPostModel(pagingResult);
     }
 
     @Override
-    public List<PostCategory> getCategoryForCreatePost() {
-        List<PostCategory> postCategoryModelList = postCategoryRepository.findAllByStatus(Status.ACTIVE);
+    public Post getById(Long postId) {
+        return postRepository
+                .findByPostIdAndStatusNotIn(postId, N_D_S_STATUS_LIST)
+                .orElse(null);
+    }
+
+    @Override
+    public List<ShowPostModel> getAllModelByPostCategoryId(Long postCategoryId, Pageable paging) {
+        Page<Post> pagingResult = 
+                postRepository.findAllByPostCategoryIdAndStatusNotIn(postCategoryId, N_D_S_STATUS_LIST, paging);
+
+        return fillAllShowPostModel(pagingResult);
+    }
+
+    @Override
+    public List<ShowPostModel> getAllModelByAuthorNameContains(String authorName, Pageable paging) {
+        Page<Post> pagingResult =
+                postRepository.findAllByAuthorNameContainsAndStatusNotIn(authorName, N_D_S_STATUS_LIST, paging);
+
+        return fillAllShowPostModel(pagingResult);
+    }
+
+    @Override
+    public List<ShowPostModel> getAllModelByPostTitleContains(String postTitle, Pageable paging) {
+        Page<Post> pagingResult =
+                postRepository.findAllByPostTitleContainsAndStatusNotIn(postTitle, N_D_S_STATUS_LIST, paging);
+
+        return fillAllShowPostModel(pagingResult);
+    }
+
+    @Override
+    public List<ShowPostModel> getAllModelByOwnerNameContains(String ownerName, Pageable paging) {
+        Page<Post> pagingResult =
+                postRepository.findAllByOwnerNameContainsAndStatusNotIn(ownerName, N_D_S_STATUS_LIST, paging);
+
+        return fillAllShowPostModel(pagingResult);
+    }
+
+    @Override
+    public boolean existsByAddress(String address) {
+        return postRepository
+                .existsByAddressAndStatusNotIn(address, N_D_S_STATUS_LIST);
+    }
+    @Override
+    public List<ShowPostModel> getAllModelByAddressContains(String address, Pageable paging) {
+        Page<Post> pagingResult =
+                postRepository.findAllByAddressContainsAndStatusNotIn(address, N_D_S_STATUS_LIST, paging);
+
+        return fillAllShowPostModel(pagingResult);
+    }
+
+    @Override
+    public List<ShowPostModel> getAllModelByScaleContains(String scale, Pageable paging) {
+        Page<Post> pagingResult =
+                postRepository.findAllByScaleContainsAndStatusNotIn(scale, N_D_S_STATUS_LIST, paging);
+
+        return fillAllShowPostModel(pagingResult);
+    }
+
+    @Override
+    public List<PostCategory> getAllPostCategoryForCreatePost() {
+        List<PostCategory> postCategoryModelList = postCategoryRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST);
         return postCategoryModelList;
     }
 
-    @Override
-    public Post getPostById(Long postId) {
-        Optional<Post> post = postRepository.findByPostIdAndIsDeletedIsFalse(postId);
-        if(post.isPresent())
-        {
-            return post.get();
-        }
-        return null;
-    }
-
+    /* UPDATE */
     @Override
     public boolean updatePost(UpdatePostModel updatePostModel) {
-        Post post = postRepository.findById(updatePostModel.getPostId()).orElse(null);
-        Optional<PostCategory> category = postCategoryRepository.findById(updatePostModel.getPostCategoryId());
-        if(post != null || category != null)
-        {
-            post.setPostCategoryId(updatePostModel.getPostCategoryId());
-            post.setAuthorName(updatePostModel.getAuthorName());
-            post.setPostTitle(updatePostModel.getPostTitle());
-            post.setOwnerName(updatePostModel.getOwnerName());
-            post.setAddress(updatePostModel.getAddress());
-            post.setScale(updatePostModel.getScale());
-            post.setUpdatedAt(LocalDateTime.now());
-            postRepository.saveAndFlush(post);
-            return true;
-        }
-        return false;
-    }
+        Post post = getById(updatePostModel.getPostId());
 
-    @Override
-    public boolean deletePost(Long postId) {
-        Post post = postRepository.findById(postId).orElse(null);
-
-        if (post == null){
+        if (post == null)
             return false;
-        }
 
-        post.setIsDeleted(true);
+        PostCategory category =
+                postCategoryService.getById(updatePostModel.getPostCategoryId());
+
+        if (category == null)
+            return false;
+
+        post.setPostCategoryId(category.getPostCategoryId());
+        post.setAuthorName(updatePostModel.getAuthorName());
+        post.setPostTitle(updatePostModel.getPostTitle());
+        post.setOwnerName(updatePostModel.getOwnerName());
+        post.setAddress(updatePostModel.getAddress());
+        post.setScale(updatePostModel.getScale());
+        post.setUpdatedAt(LocalDateTime.now());
+
         postRepository.saveAndFlush(post);
 
         return true;
     }
 
-    @Override
-    public List<ShowPostModel> getPostByPostCategory(Long postCategoryId, int pageNo, int pageSize, String sortBy, boolean sortType) {
-        Pageable paging;
-        if(sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
-        Page<Post> pagingResult = postRepository.findAllByPostCategoryIdAndIsDeletedIsFalse(postCategoryId, paging);
-
-        if(pagingResult.hasContent()){
-            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
-
-            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
-
-                @Override
-                protected ShowPostModel doForward(Post post) {
-                    ShowPostModel model = new ShowPostModel();
-
-                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
-                    if(postCategory.isPresent())
-                    {
-                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
-                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
-                    }else{
-                        model.setPostCategoryDesc(null);
-                        model.setPostCategoryName(null);
-                    }
-
-                    model.setPostId(post.getPostId());
-                    model.setPostCategoryId(post.getPostCategoryId());
-                    model.setAuthorName(post.getAuthorName());
-                    model.setPostTitle(post.getPostTitle());
-                    model.setOwnerName(post.getOwnerName());
-                    model.setAddress(post.getAddress());
-                    model.setScale(post.getScale());
-                    model.setStatus(post.getStatus());
-
-                    model.setCreatedAt(post.getCreatedAt());
-                    model.setCreatedBy(post.getCreatedBy());
-                    model.setUpdatedAt(post.getCreatedAt());
-                    model.setUpdatedBy(post.getUpdatedBy());
-                    model.setTotalPage(totalPage);
-                    return model;
-                }
-
-                @Override
-                protected Post doBackward(ShowPostModel showPostModel) {
-                    return null;
-                }
-            });
-            return modelResult.getContent();
-        }else{
-            return new ArrayList<ShowPostModel>();
-        }
-    }
-
-    @Override
-    public List<ShowPostModel> getPostByScale(String scale, int pageNo, int pageSize, String sortBy, boolean sortType) {
-        Pageable paging;
-        if(sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
-        Page<Post> pagingResult = postRepository.findAllByScaleContainingAndIsDeletedIsFalse(scale, paging);
-
-        if(pagingResult.hasContent()){
-            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
-
-            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
-
-                @Override
-                protected ShowPostModel doForward(Post post) {
-                    ShowPostModel model = new ShowPostModel();
-
-                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
-                    if(postCategory.isPresent())
-                    {
-                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
-                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
-                    }else{
-                        model.setPostCategoryDesc(null);
-                        model.setPostCategoryName(null);
-                    }
-
-                    model.setPostId(post.getPostId());
-                    model.setPostCategoryId(post.getPostCategoryId());
-                    model.setAuthorName(post.getAuthorName());
-                    model.setPostTitle(post.getPostTitle());
-                    model.setOwnerName(post.getOwnerName());
-                    model.setAddress(post.getAddress());
-                    model.setScale(post.getScale());
-                    model.setStatus(post.getStatus());
-
-                    model.setCreatedAt(post.getCreatedAt());
-                    model.setCreatedBy(post.getCreatedBy());
-                    model.setUpdatedAt(post.getCreatedAt());
-                    model.setUpdatedBy(post.getUpdatedBy());
-                    model.setTotalPage(totalPage);
-                    return model;
-                }
-
-                @Override
-                protected Post doBackward(ShowPostModel showPostModel) {
-                    return null;
-                }
-            });
-            return modelResult.getContent();
-        }else{
-            return new ArrayList<ShowPostModel>();
-        }
-    }
-
-    @Override
-    public List<ShowPostModel> getPostByAuthorName(String authorName, int pageNo, int pageSize, String sortBy, boolean sortType) {
-        Pageable paging;
-        if(sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
-        Page<Post> pagingResult = postRepository.findAllByAuthorNameContainingAndIsDeletedIsFalse(authorName, paging);
-
-        if(pagingResult.hasContent()){
-            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
-
-            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
-
-                @Override
-                protected ShowPostModel doForward(Post post) {
-                    ShowPostModel model = new ShowPostModel();
-
-                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
-                    if(postCategory.isPresent())
-                    {
-                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
-                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
-                    }else{
-                        model.setPostCategoryDesc(null);
-                        model.setPostCategoryName(null);
-                    }
-
-                    model.setPostId(post.getPostId());
-                    model.setPostCategoryId(post.getPostCategoryId());
-                    model.setAuthorName(post.getAuthorName());
-                    model.setPostTitle(post.getPostTitle());
-                    model.setOwnerName(post.getOwnerName());
-                    model.setAddress(post.getAddress());
-                    model.setScale(post.getScale());
-                    model.setStatus(post.getStatus());
-
-                    model.setCreatedAt(post.getCreatedAt());
-                    model.setCreatedBy(post.getCreatedBy());
-                    model.setUpdatedAt(post.getCreatedAt());
-                    model.setUpdatedBy(post.getUpdatedBy());
-                    model.setTotalPage(totalPage);
-                    return model;
-                }
-
-                @Override
-                protected Post doBackward(ShowPostModel showPostModel) {
-                    return null;
-                }
-            });
-            return modelResult.getContent();
-        }else{
-            return new ArrayList<ShowPostModel>();
-        }
-    }
-
-    @Override
-    public List<ShowPostModel> getPostByPostTitle(String postTitle, int pageNo, int pageSize, String sortBy, boolean sortType) {
-        Pageable paging;
-        if(sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
-        Page<Post> pagingResult = postRepository.findAllByPostTitleContainingAndIsDeletedIsFalse(postTitle, paging);
-
-        if(pagingResult.hasContent()){
-            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
-
-            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
-
-                @Override
-                protected ShowPostModel doForward(Post post) {
-                    ShowPostModel model = new ShowPostModel();
-
-                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
-                    if(postCategory.isPresent())
-                    {
-                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
-                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
-                    }else{
-                        model.setPostCategoryDesc(null);
-                        model.setPostCategoryName(null);
-                    }
-
-                    model.setPostId(post.getPostId());
-                    model.setPostCategoryId(post.getPostCategoryId());
-                    model.setAuthorName(post.getAuthorName());
-                    model.setPostTitle(post.getPostTitle());
-                    model.setOwnerName(post.getOwnerName());
-                    model.setAddress(post.getAddress());
-                    model.setScale(post.getScale());
-                    model.setStatus(post.getStatus());
-
-                    model.setCreatedAt(post.getCreatedAt());
-                    model.setCreatedBy(post.getCreatedBy());
-                    model.setUpdatedAt(post.getCreatedAt());
-                    model.setUpdatedBy(post.getUpdatedBy());
-                    model.setTotalPage(totalPage);
-                    return model;
-                }
-
-                @Override
-                protected Post doBackward(ShowPostModel showPostModel) {
-                    return null;
-                }
-            });
-            return modelResult.getContent();
-        }else{
-            return new ArrayList<ShowPostModel>();
-        }
-    }
-
-    @Override
-    public List<ShowPostModel> getPostByOwnerName(String ownerName, int pageNo, int pageSize, String sortBy, boolean sortType) {
-        Pageable paging;
-        if(sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
-        Page<Post> pagingResult = postRepository.findAllByOwnerNameContainingAndIsDeletedIsFalse(ownerName, paging);
-
-        if(pagingResult.hasContent()){
-            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
-
-            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
-
-                @Override
-                protected ShowPostModel doForward(Post post) {
-                    ShowPostModel model = new ShowPostModel();
-
-                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
-                    if(postCategory.isPresent())
-                    {
-                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
-                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
-                    }else{
-                        model.setPostCategoryDesc(null);
-                        model.setPostCategoryName(null);
-                    }
-
-                    model.setPostId(post.getPostId());
-                    model.setPostCategoryId(post.getPostCategoryId());
-                    model.setAuthorName(post.getAuthorName());
-                    model.setPostTitle(post.getPostTitle());
-                    model.setOwnerName(post.getOwnerName());
-                    model.setAddress(post.getAddress());
-                    model.setScale(post.getScale());
-                    model.setStatus(post.getStatus());
-
-                    model.setCreatedAt(post.getCreatedAt());
-                    model.setCreatedBy(post.getCreatedBy());
-                    model.setUpdatedAt(post.getCreatedAt());
-                    model.setUpdatedBy(post.getUpdatedBy());
-                    model.setTotalPage(totalPage);
-                    return model;
-                }
-
-                @Override
-                protected Post doBackward(ShowPostModel showPostModel) {
-                    return null;
-                }
-            });
-            return modelResult.getContent();
-        }else{
-            return new ArrayList<ShowPostModel>();
-        }
-    }
-
-    @Override
-    public List<ShowPostModel> getPostByAddress(String address, int pageNo, int pageSize, String sortBy, boolean sortType) {
-        Pageable paging;
-        if(sortType) {
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
-            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
-        }
-
-        Page<Post> pagingResult = postRepository.findAllByAddressContainingAndIsDeletedIsFalse(address, paging);
-
-        if(pagingResult.hasContent()){
-            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
-
-            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
-
-                @Override
-                protected ShowPostModel doForward(Post post) {
-                    ShowPostModel model = new ShowPostModel();
-
-                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatus(post.getPostCategoryId(), Status.ACTIVE);
-                    if(postCategory.isPresent())
-                    {
-                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
-                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
-                    }else{
-                        model.setPostCategoryDesc(null);
-                        model.setPostCategoryName(null);
-                    }
-
-                    model.setPostId(post.getPostId());
-                    model.setPostCategoryId(post.getPostCategoryId());
-                    model.setAuthorName(post.getAuthorName());
-                    model.setPostTitle(post.getPostTitle());
-                    model.setOwnerName(post.getOwnerName());
-                    model.setAddress(post.getAddress());
-                    model.setScale(post.getScale());
-                    model.setStatus(post.getStatus());
-
-                    model.setCreatedAt(post.getCreatedAt());
-                    model.setCreatedBy(post.getCreatedBy());
-                    model.setUpdatedAt(post.getCreatedAt());
-                    model.setUpdatedBy(post.getUpdatedBy());
-                    model.setTotalPage(totalPage);
-                    return model;
-                }
-
-                @Override
-                protected Post doBackward(ShowPostModel showPostModel) {
-                    return null;
-                }
-            });
-            return modelResult.getContent();
-        }else{
-            return new ArrayList<ShowPostModel>();
-        }
-    }
-    /* CREATE */
-
-    /* READ */;
-
-    /* UPDATE */
-
     /* DELETE */
+    @Override
+    public boolean deletePost(Long postId) {
+        Post post = getById(postId);
 
+        if (post == null)
+            return false;
+
+        post.setStatus(Status.DELETED);
+        postRepository.saveAndFlush(post);
+
+        return true;
+    }
+
+    /* Utils */
+    private List<ShowPostModel> fillAllShowPostModel(Page<Post> pagingResult) {
+        if (pagingResult.hasContent()) {
+            int totalPage = pagingResult.getTotalPages();
+
+            Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
+
+                @Override
+                protected ShowPostModel doForward(Post post) {
+                    ShowPostModel model = new ShowPostModel();
+
+                    Optional<PostCategory> postCategory = postCategoryRepository.findByPostCategoryIdAndStatusNotIn(post.getPostCategoryId(), N_D_S_STATUS_LIST);
+                    if (postCategory.isPresent()) {
+                        model.setPostCategoryDesc(postCategory.get().getPostCategoryDesc());
+                        model.setPostCategoryName(postCategory.get().getPostCategoryName());
+                    } else {
+                        model.setPostCategoryDesc(null);
+                        model.setPostCategoryName(null);
+                    }
+
+                    model.setPostId(post.getPostId());
+                    model.setPostCategoryId(post.getPostCategoryId());
+                    model.setAuthorName(post.getAuthorName());
+                    model.setPostTitle(post.getPostTitle());
+                    model.setOwnerName(post.getOwnerName());
+                    model.setAddress(post.getAddress());
+                    model.setScale(post.getScale());
+                    model.setStatus(post.getStatus());
+
+                    model.setCreatedAt(post.getCreatedAt());
+                    model.setCreatedBy(post.getCreatedBy());
+                    model.setUpdatedAt(post.getCreatedAt());
+                    model.setUpdatedBy(post.getUpdatedBy());
+                    model.setTotalPage(totalPage);
+                    return model;
+                }
+
+                @Override
+                protected Post doBackward(ShowPostModel showPostModel) {
+                    return null;
+                }
+            });
+            return modelResult.getContent();
+        } else {
+            return new ArrayList<ShowPostModel>();
+        }
+    }
 }

@@ -16,15 +16,15 @@ import javax.validation.constraints.Size;
 public class ExternalFileCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(example = "File xxx dự án yyy") /* Hint for Swagger */
     @Size(max = 100, message = "fileName max length: 100 characters")
-    @NotNull(message = "fileName REQUIRED for create")
+    @NotNull(message = "fileName REQUIRED for Create")
     private String fileName;
 
     @ApiModelProperty(example = "https://imgur.com/gallery/seX0ozh") /* Hint for Swagger */
     @Size(max = 100, message = "fileLink max length: 100 characters")
-    @NotNull(message = "fileLink REQUIRED for create")
+    @NotNull(message = "fileLink REQUIRED for Create")
     private String fileLink;
 
     @Positive
-    @NotNull(message = "fileTypeId REQUIRED for create")
+    @NotNull(message = "fileTypeId REQUIRED for Create")
     private Long fileTypeId;
 }

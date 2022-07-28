@@ -15,7 +15,7 @@ import javax.validation.constraints.Size;
 public class RequestTypeCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(example = "Yêu cầu chi tiêu") /* Hint for Swagger */
     @Size(max = 100, message = "requestTypeName max length: 100 characters")
-    @NotNull(message = "requestTypeName REQUIRED for create")
+    @NotNull(message = "requestTypeName REQUIRED for Create")
     private String requestTypeName;
 
     @ApiModelProperty(example = "Yêu cầu chi tiêu") /* Hint for Swagger */

@@ -1,11 +1,11 @@
 package com.ntv.ntvcons_backend.services.projectManager;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.ProjectManager;
-import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.repositories.ProjectManagerRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -36,6 +36,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Autowired
     private ProjectService projectService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public ProjectManager createProjectManager(ProjectManager newProjectManager) throws Exception {
@@ -57,9 +59,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
 
         /* Check duplicate */
         if (projectManagerRepository
-                .existsByProjectIdAndManagerIdAndIsDeletedIsFalse(
+                .existsByProjectIdAndManagerIdAndStatusNotIn(
                         newProjectManager.getProjectId(),
-                        newProjectManager.getManagerId())) {
+                        newProjectManager.getManagerId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another ProjectManager relationship between with Project with Id: '"
                     + newProjectManager.getProjectId()
                     + "' and User with Id: '"
@@ -140,9 +143,10 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             for (ProjectManager newProjectManager : newProjectManagerList) {
                 /* TODO: bulk check instead of loop */
                 if (projectManagerRepository
-                                .existsByProjectIdAndManagerIdAndIsDeletedIsFalse(
+                                .existsByProjectIdAndManagerIdAndStatusNotIn(
                                         newProjectManager.getProjectId(),
-                                        newProjectManager.getManagerId())) {
+                                        newProjectManager.getManagerId(),
+                                        N_D_S_STATUS_LIST)) {
                     errorMsg.append("Already exists another ProjectManager relationship between with Project with Id: '")
                             .append(newProjectManager.getProjectId())
                             .append("' and User with Id: '")
@@ -177,7 +181,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     /* READ */
     @Override
     public Page<ProjectManager> getPageAll(Pageable paging) throws Exception {
-        Page<ProjectManager> projectManagerPage = projectManagerRepository.findAllByIsDeletedIsFalse(paging);
+        Page<ProjectManager> projectManagerPage =
+                projectManagerRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (projectManagerPage.isEmpty()) 
             return null;
@@ -202,7 +207,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public ProjectManager getById(long projectManagerId) throws Exception {
         return projectManagerRepository
-                .findByProjectManagerIdAndIsDeletedIsFalse(projectManagerId)
+                .findByProjectManagerIdAndStatusNotIn(projectManagerId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -218,7 +223,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public List<ProjectManager> getAllByIdIn(Collection<Long> projectManagerIdCollection) throws Exception {
         List<ProjectManager> projectManagerList =
-                projectManagerRepository.findAllByProjectManagerIdInAndIsDeletedIsFalse(projectManagerIdCollection);
+                projectManagerRepository
+                        .findAllByProjectManagerIdInAndStatusNotIn(projectManagerIdCollection, N_D_S_STATUS_LIST);
 
         if (projectManagerList.isEmpty()) 
             return null;
@@ -238,7 +244,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public List<ProjectManager> getAllByManagerId(long managerId) throws Exception {
         List<ProjectManager> projectManagerList =
-                projectManagerRepository.findAllByManagerIdAndIsDeletedIsFalse(managerId);
+                projectManagerRepository.findAllByManagerIdAndStatusNotIn(managerId, N_D_S_STATUS_LIST);
 
         if (projectManagerList.isEmpty()) 
             return null;
@@ -257,7 +263,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public Page<ProjectManager> getPageAllByManagerId(Pageable paging, long managerId) throws Exception {
         Page<ProjectManager> projectManagerPage =
-                projectManagerRepository.findAllByManagerIdAndIsDeletedIsFalse(managerId, paging);
+                projectManagerRepository.findAllByManagerIdAndStatusNotIn(managerId, N_D_S_STATUS_LIST, paging);
 
         if (projectManagerPage.isEmpty()) 
             return null;
@@ -282,7 +288,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public List<ProjectManager> getAllByManagerIdIn(Collection<Long> managerIdCollection) throws Exception {
         List<ProjectManager> projectManagerList =
-                projectManagerRepository.findAllByManagerIdInAndIsDeletedIsFalse(managerIdCollection);
+                projectManagerRepository.findAllByManagerIdInAndStatusNotIn(managerIdCollection, N_D_S_STATUS_LIST);
 
         if (projectManagerList.isEmpty()) 
             return null;
@@ -301,7 +307,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public Page<ProjectManager> getPageAllByManagerIdIn(Pageable paging, Collection<Long> managerIdCollection) throws Exception {
         Page<ProjectManager> projectManagerPage =
-                projectManagerRepository.findAllByManagerIdInAndIsDeletedIsFalse(managerIdCollection, paging);
+                projectManagerRepository
+                        .findAllByManagerIdInAndStatusNotIn(managerIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (projectManagerPage.isEmpty()) 
             return null;
@@ -326,7 +333,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public List<ProjectManager> getAllByProjectId(long projectId) throws Exception {
         List<ProjectManager> projectManagerList =
-                projectManagerRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
+                projectManagerRepository.findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST);
 
         if (projectManagerList.isEmpty()) 
             return null;
@@ -345,7 +352,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public Page<ProjectManager> getPageAllByProjectId(Pageable paging, long projectId) throws Exception {
         Page<ProjectManager> projectManagerPage =
-                projectManagerRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
+                projectManagerRepository.findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST, paging);
 
         if (projectManagerPage.isEmpty()) 
             return null;
@@ -370,7 +377,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public List<ProjectManager> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<ProjectManager> projectManagerList =
-                projectManagerRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+                projectManagerRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST);
 
         if (projectManagerList.isEmpty()) 
             return null;
@@ -418,7 +425,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     @Override
     public Page<ProjectManager> getPageAllByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
         Page<ProjectManager> projectManagerPage =
-                projectManagerRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection, paging);
+                projectManagerRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (projectManagerPage.isEmpty()) 
             return null;
@@ -486,10 +493,11 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
 
         /* Check duplicate */
         if (projectManagerRepository
-                .existsByProjectIdAndManagerIdAndProjectManagerIdIsNotAndIsDeletedIsFalse(
+                .existsByProjectIdAndManagerIdAndProjectManagerIdIsNotAndStatusNotIn(
                         updatedProjectManager.getProjectId(),
                         updatedProjectManager.getManagerId(),
-                        updatedProjectManager.getProjectManagerId())) {
+                        updatedProjectManager.getProjectManagerId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another ProjectManager relationship between with Project with Id: '"
                     + updatedProjectManager.getProjectId()
                     + "' and User with Id: '"
@@ -658,10 +666,11 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             for (ProjectManager updatedProjectManager : updatedProjectManagerList) {
                 /* TODO: bulk check instead of loop */
                 if (projectManagerRepository
-                        .existsByProjectIdAndManagerIdAndProjectManagerIdIsNotAndIsDeletedIsFalse(
+                        .existsByProjectIdAndManagerIdAndProjectManagerIdIsNotAndStatusNotIn(
                                 updatedProjectManager.getProjectId(),
                                 updatedProjectManager.getManagerId(),
-                                updatedProjectManager.getProjectManagerId())) {
+                                updatedProjectManager.getProjectManagerId(),
+                                N_D_S_STATUS_LIST)) {
                     errorMsg.append("Already exists another ProjectManager relationship between Project with Id: '")
                             .append(updatedProjectManager.getProjectId())
                             .append("' and User with Id: '")
@@ -740,14 +749,92 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
 
     /* DELETE */
     @Override
+    public boolean removeProjectManager(long projectManagerId) throws Exception {
+        ProjectManager projectManager = getById(projectManagerId);
+
+        if (projectManager == null) 
+            return false;
+
+        projectManager.setStatus(Status.REMOVED);
+        projectManagerRepository.saveAndFlush(projectManager);
+
+        return true;
+    }
+    
+    @Override
+    public boolean removeAllByUserId(long userId) throws Exception {
+        List<ProjectManager> projectManagerList = getAllByManagerId(userId);
+
+        if (projectManagerList == null)
+            return false;
+
+        projectManagerList =
+                projectManagerList.stream()
+                        .peek(projectManager -> projectManager.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        projectManagerRepository.saveAllAndFlush(projectManagerList);
+
+        return true;
+    }
+    @Override
+    public boolean removeAllByUserIdIn(Collection<Long> userIdCollection) throws Exception {
+        List<ProjectManager> projectManagerList = getAllByManagerIdIn(userIdCollection);
+
+        if (projectManagerList == null)
+            return false;
+
+        projectManagerList =
+                projectManagerList.stream()
+                        .peek(projectManager -> projectManager.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        projectManagerRepository.saveAllAndFlush(projectManagerList);
+
+        return true;
+    }
+
+    @Override
+    public boolean removeAllByProjectId(long projectId) throws Exception {
+        List<ProjectManager> projectManagerList = getAllByProjectId(projectId);
+
+        if (projectManagerList == null)
+            return false;
+
+        projectManagerList =
+                projectManagerList.stream()
+                        .peek(projectManager -> projectManager.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        projectManagerRepository.saveAllAndFlush(projectManagerList);
+
+        return true;
+    }
+    @Override
+    public boolean removeAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<ProjectManager> projectManagerList = getAllByProjectIdIn(projectIdCollection);
+
+        if (projectManagerList == null)
+            return false;
+
+        projectManagerList =
+                projectManagerList.stream()
+                        .peek(projectManager -> projectManager.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        projectManagerRepository.saveAllAndFlush(projectManagerList);
+
+        return true;
+    }
+
+    @Override
     public boolean deleteProjectManager(long projectManagerId) throws Exception {
         ProjectManager projectManager = getById(projectManagerId);
 
-        if (projectManager == null) {
+        if (projectManager == null) 
             return false;
-        }
 
-        projectManager.setIsDeleted(true);
+        projectManager.setStatus(Status.DELETED);
         projectManagerRepository.saveAndFlush(projectManager);
 
         return true;
@@ -757,13 +844,12 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public boolean deleteAllByUserId(long userId) throws Exception {
         List<ProjectManager> projectManagerList = getAllByManagerId(userId);
 
-        if (projectManagerList == null) {
+        if (projectManagerList == null) 
             return false;
-        }
 
         projectManagerList =
                 projectManagerList.stream()
-                        .peek(projectManager -> projectManager.setIsDeleted(true))
+                        .peek(projectManager -> projectManager.setStatus(Status.DELETED))
                         .collect(Collectors.toList());
 
         projectManagerRepository.saveAllAndFlush(projectManagerList);
@@ -775,13 +861,12 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     public boolean deleteAllByProjectId(long projectId) throws Exception {
         List<ProjectManager> projectManagerList = getAllByProjectId(projectId);
 
-        if (projectManagerList == null) {
+        if (projectManagerList == null) 
             return false;
-        }
 
         projectManagerList =
                 projectManagerList.stream()
-                        .peek(projectManager -> projectManager.setIsDeleted(true))
+                        .peek(projectManager -> projectManager.setStatus(Status.DELETED))
                         .collect(Collectors.toList());
 
         projectManagerRepository.saveAllAndFlush(projectManagerList);

@@ -15,7 +15,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class LocationCreateOptionDTO implements Serializable {
     @ApiModelProperty(example = "CREATE_NEW_LOCATION") /* Hint for Swagger */
-    @NotNull(message = "createOption REQUIRED for create Location or not")
+    @NotNull(message = "createOption REQUIRED for Create Location or not")
     private CreateOption createOption;
 
     private LocationCreateDTO newLocation;

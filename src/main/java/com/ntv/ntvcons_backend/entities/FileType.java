@@ -26,9 +26,6 @@ public class FileType extends BaseEntity {
     @Column(name = "fileTypeDesc", length = 100)
     private String fileTypeDesc;
 
-    @Column(name = "fileTypeExtension", nullable = false, length = 10)
-    private String fileTypeExtension;
-
     @Column(name = "isDeleted", nullable = false)
     private Boolean isDeleted = false;
 

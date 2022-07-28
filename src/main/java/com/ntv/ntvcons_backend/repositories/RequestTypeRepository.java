@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.RequestType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,22 +13,32 @@ import java.util.Optional;
 
 @Repository
 public interface RequestTypeRepository extends JpaRepository<RequestType, Long> {
-    Page<RequestType> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<RequestType> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByRequestTypeIdAndIsDeletedIsFalse(long requestTypeId);
-    Optional<RequestType> findByRequestTypeIdAndIsDeletedIsFalse(long requestTypeId);
-    boolean existsAllByRequestTypeIdInAndIsDeletedIsFalse(Collection<Long> requestTypeIdCollection);
-    List<RequestType> findAllByRequestTypeIdInAndIsDeletedIsFalse(Collection<Long> requestTypeIdCollection);
+    boolean existsByRequestTypeIdAndStatusNotIn
+            (long requestTypeId, Collection<Status> statusCollection);
+    Optional<RequestType> findByRequestTypeIdAndStatusNotIn
+            (long requestTypeId, Collection<Status> statusCollection);
+    boolean existsAllByRequestTypeIdInAndStatusNotIn
+            (Collection<Long> requestTypeIdCollection, Collection<Status> statusCollection);
+    List<RequestType> findAllByRequestTypeIdInAndStatusNotIn
+            (Collection<Long> requestTypeIdCollection, Collection<Status> statusCollection);
     /* Id & requestTypeName */
     /** Check duplicate requestTypeName for update */
-    boolean existsByRequestTypeNameAndRequestTypeIdIsNotAndIsDeletedIsFalse(String requestTypeName, long requestTypeId);
+    boolean existsByRequestTypeNameAndRequestTypeIdIsNotAndStatusNotIn
+            (String requestTypeName, long requestTypeId, Collection<Status> statusCollection);
 
 
     /* requestTypeName */
-    boolean existsByRequestTypeNameAndIsDeletedIsFalse(String requestTypeName);
-    Optional<RequestType> findByRequestTypeNameAndIsDeletedIsFalse(String requestTypeName);
-    List<RequestType> findAllByRequestTypeNameContainsAndIsDeletedIsFalse(String requestTypeName);
-    Page<RequestType> findAllByRequestTypeNameContainsAndIsDeletedIsFalse(String requestTypeName, Pageable paging);
+    boolean existsByRequestTypeNameAndStatusNotIn
+            (String requestTypeName, Collection<Status> statusCollection);
+    Optional<RequestType> findByRequestTypeNameAndStatusNotIn
+            (String requestTypeName, Collection<Status> statusCollection);
+    List<RequestType> findAllByRequestTypeNameContainsAndStatusNotIn
+            (String requestTypeName, Collection<Status> statusCollection);
+    Page<RequestType> findAllByRequestTypeNameContainsAndStatusNotIn
+            (String requestTypeName, Collection<Status> statusCollection, Pageable paging);
 }

@@ -6,7 +6,7 @@ import com.ntv.ntvcons_backend.dtos.fileType.FileTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.fileType.FileTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.fileType.FileTypeUpdateDTO;
 import com.ntv.ntvcons_backend.services.fileType.FileTypeService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -24,7 +24,7 @@ public class FileTypeController {
     @Autowired
     private FileTypeService fileTypeService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -55,7 +55,7 @@ public class FileTypeController {
         try {
             List<FileTypeReadDTO> fileTypeDTOList =
                     fileTypeService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (fileTypeDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No FileType found");
@@ -99,15 +99,6 @@ public class FileTypeController {
                     }
                     break;
 
-                case BY_EXTENSION:
-                    fileTypeDTO = fileTypeService.getDTOByFileTypeExtension(searchParam);
-
-                    if (fileTypeDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with extension: '" + searchParam + "'. ");
-                    }
-                    break;
-
                 default:
                     throw new IllegalArgumentException("Invalid SearchType used for entity FileType");
             }
@@ -134,10 +125,6 @@ public class FileTypeController {
                 case BY_NAME:
                     errorMsg += "name: '" + searchParam + "'. ";
                     break;
-
-                case BY_EXTENSION:
-                    errorMsg += "extension: '" + searchParam + "'. ";
-                    break;
             }
 
             return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
@@ -153,7 +140,7 @@ public class FileTypeController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<FileTypeReadDTO> fileTypeDTOList;
 
@@ -161,16 +148,6 @@ public class FileTypeController {
                 case BY_NAME_CONTAINS:
                     fileTypeDTOList =
                             fileTypeService.getAllDTOInPagingByFileTypeNameContains(paging, searchParam);
-
-                    if (fileTypeDTOList == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with name contains: '" + searchParam + "'. ");
-                    }
-                    break;
-
-                case BY_EXTENSION_CONTAINS:
-                    fileTypeDTOList =
-                            fileTypeService.getAllDTOInPagingByFileTypeExtensionContains(paging, searchParam);
 
                     if (fileTypeDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -199,10 +176,6 @@ public class FileTypeController {
             switch (searchType) {
                 case BY_NAME_CONTAINS:
                     errorMsg += "name contains: '" + searchParam + "'. ";
-                    break;
-
-                case BY_EXTENSION_CONTAINS:
-                    errorMsg += "extension contains: '" + searchParam + "'. ";
                     break;
             }
 

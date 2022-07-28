@@ -2,7 +2,7 @@ package com.ntv.ntvcons_backend.services.task;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.SearchOption;
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
@@ -11,6 +11,7 @@ import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.entities.Task;
+import com.ntv.ntvcons_backend.entities.TaskAssignment;
 import com.ntv.ntvcons_backend.repositories.TaskRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
@@ -56,11 +57,11 @@ public class TaskServiceImpl implements TaskService{
 
     private final EntityType ENTITY_TYPE = EntityType.TASK_ENTITY;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public Task createTask(Task newTask) throws Exception {
-        /* TODO: also create EntityWrapper for task */
-
         String errorMsg = "";
 
         /* Check FK */
@@ -75,9 +76,10 @@ public class TaskServiceImpl implements TaskService{
 
         /* Check duplicate */
         if (taskRepository
-                .existsByProjectIdAndTaskNameAndIsDeletedIsFalse(
+                .existsByProjectIdAndTaskNameAndStatusNotIn(
                         newTask.getProjectId(),
-                        newTask.getTaskName())) {
+                        newTask.getTaskName(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Task with name: '" + newTask.getTaskName()
                     + "' for Project with Id:' " +  newTask.getProjectId() + "'. ";
         }
@@ -95,6 +97,7 @@ public class TaskServiceImpl implements TaskService{
                     mapper.skip(Task::setPlanEndDate);});
 
         Task newTask = modelMapper.map(newTaskDTO, Task.class);
+        long createdBy = newTask.getCreatedBy();
 
         /* Already check NOT NULL */
         newTask.setPlanStartDate(
@@ -118,22 +121,22 @@ public class TaskServiceImpl implements TaskService{
                 .createEntityWrapper(newTaskId, ENTITY_TYPE, newTask.getCreatedBy());
 
         /* Create associated TaskAssignment (if present) */
-        TaskAssignmentCreateDTO taskAssignmentDTO = newTaskDTO.getTaskAssignment();
-        if (taskAssignmentDTO != null) {
-            /* Set required FK */
-            taskAssignmentDTO.setTaskId(newTaskId);
+        Long assigneeId = newTaskDTO.getAssigneeId();
+        if (assigneeId != null) {
+            TaskAssignmentCreateDTO taskAssignmentDTO =
+                    new TaskAssignmentCreateDTO(newTaskId, createdBy, assigneeId);
 
-            taskAssignmentService.createTaskAssignmentByDTO(newTaskDTO.getTaskAssignment());
+            taskAssignmentService.createTaskAssignmentByDTO(taskAssignmentDTO);
         }
 
         return fillDTO(newTask);
     }
 
     /* READ */
-    /* TODO: add get externalFile via pairing */
     @Override
     public Page<Task> getPageAll(Pageable paging) throws Exception {
-        Page<Task> taskPage = taskRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Task> taskPage =
+                taskRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (taskPage.isEmpty())
             return null;
@@ -157,12 +160,13 @@ public class TaskServiceImpl implements TaskService{
 
     @Override
     public boolean existsById(long taskId) throws Exception {
-        return taskRepository.existsByTaskIdAndIsDeletedIsFalse(taskId);
+        return taskRepository
+                .existsByTaskIdAndStatusNotIn(taskId, N_D_S_STATUS_LIST);
     }
     @Override
     public Task getById(long taskId) throws Exception {
         return taskRepository
-                .findByTaskIdAndIsDeletedIsFalse(taskId)
+                .findByTaskIdAndStatusNotIn(taskId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -177,11 +181,13 @@ public class TaskServiceImpl implements TaskService{
 
     @Override
     public boolean existsAllByIdIn(Collection<Long> taskIdCollection) throws Exception {
-        return taskRepository.existsAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection);
+        return taskRepository
+                .existsAllByTaskIdInAndStatusNotIn(taskIdCollection, N_D_S_STATUS_LIST);
     }
     @Override
     public List<Task> getAllByIdIn(Collection<Long> taskIdCollection) throws Exception {
-        List<Task> taskList = taskRepository.findAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection);
+        List<Task> taskList =
+                taskRepository.findAllByTaskIdInAndStatusNotIn(taskIdCollection, N_D_S_STATUS_LIST);
 
         if (taskList.isEmpty()) 
             return null;
@@ -209,7 +215,8 @@ public class TaskServiceImpl implements TaskService{
 
     @Override
     public List<Task> getAllByProjectId(long projectId) throws Exception {
-        List<Task> taskList = taskRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
+        List<Task> taskList =
+                taskRepository.findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST);
 
         if (taskList.isEmpty()) 
             return null;
@@ -228,7 +235,7 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public Page<Task> getPageAllByProjectId(Pageable paging, long projectId) throws Exception {
         Page<Task> taskPage =
-                taskRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
+                taskRepository.findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST, paging);
 
         if (taskPage.isEmpty())
             return null;
@@ -252,7 +259,8 @@ public class TaskServiceImpl implements TaskService{
 
     @Override
     public List<Task> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
-        List<Task> taskList = taskRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+        List<Task> taskList =
+                taskRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST);
 
         if (taskList.isEmpty()) 
             return null;
@@ -298,7 +306,7 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public Page<Task> getPageAllByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
         Page<Task> taskPage =
-                taskRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection, paging);
+                taskRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (taskPage.isEmpty())
             return null;
@@ -322,7 +330,7 @@ public class TaskServiceImpl implements TaskService{
 
     @Override
     public List<Task> getAllByTaskName(String taskName) throws Exception {
-        List<Task> taskList = taskRepository.findAllByTaskNameAndIsDeletedIsFalse(taskName);
+        List<Task> taskList = taskRepository.findAllByTaskNameAndStatusNotIn(taskName, N_D_S_STATUS_LIST);
 
         if (taskList.isEmpty())
             return null;
@@ -341,7 +349,7 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public Page<Task> getPageAllByTaskName(Pageable paging, String taskName) throws Exception {
         Page<Task> taskPage =
-                taskRepository.findAllByTaskNameAndIsDeletedIsFalse(taskName, paging);
+                taskRepository.findAllByTaskNameAndStatusNotIn(taskName, N_D_S_STATUS_LIST, paging);
 
         if (taskPage.isEmpty())
             return null;
@@ -365,7 +373,7 @@ public class TaskServiceImpl implements TaskService{
 
     @Override
     public List<Task> getAllByTaskNameContains(String taskName) throws Exception {
-        List<Task> taskList = taskRepository.findAllByTaskNameContainsAndIsDeletedIsFalse(taskName);
+        List<Task> taskList = taskRepository.findAllByTaskNameContainsAndStatusNotIn(taskName, N_D_S_STATUS_LIST);
 
         if (taskList.isEmpty()) 
             return null;
@@ -384,7 +392,7 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public Page<Task> getPageAllByTaskNameContains(Pageable paging, String taskName) throws Exception {
         Page<Task> taskPage =
-                taskRepository.findAllByTaskNameContainsAndIsDeletedIsFalse(taskName, paging);
+                taskRepository.findAllByTaskNameContainsAndStatusNotIn(taskName, N_D_S_STATUS_LIST, paging);
 
         if (taskPage.isEmpty())
             return null;
@@ -412,15 +420,15 @@ public class TaskServiceImpl implements TaskService{
 
         switch (searchOption) {
             case BEFORE_DATE:
-                taskList = taskRepository.findAllByPlanStartDateBeforeAndIsDeletedIsFalse(toDate);
+                taskList = taskRepository.findAllByPlanStartDateBeforeAndStatusNotIn(toDate, N_D_S_STATUS_LIST);
                 break;
 
             case AFTER_DATE:
-                taskList = taskRepository.findAllByPlanStartDateAfterAndIsDeletedIsFalse(fromDate);
+                taskList = taskRepository.findAllByPlanStartDateAfterAndStatusNotIn(fromDate, N_D_S_STATUS_LIST);
                 break;
 
             case BETWEEN_DATE:
-                taskList = taskRepository.findAllByPlanStartDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                taskList = taskRepository.findAllByPlanStartDateBetweenAndStatusNotIn(fromDate, toDate, N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -450,15 +458,15 @@ public class TaskServiceImpl implements TaskService{
 
         switch (searchOption) {
             case BEFORE_DATE:
-                taskList = taskRepository.findAllByPlanEndDateBeforeAndIsDeletedIsFalse(toDate);
+                taskList = taskRepository.findAllByPlanEndDateBeforeAndStatusNotIn(toDate, N_D_S_STATUS_LIST);
                 break;
 
             case AFTER_DATE:
-                taskList = taskRepository.findAllByPlanEndDateAfterAndIsDeletedIsFalse(fromDate);
+                taskList = taskRepository.findAllByPlanEndDateAfterAndStatusNotIn(fromDate, N_D_S_STATUS_LIST);
                 break;
 
             case BETWEEN_DATE:
-                taskList = taskRepository.findAllByPlanEndDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                taskList = taskRepository.findAllByPlanEndDateBetweenAndStatusNotIn(fromDate, toDate, N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -485,7 +493,8 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public List<Task> getAllByPlanStartDateAfterAndPlanEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList =
-                taskRepository.findAllByPlanStartDateAfterAndPlanEndDateBeforeAndIsDeletedIsFalse(fromDate, toDate);
+                taskRepository
+                        .findAllByPlanStartDateAfterAndPlanEndDateBeforeAndStatusNotIn(fromDate, toDate, N_D_S_STATUS_LIST);
 
         if (taskList.isEmpty()) 
             return null;
@@ -508,15 +517,15 @@ public class TaskServiceImpl implements TaskService{
 
         switch (searchOption) {
             case BEFORE_DATE:
-                taskList = taskRepository.findAllByActualStartDateBeforeAndIsDeletedIsFalse(toDate);
+                taskList = taskRepository.findAllByActualStartDateBeforeAndStatusNotIn(toDate, N_D_S_STATUS_LIST);
                 break;
 
             case AFTER_DATE:
-                taskList = taskRepository.findAllByActualStartDateAfterAndIsDeletedIsFalse(fromDate);
+                taskList = taskRepository.findAllByActualStartDateAfterAndStatusNotIn(fromDate, N_D_S_STATUS_LIST);
                 break;
 
             case BETWEEN_DATE:
-                taskList = taskRepository.findAllByActualStartDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                taskList = taskRepository.findAllByActualStartDateBetweenAndStatusNotIn(fromDate, toDate, N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -546,15 +555,15 @@ public class TaskServiceImpl implements TaskService{
 
         switch (searchOption) {
             case BEFORE_DATE:
-                taskList = taskRepository.findAllByActualEndDateBeforeAndIsDeletedIsFalse(toDate);
+                taskList = taskRepository.findAllByActualEndDateBeforeAndStatusNotIn(toDate, N_D_S_STATUS_LIST);
                 break;
 
             case AFTER_DATE:
-                taskList = taskRepository.findAllByActualEndDateAfterAndIsDeletedIsFalse(fromDate);
+                taskList = taskRepository.findAllByActualEndDateAfterAndStatusNotIn(fromDate, N_D_S_STATUS_LIST);
                 break;
 
             case BETWEEN_DATE:
-                taskList = taskRepository.findAllByActualEndDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                taskList = taskRepository.findAllByActualEndDateBetweenAndStatusNotIn(fromDate, toDate, N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -581,7 +590,7 @@ public class TaskServiceImpl implements TaskService{
     @Override
     public List<Task> getAllByActualStartDateAfterAndActualEndDateBefore(LocalDateTime fromDate, LocalDateTime toDate) throws Exception {
         List<Task> taskList =
-                taskRepository.findAllByActualStartDateAfterAndActualEndDateBeforeAndIsDeletedIsFalse(fromDate, toDate);
+                taskRepository.findAllByActualStartDateAfterAndActualEndDateBeforeAndStatusNotIn(fromDate, toDate, N_D_S_STATUS_LIST);
 
         if (taskList.isEmpty()) 
             return null;
@@ -633,10 +642,11 @@ public class TaskServiceImpl implements TaskService{
 
         /* Check duplicate */
         if (taskRepository
-                .existsByProjectIdAndTaskNameAndTaskIdIsNotAndIsDeletedIsFalse(
+                .existsByProjectIdAndTaskNameAndTaskIdIsNotAndStatusNotIn(
                         updatedTask.getProjectId(),
                         updatedTask.getTaskName(),
-                        updatedTask.getTaskId())) {
+                        updatedTask.getTaskId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Task with name: '" + updatedTask.getTaskName()
                     + "' for Project with Id:' " +  updatedTask.getProjectId() + "'. ";
         }
@@ -659,6 +669,7 @@ public class TaskServiceImpl implements TaskService{
                     mapper.skip(Task::setActualEndDate);});
 
         Task updatedTask = modelMapper.map(updatedTaskDTO, Task.class);
+        long updatedBy = updatedTask.getUpdatedBy();
 
         /* Already check NOT NULL */
         updatedTask.setPlanStartDate(
@@ -702,16 +713,38 @@ public class TaskServiceImpl implements TaskService{
         if (updatedTask == null) 
             return null;
 
-        long taskId = updatedTask.getTaskId();
+        long updatedTaskId = updatedTask.getTaskId();
 
         /* Update TaskAssignment (if present) */
-        TaskAssignmentUpdateDTO taskAssignmentDTO = updatedTaskDTO.getTaskAssignment();
-        if (taskAssignmentDTO != null) {
-            /* Reset FK just in case */
-            taskAssignmentDTO.setTaskId(taskId);
+        Long assigneeId = updatedTaskDTO.getAssigneeId();
+        if (assigneeId != null) {
+            TaskAssignment taskAssignment = taskAssignmentService.getByTaskId(updatedTaskId);
 
-            if (taskAssignmentService.updateTaskAssignmentByDTO(taskAssignmentDTO) == null)
-                throw new IllegalArgumentException("No TaskAssignment found with taskId: '" + taskId + "' to update");
+            if (taskAssignment == null) {
+                TaskAssignmentCreateDTO taskAssignmentDTO =
+                        new TaskAssignmentCreateDTO(updatedTaskId, updatedBy, assigneeId);
+
+                taskAssignmentService.createTaskAssignmentByDTO(taskAssignmentDTO);
+            } else {
+                if (assigneeId <= 0) { /* assigneeId <= 0 to remove */
+                    /* Task 1-1 TaskAssignment */
+                    taskAssignmentService.removeByTaskId(updatedTaskId);
+                } else {
+                    if (!taskAssignment.getAssigneeId().equals(assigneeId)) {
+                        /* Task 1-1 TaskAssignment */
+                        taskAssignmentService.removeByTaskId(updatedTaskId);
+
+                        TaskAssignmentUpdateDTO taskAssignmentDTO =
+                                new TaskAssignmentUpdateDTO(
+                                        taskAssignment.getAssignmentId(),
+                                        updatedTaskId, updatedBy, assigneeId,
+                                        LocalDateTime.now().format(dateTimeFormatter), null);
+
+                        if (taskAssignmentService.updateTaskAssignmentByDTO(taskAssignmentDTO) == null)
+                            throw new IllegalArgumentException("No TaskAssignment found with taskId: '" + updatedTaskId + "' to update");
+                    }
+                }
+            }
         }
 
         return fillDTO(updatedTask);
@@ -734,7 +767,7 @@ public class TaskServiceImpl implements TaskService{
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(taskId, ENTITY_TYPE);
 
-        task.setIsDeleted(true);
+        task.setStatus(Status.DELETED);
         taskRepository.saveAndFlush(task);
 
         return true;

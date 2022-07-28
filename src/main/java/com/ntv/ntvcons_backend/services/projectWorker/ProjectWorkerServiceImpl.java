@@ -1,11 +1,11 @@
 package com.ntv.ntvcons_backend.services.projectWorker;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
-import com.ntv.ntvcons_backend.entities.ReportDetail;
 import com.ntv.ntvcons_backend.repositories.ProjectWorkerRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -40,6 +40,8 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Autowired
     private ProjectService projectService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public ProjectWorker createProjectWorker(ProjectWorker newProjectWorker) throws Exception {
@@ -61,9 +63,10 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
 
         /* Check duplicate */
         if (projectWorkerRepository
-                .existsByProjectIdAndWorkerIdAndIsDeletedIsFalse(
+                .existsByProjectIdAndWorkerIdAndStatusNotIn(
                         newProjectWorker.getProjectId(),
-                        newProjectWorker.getWorkerId())) {
+                        newProjectWorker.getWorkerId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another ProjectWorker relationship between with Project with Id: '"
                     + newProjectWorker.getProjectId()
                     + "' and Worker with Id: '"
@@ -145,9 +148,10 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
             for (ProjectWorker newProjectWorker : newProjectWorkerList) {
                 /* TODO: bulk check instead of loop */
                 if (projectWorkerRepository
-                                .existsByProjectIdAndWorkerIdAndIsDeletedIsFalse(
+                                .existsByProjectIdAndWorkerIdAndStatusNotIn(
                                         newProjectWorker.getProjectId(),
-                                        newProjectWorker.getWorkerId())) {
+                                        newProjectWorker.getWorkerId(),
+                                        N_D_S_STATUS_LIST)) {
                     errorMsg.append("Already exists another ProjectWorker relationship between with Project with Id: '")
                             .append(newProjectWorker.getProjectId())
                             .append("' and Worker with Id: '")
@@ -182,7 +186,8 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     /* READ */
     @Override
     public Page<ProjectWorker> getPageAll(Pageable paging) throws Exception {
-        Page<ProjectWorker> projectWorkerPage = projectWorkerRepository.findAllByIsDeletedIsFalse(paging);
+        Page<ProjectWorker> projectWorkerPage =
+                projectWorkerRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (projectWorkerPage.isEmpty()) 
             return null;
@@ -207,7 +212,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public ProjectWorker getById(long projectWorkerId) throws Exception {
         return projectWorkerRepository
-                .findByProjectWorkerIdAndIsDeletedIsFalse(projectWorkerId)
+                .findByProjectWorkerIdAndStatusNotIn(projectWorkerId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -223,7 +228,8 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public List<ProjectWorker> getAllByIdIn(Collection<Long> projectWorkerIdCollection) throws Exception {
         List<ProjectWorker> projectWorkerList =
-                projectWorkerRepository.findAllByProjectWorkerIdInAndIsDeletedIsFalse(projectWorkerIdCollection);
+                projectWorkerRepository
+                        .findAllByProjectWorkerIdInAndStatusNotIn(projectWorkerIdCollection, N_D_S_STATUS_LIST);
 
         if (projectWorkerList.isEmpty()) 
             return null;
@@ -243,7 +249,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public List<ProjectWorker> getAllByWorkerId(long workerId) throws Exception {
         List<ProjectWorker> projectWorkerList =
-                projectWorkerRepository.findAllByWorkerIdAndIsDeletedIsFalse(workerId);
+                projectWorkerRepository.findAllByWorkerIdAndStatusNotIn(workerId, N_D_S_STATUS_LIST);
 
         if (projectWorkerList.isEmpty()) 
             return null;
@@ -262,7 +268,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public Page<ProjectWorker> getPageAllByWorkerId(Pageable paging, long workerId) throws Exception {
         Page<ProjectWorker> projectWorkerPage =
-                projectWorkerRepository.findAllByWorkerIdAndIsDeletedIsFalse(workerId, paging);
+                projectWorkerRepository.findAllByWorkerIdAndStatusNotIn(workerId, N_D_S_STATUS_LIST, paging);
 
         if (projectWorkerPage.isEmpty()) 
             return null;
@@ -287,7 +293,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public List<ProjectWorker> getAllByWorkerIdIn(Collection<Long> workerIdCollection) throws Exception {
         List<ProjectWorker> projectWorkerList =
-                projectWorkerRepository.findAllByWorkerIdInAndIsDeletedIsFalse(workerIdCollection);
+                projectWorkerRepository.findAllByWorkerIdInAndStatusNotIn(workerIdCollection, N_D_S_STATUS_LIST);
 
         if (projectWorkerList.isEmpty()) 
             return null;
@@ -306,7 +312,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public Page<ProjectWorker> getPageAllByWorkerIdIn(Pageable paging, Collection<Long> workerIdCollection) throws Exception {
         Page<ProjectWorker> projectWorkerPage =
-                projectWorkerRepository.findAllByWorkerIdInAndIsDeletedIsFalse(workerIdCollection, paging);
+                projectWorkerRepository.findAllByWorkerIdInAndStatusNotIn(workerIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (projectWorkerPage.isEmpty()) 
             return null;
@@ -331,7 +337,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public List<ProjectWorker> getAllByProjectId(long projectId) throws Exception {
         List<ProjectWorker> projectWorkerList =
-                projectWorkerRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
+                projectWorkerRepository.findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST);
 
         if (projectWorkerList.isEmpty()) 
             return null;
@@ -350,7 +356,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public Page<ProjectWorker> getPageAllByProjectId(Pageable paging, long projectId) throws Exception {
         Page<ProjectWorker> projectWorkerPage =
-                projectWorkerRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
+                projectWorkerRepository.findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST, paging);
 
         if (projectWorkerPage.isEmpty()) 
             return null;
@@ -375,7 +381,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public List<ProjectWorker> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<ProjectWorker> projectWorkerList =
-                projectWorkerRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+                projectWorkerRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST);
 
         if (projectWorkerList.isEmpty()) 
             return null;
@@ -423,7 +429,8 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     @Override
     public Page<ProjectWorker> getPageAllByProjectIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
         Page<ProjectWorker> projectWorkerPage =
-                projectWorkerRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection, paging);
+                projectWorkerRepository
+                        .findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (projectWorkerPage.isEmpty()) 
             return null;
@@ -491,10 +498,11 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
 
         /* Check duplicate */
         if (projectWorkerRepository
-                .existsByProjectIdAndWorkerIdAndProjectWorkerIdIsNotAndIsDeletedIsFalse(
+                .existsByProjectIdAndWorkerIdAndProjectWorkerIdIsNotAndStatusNotIn(
                         updatedProjectWorker.getProjectId(),
                         updatedProjectWorker.getWorkerId(),
-                        updatedProjectWorker.getProjectWorkerId())) {
+                        updatedProjectWorker.getProjectWorkerId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another ProjectWorker relationship between with Project with Id: '"
                     + updatedProjectWorker.getProjectId()
                     + "' and Worker with Id: '"
@@ -664,10 +672,11 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
             for (ProjectWorker updatedProjectWorker : updatedProjectWorkerList) {
                 /* TODO: bulk check instead of loop */
                 if (projectWorkerRepository
-                        .existsByProjectIdAndWorkerIdAndProjectWorkerIdIsNotAndIsDeletedIsFalse(
+                        .existsByProjectIdAndWorkerIdAndProjectWorkerIdIsNotAndStatusNotIn(
                                 updatedProjectWorker.getProjectId(),
                                 updatedProjectWorker.getWorkerId(),
-                                updatedProjectWorker.getProjectWorkerId())) {
+                                updatedProjectWorker.getProjectWorkerId(),
+                                N_D_S_STATUS_LIST)) {
                     errorMsg.append("Already exists another ProjectWorker relationship between Project with Id: '")
                             .append(updatedProjectWorker.getProjectId())
                             .append("' and Worker with Id: '")
@@ -744,16 +753,95 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
         return fillAllDTO(projectWorkerList, null);
     }
 
+
     /* DELETE */
+    @Override
+    public boolean removeProjectWorker(long projectWorkerId) throws Exception {
+        ProjectWorker projectWorker = getById(projectWorkerId);
+
+        if (projectWorker == null)
+            return false;
+
+        projectWorker.setStatus(Status.DELETED);
+        projectWorkerRepository.saveAndFlush(projectWorker);
+
+        return true;
+    }
+
+    @Override
+    public boolean removeAllByWorkerId(long workerId) throws Exception {
+        List<ProjectWorker> projectWorkerList = getAllByWorkerId(workerId);
+
+        if (projectWorkerList == null)
+            return false;
+
+        projectWorkerList =
+                projectWorkerList.stream()
+                        .peek(projectWorker -> projectWorker.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        projectWorkerRepository.saveAllAndFlush(projectWorkerList);
+
+        return true;
+    }
+    @Override
+    public boolean removeAllByWorkerIdIn(Collection<Long> workerIdCollection) throws Exception {
+        List<ProjectWorker> projectWorkerList = getAllByWorkerIdIn(workerIdCollection);
+
+        if (projectWorkerList == null)
+            return false;
+
+        projectWorkerList =
+                projectWorkerList.stream()
+                        .peek(projectWorker -> projectWorker.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        projectWorkerRepository.saveAllAndFlush(projectWorkerList);
+
+        return true;
+    }
+
+    @Override
+    public boolean removeAllByProjectId(long projectId) throws Exception {
+        List<ProjectWorker> projectWorkerList = getAllByProjectId(projectId);
+
+        if (projectWorkerList == null)
+            return false;
+
+        projectWorkerList =
+                projectWorkerList.stream()
+                        .peek(projectWorker -> projectWorker.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        projectWorkerRepository.saveAllAndFlush(projectWorkerList);
+
+        return true;
+    }
+    @Override
+    public boolean removeAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
+        List<ProjectWorker> projectWorkerList = getAllByProjectIdIn(projectIdCollection);
+
+        if (projectWorkerList == null)
+            return false;
+
+        projectWorkerList =
+                projectWorkerList.stream()
+                        .peek(projectWorker -> projectWorker.setStatus(Status.REMOVED))
+                        .collect(Collectors.toList());
+
+        projectWorkerRepository.saveAllAndFlush(projectWorkerList);
+
+        return true;
+    }
+
     @Override
     public boolean deleteProjectWorker(long projectWorkerId) throws Exception {
         ProjectWorker projectWorker = getById(projectWorkerId);
 
-        if (projectWorker == null) {
+        if (projectWorker == null) 
             return false;
-        }
 
-        projectWorker.setIsDeleted(true);
+        projectWorker.setStatus(Status.DELETED);
         projectWorkerRepository.saveAndFlush(projectWorker);
 
         return true;
@@ -763,13 +851,12 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     public boolean deleteAllByWorkerId(long workerId) throws Exception {
         List<ProjectWorker> projectWorkerList = getAllByWorkerId(workerId);
 
-        if (projectWorkerList == null) {
+        if (projectWorkerList == null) 
             return false;
-        }
 
         projectWorkerList =
                 projectWorkerList.stream()
-                        .peek(projectWorker -> projectWorker.setIsDeleted(true))
+                        .peek(projectWorker -> projectWorker.setStatus(Status.DELETED))
                         .collect(Collectors.toList());
 
         projectWorkerRepository.saveAllAndFlush(projectWorkerList);
@@ -781,13 +868,12 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     public boolean deleteAllByProjectId(long projectId) throws Exception {
         List<ProjectWorker> projectWorkerList = getAllByProjectId(projectId);
 
-        if (projectWorkerList == null) {
+        if (projectWorkerList == null) 
             return false;
-        }
 
         projectWorkerList =
                 projectWorkerList.stream()
-                        .peek(projectWorker -> projectWorker.setIsDeleted(true))
+                        .peek(projectWorker -> projectWorker.setStatus(Status.DELETED))
                         .collect(Collectors.toList());
 
         projectWorkerRepository.saveAllAndFlush(projectWorkerList);

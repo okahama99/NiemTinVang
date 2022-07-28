@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.role;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.role.RoleCreateDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleUpdateDTO;
@@ -10,9 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -32,6 +31,8 @@ public class RoleServiceImpl implements RoleService {
     @Autowired
     private UserService userService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public Role createRole(Role newRole) throws Exception {
@@ -44,7 +45,10 @@ public class RoleServiceImpl implements RoleService {
         }
         
         /* Check duplicate */
-        if (roleRepository.existsByRoleNameAndIsDeletedIsFalse(newRole.getRoleName())) {
+        if (roleRepository
+                .existsByRoleNameAndStatusNotIn(
+                        newRole.getRoleName(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Role with name: '" + newRole.getRoleName() + "'. ";
         }
 
@@ -65,7 +69,7 @@ public class RoleServiceImpl implements RoleService {
     /* READ */
     @Override
     public Page<Role> getPageAll(Pageable paging) throws Exception {
-       Page<Role> rolePage = roleRepository.findAllByIsDeletedIsFalse(paging);
+       Page<Role> rolePage = roleRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (rolePage.isEmpty())
             return null;
@@ -89,12 +93,13 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public boolean existsById(long roleId) throws Exception {
-        return roleRepository.existsByRoleIdAndIsDeletedIsFalse(roleId);
+        return roleRepository
+                .existsByRoleIdAndStatusNotIn(roleId, N_D_S_STATUS_LIST);
     }
     @Override
     public Role getById(long roleId) throws Exception {
         return roleRepository
-                .findByRoleIdAndIsDeletedIsFalse(roleId)
+                .findByRoleIdAndStatusNotIn(roleId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -109,12 +114,12 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public boolean existsAllByIdIn(Collection<Long> roleIdCollection) throws Exception {
-        return roleRepository.existsAllByRoleIdInAndIsDeletedIsFalse(roleIdCollection);
+        return roleRepository.existsAllByRoleIdInAndStatusNotIn(roleIdCollection, N_D_S_STATUS_LIST);
     }
     @Override
     public List<Role> getAllByIdIn(Collection<Long> roleIdCollection) throws Exception {
         List<Role> roleList = 
-                roleRepository.findAllByRoleIdInAndIsDeletedIsFalse(roleIdCollection);
+                roleRepository.findAllByRoleIdInAndStatusNotIn(roleIdCollection, N_D_S_STATUS_LIST);
 
         if (roleList.isEmpty()) 
             return null;
@@ -143,7 +148,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role getByRoleName(String roleName) throws Exception {
         return roleRepository
-                .findByRoleNameAndIsDeletedIsFalse(roleName)
+                .findByRoleNameAndStatusNotIn(roleName, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -159,7 +164,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<Role> getAllByRoleNameContains(String roleName) throws Exception {
         List<Role> roleList =
-                roleRepository.findAllByRoleNameContainsAndIsDeletedIsFalse(roleName);
+                roleRepository.findAllByRoleNameContainsAndStatusNotIn(roleName, N_D_S_STATUS_LIST);
 
         if (roleList.isEmpty()) 
             return null;
@@ -178,7 +183,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Page<Role> getPageAllByRoleNameContains(Pageable paging, String roleName) throws Exception {
         Page<Role> rolePage =
-                roleRepository.findAllByRoleNameContainsAndIsDeletedIsFalse(roleName, paging);
+                roleRepository.findAllByRoleNameContainsAndStatusNotIn(roleName, N_D_S_STATUS_LIST, paging);
 
         if (rolePage.isEmpty())
             return null;
@@ -227,9 +232,10 @@ public class RoleServiceImpl implements RoleService {
 
         /* Check duplicate */
         if (roleRepository
-                .existsByRoleNameAndRoleIdIsNotAndIsDeletedIsFalse(
+                .existsByRoleNameAndRoleIdIsNotAndStatusNotIn(
                         updatedRole.getRoleName(),
-                        updatedRole.getRoleId())) {
+                        updatedRole.getRoleId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Role with name: '" + updatedRole.getRoleName() + "'. ";
         }
 
@@ -263,7 +269,7 @@ public class RoleServiceImpl implements RoleService {
             /* Not found with Id */
         }
 
-        role.setIsDeleted(true);
+        role.setStatus(Status.DELETED);
         roleRepository.saveAndFlush(role);
 
         return true;

@@ -18,15 +18,15 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class ProjectManagerUpdateDTO extends BaseUpdateDTO {
     @PositiveOrZero
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long projectManagerId;
 
     @Positive
-    @NotNull(message = "projectId REQUIRED for update")
+    @NotNull(message = "projectId REQUIRED for Update")
     private Long projectId;
 
     @Positive
-    @NotNull(message = "userId (managerId) REQUIRED for update")
+    @NotNull(message = "userId (managerId) REQUIRED for Update")
     private Long managerId;
 
     /** yyyy-MM-dd HH:mm */

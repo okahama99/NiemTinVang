@@ -14,31 +14,39 @@ import java.util.Optional;
 @Repository
 public interface ExternalFileEntityWrapperPairingRepository
         extends JpaRepository<ExternalFileEntityWrapperPairing, Long> {
-    List<ExternalFileEntityWrapperPairing> findAllByStatusNot(Status status);
-    Page<ExternalFileEntityWrapperPairing> findAllByStatusNot(Status status, Pageable paging);
+    List<ExternalFileEntityWrapperPairing> findAllByStatusNotIn
+            (Collection<Status> statusCollection);
+    Page<ExternalFileEntityWrapperPairing> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByPairingIdAndStatusNot(long pairingId, Status status);
-    Optional<ExternalFileEntityWrapperPairing> findByPairingIdAndStatusNot(long pairingId, Status status);
-    List<ExternalFileEntityWrapperPairing> findAllByPairingIdInAndStatusNot
-            (Collection<Long> pairingIdCollection, Status status);
+    boolean existsByPairingIdAndStatusNotIn
+            (long pairingId, Collection<Status> statusCollection);
+    Optional<ExternalFileEntityWrapperPairing> findByPairingIdAndStatusNotIn
+            (long pairingId, Collection<Status> statusCollection);
+    List<ExternalFileEntityWrapperPairing> findAllByPairingIdInAndStatusNotIn
+            (Collection<Long> pairingIdCollection, Collection<Status> statusCollection);
     /* Id & entityWrapperId & externalFileId */
-    boolean existsByEntityWrapperIdAndExternalFileIdAndPairingIdIsNotAndStatusNot
-            (long entityWrapperId, long externalFileId, long pairingId, Status status);
+    /** Check duplicate for Update */
+    boolean existsByEntityWrapperIdAndExternalFileIdAndPairingIdIsNotAndStatusNotIn
+            (long entityWrapperId, long externalFileId, long pairingId, Collection<Status> statusCollection);
 
 
     /* entityWrapperId */
-    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdAndStatusNot(long entityWrapperId, Status status);
-    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdInAndStatusNot
-            (Collection<Long> entityWrapperIdCollection, Status status);
+    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdAndStatusNotIn
+            (long entityWrapperId, Collection<Status> statusCollection);
+    List<ExternalFileEntityWrapperPairing> findAllByEntityWrapperIdInAndStatusNotIn
+            (Collection<Long> entityWrapperIdCollection, Collection<Status> statusCollection);
 
 
     /* externalFileId */
-    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdAndStatusNot(long externalFileId, Status status);
-    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdInAndStatusNot
-            (Collection<Long> externalFileIdCollection, Status status);
+    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdAndStatusNotIn
+            (long externalFileId, Collection<Status> statusCollection);
+    List<ExternalFileEntityWrapperPairing> findAllByExternalFileIdInAndStatusNotIn
+            (Collection<Long> externalFileIdCollection, Collection<Status> statusCollection);
     /* entityWrapperId & externalFileId */
-    boolean existsByEntityWrapperIdAndExternalFileIdAndStatusNot
-            (long entityWrapperId, long externalFileId, Status status);
+    /** Check duplicate for Create */
+    boolean existsByEntityWrapperIdAndExternalFileIdAndStatusNotIn
+            (long entityWrapperId, long externalFileId, Collection<Status> statusCollection);
 }

@@ -7,7 +7,7 @@ import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.entities.LocationModels.ShowLocationModel;
 import com.ntv.ntvcons_backend.services.location.LocationService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -24,7 +24,7 @@ public class LocationController {
     @Autowired
     private LocationService locationService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -79,7 +79,7 @@ public class LocationController {
         try {
             List<LocationReadDTO> locationList =
                     locationService.getAllInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (locationList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Location found");

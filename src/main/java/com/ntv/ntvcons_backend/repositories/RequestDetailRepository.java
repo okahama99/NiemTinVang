@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.RequestDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,24 +13,32 @@ import java.util.Optional;
 
 @Repository
 public interface RequestDetailRepository extends JpaRepository<RequestDetail, Long> {
-    Page<RequestDetail> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<RequestDetail> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<RequestDetail> findByRequestDetailIdAndIsDeletedIsFalse(long requestDetailId);
-    List<RequestDetail> findAllByRequestDetailIdInAndIsDeletedIsFalse(Collection<Long> requestDetailIdCollection);
+    Optional<RequestDetail> findByRequestDetailIdAndStatusNotIn
+            (long requestDetailId, Collection<Status> statusCollection);
+    List<RequestDetail> findAllByRequestDetailIdInAndStatusNotIn
+            (Collection<Long> requestDetailIdCollection, Collection<Status> statusCollection);
     /* Id & requestId & itemDesc & itemPrice */
-    boolean existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndIsDeletedIsFalse
-            (long requestId, String itemDesc, double itemPrice, long requestDetailId);
+    /** Check duplicate for Update */
+    boolean existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndStatusNotIn
+            (long requestId, String itemDesc, double itemPrice, long requestDetailId, Collection<Status> statusCollection);
 
 
     /* requestId */
-    List<RequestDetail> findAllByRequestIdAndIsDeletedIsFalse(long requestId);
-    Page<RequestDetail> findAllByRequestIdAndIsDeletedIsFalse(long requestId, Pageable paging);
-    List<RequestDetail> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
-    Page<RequestDetail> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection, Pageable paging);
-
-
-    /* Id & requestId & itemDesc & itemPrice */
-    boolean existsByRequestIdAndItemDescAndItemPriceAndIsDeletedIsFalse(long requestId, String itemDesc, double itemPrice);
+    List<RequestDetail> findAllByRequestIdAndStatusNotIn
+            (long requestId, Collection<Status> statusCollection);
+    Page<RequestDetail> findAllByRequestIdAndStatusNotIn
+            (long requestId, Collection<Status> statusCollection, Pageable paging);
+    List<RequestDetail> findAllByRequestIdInAndStatusNotIn
+            (Collection<Long> requestIdCollection, Collection<Status> statusCollection);
+    Page<RequestDetail> findAllByRequestIdInAndStatusNotIn
+            (Collection<Long> requestIdCollection, Collection<Status> statusCollection, Pageable paging);
+    /* requestId & itemDesc & itemPrice */
+    /** Check duplicate for Update */
+    boolean existsByRequestIdAndItemDescAndItemPriceAndStatusNotIn
+            (long requestId, String itemDesc, double itemPrice, Collection<Status> statusCollection);
 }

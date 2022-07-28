@@ -14,16 +14,13 @@ import java.time.LocalDateTime;
 public abstract class BaseUpdateDTO implements Serializable {
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
-    private final Long updatedBy = 4L;
-    /* TODO: to be replace when login done
-    @Positive
-    @NotNull(message = "userId (updatedBy) REQUIRED for update")
-    private Long updatedBy; */
+    private Long updatedBy = 4L;
 
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
     private final LocalDateTime updatedAt = LocalDateTime.now();
 
+    /* TODO: replace later or dynamic change */
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
     private final Status status = Status.ACTIVE;

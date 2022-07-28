@@ -1,17 +1,15 @@
 package com.ntv.ntvcons_backend.controllers;
 
-import com.ntv.ntvcons_backend.Enum.Status;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.entities.Post;
 import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.CreatePostCategoryModel;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.ShowPostCategoryModel;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.UpdatePostCategoryModel;
-import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
-import com.ntv.ntvcons_backend.repositories.PostCategoryRepository;
 import com.ntv.ntvcons_backend.services.postCategory.PostCategoryService;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,25 +21,24 @@ import java.util.List;
 @RestController
 @RequestMapping("/postCategory")
 public class PostCategoryController {
-
     @Autowired
-    PostCategoryRepository postCategoryRepository;
-
+    private PostCategoryService postCategoryService;
     @Autowired
-    PostCategoryService postCategoryService;
+    private MiscUtil miscUtil;
 
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createPostCategory", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createPostCategory(@RequestBody CreatePostCategoryModel createPostCategoryModel){
-        if((postCategoryRepository.findByPostCategoryNameAndStatus(createPostCategoryModel.getPostCategoryName(), Status.ACTIVE)) != null){
+    public ResponseEntity<Object> createPostCategory(@RequestBody CreatePostCategoryModel createPostCategoryModel) {
+        if (postCategoryService.existsByPostCategoryName(
+                createPostCategoryModel.getPostCategoryName())) {
             return ResponseEntity.ok().body("Tên đã tồn tại, vui lòng sử dụng tên khác.");
-        }else{
-                boolean result = postCategoryService.createPostCategory(createPostCategoryModel);
-                if (result) {
-                    return ResponseEntity.ok().body("Tạo thành công.");
-                }
-                return ResponseEntity.badRequest().body("Tạo thất bại.");
+        } else {
+            boolean result = postCategoryService.createPostCategory(createPostCategoryModel);
+            if (result) {
+                return ResponseEntity.ok().body("Tạo thành công.");
+            }
+            return ResponseEntity.badRequest().body("Tạo thất bại.");
         }
 
     }
@@ -53,7 +50,9 @@ public class PostCategoryController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<ShowPostCategoryModel> posts = postCategoryService.getAllAvailablePostCategory(pageNo, pageSize, sortBy, sortTypeAsc);
+            List<ShowPostCategoryModel> posts =
+                    postCategoryService.getAllModel(
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (posts == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No PostCategory found");
@@ -78,7 +77,7 @@ public class PostCategoryController {
 
             switch (searchType) {
                 case BY_POST_CATEGORY_ID:
-                    postCategory = postCategoryService.getPostCategoryById(Long.parseLong(searchParam));
+                    postCategory = postCategoryService.getById(Long.parseLong(searchParam));
 
                     if (postCategory == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -122,12 +121,13 @@ public class PostCategoryController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortType) {
         try {
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortType);
             List<ShowPostCategoryModel> postCategory;
 
             switch (searchType) {
 
                 case BY_POST_CATEGORY_NAME:
-                    postCategory = postCategoryService.getByPostCategoryName(searchParam, pageNo, pageSize, sortBy, sortType);
+                    postCategory = postCategoryService.getAllModelByPostCategoryNameContains(searchParam, paging);
 
                     if (postCategory == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -136,7 +136,7 @@ public class PostCategoryController {
                     break;
 
                 case BY_POST_CATEGORY_DESC:
-                    postCategory = postCategoryService.getByPostCategoryDesc(searchParam, pageNo, pageSize, sortBy, sortType);
+                    postCategory = postCategoryService.getAllModelByPostCategoryDescContains(searchParam, paging);
 
                     if (postCategory == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -177,7 +177,7 @@ public class PostCategoryController {
     public ResponseEntity<Object> updatePostCategory(@RequestBody UpdatePostCategoryModel updatePostCategoryModel) {
         boolean result = postCategoryService.updatePostCategory(updatePostCategoryModel);
 
-        if(result) {
+        if (result) {
             return ResponseEntity.ok().body("Cập nhật thành công.");
         }
 

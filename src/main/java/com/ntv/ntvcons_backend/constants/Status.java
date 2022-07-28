@@ -1,5 +1,8 @@
 package com.ntv.ntvcons_backend.constants;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** If change enum please add new enum here,
  * update all old in DB to new enum.
  * Only then deleted old enum here */
@@ -14,7 +17,7 @@ public enum Status {
     /* Other avoid query status must start with 'DELETED_'
      * to call query: findBy...AndStatusNotContains('DELETED')  */
     DELETED("DELETED"),
-    DELETED_REMOVED("DELETED_REMOVED");
+    REMOVED("REMOVED");
 
     private final String stringValue;
 
@@ -58,11 +61,22 @@ public enum Status {
             case "DELETED":
                 return Status.DELETED;
 
-            case "DELETED_REMOVED":
-                return Status.DELETED_REMOVED;
+            case "REMOVED":
+                return Status.REMOVED;
 
             default:
                 throw new IllegalArgumentException("stringValue: '" + stringValue + "' not supported.");
         }
+    }
+
+    /* For @Repository */
+    public static List<Status> getAllNonDefaultSearchStatus() {
+        List<Status> nonDefaultSearchStatusList = new ArrayList<>();
+
+        /* Add any status that aren't visible by default */
+        nonDefaultSearchStatusList.add(Status.DELETED);
+        nonDefaultSearchStatusList.add(Status.REMOVED);
+
+        return nonDefaultSearchStatusList;
     }
 }

@@ -18,19 +18,19 @@ import java.time.LocalDateTime;
 public class ProjectWorkerCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(notes = "NOT NULL; Id >= 0") /* Hint for Swagger */
     @PositiveOrZero
-    @NotNull(message = "projectId REQUIRED for create")
+    @NotNull(message = "projectId REQUIRED for Create")
     private Long projectId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "workerId REQUIRED for create")
+    @NotNull(message = "workerId REQUIRED for Create")
     private Long workerId;
 
     /** yyyy-MM-dd HH:mm */
     /* TODO: use later or skip forever */
 //    /@ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
 //    @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-//    @NotNull(message = "assignDate REQUIRED for create")
+//    @NotNull(message = "assignDate REQUIRED for Create")
 //    private String assignDate;
 
     @JsonIgnore /* No serialize/deserialize */

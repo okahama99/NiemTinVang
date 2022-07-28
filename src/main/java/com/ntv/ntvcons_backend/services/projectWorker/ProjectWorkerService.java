@@ -58,6 +58,14 @@ public interface ProjectWorkerService {
     List<ProjectWorkerReadDTO> updateBulkProjectWorkerByDTO(List<ProjectWorkerUpdateDTO> updatedProjectWorkerDTOList) throws Exception;
 
     /* DELETE */
+    boolean removeProjectWorker(long projectWorkerId) throws Exception;
+
+    boolean removeAllByWorkerId(long workerId) throws Exception;
+    boolean removeAllByWorkerIdIn(Collection<Long> workerIdCollection) throws Exception;
+
+    boolean removeAllByProjectId(long projectId) throws Exception;
+    boolean removeAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+
     boolean deleteProjectWorker(long projectWorkerId) throws Exception;
 
     /** Cascade when delete Worker */

@@ -11,7 +11,8 @@ import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.JwtUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -31,7 +32,9 @@ public class ProjectController {
     @Autowired
     private LocationService locationService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
+    @Autowired
+    private JwtUtil jwtUtil;
     
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -67,8 +70,14 @@ public class ProjectController {
     /** Alternate create project by Thanh, with check FK */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1.1/createProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createProjectAlt1(@Valid @RequestBody ProjectCreateDTO projectDTO) {
+    public ResponseEntity<Object> createProjectAlt1(@Valid @RequestBody ProjectCreateDTO projectDTO,
+                                                    @RequestHeader(name = "Authorization") String token) {
         try {
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId != null) {
+                projectDTO.setCreatedBy(userId);
+            }
+
             ProjectReadDTO newProjectDTO = projectService.createProjectByDTO(projectDTO);
 
             return ResponseEntity.ok().body(newProjectDTO);
@@ -116,7 +125,7 @@ public class ProjectController {
         try {
             List<ProjectReadDTO> projects = 
                     projectService.getAllInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (projects == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Project found");
@@ -200,7 +209,7 @@ public class ProjectController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<ProjectReadDTO> projectDTOList;
 
@@ -291,8 +300,14 @@ public class ProjectController {
     /** Alternate update project by Thanh, with check FK */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1.1/updateProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProjectAlt1(@Valid @RequestBody ProjectUpdateDTO projectDTO){
+    public ResponseEntity<Object> updateProjectAlt1(@Valid @RequestBody ProjectUpdateDTO projectDTO,
+                                                    @RequestHeader(name = "Authorization") String token){
         try {
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId != null) {
+                projectDTO.setUpdatedBy(userId);
+            }
+
             ProjectReadDTO updatedProjectDTO = projectService.updateProjectByDTO(projectDTO);
 
             if (updatedProjectDTO == null) {

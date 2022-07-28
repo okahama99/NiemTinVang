@@ -6,7 +6,8 @@ import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.services.task.TaskService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.JwtUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -23,14 +24,22 @@ public class TaskController {
     @Autowired
     private TaskService taskService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createTask", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO) {
+    public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO,
+                                             @RequestHeader(name = "Authorization") String token) {
         try {
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId != null) {
+                taskDTO.setCreatedBy(userId);
+            }
+
             TaskReadDTO newTaskDTO = taskService.createTaskByDTO(taskDTO);
 
             return ResponseEntity.ok().body(newTaskDTO);
@@ -54,7 +63,7 @@ public class TaskController {
         try {
             List<TaskReadDTO> taskDTOList = 
                     taskService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (taskDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Task found");
@@ -125,7 +134,7 @@ public class TaskController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<TaskReadDTO> taskDTOList;
 
@@ -198,8 +207,14 @@ public class TaskController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateTask", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO) {
+    public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO,
+                                             @RequestHeader(name = "Authorization") String token) {
         try {
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId != null) {
+                taskDTO.setUpdatedBy(userId);
+            }
+
             TaskReadDTO updatedTaskDTO = taskService.updateTaskByDTO(taskDTO);
 
             if (updatedTaskDTO == null) {

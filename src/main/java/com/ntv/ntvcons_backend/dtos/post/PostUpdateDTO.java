@@ -15,16 +15,16 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class PostUpdateDTO extends BaseUpdateDTO {
     @Positive
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long postId;
 
     @ApiModelProperty(example = "Nguyen Van A") /* Hint for Swagger */
     @Size(max = 100, message = "authorName max length: 100 characters")
-    @NotNull(message = "authorName REQUIRED for update")
+    @NotNull(message = "authorName REQUIRED for Update")
     private String authorName;
 
     @ApiModelProperty(example = "Giá xây dựng 2022") /* Hint for Swagger */
     @Size(max = 100, message = "postTitle max length: 100 characters")
-    @NotNull(message = "postTitle REQUIRED for update")
+    @NotNull(message = "postTitle REQUIRED for Update")
     private String postTitle;
 }
