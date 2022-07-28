@@ -14,7 +14,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class LocationUpdateOptionDTO implements Serializable {
     @ApiModelProperty(example = "UPDATE_EXISTING_LOCATION_USED") /* Hint for Swagger */
-    @NotNull(message = "updateOption REQUIRED for update")
+    @NotNull(message = "updateOption REQUIRED for Update")
     private UpdateOption updateOption;
 
     private LocationCreateDTO newLocation;

@@ -6,7 +6,7 @@ import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
 import com.ntv.ntvcons_backend.services.requestType.RequestTypeService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -24,7 +24,7 @@ public class RequestTypeController {
     @Autowired
     private RequestTypeService requestTypeService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -56,7 +56,7 @@ public class RequestTypeController {
         try {
             List<RequestTypeReadDTO> requestTypeDTOList =
                     requestTypeService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (requestTypeDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No RequestType found");
@@ -141,7 +141,7 @@ public class RequestTypeController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
             
             List<RequestTypeReadDTO> requestTypeDTOList;
 

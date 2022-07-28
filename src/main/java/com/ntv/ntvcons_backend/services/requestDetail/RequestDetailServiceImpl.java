@@ -1,10 +1,11 @@
 package com.ntv.ntvcons_backend.services.requestDetail;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailUpdateDTO;
-import com.ntv.ntvcons_backend.entities.*;
+import com.ntv.ntvcons_backend.entities.Request;
 import com.ntv.ntvcons_backend.entities.RequestDetail;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.ShowRequestDetailModel;
@@ -40,6 +41,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     private UserService userService;
     @Autowired
     private ModelMapper modelMapper;
+
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* CREATE */
     @Override
@@ -78,10 +81,11 @@ public class RequestDetailServiceImpl implements RequestDetailService {
 
         /* Check duplicate */
         if (requestDetailRepository
-                .existsByRequestIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
+                .existsByRequestIdAndItemDescAndItemPriceAndStatusNotIn(
                         newRequestDetail.getRequestId(),
                         newRequestDetail.getItemDesc(),
-                        newRequestDetail.getItemPrice())) {
+                        newRequestDetail.getItemPrice(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exist another RequestDetail of Request with Id: '" + newRequestDetail.getRequestId()
                     + "'. With itemDesc: '" + newRequestDetail.getItemDesc()
                     + "' at price: '" + newRequestDetail.getItemPrice() + "'. ";
@@ -175,10 +179,11 @@ public class RequestDetailServiceImpl implements RequestDetailService {
             /* Check duplicate 2 (input vs DB) */
             for (RequestDetail newRequestDetail : newRequestDetailList) {
                 if (requestDetailRepository
-                        .existsByRequestIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
+                        .existsByRequestIdAndItemDescAndItemPriceAndStatusNotIn(
                                 newRequestDetail.getRequestId(),
                                 newRequestDetail.getItemDesc(),
-                                newRequestDetail.getItemPrice())) {
+                                newRequestDetail.getItemPrice(),
+                                N_D_S_STATUS_LIST)) {
                     errorMsg.append("Already exist another RequestDetail of Request with Id: '")
                             .append(newRequestDetail.getRequestId())
                             .append("'. With itemDesc: '").append(newRequestDetail.getItemDesc())
@@ -216,7 +221,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<RequestDetail> pagingResult = requestDetailRepository.findAllByIsDeletedIsFalse(paging);
+        Page<RequestDetail> pagingResult =
+                requestDetailRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
@@ -255,7 +261,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     @Override
     public Page<RequestDetail> getPageAll(Pageable paging) throws Exception {
         Page<RequestDetail> requestDetailPage =
-                requestDetailRepository.findAllByIsDeletedIsFalse(paging);
+                requestDetailRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (requestDetailPage.isEmpty())
             return null;
@@ -280,7 +286,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     @Override
     public RequestDetail getById(long requestDetailId) throws Exception {
         return requestDetailRepository
-                .findByRequestDetailIdAndIsDeletedIsFalse(requestDetailId)
+                .findByRequestDetailIdAndStatusNotIn(requestDetailId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -296,7 +302,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     @Override
     public List<RequestDetail> getAllByIdIn(Collection<Long> requestDetailIdCollection) throws Exception {
         List<RequestDetail> requestDetailList =
-                requestDetailRepository.findAllByRequestDetailIdInAndIsDeletedIsFalse(requestDetailIdCollection);
+                requestDetailRepository
+                        .findAllByRequestDetailIdInAndStatusNotIn(requestDetailIdCollection, N_D_S_STATUS_LIST);
 
         if (requestDetailList.isEmpty())
             return null;
@@ -315,13 +322,14 @@ public class RequestDetailServiceImpl implements RequestDetailService {
 
     @Override
     public List<RequestDetail> getRequestDetailByRequestId(Long requestId) {
-        return requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(requestId);
+        return requestDetailRepository
+                .findAllByRequestIdAndStatusNotIn(requestId, N_D_S_STATUS_LIST);
     }
 
     @Override
     public List<RequestDetail> getAllByRequestId(long requestId) throws Exception {
         List<RequestDetail> requestDetailList =
-                requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(requestId);
+                requestDetailRepository.findAllByRequestIdAndStatusNotIn(requestId, N_D_S_STATUS_LIST);
 
         if (requestDetailList.isEmpty()) 
             return null;
@@ -342,7 +350,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     @Override
     public Page<RequestDetail> getPageAllByRequestId(Pageable paging, long requestId) throws Exception {
         Page<RequestDetail> requestDetailPage =
-                requestDetailRepository.findAllByRequestIdAndIsDeletedIsFalse(requestId, paging);
+                requestDetailRepository.findAllByRequestIdAndStatusNotIn(requestId, N_D_S_STATUS_LIST, paging);
 
         if (requestDetailPage.isEmpty())
             return null;
@@ -367,7 +375,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     @Override
     public List<RequestDetail> getAllByRequestIdIn(Collection<Long> requestIdCollection) throws Exception {
         List<RequestDetail> requestDetailList =
-                requestDetailRepository.findAllByRequestIdInAndIsDeletedIsFalse(requestIdCollection);
+                requestDetailRepository.findAllByRequestIdInAndStatusNotIn(requestIdCollection, N_D_S_STATUS_LIST);
 
         if (requestDetailList.isEmpty()) 
             return null;
@@ -414,7 +422,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     @Override
     public Page<RequestDetail> getPageAllByRequestIdIn(Pageable paging, Collection<Long> requestIdCollection) throws Exception {
         Page<RequestDetail> requestDetailPage =
-                requestDetailRepository.findAllByRequestIdInAndIsDeletedIsFalse(requestIdCollection, paging);
+                requestDetailRepository
+                        .findAllByRequestIdInAndStatusNotIn(requestIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (requestDetailPage.isEmpty())
             return null;
@@ -439,7 +448,9 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     /* UPDATE */
     @Override
     public boolean updateRequestDetail(UpdateRequestDetailModel updateRequestDetailModel) {
-        Optional<RequestDetail> requestDetail = requestDetailRepository.findByRequestDetailIdAndIsDeletedIsFalse(updateRequestDetailModel.getRequestDetailId());
+        Optional<RequestDetail> requestDetail =
+                requestDetailRepository
+                        .findByRequestDetailIdAndStatusNotIn(updateRequestDetailModel.getRequestDetailId(), N_D_S_STATUS_LIST);
         if (requestDetail != null)
         {
             requestDetail.get().setItemUnit(updateRequestDetailModel.getItemUnit());
@@ -484,11 +495,12 @@ public class RequestDetailServiceImpl implements RequestDetailService {
 
         /* Check duplicate */
         if (requestDetailRepository
-                .existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndIsDeletedIsFalse(
+                .existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndStatusNotIn(
                         updatedRequestDetail.getRequestId(),
                         updatedRequestDetail.getItemDesc(),
                         updatedRequestDetail.getItemPrice(),
-                        updatedRequestDetail.getRequestDetailId())) {
+                        updatedRequestDetail.getRequestDetailId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exist another RequestDetail of Request with Id: '" + updatedRequestDetail.getRequestId()
                     + "'. With itemDesc: '" + updatedRequestDetail.getItemDesc()
                     + "' at price: '" + updatedRequestDetail.getItemPrice() + "'. ";
@@ -614,11 +626,12 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         /* Check duplicate 2 (input vs DB) */
         for (RequestDetail updatedRequestDetail : updatedRequestDetailList) {
             if (requestDetailRepository
-                    .existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndIsDeletedIsFalse(
+                    .existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndStatusNotIn(
                             updatedRequestDetail.getRequestId(),
                             updatedRequestDetail.getItemDesc(),
                             updatedRequestDetail.getItemPrice(),
-                            updatedRequestDetail.getRequestDetailId())) {
+                            updatedRequestDetail.getRequestDetailId(),
+                            N_D_S_STATUS_LIST)) {
                 errorMsg.append("Already exist another RequestDetail of Request with Id: '")
                         .append(updatedRequestDetail.getRequestId())
                         .append("'. With itemDesc: '").append(updatedRequestDetail.getItemDesc())
@@ -665,7 +678,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         if (requestDetail == null)
             return false;
 
-        requestDetail.setIsDeleted(true);
+        requestDetail.setStatus(Status.DELETED);
         requestDetailRepository.saveAndFlush(requestDetail);
 
         return true;
@@ -679,7 +692,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
             return false;
 
         requestDetailList = requestDetailList.stream()
-                .peek(requestDetail -> requestDetail.setIsDeleted(true))
+                .peek(requestDetail -> requestDetail.setStatus(Status.DELETED))
                 .collect(Collectors.toList());
 
         requestDetailRepository.saveAllAndFlush(requestDetailList);
@@ -694,7 +707,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
             return false;
 
         requestDetailList = requestDetailList.stream()
-                .peek(requestDetail -> requestDetail.setIsDeleted(true))
+                .peek(requestDetail -> requestDetail.setStatus(Status.DELETED))
                 .collect(Collectors.toList());
 
         requestDetailRepository.saveAllAndFlush(requestDetailList);

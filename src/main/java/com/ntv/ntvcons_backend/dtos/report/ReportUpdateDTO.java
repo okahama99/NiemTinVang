@@ -21,28 +21,28 @@ import java.util.List;
 public class ReportUpdateDTO extends BaseUpdateDTO {
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long reportId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "projectId REQUIRED for update")
+    @NotNull(message = "projectId REQUIRED for Update")
     private Long projectId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "reportTypeId REQUIRED for update")
+    @NotNull(message = "reportTypeId REQUIRED for Update")
     private Long reportTypeId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "reporterId REQUIRED for update")
+    @NotNull(message = "reporterId REQUIRED for Update")
     private Long reporterId;
 
     @ApiModelProperty(example = "Báo cáo xxx",
             notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "reportName max length: 100 characters")
-    @NotNull(message = "reportName REQUIRED for update")
+    @NotNull(message = "reportName REQUIRED for Update")
     private String reportName;
 
     @ApiModelProperty(example = "Chuẩn bị xây tường, ...",
@@ -54,14 +54,14 @@ public class ReportUpdateDTO extends BaseUpdateDTO {
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
             notes = "NOT NULL; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "reportDate REQUIRED for update")
+    @NotNull(message = "reportDate REQUIRED for Update")
     private String reportDate;
 
     @ApiModelProperty(notes = "Nullable; size >= 1 (if not null)") /* Hint for Swagger */
-    @Size(min = 1, message = "Needed at least 1 for update")
+    @Size(min = 1, message = "Needed at least 1 for Update")
     private List<ReportDetailUpdateDTO> reportDetailList;
 
     @ApiModelProperty(notes = "Nullable; size >= 1 (if not null)") /* Hint for Swagger */
-    @Size(min = 1, message = "Needed at least 1 for update")
+    @Size(min = 1, message = "Needed at least 1 for Update")
     private List<TaskReportUpdateDTO> taskReportList;
 }

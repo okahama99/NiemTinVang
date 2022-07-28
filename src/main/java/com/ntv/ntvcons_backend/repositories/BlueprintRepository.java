@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.Blueprint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,41 +13,56 @@ import java.util.Optional;
 
 @Repository
 public interface BlueprintRepository extends JpaRepository<Blueprint, Long> {
-    Page<Blueprint> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<Blueprint> findAllByStatusNotIn(Collection<Status> statusCollection, Pageable paging);
 
-    Blueprint getByBlueprintNameAndIsDeletedIsFalse(String bluePrintName);
+    Blueprint getByBlueprintNameAndStatusNotIn(String bluePrintName, Collection<Status> statusCollection);
 
     /* Id */
-    boolean existsByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
-    Optional<Blueprint> findByBlueprintIdAndIsDeletedIsFalse(long blueprintId);
-    List<Blueprint> findAllByBlueprintIdInAndIsDeletedIsFalse(Collection<Long> blueprintIdCollection);
-    /* Id & projectId & blueprintName */
-    boolean existsByProjectIdOrBlueprintNameAndBlueprintIdIsNotAndIsDeletedIsFalse
-            (long projectId, String blueprintName, long blueprintId);
+    boolean existsByBlueprintIdAndStatusNotIn(long blueprintId, Collection<Status> statusCollection);
+    Optional<Blueprint> findByBlueprintIdAndStatusNotIn(long blueprintId, Collection<Status> statusCollection);
+    List<Blueprint> findAllByBlueprintIdInAndStatusNotIn
+            (Collection<Long> blueprintIdCollection, Collection<Status> statusCollection);
+    /* Id & (projectId || blueprintName) */
+    /** Check duplicate for Update */
+    boolean existsByProjectIdOrBlueprintNameAndBlueprintIdIsNotAndStatusNotIn
+            (long projectId, String blueprintName, long blueprintId, Collection<Status> statusCollection);
 
 
     /* projectId */
-    Optional<Blueprint> findByProjectIdAndIsDeletedIsFalse(long projectId);
-    List<Blueprint> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
+    Optional<Blueprint> findByProjectIdAndStatusNotIn(long projectId, Collection<Status> statusCollection);
+    List<Blueprint> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
 
 
     /* blueprintName */
-    Optional<Blueprint> findByBlueprintNameAndIsDeletedIsFalse(String blueprintName);
-    List<Blueprint> findAllByBlueprintNameContainsAndIsDeletedIsFalse(String blueprintName);
-    Page<Blueprint> findAllByBlueprintNameContainsAndIsDeletedIsFalse(String blueprintName, Pageable paging);
-    /* projectId & blueprintName */
-    boolean existsByProjectIdOrBlueprintNameAndIsDeletedIsFalse(long projectId, String blueprintName);
+    Optional<Blueprint> findByBlueprintNameAndStatusNotIn
+            (String blueprintName, Collection<Status> statusCollection);
+    List<Blueprint> findAllByBlueprintNameContainsAndStatusNotIn
+            (String blueprintName, Collection<Status> statusCollection);
+    Page<Blueprint> findAllByBlueprintNameContainsAndStatusNotIn
+            (String blueprintName, Collection<Status> statusCollection, Pageable paging);
+    /* projectId || blueprintName */
+    /** Check duplicate for Create */
+    boolean existsByProjectIdOrBlueprintNameAndStatusNotIn
+            (long projectId, String blueprintName, Collection<Status> statusCollection);
 
 
     /* designerName */
-    List<Blueprint> findAllByDesignerNameAndIsDeletedIsFalse(String designerName);
-    Page<Blueprint> findAllByDesignerNameAndIsDeletedIsFalse(String designerName, Pageable paging);
-    List<Blueprint> findAllByDesignerNameContainsAndIsDeletedIsFalse(String designerName);
-    Page<Blueprint> findAllByDesignerNameContainsAndIsDeletedIsFalse(String designerName, Pageable paging);
+    List<Blueprint> findAllByDesignerNameAndStatusNotIn
+            (String designerName, Collection<Status> statusCollection);
+    Page<Blueprint> findAllByDesignerNameAndStatusNotIn
+            (String designerName, Collection<Status> statusCollection, Pageable paging);
+    List<Blueprint> findAllByDesignerNameContainsAndStatusNotIn
+            (String designerName, Collection<Status> statusCollection);
+    Page<Blueprint> findAllByDesignerNameContainsAndStatusNotIn
+            (String designerName, Collection<Status> statusCollection, Pageable paging);
 
 
     /* estimatedCost */
-    List<Blueprint> findAllByEstimatedCostGreaterThanEqualAndIsDeletedIsFalse(double minCost);
-    List<Blueprint> findAllByEstimatedCostLessThanEqualAndIsDeletedIsFalse(double maxCost);
-    List<Blueprint> findAllByEstimatedCostBetweenAndIsDeletedIsFalse(double minCost, double maxCost);
+    List<Blueprint> findAllByEstimatedCostGreaterThanEqualAndStatusNotIn
+            (double minCost, Collection<Status> statusCollection);
+    List<Blueprint> findAllByEstimatedCostLessThanEqualAndStatusNotIn
+            (double maxCost, Collection<Status> statusCollection);
+    List<Blueprint> findAllByEstimatedCostBetweenAndStatusNotIn
+            (double minCost, double maxCost, Collection<Status> statusCollection);
 }

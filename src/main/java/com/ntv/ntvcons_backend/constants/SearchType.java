@@ -66,11 +66,9 @@ public class SearchType {
     public enum FILE_TYPE {
         BY_ID,
         BY_NAME,
-        BY_EXTENSION,
     }
     public enum ALL_FILE_TYPE {
         BY_NAME_CONTAINS,
-        BY_EXTENSION_CONTAINS,
     }
 
     public enum REPORT {

@@ -48,7 +48,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
-    private final Status DELETED = Status.DELETED;
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* CREATE */
     @Override
@@ -105,6 +105,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
             default:
                 throw new IllegalArgumentException("Invalid EntityType used, no such type exists!");
         }
+
         if (isNotExists) {
             errorMsg += "No " + type.getEntityName() + " found with Id: '" + createdBy
                     + "'. Which violate constraint: "
@@ -115,42 +116,42 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         boolean isDuplicated = false;
         switch (type) {
             case BLUEPRINT_ENTITY:
-                if (entityWrapperRepository.existsByBlueprintIdAndStatusNot(entityId, DELETED))
+                if (entityWrapperRepository.existsByBlueprintIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
             case POST_ENTITY:
-                if (entityWrapperRepository.existsByPostIdAndStatusNot(entityId, DELETED))
+                if (entityWrapperRepository.existsByPostIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
             case PROJECT_ENTITY:
-                if (entityWrapperRepository.existsByProjectIdAndStatusNot(entityId, DELETED))
+                if (entityWrapperRepository.existsByProjectIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
             case REPORT_ENTITY:
-                if (entityWrapperRepository.existsByReportIdAndStatusNot(entityId, DELETED))
+                if (entityWrapperRepository.existsByReportIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
             case REQUEST_ENTITY:
-                if (entityWrapperRepository.existsByRequestIdAndStatusNot(entityId, DELETED))
+                if (entityWrapperRepository.existsByRequestIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
             case TASK_ENTITY:
-                if (entityWrapperRepository.existsByTaskIdAndStatusNot(entityId, DELETED))
+                if (entityWrapperRepository.existsByTaskIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
             case USER_ENTITY:
-                if (entityWrapperRepository.existsByUserIdAndStatusNot(entityId, DELETED))
+                if (entityWrapperRepository.existsByUserIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
             case WORKER_ENTITY:
-                if (entityWrapperRepository.existsByWorkerIdAndStatusNot(entityId, DELETED))
+                if (entityWrapperRepository.existsByWorkerIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
@@ -176,7 +177,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Override
     public List<EntityWrapper> getAll() throws Exception {
         List<EntityWrapper> entityWrapperList =
-                entityWrapperRepository.findAllByStatusNot(DELETED);
+                entityWrapperRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST);
 
         if (entityWrapperList.isEmpty())
             return null;
@@ -187,12 +188,12 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Override
     public boolean existsById(long entityWrapperId) throws Exception {
         return entityWrapperRepository
-                .existsByEntityWrapperIdAndStatusNot(entityWrapperId, DELETED);
+                .existsByEntityWrapperIdAndStatusNotIn(entityWrapperId, N_D_S_STATUS_LIST);
     }
     @Override
     public EntityWrapper getById(long entityWrapperId) throws Exception {
         return entityWrapperRepository
-                .findByEntityWrapperIdAndStatusNot(entityWrapperId, DELETED)
+                .findByEntityWrapperIdAndStatusNotIn(entityWrapperId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
 
@@ -203,42 +204,42 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         switch (type) {
             case BLUEPRINT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByBlueprintIdNotNullAndStatusNot(DELETED);
+                        entityWrapperRepository.findAllByBlueprintIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
             case POST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByPostIdNotNullAndStatusNot(DELETED);
+                        entityWrapperRepository.findAllByPostIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
             case PROJECT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByProjectIdNotNullAndStatusNot(DELETED);
+                        entityWrapperRepository.findAllByProjectIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
             case REPORT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByReportIdNotNullAndStatusNot(DELETED);
+                        entityWrapperRepository.findAllByReportIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
             case REQUEST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByRequestIdNotNullAndStatusNot(DELETED);
+                        entityWrapperRepository.findAllByRequestIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
             case TASK_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByTaskIdNotNullAndStatusNot(DELETED);
+                        entityWrapperRepository.findAllByTaskIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
             case USER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByUserIdNotNullAndStatusNot(DELETED);
+                        entityWrapperRepository.findAllByUserIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
             case WORKER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByWorkerIdNotNullAndStatusNot(DELETED);
+                        entityWrapperRepository.findAllByWorkerIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -259,49 +260,49 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
             case BLUEPRINT_ENTITY:
                 exists =
                         entityWrapperRepository
-                                .existsByBlueprintIdAndStatusNot(entityID, DELETED);
+                                .existsByBlueprintIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case POST_ENTITY:
                 exists =
                         entityWrapperRepository
-                                .existsByPostIdAndStatusNot(entityID, DELETED);
+                                .existsByPostIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case PROJECT_ENTITY:
                 exists =
                         entityWrapperRepository
-                                .existsByProjectIdAndStatusNot(entityID, DELETED);
+                                .existsByProjectIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case REPORT_ENTITY:
                 exists =
                         entityWrapperRepository
-                                .existsByReportIdAndStatusNot(entityID, DELETED);
+                                .existsByReportIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case REQUEST_ENTITY:
                 exists =
                         entityWrapperRepository
-                                .existsByRequestIdAndStatusNot(entityID, DELETED);
+                                .existsByRequestIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case TASK_ENTITY:
                 exists =
                         entityWrapperRepository
-                                .existsByTaskIdAndStatusNot(entityID, DELETED);
+                                .existsByTaskIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case USER_ENTITY:
                 exists =
                         entityWrapperRepository
-                                .existsByUserIdAndStatusNot(entityID, DELETED);
+                                .existsByUserIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case WORKER_ENTITY:
                 exists =
                         entityWrapperRepository
-                                .existsByWorkerIdAndStatusNot(entityID, DELETED);
+                                .existsByWorkerIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -318,56 +319,56 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
             case BLUEPRINT_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByBlueprintIdAndStatusNot(entityID, DELETED)
+                                .findByBlueprintIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 
             case POST_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByPostIdAndStatusNot(entityID, DELETED)
+                                .findByPostIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 
             case PROJECT_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByProjectIdAndStatusNot(entityID, DELETED)
+                                .findByProjectIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 
             case REPORT_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByReportIdAndStatusNot(entityID, DELETED)
+                                .findByReportIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 
             case REQUEST_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByRequestIdAndStatusNot(entityID, DELETED)
+                                .findByRequestIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 
             case TASK_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByTaskIdAndStatusNot(entityID, DELETED)
+                                .findByTaskIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 
             case USER_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByUserIdAndStatusNot(entityID, DELETED)
+                                .findByUserIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 
             case WORKER_ENTITY:
                 entityWrapper =
                         entityWrapperRepository
-                                .findByWorkerIdAndStatusNot(entityID, DELETED)
+                                .findByWorkerIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 
@@ -385,42 +386,42 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         switch (type) {
             case BLUEPRINT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByBlueprintIdInAndStatusNot(entityIdCollection, DELETED);
+                        entityWrapperRepository.findAllByBlueprintIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case POST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByPostIdInAndStatusNot(entityIdCollection, DELETED);
+                        entityWrapperRepository.findAllByPostIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case PROJECT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByProjectIdInAndStatusNot(entityIdCollection, DELETED);
+                        entityWrapperRepository.findAllByProjectIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case REPORT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByReportIdInAndStatusNot(entityIdCollection, DELETED);
+                        entityWrapperRepository.findAllByReportIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case REQUEST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByRequestIdInAndStatusNot(entityIdCollection, DELETED);
+                        entityWrapperRepository.findAllByRequestIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case TASK_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByTaskIdInAndStatusNot(entityIdCollection, DELETED);
+                        entityWrapperRepository.findAllByTaskIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case USER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByUserIdInAndStatusNot(entityIdCollection, DELETED);
+                        entityWrapperRepository.findAllByUserIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case WORKER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByWorkerIdInAndStatusNot(entityIdCollection, DELETED);
+                        entityWrapperRepository.findAllByWorkerIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             default:

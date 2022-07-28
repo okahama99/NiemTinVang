@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.Request;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,88 +14,128 @@ import java.util.Optional;
 
 @Repository
 public interface RequestRepository extends JpaRepository<Request, Long> {
-    Page<Request> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<Request> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByRequestIdAndIsDeletedIsFalse(long requestId);
-    Optional<Request> findByRequestIdAndIsDeletedIsFalse(long requestId);
-    boolean existsAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
-    List<Request> findAllByRequestIdInAndIsDeletedIsFalse(Collection<Long> requestIdCollection);
+    boolean existsByRequestIdAndStatusNotIn
+            (long requestId, Collection<Status> statusCollection);
+    Optional<Request> findByRequestIdAndStatusNotIn
+            (long requestId, Collection<Status> statusCollection);
+    boolean existsAllByRequestIdInAndStatusNotIn
+            (Collection<Long> requestIdCollection, Collection<Status> statusCollection);
+    List<Request> findAllByRequestIdInAndStatusNotIn
+            (Collection<Long> requestIdCollection, Collection<Status> statusCollection);
     /* Id & projectId & requestName */
-    boolean existsByProjectIdAndRequestNameAndRequestIdIsNotAndIsDeletedIsFalse
-            (long projectId, String requestName, long requestId);
+    /** Check duplicate for Update */
+    boolean existsByProjectIdAndRequestNameAndRequestIdIsNotAndStatusNotIn
+            (long projectId, String requestName, long requestId, Collection<Status> statusCollection);
 
 
     /* projectId */
-    List<Request> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
-    Page<Request> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable paging);
-    List<Request> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
-    Page<Request> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection, Pageable paging);
+    List<Request> findAllByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection);
+    Page<Request> findAllByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection, Pageable paging);
+    List<Request> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
+    Page<Request> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection, Pageable paging);
 
     /* projectId & isVerified */
-    List<Request> findAllByProjectIdAndIsVerifiedAndIsDeletedIsFalse(long projectId, boolean isVerified);
+    List<Request> findAllByProjectIdAndIsVerifiedAndStatusNotIn
+            (long projectId, boolean isVerified, Collection<Status> statusCollection);
 
     /* projectId & isVerified = true & isApproved (Approval required Verification) */
-    List<Request> findAllByProjectIdAndIsVerifiedIsTrueAndIsApprovedAndIsDeletedIsFalse(long projectId, boolean isApproved);
+    List<Request> findAllByProjectIdAndIsVerifiedIsTrueAndIsApprovedAndStatusNotIn
+            (long projectId, boolean isApproved, Collection<Status> statusCollection);
 
 
     /* requestName */
-    List<Request> findAllByRequestNameAndIsDeletedIsFalse(String requestName);
-    Page<Request> findAllByRequestNameAndIsDeletedIsFalse(String requestName, Pageable paging);
-    List<Request> findAllByRequestNameContainsAndIsDeletedIsFalse(String requestName);
-    Page<Request> findAllByRequestNameContainsAndIsDeletedIsFalse(String requestName, Pageable paging);
+    List<Request> findAllByRequestNameAndStatusNotIn
+            (String requestName, Collection<Status> statusCollection);
+    Page<Request> findAllByRequestNameAndStatusNotIn
+            (String requestName, Collection<Status> statusCollection, Pageable paging);
+    List<Request> findAllByRequestNameContainsAndStatusNotIn
+            (String requestName, Collection<Status> statusCollection);
+    Page<Request> findAllByRequestNameContainsAndStatusNotIn
+            (String requestName, Collection<Status> statusCollection, Pageable paging);
     /* projectId & requestName */
-    boolean existsByProjectIdAndRequestNameAndIsDeletedIsFalse(long projectId, String requestName);
+    /** Check duplicate for Create */
+    boolean existsByProjectIdAndRequestNameAndStatusNotIn
+            (long projectId, String requestName, Collection<Status> statusCollection);
 
 
     /* requestTypeId */
-    List<Request> findAllByRequestTypeIdAndIsDeletedIsFalse(long requestTypeId);
-    Page<Request> findAllByRequestTypeIdAndIsDeletedIsFalse(long requestTypeId, Pageable paging);
-    List<Request> findAllByRequestTypeIdInAndIsDeletedIsFalse(Collection<Long> requestTypeIdCollection);
-    Page<Request> findAllByRequestTypeIdInAndIsDeletedIsFalse(Collection<Long> requestTypeIdCollection, Pageable paging);
+    List<Request> findAllByRequestTypeIdAndStatusNotIn
+            (long requestTypeId, Collection<Status> statusCollection);
+    Page<Request> findAllByRequestTypeIdAndStatusNotIn
+            (long requestTypeId, Collection<Status> statusCollection, Pageable paging);
+    List<Request> findAllByRequestTypeIdInAndStatusNotIn
+            (Collection<Long> requestTypeIdCollection, Collection<Status> statusCollection);
+    Page<Request> findAllByRequestTypeIdInAndStatusNotIn
+            (Collection<Long> requestTypeIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* requesterId */
-    List<Request> findAllByRequesterIdAndIsDeletedIsFalse(long requesterId);
-    Page<Request> findAllByRequesterIdAndIsDeletedIsFalse(long requesterId, Pageable paging);
-    List<Request> findAllByRequesterIdInAndIsDeletedIsFalse(Collection<Long> requesterIdCollection);
-    Page<Request> findAllByRequesterIdInAndIsDeletedIsFalse(Collection<Long> requesterIdCollection, Pageable paging);
+    List<Request> findAllByRequesterIdAndStatusNotIn
+            (long requesterId, Collection<Status> statusCollection);
+    Page<Request> findAllByRequesterIdAndStatusNotIn
+            (long requesterId, Collection<Status> statusCollection, Pageable paging);
+    List<Request> findAllByRequesterIdInAndStatusNotIn
+            (Collection<Long> requesterIdCollection, Collection<Status> statusCollection);
+    Page<Request> findAllByRequesterIdInAndStatusNotIn
+            (Collection<Long> requesterIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* requestDatetime */
-    List<Request> findAllByRequestDateAfterAndIsDeletedIsFalse(LocalDateTime afterDatetime);
-    List<Request> findAllByRequestDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDatetime);
-    List<Request> findAllByRequestDateBetweenAndIsDeletedIsFalse(LocalDateTime fromDatetime, LocalDateTime toDatetime);
+    List<Request> findAllByRequestDateAfterAndStatusNotIn
+            (LocalDateTime afterDatetime, Collection<Status> statusCollection);
+    List<Request> findAllByRequestDateBeforeAndStatusNotIn
+            (LocalDateTime beforeDatetime, Collection<Status> statusCollection);
+    List<Request> findAllByRequestDateBetweenAndStatusNotIn
+            (LocalDateTime fromDatetime, LocalDateTime toDatetime, Collection<Status> statusCollection);
 
 
     /* verifierId */
-    List<Request> findAllByVerifierIdAndIsDeletedIsFalse(long requesterId);
-    Page<Request> findAllByVerifierIdAndIsDeletedIsFalse(long requesterId, Pageable paging);
-    List<Request> findAllByVerifierIdInAndIsDeletedIsFalse(Collection<Long> requesterIdCollection);
-    Page<Request> findAllByVerifierIdInAndIsDeletedIsFalse(Collection<Long> requesterIdCollection, Pageable paging);
+    List<Request> findAllByVerifierIdAndStatusNotIn
+            (long requesterId, Collection<Status> statusCollection);
+    Page<Request> findAllByVerifierIdAndStatusNotIn
+            (long requesterId, Collection<Status> statusCollection, Pageable paging);
+    List<Request> findAllByVerifierIdInAndStatusNotIn
+            (Collection<Long> requesterIdCollection, Collection<Status> statusCollection);
+    Page<Request> findAllByVerifierIdInAndStatusNotIn
+            (Collection<Long> requesterIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* isVerified */
-    List<Request> findAllByIsVerifiedAndIsDeletedIsFalse(boolean isVerified);
+    List<Request> findAllByIsVerifiedAndStatusNotIn
+            (boolean isVerified, Collection<Status> statusCollection);
 
     /* isVerified = true  & verifyDate */
-    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
-    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
-    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBetweenAndIsDeletedIsFalse(LocalDateTime fromDate, LocalDateTime toDate);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateAfterAndStatusNotIn
+            (LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBeforeAndStatusNotIn
+            (LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifyDateBetweenAndStatusNotIn
+            (LocalDateTime fromDate, LocalDateTime toDate, Collection<Status> statusCollection);
 
     /* isVerified = true  & verifierId */
-    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdAndIsDeletedIsFalse(long verifierId);
-    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdInAndIsDeletedIsFalse(Collection<Long> verifierIdCollection);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdAndStatusNotIn
+            (long verifierId, Collection<Status> statusCollection);
+    List<Request> findAllByIsVerifiedIsTrueAndVerifierIdInAndStatusNotIn
+            (Collection<Long> verifierIdCollection, Collection<Status> statusCollection);
 
     /* isVerified = true & isApproved (Approval required Verification) */
-    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndIsDeletedIsFalse(boolean isApproved);
+    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndStatusNotIn
+            (boolean isApproved, Collection<Status> statusCollection);
 
     /* isVerified = true & isApproved & verifyDate */
-    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateAfterAndIsDeletedIsFalse
-            (boolean isApproved, LocalDateTime afterDate);
-    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateBeforeAndIsDeletedIsFalse
-            (boolean isApproved, LocalDateTime beforeDate);
-    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateBetweenAndIsDeletedIsFalse
-            (boolean isApproved, LocalDateTime fromDate, LocalDateTime toDate);
+    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateAfterAndStatusNotIn
+            (boolean isApproved, LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateBeforeAndStatusNotIn
+            (boolean isApproved, LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<Request> findAllByIsVerifiedIsTrueAndIsApprovedAndVerifyDateBetweenAndStatusNotIn
+            (boolean isApproved, LocalDateTime fromDate, LocalDateTime toDate, Collection<Status> statusCollection);
 }

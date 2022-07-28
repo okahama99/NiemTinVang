@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.TaskAssignment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,41 +14,59 @@ import java.util.Optional;
 
 @Repository
 public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Long> {
-    Page<TaskAssignment> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<TaskAssignment> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<TaskAssignment> findByAssignmentIdAndIsDeletedIsFalse(long assignmentId);
-    List<TaskAssignment> findAllByAssignmentIdInAndIsDeletedIsFalse(Collection<Long> assignmentIdCollection);
+    Optional<TaskAssignment> findByAssignmentIdAndStatusNotIn
+            (long assignmentId, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByAssignmentIdInAndStatusNotIn
+            (Collection<Long> assignmentIdCollection, Collection<Status> statusCollection);
     /* Id & taskId & assignerId & assigneeId */
-    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndIsDeletedIsFalse
-            (long taskId, long assignerId, long assigneeId, long assignmentId);
+    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndStatusNotIn
+            (long taskId, long assignerId, long assigneeId, long assignmentId, Collection<Status> statusCollection);
 
 
     /* taskId */
-    Optional<TaskAssignment> findByTaskIdAndIsDeletedIsFalse(long taskId);
-    List<TaskAssignment> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection);
-    Page<TaskAssignment> findAllByTaskIdInAndIsDeletedIsFalse(Collection<Long> taskIdCollection, Pageable paging);
+    Optional<TaskAssignment> findByTaskIdAndStatusNotIn
+            (long taskId, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByTaskIdInAndStatusNotIn
+            (Collection<Long> taskIdCollection, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByTaskIdInAndStatusNotIn
+            (Collection<Long> taskIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* assignerId */
-    List<TaskAssignment> findAllByAssignerIdAndIsDeletedIsFalse(long assignerId);
-    Page<TaskAssignment> findAllByAssignerIdAndIsDeletedIsFalse(long assignerId, Pageable paging);
-    List<TaskAssignment> findAllByAssignerIdInAndIsDeletedIsFalse(Collection<Long> assignerIdCollection);
-    Page<TaskAssignment> findAllByAssignerIdInAndIsDeletedIsFalse(Collection<Long> assignerIdCollection, Pageable paging);
+    List<TaskAssignment> findAllByAssignerIdAndStatusNotIn
+            (long assignerId, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByAssignerIdAndStatusNotIn
+            (long assignerId, Collection<Status> statusCollection, Pageable paging);
+    List<TaskAssignment> findAllByAssignerIdInAndStatusNotIn
+            (Collection<Long> assignerIdCollection, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByAssignerIdInAndStatusNotIn
+            (Collection<Long> assignerIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* assigneeId */
-    List<TaskAssignment> findAllByAssigneeIdAndIsDeletedIsFalse(long assigneeId);
-    Page<TaskAssignment> findAllByAssigneeIdAndIsDeletedIsFalse(long assigneeId, Pageable paging);
-    List<TaskAssignment> findAllByAssigneeIdInAndIsDeletedIsFalse(Collection<Long> assigneeIdCollection);
-    Page<TaskAssignment> findAllByAssigneeIdInAndIsDeletedIsFalse(Collection<Long> assigneeIdCollection, Pageable paging);
+    List<TaskAssignment> findAllByAssigneeIdAndStatusNotIn
+            (long assigneeId, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByAssigneeIdAndStatusNotIn
+            (long assigneeId, Collection<Status> statusCollection, Pageable paging);
+    List<TaskAssignment> findAllByAssigneeIdInAndStatusNotIn
+            (Collection<Long> assigneeIdCollection, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByAssigneeIdInAndStatusNotIn
+            (Collection<Long> assigneeIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* taskId & assignerId & assigneeId */
-    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndIsDeletedIsFalse(long taskId, long assignerId, long assigneeId);
+    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndStatusNotIn
+            (long taskId, long assignerId, long assigneeId, Collection<Status> statusCollection);
 
 
     /* assignDate */
-    List<TaskAssignment> findAllByAssignDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
-    List<TaskAssignment> findAllByAssignDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
-    List<TaskAssignment> findAllByAssignDateBetweenAndIsDeletedIsFalse(LocalDateTime fromDate, LocalDateTime toDate);
+    List<TaskAssignment> findAllByAssignDateAfterAndStatusNotIn
+            (LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByAssignDateBeforeAndStatusNotIn
+            (LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByAssignDateBetweenAndStatusNotIn
+            (LocalDateTime fromDate, LocalDateTime toDate, Collection<Status> statusCollection);
 }

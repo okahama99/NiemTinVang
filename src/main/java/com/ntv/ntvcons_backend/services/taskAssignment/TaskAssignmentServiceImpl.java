@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.taskAssignment;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
@@ -12,9 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -37,6 +36,8 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private TaskService taskService;
+
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* CREATE */
     @Override
@@ -63,10 +64,11 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
         /* Check duplicate */
         if (taskAssignmentRepository
-                .existsByTaskIdAndAssignerIdAndAssigneeIdAndIsDeletedIsFalse(
+                .existsByTaskIdAndAssignerIdAndAssigneeIdAndStatusNotIn(
                         newTaskAssignment.getTaskId(),
                         newTaskAssignment.getAssignerId(),
-                        newTaskAssignment.getAssigneeId())) {
+                        newTaskAssignment.getAssigneeId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another TaskAssignment relationship between with Task with Id: '"
                     + newTaskAssignment.getTaskId()
                     + "' and User (Assigner) with Id: '"
@@ -96,7 +98,8 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     /* READ */
     @Override
     public Page<TaskAssignment> getPageAll(Pageable paging) throws Exception {
-        Page<TaskAssignment> taskAssignmentPage = taskAssignmentRepository.findAllByIsDeletedIsFalse(paging);
+        Page<TaskAssignment> taskAssignmentPage =
+                taskAssignmentRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (taskAssignmentPage.isEmpty()) 
             return null;
@@ -121,7 +124,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public TaskAssignment getById(long assignmentId) throws Exception {
         return taskAssignmentRepository
-                .findByAssignmentIdAndIsDeletedIsFalse(assignmentId)
+                .findByAssignmentIdAndStatusNotIn(assignmentId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -137,7 +140,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public List<TaskAssignment> getAllByIdIn(Collection<Long> assignmentIdCollection) throws Exception {
         List<TaskAssignment> taskAssignmentList =
-                taskAssignmentRepository.findAllByAssignmentIdInAndIsDeletedIsFalse(assignmentIdCollection);
+                taskAssignmentRepository.findAllByAssignmentIdInAndStatusNotIn(assignmentIdCollection, N_D_S_STATUS_LIST);
 
         if (!taskAssignmentList.isEmpty()) 
             return null;
@@ -157,7 +160,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public TaskAssignment getByTaskId(long taskId) throws Exception {
         return taskAssignmentRepository
-                .findByTaskIdAndIsDeletedIsFalse(taskId)
+                .findByTaskIdAndStatusNotIn(taskId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -173,7 +176,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public List<TaskAssignment> getAllByTaskIdIn(Collection<Long> taskIdCollection) throws Exception {
         List<TaskAssignment> taskAssignmentList =
-                taskAssignmentRepository.findAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection);
+                taskAssignmentRepository.findAllByTaskIdInAndStatusNotIn(taskIdCollection, N_D_S_STATUS_LIST);
         
         if (taskAssignmentList.isEmpty())
             return null;
@@ -202,7 +205,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public Page<TaskAssignment> getPageAllByTaskIdIn(Pageable paging, Collection<Long> taskIdCollection) throws Exception {
         Page<TaskAssignment> taskAssignmentPage =
-                taskAssignmentRepository.findAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection, paging);
+                taskAssignmentRepository.findAllByTaskIdInAndStatusNotIn(taskIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (taskAssignmentPage.isEmpty())
             return null;
@@ -227,7 +230,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public List<TaskAssignment> getAllByAssignerId(long assignerId) throws Exception {
         List<TaskAssignment> taskAssignmentList =
-                taskAssignmentRepository.findAllByAssignerIdAndIsDeletedIsFalse(assignerId);
+                taskAssignmentRepository.findAllByAssignerIdAndStatusNotIn(assignerId, N_D_S_STATUS_LIST);
 
         if (!taskAssignmentList.isEmpty()) 
             return null;
@@ -246,7 +249,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public Page<TaskAssignment> getPageAllByAssignerId(Pageable paging, long assignerId) throws Exception {
         Page<TaskAssignment> taskAssignmentPage =
-                taskAssignmentRepository.findAllByAssignerIdAndIsDeletedIsFalse(assignerId, paging);
+                taskAssignmentRepository.findAllByAssignerIdAndStatusNotIn(assignerId, N_D_S_STATUS_LIST, paging);
 
         if (!taskAssignmentPage.isEmpty())
             return null;
@@ -271,7 +274,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public List<TaskAssignment> getAllByAssigneeId(long assigneeId) throws Exception {
         List<TaskAssignment> taskAssignmentList =
-                taskAssignmentRepository.findAllByAssigneeIdAndIsDeletedIsFalse(assigneeId);
+                taskAssignmentRepository.findAllByAssigneeIdAndStatusNotIn(assigneeId, N_D_S_STATUS_LIST);
 
         if (!taskAssignmentList.isEmpty()) 
             return null;
@@ -290,7 +293,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     @Override
     public Page<TaskAssignment> getPageAllByAssigneeId(Pageable paging, long assigneeId) throws Exception {
         Page<TaskAssignment> taskAssignmentPage =
-                taskAssignmentRepository.findAllByAssigneeIdAndIsDeletedIsFalse(assigneeId, paging);
+                taskAssignmentRepository.findAllByAssigneeIdAndStatusNotIn(assigneeId, N_D_S_STATUS_LIST, paging);
 
         if (!taskAssignmentPage.isEmpty())
             return null;
@@ -364,11 +367,12 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
         /* Check duplicate */
         if (taskAssignmentRepository
-                .existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndIsDeletedIsFalse(
+                .existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndStatusNotIn(
                         updatedTaskAssignment.getTaskId(),
                         updatedTaskAssignment.getAssignerId(),
                         updatedTaskAssignment.getAssigneeId(),
-                        updatedTaskAssignment.getAssignmentId())) {
+                        updatedTaskAssignment.getAssignmentId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another TaskAssignment relationship between with Task with Id: '"
                     + updatedTaskAssignment.getTaskId()
                     + "' and User (Assigner) with Id: '"
@@ -424,11 +428,10 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     public boolean deleteTaskAssignment(long assignmentId) throws Exception {
         TaskAssignment taskAssignment = getById(assignmentId);
 
-        if (taskAssignment == null) {
+        if (taskAssignment == null) 
             return false;
-        }
 
-        taskAssignment.setIsDeleted(true);
+        taskAssignment.setStatus(Status.DELETED);
         taskAssignmentRepository.saveAndFlush(taskAssignment);
 
         return true;
@@ -448,7 +451,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
         taskAssignmentList =
                 taskAssignmentList.stream()
-                        .peek(taskAssignment -> taskAssignment.setIsDeleted(true))
+                        .peek(taskAssignment -> taskAssignment.setStatus(Status.DELETED))
                         .collect(Collectors.toList());
 
         taskAssignmentRepository.saveAllAndFlush(taskAssignmentList);
@@ -460,11 +463,10 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     public boolean deleteByTaskId(long taskId) throws Exception {
         TaskAssignment taskAssignment = getByTaskId(taskId);
 
-        if (taskAssignment == null) {
+        if (taskAssignment == null) 
             return false;
-        }
 
-        taskAssignment.setIsDeleted(true);
+        taskAssignment.setStatus(Status.DELETED);
         taskAssignmentRepository.saveAndFlush(taskAssignment);
 
         return true;

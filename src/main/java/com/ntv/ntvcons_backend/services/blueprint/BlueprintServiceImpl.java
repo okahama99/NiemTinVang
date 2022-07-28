@@ -2,21 +2,14 @@ package com.ntv.ntvcons_backend.services.blueprint;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
-import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
-import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
-import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
-import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
@@ -54,6 +47,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
     private final EntityType ENTITY_TYPE = EntityType.BLUEPRINT_ENTITY;
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* CREATE */
     @Override
@@ -81,9 +75,10 @@ public class BlueprintServiceImpl implements BlueprintService {
 
         /* Check duplicate */
         if (blueprintRepository
-                .existsByProjectIdOrBlueprintNameAndIsDeletedIsFalse(
+                .existsByProjectIdOrBlueprintNameAndStatusNotIn(
                         newBlueprint.getProjectId(),
-                        newBlueprint.getBlueprintName())) {
+                        newBlueprint.getBlueprintName(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Blueprint with projectId: '" + newBlueprint.getProjectId()
                     + "'. Or with blueprintName: '" + newBlueprint.getBlueprintName() + "'. ";
         }
@@ -117,7 +112,7 @@ public class BlueprintServiceImpl implements BlueprintService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Blueprint> pagingResult = blueprintRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Blueprint> pagingResult = blueprintRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (pagingResult.hasContent()) {
             double totalPage = Math.ceil((double) pagingResult.getTotalElements() / pageSize);
@@ -157,7 +152,7 @@ public class BlueprintServiceImpl implements BlueprintService {
 
     @Override
     public Page<Blueprint> getPageAll(Pageable paging) throws Exception {
-        Page<Blueprint> blueprintPage = blueprintRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Blueprint> blueprintPage = blueprintRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (blueprintPage.isEmpty()) 
             return null;
@@ -182,12 +177,12 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public boolean existsById(long blueprintId) throws Exception {
         return blueprintRepository
-                .existsByBlueprintIdAndIsDeletedIsFalse(blueprintId);
+                .existsByBlueprintIdAndStatusNotIn(blueprintId, N_D_S_STATUS_LIST);
     }
     @Override
     public Blueprint getById(long blueprintId) throws Exception {
         return blueprintRepository
-                .findByBlueprintIdAndIsDeletedIsFalse(blueprintId)
+                .findByBlueprintIdAndStatusNotIn(blueprintId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -203,7 +198,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public List<Blueprint> getAllByIdIn(Collection<Long> blueprintIdCollection) throws Exception {
         List<Blueprint> blueprintList = 
-                blueprintRepository.findAllByBlueprintIdInAndIsDeletedIsFalse(blueprintIdCollection);
+                blueprintRepository.findAllByBlueprintIdInAndStatusNotIn(blueprintIdCollection, N_D_S_STATUS_LIST);
         
         if (blueprintList.isEmpty()) 
             return null;
@@ -223,7 +218,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public Blueprint getByProjectId(long projectId) throws Exception {
         return blueprintRepository
-                .findByProjectIdAndIsDeletedIsFalse(projectId)
+                .findByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST)
                 .orElse(null);
 
     }
@@ -240,7 +235,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public List<Blueprint> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Blueprint> blueprintList =
-                blueprintRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+                blueprintRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST);
 
         if (blueprintList.isEmpty()) 
             return null;
@@ -270,7 +265,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public Blueprint getByBlueprintName(String blueprintName) throws Exception {
         return blueprintRepository
-                .findByBlueprintNameAndIsDeletedIsFalse(blueprintName)
+                .findByBlueprintNameAndStatusNotIn(blueprintName, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -286,7 +281,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public List<Blueprint> getAllByBlueprintNameContains(String blueprintName) throws Exception {
         List<Blueprint> blueprintList =
-                blueprintRepository.findAllByBlueprintNameContainsAndIsDeletedIsFalse(blueprintName);
+                blueprintRepository.findAllByBlueprintNameContainsAndStatusNotIn(blueprintName, N_D_S_STATUS_LIST);
 
         if (blueprintList.isEmpty()) 
             return null;
@@ -305,7 +300,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public Page<Blueprint> getPageAllByBlueprintNameContains(Pageable paging, String blueprintName) throws Exception {
         Page<Blueprint> blueprintPage =
-                blueprintRepository.findAllByBlueprintNameContainsAndIsDeletedIsFalse(blueprintName, paging);
+                blueprintRepository.findAllByBlueprintNameContainsAndStatusNotIn(blueprintName, N_D_S_STATUS_LIST, paging);
 
         if (blueprintPage.isEmpty()) 
             return null;
@@ -330,7 +325,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public List<Blueprint> getAllByDesignerName(String designerName) throws Exception {
         List<Blueprint> blueprintList =
-                blueprintRepository.findAllByDesignerNameAndIsDeletedIsFalse(designerName);
+                blueprintRepository.findAllByDesignerNameAndStatusNotIn(designerName, N_D_S_STATUS_LIST);
 
         if (blueprintList.isEmpty()) 
             return null;
@@ -349,7 +344,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public Page<Blueprint> getPageAllByDesignerName(Pageable paging, String designerName) throws Exception {
         Page<Blueprint> blueprintPage =
-                blueprintRepository.findAllByDesignerNameAndIsDeletedIsFalse(designerName, paging);
+                blueprintRepository.findAllByDesignerNameAndStatusNotIn(designerName, N_D_S_STATUS_LIST, paging);
 
         if (blueprintPage.isEmpty()) 
             return null;
@@ -374,7 +369,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public List<Blueprint> getAllByDesignerNameContains(String designerName) throws Exception {
         List<Blueprint> blueprintList =
-                blueprintRepository.findAllByDesignerNameContainsAndIsDeletedIsFalse(designerName);
+                blueprintRepository.findAllByDesignerNameContainsAndStatusNotIn(designerName, N_D_S_STATUS_LIST);
 
         if (blueprintList.isEmpty()) 
             return null;
@@ -393,7 +388,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public Page<Blueprint> getPageAllByDesignerNameContains(Pageable paging, String designerName) throws Exception {
         Page<Blueprint> blueprintPage =
-                blueprintRepository.findAllByDesignerNameContainsAndIsDeletedIsFalse(designerName, paging);
+                blueprintRepository.findAllByDesignerNameContainsAndStatusNotIn(designerName, N_D_S_STATUS_LIST, paging);
 
         if (blueprintPage.isEmpty()) 
             return null;
@@ -418,7 +413,7 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public List<Blueprint> getAllByEstimatedCostBetween(double from, double to) {
         List<Blueprint> blueprintList =
-                blueprintRepository.findAllByEstimatedCostBetweenAndIsDeletedIsFalse(from, to);
+                blueprintRepository.findAllByEstimatedCostBetweenAndStatusNotIn(from, to, N_D_S_STATUS_LIST);
 
         if (blueprintList.isEmpty()) 
             return null;
@@ -440,12 +435,14 @@ public class BlueprintServiceImpl implements BlueprintService {
     @Override
     public String checkDuplicate(String blueprintName) {
         String result = "No duplicate";
-        Blueprint checkDuplicate = blueprintRepository.getByBlueprintNameAndIsDeletedIsFalse(blueprintName);
-        if (checkDuplicate != null)
-        {
+        Blueprint checkDuplicate =
+                blueprintRepository.getByBlueprintNameAndStatusNotIn(blueprintName, N_D_S_STATUS_LIST);
+
+        if (checkDuplicate != null) {
             result = "Existed blueprint name";
             return result;
         }
+
         return result;
     }
 
@@ -494,10 +491,11 @@ public class BlueprintServiceImpl implements BlueprintService {
 
         /* Check duplicate */
         if (blueprintRepository
-                .existsByProjectIdOrBlueprintNameAndBlueprintIdIsNotAndIsDeletedIsFalse(
+                .existsByProjectIdOrBlueprintNameAndBlueprintIdIsNotAndStatusNotIn(
                         updatedBlueprint.getProjectId(),
                         updatedBlueprint.getBlueprintName(),
-                        updatedBlueprint.getBlueprintId())) {
+                        updatedBlueprint.getBlueprintId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Blueprint with projectId: '" + updatedBlueprint.getProjectId()
                     + "'. Or with blueprintName: '" + updatedBlueprint.getBlueprintName() + "'. ";
         }
@@ -532,7 +530,7 @@ public class BlueprintServiceImpl implements BlueprintService {
             /* Not found with Id */
         }
 
-        blueprint.setIsDeleted(true);
+        blueprint.setStatus(Status.DELETED);
         blueprintRepository.saveAndFlush(blueprint);
 
         return true;
@@ -547,7 +545,7 @@ public class BlueprintServiceImpl implements BlueprintService {
             /* Not found with Id */
         }
 
-        blueprint.setIsDeleted(true);
+        blueprint.setStatus(Status.DELETED);
         blueprintRepository.saveAndFlush(blueprint);
 
         return true;
@@ -563,7 +561,7 @@ public class BlueprintServiceImpl implements BlueprintService {
 
         blueprintList =
                 blueprintList.stream()
-                        .peek(blueprint -> blueprint.setIsDeleted(true))
+                        .peek(blueprint -> blueprint.setStatus(Status.DELETED))
                         .collect(Collectors.toList());
 
         blueprintRepository.saveAllAndFlush(blueprintList);

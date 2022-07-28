@@ -21,41 +21,41 @@ import java.util.List;
 public class RequestUpdateDTO extends BaseUpdateDTO {
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long requestId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "projectId REQUIRED for update")
+    @NotNull(message = "projectId REQUIRED for Update")
     private Long projectId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "requestTypeId REQUIRED for update")
+    @NotNull(message = "requestTypeId REQUIRED for Update")
     private Long requestTypeId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "RequesterId REQUIRED for update")
+    @NotNull(message = "RequesterId REQUIRED for Update")
     private Long RequesterId;
 
     @ApiModelProperty(example = "Yêu cầu xxx",
             notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "requestName max length: 100 characters")
-    @NotNull(message = "requestName REQUIRED for update")
+    @NotNull(message = "requestName REQUIRED for Update")
     private String requestName;
 
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
             notes = "NOT NULL; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "requestDate REQUIRED for update")
+    @NotNull(message = "requestDate REQUIRED for Update")
     private String requestDate;
 
     @ApiModelProperty(example = "Yêu cầu chi tiêu xxx",
             notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "requestDesc max length: 100 characters")
-    @NotNull(message = "requestDesc REQUIRED for update")
+    @NotNull(message = "requestDesc REQUIRED for Update")
     private String requestDesc;
 
     @ApiModelProperty(notes = "Nullable; size >= 1 (if not null)")

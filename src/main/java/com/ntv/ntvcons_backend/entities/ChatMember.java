@@ -1,5 +1,5 @@
 package com.ntv.ntvcons_backend.entities;
-import com.ntv.ntvcons_backend.Enum.Status;
+import com.ntv.ntvcons_backend.constants.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +24,4 @@ public class ChatMember extends BaseEntity{
 
     @Column(name = "memberId", nullable = false)
     private Long memberId;
-
-    @Column(name = "status", nullable = false)
-    private Status status;
 }

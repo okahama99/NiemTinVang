@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.reportType;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeUpdateDTO;
@@ -30,6 +31,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     @Autowired
     private UserService userService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public ReportType createReportType(ReportType newReportType) throws Exception {
@@ -42,7 +45,10 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         }
 
         /* Check duplicate */
-        if (reportTypeRepository.existsByReportTypeNameAndIsDeletedIsFalse(newReportType.getReportTypeName())){
+        if (reportTypeRepository
+                .existsByReportTypeNameAndStatusNotIn(
+                        newReportType.getReportTypeName(),
+                        N_D_S_STATUS_LIST)){
             errorMsg += "Already exists another ReportType with name: '" 
                     + newReportType.getReportTypeName() + "'. ";
         }
@@ -64,7 +70,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     /* READ */
     @Override
     public Page<ReportType> getPageAll(Pageable paging) throws Exception {
-        Page<ReportType> reportTypePage = reportTypeRepository.findAllByIsDeletedIsFalse(paging);
+        Page<ReportType> reportTypePage =
+                reportTypeRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (reportTypePage.isEmpty()) 
             return null;
@@ -88,12 +95,13 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
     @Override
     public boolean existsById(long reportTypeId) throws Exception {
-        return reportTypeRepository.existsByReportTypeIdAndIsDeletedIsFalse(reportTypeId);
+        return reportTypeRepository
+                .existsByReportTypeIdAndStatusNotIn(reportTypeId, N_D_S_STATUS_LIST);
     }
     @Override
     public ReportType getById(long reportTypeId) throws Exception {
         return reportTypeRepository
-                .findByReportTypeIdAndIsDeletedIsFalse(reportTypeId)
+                .findByReportTypeIdAndStatusNotIn(reportTypeId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -108,12 +116,13 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
     @Override
     public boolean existsAllByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
-        return reportTypeRepository.existsAllByReportTypeIdInAndIsDeletedIsFalse(reportTypeIdCollection);
+        return reportTypeRepository
+                .existsAllByReportTypeIdInAndStatusNotIn(reportTypeIdCollection, N_D_S_STATUS_LIST);
     }
     @Override
     public List<ReportType> getAllByIdIn(Collection<Long> reportTypeIdCollection) throws Exception {
         List<ReportType> reportTypeList =
-                reportTypeRepository.findAllByReportTypeIdInAndIsDeletedIsFalse(reportTypeIdCollection);
+                reportTypeRepository.findAllByReportTypeIdInAndStatusNotIn(reportTypeIdCollection, N_D_S_STATUS_LIST);
 
         if (reportTypeList.isEmpty()) 
             return null;
@@ -143,7 +152,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     @Override
     public ReportType getByReportTypeName(String reportTypeName) throws Exception {
         return reportTypeRepository
-                .findByReportTypeNameAndIsDeletedIsFalse(reportTypeName)
+                .findByReportTypeNameAndStatusNotIn(reportTypeName, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -159,7 +168,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     @Override
     public List<ReportType> getAllByReportTypeNameContains(String reportTypeName) throws Exception {
         List<ReportType> reportTypeList =
-                reportTypeRepository.findAllByReportTypeNameContainsAndIsDeletedIsFalse(reportTypeName);
+                reportTypeRepository.findAllByReportTypeNameContainsAndStatusNotIn(reportTypeName, N_D_S_STATUS_LIST);
 
         if (reportTypeList.isEmpty()) 
             return null;
@@ -178,7 +187,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     @Override
     public Page<ReportType> getPageAllByReportTypeNameContains(Pageable paging, String reportTypeName) throws Exception {
         Page<ReportType> reportTypePage =
-                reportTypeRepository.findAllByReportTypeNameContainsAndIsDeletedIsFalse(reportTypeName, paging);
+                reportTypeRepository
+                        .findAllByReportTypeNameContainsAndStatusNotIn(reportTypeName, N_D_S_STATUS_LIST, paging);
 
         if (reportTypePage.isEmpty())
             return null;
@@ -227,9 +237,10 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
         /* Check duplicate */
         if (reportTypeRepository
-                .existsByReportTypeNameAndReportTypeIdIsNotAndIsDeletedIsFalse(
+                .existsByReportTypeNameAndReportTypeIdIsNotAndStatusNotIn(
                         updatedReportType.getReportTypeName(),
-                        updatedReportType.getReportTypeId())) {
+                        updatedReportType.getReportTypeId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another ReportType with name: '"
                     + updatedReportType.getReportTypeName() + "'. ";
         }
@@ -264,7 +275,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
             /* Not found with Id */
         }
 
-        reportType.setIsDeleted(true);
+        reportType.setStatus(Status.DELETED);
         reportTypeRepository.saveAndFlush(reportType);
 
         return true;

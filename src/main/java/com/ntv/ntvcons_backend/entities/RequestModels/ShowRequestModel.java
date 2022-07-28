@@ -19,5 +19,5 @@ public class ShowRequestModel {
 
     private Long createdBy, updatedBy;
     private LocalDateTime createdAt, updatedAt;
-    private Double totalPage;
+    private Integer totalPage;
 }

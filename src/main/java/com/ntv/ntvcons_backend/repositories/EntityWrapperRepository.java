@@ -13,68 +13,113 @@ import java.util.Optional;
 
 @Repository
 public interface EntityWrapperRepository extends JpaRepository<EntityWrapper, Long> {
-    List<EntityWrapper> findAllByStatusNot(Status status);
-    Page<EntityWrapper> findAllByStatusNot(Status status, Pageable paging);
+    List<EntityWrapper> findAllByStatusNotIn
+            (Collection<Status> statusCollection);
+    Page<EntityWrapper> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByEntityWrapperIdAndStatusNot(long entityWrapperId, Status status);
-    Optional<EntityWrapper> findByEntityWrapperIdAndStatusNot(long entityWrapperId, Status status);
-    List<EntityWrapper> findAllByEntityWrapperIdInAndStatusNot(Collection<Long> entityWrapperIdCollection, Status status);
+    boolean existsByEntityWrapperIdAndStatusNotIn
+            (long entityWrapperId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByEntityWrapperIdAndStatusNotIn
+            (long entityWrapperId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByEntityWrapperIdInAndStatusNotIn
+            (Collection<Long> entityWrapperIdCollection, Collection<Status> statusCollection);
 
 
     /* blueprintId */
-    boolean existsByBlueprintIdAndStatusNot(long blueprintId, Status status);
-    Optional<EntityWrapper> findByBlueprintIdAndStatusNot(long blueprintId, Status status);
-    List<EntityWrapper> findAllByBlueprintIdInAndStatusNot(Collection<Long> blueprintIdCollection, Status status);
-    List<EntityWrapper> findAllByBlueprintIdNotNullAndStatusNot(Status status);
+    /** Check duplicate for Create */
+    boolean existsByBlueprintIdAndStatusNotIn
+            (long blueprintId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByBlueprintIdAndStatusNotIn
+            (long blueprintId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByBlueprintIdInAndStatusNotIn
+            (Collection<Long> blueprintIdCollection, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByBlueprintIdNotNullAndStatusNotIn
+            (Collection<Status> statusCollection);
 
 
     /* postId */
-    boolean existsByPostIdAndStatusNot(long postId, Status status);
-    Optional<EntityWrapper> findByPostIdAndStatusNot(long postId, Status status);
-    List<EntityWrapper> findAllByPostIdInAndStatusNot(Collection<Long> postIdCollection, Status status);
-    List<EntityWrapper> findAllByPostIdNotNullAndStatusNot(Status status);
+    /** Check duplicate for Create */
+    boolean existsByPostIdAndStatusNotIn
+            (long postId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByPostIdAndStatusNotIn
+            (long postId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByPostIdInAndStatusNotIn(
+            Collection<Long> postIdCollection, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByPostIdNotNullAndStatusNotIn
+            (Collection<Status> statusCollection);
 
 
     /* projectId */
-    boolean existsByProjectIdAndStatusNot(long projectId, Status status);
-    Optional<EntityWrapper> findByProjectIdAndStatusNot(long projectId, Status status);
-    List<EntityWrapper> findAllByProjectIdInAndStatusNot(Collection<Long> projectIDCollection, Status status);
-    List<EntityWrapper> findAllByProjectIdNotNullAndStatusNot(Status status);
+    /** Check duplicate for Create */
+    boolean existsByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIDCollection, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByProjectIdNotNullAndStatusNotIn
+            (Collection<Status> statusCollection);
 
 
     /* reportId */
-    boolean existsByReportIdAndStatusNot(long reportId, Status status);
-    Optional<EntityWrapper> findByReportIdAndStatusNot(long reportId, Status status);
-    List<EntityWrapper> findAllByReportIdInAndStatusNot(Collection<Long> reportIdCollection, Status status);
-    List<EntityWrapper> findAllByReportIdNotNullAndStatusNot(Status status);
+    /** Check duplicate for Create */
+    boolean existsByReportIdAndStatusNotIn
+            (long reportId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByReportIdAndStatusNotIn
+            (long reportId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByReportIdInAndStatusNotIn
+            (Collection<Long> reportIdCollection, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByReportIdNotNullAndStatusNotIn
+            (Collection<Status> statusCollection);
 
 
     /* requestId */
-    boolean existsByRequestIdAndStatusNot(long requestId, Status status);
-    Optional<EntityWrapper> findByRequestIdAndStatusNot(long requestId, Status status);
-    List<EntityWrapper> findAllByRequestIdInAndStatusNot(Collection<Long> requestIdCollection, Status status);
-    List<EntityWrapper> findAllByRequestIdNotNullAndStatusNot(Status status);
+    /** Check duplicate for Create */
+    boolean existsByRequestIdAndStatusNotIn
+            (long requestId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByRequestIdAndStatusNotIn
+            (long requestId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByRequestIdInAndStatusNotIn
+            (Collection<Long> requestIdCollection, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByRequestIdNotNullAndStatusNotIn
+            (Collection<Status> statusCollection);
 
 
     /* taskId */
-    boolean existsByTaskIdAndStatusNot(long taskId, Status status);
-    Optional<EntityWrapper> findByTaskIdAndStatusNot(long taskId, Status status);
-    List<EntityWrapper> findAllByTaskIdInAndStatusNot(Collection<Long> taskIdCollection, Status status);
-    List<EntityWrapper> findAllByTaskIdNotNullAndStatusNot(Status status);
+    /** Check duplicate for Create */
+    boolean existsByTaskIdAndStatusNotIn
+            (long taskId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByTaskIdAndStatusNotIn
+            (long taskId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByTaskIdInAndStatusNotIn
+            (Collection<Long> taskIdCollection, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByTaskIdNotNullAndStatusNotIn
+            (Collection<Status> statusCollection);
 
 
     /* userId */
-    boolean existsByUserIdAndStatusNot(long userId, Status status);
-    Optional<EntityWrapper> findByUserIdAndStatusNot(long userId, Status status);
-    List<EntityWrapper> findAllByUserIdInAndStatusNot(Collection<Long> userIdCollection, Status status);
-    List<EntityWrapper> findAllByUserIdNotNullAndStatusNot(Status status);
+    /** Check duplicate for Create */
+    boolean existsByUserIdAndStatusNotIn
+            (long userId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByUserIdAndStatusNotIn
+            (long userId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByUserIdInAndStatusNotIn
+            (Collection<Long> userIdCollection, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByUserIdNotNullAndStatusNotIn
+            (Collection<Status> statusCollection);
 
 
     /* workerId */
-    boolean existsByWorkerIdAndStatusNot(long workerId, Status status);
-    Optional<EntityWrapper> findByWorkerIdAndStatusNot(long workerId, Status status);
-    List<EntityWrapper> findAllByWorkerIdInAndStatusNot(Collection<Long> workerIdCollection, Status status);
-    List<EntityWrapper> findAllByWorkerIdNotNullAndStatusNot(Status status);
+    /** Check duplicate for Create */
+    boolean existsByWorkerIdAndStatusNotIn
+            (long workerId, Collection<Status> statusCollection);
+    Optional<EntityWrapper> findByWorkerIdAndStatusNotIn
+            (long workerId, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByWorkerIdInAndStatusNotIn
+            (Collection<Long> workerIdCollection, Collection<Status> statusCollection);
+    List<EntityWrapper> findAllByWorkerIdNotNullAndStatusNotIn
+            (Collection<Status> statusCollection);
 }

@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.Worker;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,41 +13,62 @@ import java.util.Optional;
 
 @Repository
 public interface WorkerRepository extends JpaRepository<Worker, Long> {
-        Page<Worker> findAllByIsDeletedIsFalse(Pageable paging);
+        Page<Worker> findAllByStatusNotIn
+                (Collection<Status> statusCollection, Pageable paging);
 
 
         /* Id */
-        boolean existsByWorkerIdAndIsDeletedIsFalse(long workerId);
-        Optional<Worker> findByWorkerIdAndIsDeletedIsFalse(long workerId);
-        boolean existsAllByWorkerIdInAndIsDeletedIsFalse(Collection<Long> workerIdCollection);
-        List<Worker> findAllByWorkerIdInAndIsDeletedIsFalse(Collection<Long> workerIdCollection);
+        boolean existsByWorkerIdAndStatusNotIn
+                (long workerId, Collection<Status> statusCollection);
+        Optional<Worker> findByWorkerIdAndStatusNotIn
+                (long workerId, Collection<Status> statusCollection);
+        boolean existsAllByWorkerIdInAndStatusNotIn
+                (Collection<Long> workerIdCollection, Collection<Status> statusCollection);
+        List<Worker> findAllByWorkerIdInAndStatusNotIn
+                (Collection<Long> workerIdCollection, Collection<Status> statusCollection);
         /* Id & citizenId */
-        boolean existsByCitizenIdAndWorkerIdIsNotAndIsDeletedIsFalse(String citizenId, long workerId);
+        boolean existsByCitizenIdAndWorkerIdIsNotAndStatusNotIn
+                (String citizenId, long workerId, Collection<Status> statusCollection);
 
 
         /* fullName */
-        List<Worker> findAllByFullNameAndIsDeletedIsFalse(String fullName);
-        Page<Worker> findAllByFullNameAndIsDeletedIsFalse(String fullName, Pageable paging);
-        List<Worker> findAllByFullNameContainsAndIsDeletedIsFalse(String fullName);
-        Page<Worker> findAllByFullNameContainsAndIsDeletedIsFalse(String fullName, Pageable paging);
+        List<Worker> findAllByFullNameAndStatusNotIn
+                (String fullName, Collection<Status> statusCollection);
+        Page<Worker> findAllByFullNameAndStatusNotIn
+                (String fullName, Collection<Status> statusCollection, Pageable paging);
+        List<Worker> findAllByFullNameContainsAndStatusNotIn
+                (String fullName, Collection<Status> statusCollection);
+        Page<Worker> findAllByFullNameContainsAndStatusNotIn
+                (String fullName, Collection<Status> statusCollection, Pageable paging);
 
 
         /* citizenId */
-        boolean existsByCitizenIdAndIsDeletedIsFalse(String citizenId);
-        Optional<Worker> findByCitizenIdAndIsDeletedIsFalse(String citizenId);
-        List<Worker> findAllByCitizenIdContainsAndIsDeletedIsFalse(String citizenId);
-        Page<Worker> findAllByCitizenIdContainsAndIsDeletedIsFalse(String citizenId, Pageable paging);
+        boolean existsByCitizenIdAndStatusNotIn
+                (String citizenId, Collection<Status> statusCollection);
+        Optional<Worker> findByCitizenIdAndStatusNotIn
+                (String citizenId, Collection<Status> statusCollection);
+        List<Worker> findAllByCitizenIdContainsAndStatusNotIn
+                (String citizenId, Collection<Status> statusCollection);
+        Page<Worker> findAllByCitizenIdContainsAndStatusNotIn
+                (String citizenId, Collection<Status> statusCollection, Pageable paging);
 
 
         /* socialSecurityCode */
-        Optional<Worker> findBySocialSecurityCodeAndIsDeletedIsFalse(String socialSecurityCode);
-        List<Worker> findAllBySocialSecurityCodeContainsAndIsDeletedIsFalse(String socialSecurityCode);
-        Page<Worker> findAllBySocialSecurityCodeContainsAndIsDeletedIsFalse(String socialSecurityCode, Pageable paging);
+        Optional<Worker> findBySocialSecurityCodeAndStatusNotIn
+                (String socialSecurityCode, Collection<Status> statusCollection);
+        List<Worker> findAllBySocialSecurityCodeContainsAndStatusNotIn
+                (String socialSecurityCode, Collection<Status> statusCollection);
+        Page<Worker> findAllBySocialSecurityCodeContainsAndStatusNotIn
+                (String socialSecurityCode, Collection<Status> statusCollection, Pageable paging);
 
 
         /* addressId */
-        List<Worker> findAllByAddressIdAndIsDeletedIsFalse(long addressId);
-        Page<Worker> findAllByAddressIdAndIsDeletedIsFalse(long addressId, Pageable paging);
-        List<Worker> findAllByAddressIdInAndIsDeletedIsFalse(Collection<Long> addressIdCollection);
-        Page<Worker> findAllByAddressIdInAndIsDeletedIsFalse(Collection<Long> addressIdCollection, Pageable paging);
+        List<Worker> findAllByAddressIdAndStatusNotIn
+                (long addressId, Collection<Status> statusCollection);
+        Page<Worker> findAllByAddressIdAndStatusNotIn
+                (long addressId, Collection<Status> statusCollection, Pageable paging);
+        List<Worker> findAllByAddressIdInAndStatusNotIn
+                (Collection<Long> addressIdCollection, Collection<Status> statusCollection);
+        Page<Worker> findAllByAddressIdInAndStatusNotIn
+                (Collection<Long> addressIdCollection, Collection<Status> statusCollection, Pageable paging);
 }

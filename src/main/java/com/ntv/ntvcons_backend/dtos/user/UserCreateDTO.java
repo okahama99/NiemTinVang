@@ -16,23 +16,23 @@ import java.time.LocalDateTime;
 @Setter
 public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO */
     @Positive
-    @NotNull(message = "roleId REQUIRED for create")
+    @NotNull(message = "roleId REQUIRED for Create")
     private Long roleId;
 
     @Size(max = 50, message = "username max length: 50 characters")
-    @NotNull(message = "username REQUIRED for create")
+    @NotNull(message = "username REQUIRED for Create")
     private String username;
 
     @Size(max = 128, message = "password max length: 128 characters")
-//    @NotNull(message = "password REQUIRED for create")
+//    @NotNull(message = "password REQUIRED for Create")
     private String password;
 
     @Size(max = 100, message = "fullName max length: 100 characters")
-    @NotNull(message = "fullName REQUIRED for create")
+    @NotNull(message = "fullName REQUIRED for Create")
     private String fullName;
 
     @Pattern(regexp = Regex.PHONE_REGEX_1, message = "Need to match pattern '0 + (9-14) digits'")
-    @NotNull(message = "phone REQUIRED for create")
+    @NotNull(message = "phone REQUIRED for Create")
     private String phone;
 
     @Email
@@ -43,7 +43,7 @@ public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
 //    @Positive
-//    @NotNull(message = "userId (createdBy) REQUIRED for create")
+//    @NotNull(message = "userId (createdBy) REQUIRED for Create")
 //    For self create user
     private final Long createdBy = null;
 

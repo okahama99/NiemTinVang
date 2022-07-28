@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.ReportDetail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,22 +13,32 @@ import java.util.Optional;
 
 @Repository
 public interface ReportDetailRepository extends JpaRepository<ReportDetail, Long> {
-    Page<ReportDetail> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<ReportDetail> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<ReportDetail> findByReportDetailIdAndIsDeletedIsFalse(long reportDetailId);
-    List<ReportDetail> findAllByReportDetailIdInAndIsDeletedIsFalse(Collection<Long> reportDetailIdCollection);
+    Optional<ReportDetail> findByReportDetailIdAndStatusNotIn
+            (long reportDetailId, Collection<Status> statusCollection);
+    List<ReportDetail> findAllByReportDetailIdInAndStatusNotIn
+            (Collection<Long> reportDetailIdCollection, Collection<Status> statusCollection);
     /* reportId & itemDesc & itemPrice */
-    boolean existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndIsDeletedIsFalse
-            (long reportId, String itemDesc, double itemPrice, long reportDetailId);
+    /** Check duplicate for Update */
+    boolean existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndStatusNotIn
+            (long reportId, String itemDesc, double itemPrice, long reportDetailId, Collection<Status> statusCollection);
 
 
     /* reportId */
-    List<ReportDetail> findAllByReportIdAndIsDeletedIsFalse(long reportId);
-    Page<ReportDetail> findAllByReportIdAndIsDeletedIsFalse(long reportId, Pageable paging);
-    List<ReportDetail> findAllByReportIdInAndIsDeletedIsFalse(Collection<Long> reportIdCollection);
-    Page<ReportDetail> findAllByReportIdInAndIsDeletedIsFalse(Collection<Long> reportIdCollection, Pageable paging);
+    List<ReportDetail> findAllByReportIdAndStatusNotIn
+            (long reportId, Collection<Status> statusCollection);
+    Page<ReportDetail> findAllByReportIdAndStatusNotIn
+            (long reportId, Collection<Status> statusCollection, Pageable paging);
+    List<ReportDetail> findAllByReportIdInAndStatusNotIn
+            (Collection<Long> reportIdCollection, Collection<Status> statusCollection);
+    Page<ReportDetail> findAllByReportIdInAndStatusNotIn
+            (Collection<Long> reportIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* reportId & itemDesc & itemPrice */
-    boolean existsByReportIdAndItemDescAndItemPriceAndIsDeletedIsFalse(long reportId, String itemDesc, double itemPrice);
+    /** Check duplicate for Create */
+    boolean existsByReportIdAndItemDescAndItemPriceAndStatusNotIn
+            (long reportId, String itemDesc, double itemPrice, Collection<Status> statusCollection);
 }

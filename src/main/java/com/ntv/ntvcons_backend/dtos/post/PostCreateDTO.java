@@ -15,11 +15,11 @@ import javax.validation.constraints.Size;
 public class PostCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(example = "Nguyen Van A") /* Hint for Swagger */
     @Size(max = 100, message = "authorName max length: 100 characters")
-    @NotNull(message = "authorName REQUIRED for create")
+    @NotNull(message = "authorName REQUIRED for Create")
     private String authorName;
 
     @ApiModelProperty(example = "Giá xây dựng 2022") /* Hint for Swagger */
     @Size(max = 100, message = "postTitle max length: 100 characters")
-    @NotNull(message = "postTitle REQUIRED for create")
+    @NotNull(message = "postTitle REQUIRED for Create")
     private String postTitle;
 }

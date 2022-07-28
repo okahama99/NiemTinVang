@@ -16,20 +16,20 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class TaskReportUpdateDTO extends BaseUpdateDTO {
     @PositiveOrZero
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long taskReportId;
 
     @Positive
-    @NotNull(message = "taskId REQUIRED for update")
+    @NotNull(message = "taskId REQUIRED for Update")
     private Long taskId;
 
     @Positive
-    @NotNull(message = "reportId REQUIRED for update")
+    @NotNull(message = "reportId REQUIRED for Update")
     private Long reportId;
 
     @ApiModelProperty(example = "50%") /* Hint for Swagger */
     @Size(max = 100, message = "taskName max length: 100 characters")
-    @NotNull(message = "taskProgress REQUIRED for update")
+    @NotNull(message = "taskProgress REQUIRED for Update")
     private String taskProgress;
 
     @ApiModelProperty(example = "Xây xxx") /* Hint for Swagger */

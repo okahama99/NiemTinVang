@@ -18,12 +18,12 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class TaskCreateDTO extends BaseCreateDTO {
     @Positive
-    @NotNull(message = "projectId REQUIRED for create")
+    @NotNull(message = "projectId REQUIRED for Create")
     private Long projectId;
 
     @ApiModelProperty(example = "Xây xxx") /* Hint for Swagger */
     @Size(max = 100, message = "taskName max length: 100 characters")
-    @NotNull(message = "taskName REQUIRED for create")
+    @NotNull(message = "taskName REQUIRED for Create")
     private String taskName;
 
     @ApiModelProperty(example = "Xây xxx tầng 1") /* Hint for Swagger */
@@ -33,7 +33,7 @@ public class TaskCreateDTO extends BaseCreateDTO {
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "planStartDate REQUIRED for create")
+    @NotNull(message = "planStartDate REQUIRED for Create")
     private String planStartDate;
 
     /** yyyy-MM-dd HH:mm */

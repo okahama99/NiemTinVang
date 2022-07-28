@@ -18,22 +18,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TaskAssignmentCreateDTO extends BaseCreateDTO {
     @Positive
-    @NotNull(message = "taskId REQUIRED for create")
+    @NotNull(message = "taskId REQUIRED for Create")
     private Long taskId;
 
     @Positive
-    @NotNull(message = "userId (assignerId) REQUIRED for create")
+    @NotNull(message = "userId (assignerId) REQUIRED for Create")
     private Long assignerId;
 
     @Positive
-    @NotNull(message = "userId (assigneeId) REQUIRED for create")
+    @NotNull(message = "userId (assigneeId) REQUIRED for Create")
     private Long assigneeId;
 
     /** yyyy-MM-dd HH:mm */
     /* TODO: use later or skip forever */
 //    /@ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
 //    @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-//    @NotNull(message = "assignDate REQUIRED for create")
+//    @NotNull(message = "assignDate REQUIRED for Create")
 //    private String assignDate;
 
     @JsonIgnore /* No serialize/deserialize */

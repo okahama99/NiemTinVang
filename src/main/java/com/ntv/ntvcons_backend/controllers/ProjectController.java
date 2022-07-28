@@ -11,7 +11,7 @@ import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -31,7 +31,7 @@ public class ProjectController {
     @Autowired
     private LocationService locationService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
     
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -116,7 +116,7 @@ public class ProjectController {
         try {
             List<ProjectReadDTO> projects = 
                     projectService.getAllInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (projects == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Project found");
@@ -200,7 +200,7 @@ public class ProjectController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<ProjectReadDTO> projectDTOList;
 

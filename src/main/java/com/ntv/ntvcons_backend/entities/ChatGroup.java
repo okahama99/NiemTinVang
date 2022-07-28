@@ -1,6 +1,6 @@
 package com.ntv.ntvcons_backend.entities;
 
-import com.ntv.ntvcons_backend.Enum.Status;
+import com.ntv.ntvcons_backend.constants.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,9 +25,6 @@ public class ChatGroup extends BaseEntity{
 
     @Column(name = "groupName", nullable = false)
     private String groupName;
-
-    @Column(name = "status", nullable = false)
-    private Status status;
 
     @Column(name = "isInternalGroup", nullable = false)
     private Boolean isInternalGroup = false;

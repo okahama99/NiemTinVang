@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.reportDetail;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailUpdateDTO;
@@ -31,6 +32,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     @Autowired
     private UserService userService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public ReportDetail createReportDetail(ReportDetail newReportDetail) throws Exception {
@@ -48,10 +51,11 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         /* Check duplicate */
         if (reportDetailRepository
-                .existsByReportIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
+                .existsByReportIdAndItemDescAndItemPriceAndStatusNotIn(
                         newReportDetail.getReportId(),
                         newReportDetail.getItemDesc(),
-                        newReportDetail.getItemPrice())) {
+                        newReportDetail.getItemPrice(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exist another ReportDetail of Report with Id: '" + newReportDetail.getReportId()
                     + "'. With itemDesc: '" + newReportDetail.getItemDesc()
                     + "' at price: '" + newReportDetail.getItemPrice() + "'. ";
@@ -146,10 +150,11 @@ public class ReportDetailServiceImpl implements ReportDetailService {
             /* Check duplicate 2 (input vs DB) */
             for (ReportDetail newReportDetail : newReportDetailList) {
                 if (reportDetailRepository
-                        .existsByReportIdAndItemDescAndItemPriceAndIsDeletedIsFalse(
+                        .existsByReportIdAndItemDescAndItemPriceAndStatusNotIn(
                                 newReportDetail.getReportId(),
                                 newReportDetail.getItemDesc(),
-                                newReportDetail.getItemPrice())) {
+                                newReportDetail.getItemPrice(),
+                                N_D_S_STATUS_LIST)) {
                     errorMsg.append("Already exist another ReportDetail of Report with Id: '")
                             .append(newReportDetail.getReportId())
                             .append("'. With itemDesc: '").append(newReportDetail.getItemDesc())
@@ -179,7 +184,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     /* READ */
     @Override
     public Page<ReportDetail> getPageAll(Pageable paging) throws Exception {
-        Page<ReportDetail> reportDetailPage = reportDetailRepository.findAllByIsDeletedIsFalse(paging);
+        Page<ReportDetail> reportDetailPage =
+                reportDetailRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (reportDetailPage.isEmpty()) 
             return null;
@@ -204,7 +210,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     @Override
     public ReportDetail getById(long reportDetailId) throws Exception {
         Optional<ReportDetail> reportDetail =
-                reportDetailRepository.findByReportDetailIdAndIsDeletedIsFalse(reportDetailId);
+                reportDetailRepository.findByReportDetailIdAndStatusNotIn(reportDetailId, N_D_S_STATUS_LIST);
 
         return reportDetail.orElse(null);
     }
@@ -221,7 +227,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     @Override
     public List<ReportDetail> getAllByIdIn(Collection<Long> reportDetailIdCollection) throws Exception {
         List<ReportDetail> reportDetailList =
-                reportDetailRepository.findAllByReportDetailIdInAndIsDeletedIsFalse(reportDetailIdCollection);
+                reportDetailRepository
+                        .findAllByReportDetailIdInAndStatusNotIn(reportDetailIdCollection, N_D_S_STATUS_LIST);
 
         if (reportDetailList.isEmpty()) 
             return null;
@@ -241,7 +248,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     @Override
     public List<ReportDetail> getAllByReportId(long reportId) throws Exception {
         List<ReportDetail> reportDetailList =
-                reportDetailRepository.findAllByReportIdAndIsDeletedIsFalse(reportId);
+                reportDetailRepository.findAllByReportIdAndStatusNotIn(reportId, N_D_S_STATUS_LIST);
 
         if (reportDetailList.isEmpty()) 
             return null;
@@ -260,7 +267,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     @Override
     public Page<ReportDetail> getPageAllByReportId(Pageable paging, long reportId) throws Exception {
         Page<ReportDetail> reportDetailPage =
-                reportDetailRepository.findAllByReportIdAndIsDeletedIsFalse(reportId, paging);
+                reportDetailRepository.findAllByReportIdAndStatusNotIn(reportId, N_D_S_STATUS_LIST, paging);
 
         if (reportDetailPage.isEmpty()) 
             return null;
@@ -285,7 +292,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     @Override
     public List<ReportDetail> getAllByReportIdIn(Collection<Long> reportIdCollection) throws Exception {
         List<ReportDetail> reportDetailList =
-                reportDetailRepository.findAllByReportIdInAndIsDeletedIsFalse(reportIdCollection);
+                reportDetailRepository.findAllByReportIdInAndStatusNotIn(reportIdCollection, N_D_S_STATUS_LIST);
 
         if (reportDetailList.isEmpty()) 
             return null;
@@ -331,7 +338,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     @Override
     public Page<ReportDetail> getPageAllByReportIdIn(Pageable paging, Collection<Long> reportIdCollection) throws Exception {
         Page<ReportDetail> reportDetailPage =
-                reportDetailRepository.findAllByReportIdInAndIsDeletedIsFalse(reportIdCollection, paging);
+                reportDetailRepository.findAllByReportIdInAndStatusNotIn(reportIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (reportDetailPage.isEmpty()) 
             return null;
@@ -386,11 +393,12 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         /* Check duplicate */
         if (reportDetailRepository
-                .existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndIsDeletedIsFalse(
+                .existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndStatusNotIn(
                         updatedReportDetail.getReportId(),
                         updatedReportDetail.getItemDesc(),
                         updatedReportDetail.getItemPrice(),
-                        updatedReportDetail.getReportDetailId())) {
+                        updatedReportDetail.getReportDetailId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exist another ReportDetail of Report with Id: '" + updatedReportDetail.getReportId()
                     + "'. With itemDesc: '" + updatedReportDetail.getItemDesc()
                     + "' at price: '" + updatedReportDetail.getItemPrice() + "'. ";
@@ -518,11 +526,12 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         /* Check duplicate 2 (input vs DB) */
         for (ReportDetail updatedReportDetail : updatedReportDetailList) {
             if (reportDetailRepository
-                    .existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndIsDeletedIsFalse(
+                    .existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndStatusNotIn(
                             updatedReportDetail.getReportId(),
                             updatedReportDetail.getItemDesc(),
                             updatedReportDetail.getItemPrice(),
-                            updatedReportDetail.getReportDetailId())) {
+                            updatedReportDetail.getReportDetailId(),
+                            N_D_S_STATUS_LIST)) {
                 errorMsg.append("Already exist another ReportDetail of Report with Id: '")
                         .append(updatedReportDetail.getReportId())
                         .append("'. With itemDesc: '").append(updatedReportDetail.getItemDesc())
@@ -564,14 +573,15 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     /* DELETE */
     @Override
     public boolean deleteReportDetail(long reportDetailId) throws Exception {
-        Optional<ReportDetail> reportDetail = reportDetailRepository.findByReportDetailIdAndIsDeletedIsFalse(reportDetailId);
+        Optional<ReportDetail> reportDetail =
+                reportDetailRepository.findByReportDetailIdAndStatusNotIn(reportDetailId, N_D_S_STATUS_LIST);
 
         if (!reportDetail.isPresent()) {
             return false;
             /* Not found with Id */
         }
 
-        reportDetail.get().setIsDeleted(true);
+        reportDetail.get().setStatus(Status.DELETED);
         reportDetailRepository.saveAndFlush(reportDetail.get());
 
         return true;
@@ -588,7 +598,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         reportDetailRepository.saveAllAndFlush(
                 reportDetailList.stream()
-                        .peek(reportDetail -> reportDetail.setIsDeleted(true))
+                        .peek(reportDetail -> reportDetail.setStatus(Status.DELETED))
                         .collect(Collectors.toList()));
 
         return true;
@@ -605,7 +615,7 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
         reportDetailRepository.saveAllAndFlush(
                 reportDetailList.stream()
-                        .peek(reportDetail -> reportDetail.setIsDeleted(true))
+                        .peek(reportDetail -> reportDetail.setStatus(Status.DELETED))
                         .collect(Collectors.toList()));
 
         return true;

@@ -15,7 +15,7 @@ import javax.validation.constraints.Size;
 public class RoleCreateDTO  extends BaseCreateDTO {
     @ApiModelProperty(example = "Admin") /* Hint for Swagger */
     @Size(max = 100, message = "roleName max length: 100 characters")
-    @NotNull(message = "roleName REQUIRED for create")
+    @NotNull(message = "roleName REQUIRED for Create")
     private String roleName;
 
     @ApiModelProperty(example = "Quản trị") /* Hint for Swagger */

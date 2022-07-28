@@ -17,6 +17,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -25,33 +26,33 @@ public class ProjectCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(example = "Dự án xxx",
             notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "projectName max length: 100 characters")
-    @NotNull(message = "projectName REQUIRED for create")
+    @NotNull(message = "projectName REQUIRED for Create")
     private String projectName;
 
     /* TODO: reuse later
-    @NotNull(message = "location REQUIRED for create")
+    @NotNull(message = "location REQUIRED for Create")
     private LocationCreateOptionDTO location;*/
 
     @ApiModelProperty(notes = "NOT NULL") /* Hint for Swagger */
-    @NotNull(message = "blueprint REQUIRED for create")
+    @NotNull(message = "blueprint REQUIRED for Create")
     private LocationCreateDTO location;
 
     @ApiModelProperty(notes = "NOT NULL") /* Hint for Swagger */
-    @NotNull(message = "blueprint REQUIRED for create")
+    @NotNull(message = "blueprint REQUIRED for Create")
     private BlueprintCreateDTO blueprint;
 
     @ApiModelProperty(notes = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
-    @Size(min = 1, message = "Need at least 1 for create")
-    private List<ProjectManagerCreateDTO> projectManagerList;
+    @Size(min = 1, message = "Need at least 1 for Create")
+    private List<Long> managerIdList;
 
     @ApiModelProperty(notes = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
-    @Size(min = 1, message = "Need at least 1 for create")
-    private List<ProjectWorkerCreateDTO> projectWorkerList;
+    @Size(min = 1, message = "Need at least 1 for Create")
+    private List<Long> workerIdList;
 
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "planStartDate REQUIRED for create")
+    @NotNull(message = "planStartDate REQUIRED for Create")
     private String planStartDate;
 
     /** yyyy-MM-dd HH:mm */
