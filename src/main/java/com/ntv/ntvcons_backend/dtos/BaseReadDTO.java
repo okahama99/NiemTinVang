@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import net.minidev.json.annotate.JsonIgnore;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

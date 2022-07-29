@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.externalFile;
 
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,12 +18,12 @@ public class ExternalFileUpdateDTO extends BaseUpdateDTO {
     @NotNull(message = "Id REQUIRED for Update")
     private Long fileId;
 
-    @ApiModelProperty(example = "File xxx dự án yyy") /* Hint for Swagger */
+    @Schema(example = "File xxx dự án yyy") /* Hint for Swagger */
     @Size(max = 100, message = "fileName max length: 100 characters")
     @NotNull(message = "fileName REQUIRED for Update")
     private String fileName;
 
-    @ApiModelProperty(example = "https://imgur.com/gallery/seX0ozh") /* Hint for Swagger */
+    @Schema(example = "https://imgur.com/gallery/seX0ozh") /* Hint for Swagger */
     @Size(max = 100, message = "fileLink max length: 100 characters")
     @NotNull(message = "fileLink REQUIRED for Update")
     private String fileLink;

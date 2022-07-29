@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.post;
 
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,12 +18,12 @@ public class PostUpdateDTO extends BaseUpdateDTO {
     @NotNull(message = "Id REQUIRED for Update")
     private Long postId;
 
-    @ApiModelProperty(example = "Nguyen Van A") /* Hint for Swagger */
+    @Schema(example = "Nguyen Van A") /* Hint for Swagger */
     @Size(max = 100, message = "authorName max length: 100 characters")
     @NotNull(message = "authorName REQUIRED for Update")
     private String authorName;
 
-    @ApiModelProperty(example = "Giá xây dựng 2022") /* Hint for Swagger */
+    @Schema(example = "Giá xây dựng 2022") /* Hint for Swagger */
     @Size(max = 100, message = "postTitle max length: 100 characters")
     @NotNull(message = "postTitle REQUIRED for Update")
     private String postTitle;

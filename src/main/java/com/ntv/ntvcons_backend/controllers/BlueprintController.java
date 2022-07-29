@@ -9,6 +9,8 @@ import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -31,10 +34,17 @@ public class BlueprintController {
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createBlueprint(@Valid @RequestBody BlueprintCreateDTO blueprintDTO) {
+    @PostMapping(value = "/v1/createBlueprint",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createBlueprint(
+            @RequestPart @Valid /* For regular FE input */
+            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
+            BlueprintCreateDTO blueprintDTO,
+            @RequestPart(required = false) MultipartFile blueprintDoc) {
         try {
             BlueprintReadDTO newBlueprintDTO = blueprintService.createBlueprintByDTO(blueprintDTO);
+
+            /* TODO: upload to firebase */
 
             return ResponseEntity.ok().body(newBlueprintDTO);
         } catch (IllegalArgumentException iAE) {
@@ -256,8 +266,13 @@ public class BlueprintController {
 
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateBlueprint(@Valid @RequestBody BlueprintUpdateDTO blueprintDTO) {
+    @PutMapping(value = "/v1/updateBlueprint",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateBlueprint(
+            @RequestPart @Valid /* For regular FE input */
+            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
+            BlueprintUpdateDTO blueprintDTO,
+            @RequestPart(required = false) MultipartFile blueprintDoc) {
         try {
             BlueprintReadDTO updatedBlueprintDTO = blueprintService.updateBlueprintByDTO(blueprintDTO);
 
@@ -265,6 +280,8 @@ public class BlueprintController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No Blueprint found with Id: '" + blueprintDTO.getBlueprintId() + "'. ");
             }
+
+            /* TODO: send to Firebase */
 
             return ResponseEntity.ok().body(updatedBlueprintDTO);
         } catch (IllegalArgumentException iAE) {

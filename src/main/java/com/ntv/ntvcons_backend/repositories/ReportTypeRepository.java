@@ -13,33 +13,33 @@ import java.util.Optional;
 
 @Repository
 public interface ReportTypeRepository extends JpaRepository<ReportType, Long> {
-    Page<ReportType> findAllByStatusNotIn
-            (Collection<Status> statusCollection, Pageable paging);
+    Page<ReportType> findAllByStatusNotIn(
+            Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByReportTypeIdAndStatusNotIn
-            (long reportTypeId, Collection<Status> statusCollection);
-    Optional<ReportType> findByReportTypeIdAndStatusNotIn
-            (long reportTypeId, Collection<Status> statusCollection);
-    boolean existsAllByReportTypeIdInAndStatusNotIn
-            (Collection<Long> reportTypeIdCollection, Collection<Status> statusCollection);
-    List<ReportType> findAllByReportTypeIdInAndStatusNotIn
-            (Collection<Long> reportTypeIdCollection, Collection<Status> statusCollection);
+    boolean existsByReportTypeIdAndStatusNotIn(
+            long reportTypeId, Collection<Status> statusCollection);
+    Optional<ReportType> findByReportTypeIdAndStatusNotIn(
+            long reportTypeId, Collection<Status> statusCollection);
+    boolean existsAllByReportTypeIdInAndStatusNotIn(
+            Collection<Long> reportTypeIdCollection, Collection<Status> statusCollection);
+    List<ReportType> findAllByReportTypeIdInAndStatusNotIn(
+            Collection<Long> reportTypeIdCollection, Collection<Status> statusCollection);
     /* Id & reportTypeName */
     /** Check duplicate for Update */
-    boolean existsByReportTypeNameAndReportTypeIdIsNotAndStatusNotIn
-            (String reportTypeName, long reportTypeId, Collection<Status> statusCollection);
+    boolean existsByReportTypeNameAndReportTypeIdIsNotAndStatusNotIn(
+            String reportTypeName, long reportTypeId, Collection<Status> statusCollection);
 
 
     /* reportTypeName */
     /** Check duplicate for Create */
-    boolean existsByReportTypeNameAndStatusNotIn
-            (String reportTypeName, Collection<Status> statusCollection);
-    Optional<ReportType> findByReportTypeNameAndStatusNotIn
-            (String reportTypeName, Collection<Status> statusCollection);
-    List<ReportType> findAllByReportTypeNameContainsAndStatusNotIn
-            (String reportTypeName, Collection<Status> statusCollection);
-    Page<ReportType> findAllByReportTypeNameContainsAndStatusNotIn
-            (String reportTypeName, Collection<Status> statusCollection, Pageable paging);
+    boolean existsByReportTypeNameAndStatusNotIn(
+            String reportTypeName, Collection<Status> statusCollection);
+    Optional<ReportType> findByReportTypeNameAndStatusNotIn(
+            String reportTypeName, Collection<Status> statusCollection);
+    List<ReportType> findAllByReportTypeNameContainsAndStatusNotIn(
+            String reportTypeName, Collection<Status> statusCollection);
+    Page<ReportType> findAllByReportTypeNameContainsAndStatusNotIn(
+            String reportTypeName, Collection<Status> statusCollection, Pageable paging);
 }
