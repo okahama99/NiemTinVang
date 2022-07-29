@@ -8,7 +8,7 @@ import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -26,7 +26,7 @@ public class BlueprintController {
     @Autowired
     private BlueprintService blueprintService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -81,7 +81,7 @@ public class BlueprintController {
         try {
             List<BlueprintReadDTO> blueprintList =
                     blueprintService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (blueprintList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Blueprint found");
@@ -178,7 +178,7 @@ public class BlueprintController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<BlueprintReadDTO> blueprintDTOList;
 

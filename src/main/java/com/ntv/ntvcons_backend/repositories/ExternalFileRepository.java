@@ -13,35 +13,55 @@ import java.util.Optional;
 
 @Repository
 public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long> {
-    List<ExternalFile> findAllByStatusNot(Status status);
-    Page<ExternalFile> findAllByStatusNot(Status status, Pageable paging);
+    List<ExternalFile> findAllByStatusNotIn
+            (Collection<Status> statusCollection);
+    Page<ExternalFile> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByFileIdAndStatusNot(long fileId, Status status);
-    Optional<ExternalFile> findByFileIdAndStatusNot(long fileId, Status status);
-    boolean existsAllByFileIdInAndStatusNot(Collection<Long> fileIdCollection, Status status);
-    List<ExternalFile> findAllByFileIdInAndStatusNot(Collection<Long> fileIdCollection, Status status);
+    boolean existsByFileIdAndStatusNotIn
+            (long fileId, Collection<Status> statusCollection);
+    Optional<ExternalFile> findByFileIdAndStatusNotIn
+            (long fileId, Collection<Status> statusCollection);
+    boolean existsAllByFileIdInAndStatusNotIn
+            (Collection<Long> fileIdCollection, Collection<Status> statusCollection);
+    List<ExternalFile> findAllByFileIdInAndStatusNotIn
+            (Collection<Long> fileIdCollection, Collection<Status> statusCollection);
     /* Id & fileLink */
-    boolean existsByFileLinkAndFileIdNotAndStatusNot(String fileLink, long fileId, Status status);
+    /** Check duplicate for Update */
+    boolean existsByFileLinkAndFileIdNotAndStatusNotIn
+            (String fileLink, long fileId, Collection<Status> statusCollection);
 
 
     /* fileName */
-    Optional<ExternalFile> findByFileNameAndStatusNot(String fileName, Status status);
-    List<ExternalFile> findAllByFileNameContainsAndStatusNot(String fileName, Status status);
-    Page<ExternalFile> findAllByFileNameContainsAndStatusNot(String fileName, Pageable paging, Status status);
+    Optional<ExternalFile> findByFileNameAndStatusNotIn
+            (String fileName, Collection<Status> statusCollection);
+    List<ExternalFile> findAllByFileNameContainsAndStatusNotIn
+            (String fileName, Collection<Status> statusCollection);
+    Page<ExternalFile> findAllByFileNameContainsAndStatusNotIn
+            (String fileName, Pageable paging, Collection<Status> statusCollection);
 
 
     /* fileLink */
-    boolean existsByFileLinkAndStatusNot(String fileLink, Status status);
-    Optional<ExternalFile> findByFileLinkAndStatusNot(String fileLink, Status status);
-    List<ExternalFile> findAllByFileLinkContainsAndStatusNot(String fileLink, Status status);
-    Page<ExternalFile> findAllByFileLinkContainsAndStatusNot(String fileLink, Pageable paging, Status status);
+    /** Check duplicate for Create */
+    boolean existsByFileLinkAndStatusNotIn
+            (String fileLink, Collection<Status> statusCollection);
+    Optional<ExternalFile> findByFileLinkAndStatusNotIn
+            (String fileLink, Collection<Status> statusCollection);
+    List<ExternalFile> findAllByFileLinkContainsAndStatusNotIn
+            (String fileLink, Collection<Status> statusCollection);
+    Page<ExternalFile> findAllByFileLinkContainsAndStatusNotIn
+            (String fileLink, Pageable paging, Collection<Status> statusCollection);
 
 
     /* filetypeId */
-    List<ExternalFile> findAllByFileTypeIdAndStatusNot(long filetypeId, Status status);
-    Page<ExternalFile> findAllByFileTypeIdAndStatusNot(long filetypeId, Pageable paging, Status status);
-    List<ExternalFile> findAllByFileTypeIdInAndStatusNot(Collection<Long> fileTypeIdCollection, Status status);
-    Page<ExternalFile> findAllByFileTypeIdInAndStatusNot(Collection<Long> fileTypeIdCollection, Pageable paging, Status status);
+    List<ExternalFile> findAllByFileTypeIdAndStatusNotIn
+            (long filetypeId, Collection<Status> statusCollection);
+    Page<ExternalFile> findAllByFileTypeIdAndStatusNotIn
+            (long filetypeId, Pageable paging, Collection<Status> statusCollection);
+    List<ExternalFile> findAllByFileTypeIdInAndStatusNotIn
+            (Collection<Long> fileTypeIdCollection, Collection<Status> statusCollection);
+    Page<ExternalFile> findAllByFileTypeIdInAndStatusNotIn
+            (Collection<Long> fileTypeIdCollection, Pageable paging, Collection<Status> statusCollection);
 }

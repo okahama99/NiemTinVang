@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.taskReport;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
@@ -12,9 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -35,6 +34,8 @@ public class TaskReportServiceImpl implements TaskReportService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private TaskService taskService;
+
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* CREATE */
     @Override
@@ -57,9 +58,10 @@ public class TaskReportServiceImpl implements TaskReportService {
 
         /* Check duplicate */
         if (taskReportRepository
-                .existsByReportIdAndTaskIdAndIsDeletedIsFalse(
+                .existsByReportIdAndTaskIdAndStatusNotIn(
                         newTaskReport.getReportId(),
-                        newTaskReport.getTaskId())) {
+                        newTaskReport.getTaskId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another TaskReport of Report with Id: '" + newTaskReport.getReportId()
                     + "', for Task with Id: '" + newTaskReport.getTaskId()+ "'. ";
         }
@@ -124,7 +126,8 @@ public class TaskReportServiceImpl implements TaskReportService {
     /* READ */
     @Override
     public Page<TaskReport> getPageAll(Pageable paging) throws Exception {
-        Page<TaskReport> taskReportPage = taskReportRepository.findAllByIsDeletedIsFalse(paging);
+        Page<TaskReport> taskReportPage =
+                taskReportRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (taskReportPage.isEmpty()) 
             return null;
@@ -148,12 +151,13 @@ public class TaskReportServiceImpl implements TaskReportService {
 
     @Override
     public boolean existsById(long taskReportId) throws Exception {
-        return taskReportRepository.existsByTaskReportIdAndIsDeletedIsFalse(taskReportId);
+        return taskReportRepository
+                .existsByTaskReportIdAndStatusNotIn(taskReportId, N_D_S_STATUS_LIST);
     }
     @Override
     public TaskReport getById(long taskReportId) throws Exception {
         return taskReportRepository
-                .findByTaskReportIdAndIsDeletedIsFalse(taskReportId)
+                .findByTaskReportIdAndStatusNotIn(taskReportId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -169,7 +173,7 @@ public class TaskReportServiceImpl implements TaskReportService {
     @Override
     public List<TaskReport> getAllByIdIn(Collection<Long> taskReportIdCollection) throws Exception {
         List<TaskReport> taskReportList =
-                taskReportRepository.findAllByTaskReportIdInAndIsDeletedIsFalse(taskReportIdCollection);
+                taskReportRepository.findAllByTaskReportIdInAndStatusNotIn(taskReportIdCollection, N_D_S_STATUS_LIST);
 
         if (taskReportList.isEmpty()) 
             return null;
@@ -189,7 +193,7 @@ public class TaskReportServiceImpl implements TaskReportService {
     @Override
     public List<TaskReport> getAllByReportId(long reportId) throws Exception {
         List<TaskReport> taskReportList =
-                taskReportRepository.findAllByReportIdAndIsDeletedIsFalse(reportId);
+                taskReportRepository.findAllByReportIdAndStatusNotIn(reportId, N_D_S_STATUS_LIST);
 
         if (taskReportList.isEmpty()) 
             return null;
@@ -209,7 +213,7 @@ public class TaskReportServiceImpl implements TaskReportService {
     @Override
     public List<TaskReport> getAllByReportIdIn(Collection<Long> reportIdCollection) throws Exception {
         List<TaskReport> taskReportList =
-                taskReportRepository.findAllByReportIdInAndIsDeletedIsFalse(reportIdCollection);
+                taskReportRepository.findAllByReportIdInAndStatusNotIn(reportIdCollection, N_D_S_STATUS_LIST);
 
         if (taskReportList.isEmpty()) 
             return null;
@@ -256,7 +260,7 @@ public class TaskReportServiceImpl implements TaskReportService {
     @Override
     public List<TaskReport> getAllByTaskId(long taskId) throws Exception {
         List<TaskReport> taskReportList =
-                taskReportRepository.findAllByTaskIdAndIsDeletedIsFalse(taskId);
+                taskReportRepository.findAllByTaskIdAndStatusNotIn(taskId, N_D_S_STATUS_LIST);
 
         if (taskReportList.isEmpty()) 
             return null;
@@ -276,7 +280,7 @@ public class TaskReportServiceImpl implements TaskReportService {
     @Override
     public List<TaskReport> getAllByTaskIdIn(Collection<Long> taskIdCollection) throws Exception {
         List<TaskReport> taskReportList =
-                taskReportRepository.findAllByTaskIdInAndIsDeletedIsFalse(taskIdCollection);
+                taskReportRepository.findAllByTaskIdInAndStatusNotIn(taskIdCollection, N_D_S_STATUS_LIST);
 
         if (taskReportList.isEmpty()) 
             return null;
@@ -360,10 +364,11 @@ public class TaskReportServiceImpl implements TaskReportService {
 
         /* Check duplicate */
         if (taskReportRepository
-                .existsByReportIdAndTaskIdAndTaskReportIdIsNotAndIsDeletedIsFalse(
+                .existsByReportIdAndTaskIdAndTaskReportIdIsNotAndStatusNotIn(
                         updatedTaskReport.getReportId(),
                         updatedTaskReport.getTaskId(),
-                        updatedTaskReport.getTaskReportId())) {
+                        updatedTaskReport.getTaskReportId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another TaskReport of Report with Id: '" + updatedTaskReport.getReportId()
                     + "', for Task with Id: '" + updatedTaskReport.getTaskId()+ "'. ";
         }
@@ -457,7 +462,7 @@ public class TaskReportServiceImpl implements TaskReportService {
             /* Not found by Id */
         }
 
-        taskReport.setIsDeleted(true);
+        taskReport.setStatus(Status.DELETED);
         taskReportRepository.saveAndFlush(taskReport);
 
         return true;
@@ -473,7 +478,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         }
 
         taskReportList = taskReportList.stream()
-                .peek(taskReport -> taskReport.setIsDeleted(true))
+                .peek(taskReport -> taskReport.setStatus(Status.DELETED))
                 .collect(Collectors.toList());
 
         taskReportRepository.saveAllAndFlush(taskReportList);
@@ -491,7 +496,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         }
 
         taskReportList = taskReportList.stream()
-                .peek(taskReport -> taskReport.setIsDeleted(true))
+                .peek(taskReport -> taskReport.setStatus(Status.DELETED))
                 .collect(Collectors.toList());
 
         taskReportRepository.saveAllAndFlush(taskReportList);
@@ -509,7 +514,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         }
 
         taskReportList = taskReportList.stream()
-                .peek(taskReport -> taskReport.setIsDeleted(true))
+                .peek(taskReport -> taskReport.setStatus(Status.DELETED))
                 .collect(Collectors.toList());
 
         taskReportRepository.saveAllAndFlush(taskReportList);
@@ -527,7 +532,7 @@ public class TaskReportServiceImpl implements TaskReportService {
         }
 
         taskReportList = taskReportList.stream()
-                .peek(taskReport -> taskReport.setIsDeleted(true))
+                .peek(taskReport -> taskReport.setStatus(Status.DELETED))
                 .collect(Collectors.toList());
 
         taskReportRepository.saveAllAndFlush(taskReportList);

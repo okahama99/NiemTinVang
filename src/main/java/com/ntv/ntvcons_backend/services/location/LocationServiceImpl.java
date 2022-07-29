@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.services.location;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
@@ -34,6 +35,8 @@ public class LocationServiceImpl implements LocationService {
     @Autowired
     private UserService userService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public void createLocation(CreateLocationModel createLocationModel) {
@@ -61,17 +64,18 @@ public class LocationServiceImpl implements LocationService {
         }
 
         /* Check duplicate */
-        if (locationRepository.existsByCoordinateAndIsDeletedIsFalse(newLocation.getCoordinate())) {
+        if (locationRepository.existsByCoordinateAndStatusNotIn(newLocation.getCoordinate(), N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Location with coordinate: '" + newLocation.getCoordinate() + "'. ";
         }
         if (!(newLocation.getCountry() == null && newLocation.getProvince() == null && newLocation.getCity() == null
                 && newLocation.getDistrict() == null && newLocation.getWard() == null && newLocation.getArea() == null
                 && newLocation.getStreet() == null && newLocation.getAddressNumber() == null)) {
             if (locationRepository
-                    .existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndIsDeletedIsFalse(
+                    .existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndStatusNotIn(
                             newLocation.getCountry(), newLocation.getProvince(), newLocation.getCity(),
                             newLocation.getDistrict(), newLocation.getWard(), newLocation.getArea(),
-                            newLocation.getStreet(), newLocation.getAddressNumber())) {
+                            newLocation.getStreet(), newLocation.getAddressNumber(),
+                            N_D_S_STATUS_LIST)) {
                 errorMsg += "Already exists another Location with exact address: '"
                         + newLocation.getAddressNumber() + ", " + newLocation.getStreet() + ", " + newLocation.getArea() + ", "
                         + newLocation.getWard() + ", " + newLocation.getDistrict() + ", " + newLocation.getCity() + ", "
@@ -103,7 +107,7 @@ public class LocationServiceImpl implements LocationService {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Location> pagingResult = locationRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Location> pagingResult = locationRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (pagingResult.hasContent()) {
             double totalPage = Math.ceil((double) pagingResult.getTotalElements() / pageSize);
@@ -148,7 +152,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public Page<Location> getPageAll(Pageable paging) throws Exception {
-        Page<Location> locationPage = locationRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Location> locationPage = locationRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (locationPage.isEmpty()) 
             return null;
@@ -173,12 +177,12 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public boolean existsById(long locationId) throws Exception {
         return locationRepository
-                .existsByLocationIdAndIsDeletedIsFalse(locationId);
+                .existsByLocationIdAndStatusNotIn(locationId, N_D_S_STATUS_LIST);
     }
     @Override
     public Location getById(long locationId) throws Exception {
         return locationRepository
-                .findByLocationIdAndIsDeletedIsFalse(locationId)
+                .findByLocationIdAndStatusNotIn(locationId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -194,7 +198,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public List<Location> getAllByIdIn(Collection<Long> locationIdCollection) throws Exception {
         List<Location> locationList =
-                locationRepository.findAllByLocationIdInAndIsDeletedIsFalse(locationIdCollection);
+                locationRepository.findAllByLocationIdInAndStatusNotIn(locationIdCollection, N_D_S_STATUS_LIST);
 
         if (locationList.isEmpty()) 
             return null;
@@ -224,12 +228,12 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public boolean existsByCoordinate(String coordinate) throws Exception {
         return locationRepository
-                .existsByCoordinateAndIsDeletedIsFalse(coordinate);
+                .existsByCoordinateAndStatusNotIn(coordinate, N_D_S_STATUS_LIST);
     }
     @Override
     public Location getByCoordinate(String coordinate) throws Exception {
         return locationRepository
-                .findByCoordinateAndIsDeletedIsFalse(coordinate)
+                .findByCoordinateAndStatusNotIn(coordinate, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -245,7 +249,7 @@ public class LocationServiceImpl implements LocationService {
     @Override
     public String checkDuplicate(String addressNumber) {
         String result = "No duplicate";
-        Location checkDuplicateLocation = locationRepository.getByAddressNumberAndIsDeletedIsFalse(addressNumber);
+        Location checkDuplicateLocation = locationRepository.getByAddressNumberAndStatusNotIn(addressNumber, N_D_S_STATUS_LIST);
         if (checkDuplicateLocation != null)
         {
             result = "Existed address number";
@@ -256,7 +260,7 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public boolean checkCoordinate(String coordinate) {
-        Location checkDuplicateLocation = locationRepository.getByCoordinateAndIsDeletedIsFalse(coordinate);
+        Location checkDuplicateLocation = locationRepository.getByCoordinateAndStatusNotIn(coordinate, N_D_S_STATUS_LIST);
         if (checkDuplicateLocation != null)
         {
             return true;
@@ -310,17 +314,19 @@ public class LocationServiceImpl implements LocationService {
         /* Check duplicate */
         if (!oldLocation.getCoordinate().equals(updatedLocation.getCoordinate())) {
             if (locationRepository
-                    .existsByCoordinateAndLocationIdIsNotAndIsDeletedIsFalse(
+                    .existsByCoordinateAndLocationIdIsNotAndStatusNotIn(
                             updatedLocation.getCoordinate(),
-                            updatedLocation.getLocationId())) {
+                            updatedLocation.getLocationId(),
+                            N_D_S_STATUS_LIST)) {
                 errorMsg += "Already exists another Location with coordinate: '" + updatedLocation.getCoordinate() + "'. ";
             }
         }
         if (locationRepository
-                .existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndLocationIdIsNotAndIsDeletedIsFalse(
+                .existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndLocationIdIsNotAndStatusNotIn(
                         updatedLocation.getCountry(), updatedLocation.getProvince(), updatedLocation.getCity(),
                         updatedLocation.getDistrict(), updatedLocation.getWard(), updatedLocation.getArea(),
-                        updatedLocation.getStreet(), updatedLocation.getAddressNumber(), updatedLocation.getLocationId())) {
+                        updatedLocation.getStreet(), updatedLocation.getAddressNumber(), updatedLocation.getLocationId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Location with exact address: '"
                     + updatedLocation.getAddressNumber() + ", " + updatedLocation.getStreet() + ", " + updatedLocation.getArea()
                     + updatedLocation.getWard() + ", " + updatedLocation.getDistrict() + ", " + updatedLocation.getCity()
@@ -357,7 +363,7 @@ public class LocationServiceImpl implements LocationService {
             /* Not found with Id */
         }
 
-        location.setIsDeleted(true);
+        location.setStatus(Status.DELETED);
         locationRepository.saveAndFlush(location);
 
         return true;

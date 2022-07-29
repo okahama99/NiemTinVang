@@ -14,11 +14,7 @@ import java.time.LocalDateTime;
 public abstract class BaseCreateDTO implements Serializable {
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
-    private final Long createdBy = 4L;
-    /* TODO: to be replace when login done
-    @Positive
-    @NotNull(message = "userId (createdBy) REQUIRED for create")
-    private Long createdBy; */
+    private Long createdBy = 4L;
 
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */

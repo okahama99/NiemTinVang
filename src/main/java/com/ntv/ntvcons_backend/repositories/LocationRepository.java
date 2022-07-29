@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.Location;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,58 +13,77 @@ import java.util.Optional;
 
 @Repository
 public interface LocationRepository extends JpaRepository<Location, Long> {
-        Page<Location> findAllByIsDeletedIsFalse(Pageable paging);
+        Page<Location> findAllByStatusNotIn
+                (Collection<Status> statusCollection, Pageable paging);
 
-        Location getByAddressNumberAndIsDeletedIsFalse (String addressNumber);
+        Location getByAddressNumberAndStatusNotIn
+                (String addressNumber, Collection<Status> statusCollection);
 
-
-        Location getByCoordinateAndIsDeletedIsFalse (String addressNumber);
+        Location getByCoordinateAndStatusNotIn
+                (String addressNumber, Collection<Status> statusCollection);
 
         /* Id */
-        boolean existsByLocationIdAndIsDeletedIsFalse(long locationId);
-        Optional<Location> findByLocationIdAndIsDeletedIsFalse(long locationId);
-        List<Location> findAllByLocationIdInAndIsDeletedIsFalse(Collection<Long> locationIdCollection);
+        boolean existsByLocationIdAndStatusNotIn
+                (long locationId, Collection<Status> statusCollection);
+        Optional<Location> findByLocationIdAndStatusNotIn
+                
+                (long locationId, Collection<Status> statusCollection);
+        List<Location> findAllByLocationIdInAndStatusNotIn
+                (Collection<Long> locationIdCollection, Collection<Status> statusCollection);
         /* Id & coordinate */
-        boolean existsByCoordinateAndLocationIdIsNotAndIsDeletedIsFalse(String coordinate, long locationId);
+        /** Check duplicate for Create */
+        boolean existsByCoordinateAndLocationIdIsNotAndStatusNotIn
+                (String coordinate, long locationId, Collection<Status> statusCollection);
         /* Id & Top down */
-        boolean existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndLocationIdIsNotAndIsDeletedIsFalse
+        /** Check duplicate for Create */
+        boolean existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndLocationIdIsNotAndStatusNotIn
                 (String country, String province, String city, String district,
-                 String ward, String area, String Street, String addressNumber, long locationId);
+                 String ward, String area, String Street, String addressNumber,
+                 long locationId, Collection<Status> statusCollection);
 
 
         /* Top down */
-        List<Location> findAllByCountryAndIsDeletedIsFalse
-                (String country);
-        List<Location> findAllByCountryAndProvinceAndIsDeletedIsFalse
-                (String country, String province);
-        List<Location> findAllByCountryAndProvinceAndCityAndIsDeletedIsFalse
-                (String country, String province, String city);
-        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndIsDeletedIsFalse
-                (String country, String province, String city, String district);
-        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndIsDeletedIsFalse
-                (String country, String province, String city, String district, String ward);
-        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndStreetAndIsDeletedIsFalse
-                (String country, String province, String city, String district, String ward, String Street);
-        Optional<Location> findByCountryAndProvinceAndCityAndDistrictAndWardAndStreetAndAddressNumberAndIsDeletedIsFalse
+        List<Location> findAllByCountryAndStatusNotIn
+                (String country, Collection<Status> statusCollection);
+        List<Location> findAllByCountryAndProvinceAndStatusNotIn
+                (String country, String province, Collection<Status> statusCollection);
+        List<Location> findAllByCountryAndProvinceAndCityAndStatusNotIn
+                (String country, String province, String city, Collection<Status> statusCollection);
+        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndStatusNotIn
+                (String country, String province, String city, String district, Collection<Status> statusCollection);
+        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndStatusNotIn
                 (String country, String province, String city, String district,
-                 String ward, String Street, String addressNumber);
+                 String ward, Collection<Status> statusCollection);
+        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndStreetAndStatusNotIn
+                (String country, String province, String city, String district,
+                 String ward, String Street, Collection<Status> statusCollection);
+        Optional<Location> findByCountryAndProvinceAndCityAndDistrictAndWardAndStreetAndAddressNumberAndStatusNotIn
+                (String country, String province, String city, String district,
+                 String ward, String Street, String addressNumber, Collection<Status> statusCollection);
 
         /* Top down with area */
-        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndIsDeletedIsFalse
-                (String country, String province, String city, String district, String ward, String area);
-        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndIsDeletedIsFalse
-                (String country, String province, String city, String district, String ward, String area, String Street);
-        Optional<Location> findByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndIsDeletedIsFalse
+        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStatusNotIn
                 (String country, String province, String city, String district,
-                 String ward, String area, String Street, String addressNumber);
-        boolean existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndIsDeletedIsFalse
+                 String ward, String area, Collection<Status> statusCollection);
+        List<Location> findAllByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndStatusNotIn
                 (String country, String province, String city, String district,
-                 String ward, String area, String Street, String addressNumber);
+                 String ward, String area, String Street, Collection<Status> statusCollection);
+        Optional<Location> findByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndStatusNotIn
+                (String country, String province, String city, String district,
+                 String ward, String area, String Street, String addressNumber, Collection<Status> statusCollection);
+        boolean existsByCountryAndProvinceAndCityAndDistrictAndWardAndAreaAndStreetAndAddressNumberAndStatusNotIn
+                (String country, String province, String city, String district,
+                 String ward, String area, String Street, String addressNumber, Collection<Status> statusCollection);
 
 
         /* coordinate */
-        boolean existsByCoordinateAndIsDeletedIsFalse(String coordinate);
-        Optional<Location> findByCoordinateAndIsDeletedIsFalse(String coordinate);
-        List<Location> findAllByCoordinateContainsAndIsDeletedIsFalse(String coordinate);
-        List<Location> findAllByCoordinateInAndIsDeletedIsFalse(Collection<String> coordinateCollection);
+        /** Check duplicate for Create */
+        boolean existsByCoordinateAndStatusNotIn
+                (String coordinate, Collection<Status> statusCollection);
+        Optional<Location> findByCoordinateAndStatusNotIn
+                (String coordinate, Collection<Status> statusCollection);
+        List<Location> findAllByCoordinateContainsAndStatusNotIn
+                (String coordinate, Collection<Status> statusCollection);
+        List<Location> findAllByCoordinateInAndStatusNotIn
+                (Collection<String> coordinateCollection, Collection<Status> statusCollection);
 }

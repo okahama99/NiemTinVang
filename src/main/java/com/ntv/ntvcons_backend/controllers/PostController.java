@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.controllers;
 
-import com.ntv.ntvcons_backend.Enum.Status;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.entities.Post;
@@ -11,7 +10,10 @@ import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
 import com.ntv.ntvcons_backend.repositories.PostCategoryRepository;
 import com.ntv.ntvcons_backend.repositories.PostRepository;
 import com.ntv.ntvcons_backend.services.post.PostService;
+import com.ntv.ntvcons_backend.services.postCategory.PostCategoryService;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,26 +25,23 @@ import java.util.List;
 @RestController
 @RequestMapping("/post")
 public class PostController {
-
     @Autowired
     private PostService postService;
-
     @Autowired
-    private PostRepository postRepository;
-
+    private MiscUtil miscUtil;
     @Autowired
-    private PostCategoryRepository postCategoryRepository;
+    private PostCategoryService postCategoryService;
 
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('24','54')")
     @PostMapping(value = "/v1/createPost", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createPost(@RequestBody CreatePostModel createPostModel){
-        if(postRepository.existsByAddressAndIsDeletedIsFalse(createPostModel.getAddress())){
+    public ResponseEntity<Object> createPost(@RequestBody CreatePostModel createPostModel) {
+        if (postService.existsByAddress(createPostModel.getAddress())) {
             return ResponseEntity.ok().body("Địa chỉ đã tồn tại dự án khác.");
-        }else{
-            if(!postCategoryRepository.existsById(createPostModel.getPostCategoryId())){
+        } else {
+            if (!postCategoryService.existsById(createPostModel.getPostCategoryId())) {
                 return ResponseEntity.ok().body("PostCategoryId không tồn tại.");
-            }else{
+            } else {
                 boolean result = postService.createPost(createPostModel);
                 if (result) {
                     return ResponseEntity.ok().body("Tạo thành công.");
@@ -53,6 +52,32 @@ public class PostController {
 
     }
 
+    /* READ */
+    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> getAll(@RequestParam int pageNo,
+                                         @RequestParam int pageSize,
+                                         @RequestParam String sortBy,
+                                         @RequestParam boolean sortTypeAsc) {
+        try {
+            List<ShowPostModel> posts = 
+                    postService.getAllAvailablePost(
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+
+            if (posts == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Post found");
+            }
+
+            return ResponseEntity.ok().body(posts);
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error searching for Request", e.getMessage()));
+        }
+    }
+    
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.POST searchType) {
@@ -61,7 +86,7 @@ public class PostController {
 
             switch (searchType) {
                 case BY_POST_ID:
-                    post = postService.getPostById(Long.parseLong(searchParam));
+                    post = postService.getById(Long.parseLong(searchParam));
 
                     if (post == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -105,12 +130,13 @@ public class PostController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortType) {
         try {
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortType);
             List<ShowPostModel> post;
 
             switch (searchType) {
 
                 case BY_POST_CATEGORY_ID:
-                    post = postService.getPostByPostCategory(Long.parseLong(searchParam), pageNo, pageSize, sortBy, sortType);
+                    post = postService.getAllModelByPostCategoryId(Long.parseLong(searchParam), paging);
 
                     if (post == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -118,17 +144,8 @@ public class PostController {
                     }
                     break;
 
-                case BY_SCALE:
-                    post = postService.getPostByScale(searchParam, pageNo, pageSize, sortBy, sortType);
-
-                    if (post == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Post found with Scale: '" + searchParam + "'. ");
-                    }
-                    break;
-
                 case BY_AUTHOR_NAME:
-                    post = postService.getPostByAuthorName(searchParam, pageNo, pageSize, sortBy, sortType);
+                    post = postService.getAllModelByAuthorNameContains(searchParam, paging);
 
                     if (post == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -137,7 +154,7 @@ public class PostController {
                     break;
 
                 case BY_POST_TITLE:
-                    post = postService.getPostByPostTitle(searchParam, pageNo, pageSize, sortBy, sortType);
+                    post = postService.getAllModelByPostTitleContains(searchParam, paging);
 
                     if (post == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -146,7 +163,7 @@ public class PostController {
                     break;
 
                 case BY_OWNER_NAME:
-                    post = postService.getPostByOwnerName(searchParam, pageNo, pageSize, sortBy, sortType);
+                    post = postService.getAllModelByOwnerNameContains(searchParam, paging);
 
                     if (post == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -155,11 +172,20 @@ public class PostController {
                     break;
 
                 case BY_ADDRESS:
-                    post = postService.getPostByAddress(searchParam, pageNo, pageSize, sortBy, sortType);
+                    post = postService.getAllModelByAddressContains(searchParam, paging);
 
                     if (post == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                                 .body("No Post found with Address: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_SCALE:
+                    post = postService.getAllModelByScaleContains(searchParam, paging);
+
+                    if (post == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Post found with Scale: '" + searchParam + "'. ");
                     }
                     break;
 
@@ -212,37 +238,15 @@ public class PostController {
         }
     }
 
-    @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getAll(@RequestParam int pageNo,
-                                         @RequestParam int pageSize,
-                                         @RequestParam String sortBy,
-                                         @RequestParam boolean sortTypeAsc) {
-        try {
-            List<ShowPostModel> posts = postService.getAllAvailablePost(pageNo, pageSize, sortBy, sortTypeAsc);
-
-            if (posts == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Post found");
-            }
-
-            return ResponseEntity.ok().body(posts);
-        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
-            /* Catch invalid sortBy */
-            return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for Request", e.getMessage()));
-        }
-    }
 
     @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getCategoryForCreatePost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getCategoryForCreatePost() {
-            List<PostCategory> categoryModelList = postService.getCategoryForCreatePost();
-            if (categoryModelList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No PostCategory found");
-            }
-            return ResponseEntity.ok().body(categoryModelList);
+        List<PostCategory> categoryModelList = postService.getAllPostCategoryForCreatePost();
+        if (categoryModelList == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No PostCategory found");
+        }
+        return ResponseEntity.ok().body(categoryModelList);
     }
 
     /* UPDATE */
@@ -251,7 +255,7 @@ public class PostController {
     public ResponseEntity<Object> updatePost(@RequestBody UpdatePostModel updatePostModel) {
         boolean result = postService.updatePost(updatePostModel);
 
-        if(result) {
+        if (result) {
             return ResponseEntity.ok().body("Cập nhật thành công.");
         }
 

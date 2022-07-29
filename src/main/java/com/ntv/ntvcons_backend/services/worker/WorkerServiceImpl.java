@@ -1,9 +1,7 @@
 package com.ntv.ntvcons_backend.services.worker;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
-import com.ntv.ntvcons_backend.dtos.location.LocationCreateOptionDTO;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
@@ -13,9 +11,8 @@ import com.ntv.ntvcons_backend.entities.Worker;
 import com.ntv.ntvcons_backend.repositories.WorkerRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
-import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
-import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
+import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +45,8 @@ public class WorkerServiceImpl implements WorkerService {
 
     private final EntityType ENTITY_TYPE = EntityType.WORKER_ENTITY;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public Worker createWorker(Worker newWorker) throws Exception {
@@ -67,7 +66,9 @@ public class WorkerServiceImpl implements WorkerService {
 
         /* Check duplicate */
         if (workerRepository
-                .existsByCitizenIdAndIsDeletedIsFalse(newWorker.getCitizenId())) {
+                .existsByCitizenIdAndStatusNotIn(
+                        newWorker.getCitizenId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Worker with citizenId: '"
                     + newWorker.getCitizenId() + "'. ";
         }
@@ -97,7 +98,8 @@ public class WorkerServiceImpl implements WorkerService {
     /* READ */
     @Override
     public Page<Worker> getPageAll(Pageable paging) throws Exception {
-        Page<Worker> workerPage = workerRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Worker> workerPage =
+                workerRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (workerPage.isEmpty())
             return null;
@@ -122,12 +124,12 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public boolean existsById(long workerId) throws Exception {
         return workerRepository
-                .existsByWorkerIdAndIsDeletedIsFalse(workerId);
+                .existsByWorkerIdAndStatusNotIn(workerId, N_D_S_STATUS_LIST);
     }
     @Override
     public Worker getById(long workerId) throws Exception {
         return workerRepository
-                .findByWorkerIdAndIsDeletedIsFalse(workerId)
+                .findByWorkerIdAndStatusNotIn(workerId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -142,11 +144,13 @@ public class WorkerServiceImpl implements WorkerService {
 
     @Override
     public boolean existsAllByIdIn(Collection<Long> workerIdCollection) throws Exception {
-        return workerRepository.existsAllByWorkerIdInAndIsDeletedIsFalse(workerIdCollection);
+        return workerRepository
+                .existsAllByWorkerIdInAndStatusNotIn(workerIdCollection, N_D_S_STATUS_LIST);
     }
     @Override
     public List<Worker> getAllByIdIn(Collection<Long> workerIdCollection) throws Exception {
-        List<Worker> workerList = workerRepository.findAllByWorkerIdInAndIsDeletedIsFalse(workerIdCollection);
+        List<Worker> workerList =
+                workerRepository.findAllByWorkerIdInAndStatusNotIn(workerIdCollection, N_D_S_STATUS_LIST);
 
         if (!workerList.isEmpty()) 
             return null;
@@ -175,7 +179,8 @@ public class WorkerServiceImpl implements WorkerService {
 
     @Override
     public List<Worker> getAllByAddressId(long addressId) throws Exception {
-        List<Worker> workerList = workerRepository.findAllByAddressIdAndIsDeletedIsFalse(addressId);
+        List<Worker> workerList =
+                workerRepository.findAllByAddressIdAndStatusNotIn(addressId, N_D_S_STATUS_LIST);
 
         if (workerList.isEmpty())
             return null;
@@ -194,7 +199,7 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public Page<Worker> getPageAllByAddressId(Pageable paging, long addressId) throws Exception {
         Page<Worker> workerPage =
-                workerRepository.findAllByAddressIdAndIsDeletedIsFalse(addressId, paging);
+                workerRepository.findAllByAddressIdAndStatusNotIn(addressId, N_D_S_STATUS_LIST, paging);
 
         if (workerPage.isEmpty())
             return null;
@@ -218,7 +223,7 @@ public class WorkerServiceImpl implements WorkerService {
 
     @Override
     public List<Worker> getAllByFullName(String fullName) throws Exception {
-        List<Worker> workerList = workerRepository.findAllByFullNameAndIsDeletedIsFalse(fullName);
+        List<Worker> workerList = workerRepository.findAllByFullNameAndStatusNotIn(fullName, N_D_S_STATUS_LIST);
 
         if (workerList.isEmpty())
             return null;
@@ -237,7 +242,7 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public Page<Worker> getPageAllByFullName(Pageable paging, String fullName) throws Exception {
         Page<Worker> workerPage =
-                workerRepository.findAllByFullNameAndIsDeletedIsFalse(fullName, paging);
+                workerRepository.findAllByFullNameAndStatusNotIn(fullName, N_D_S_STATUS_LIST, paging);
 
         if (workerPage.isEmpty())
             return null;
@@ -261,7 +266,7 @@ public class WorkerServiceImpl implements WorkerService {
 
     @Override
     public List<Worker> getAllByFullNameContains(String fullName) throws Exception {
-        List<Worker> workerList = workerRepository.findAllByFullNameContainsAndIsDeletedIsFalse(fullName);
+        List<Worker> workerList = workerRepository.findAllByFullNameContainsAndStatusNotIn(fullName, N_D_S_STATUS_LIST);
 
         if (workerList.isEmpty())
             return null;
@@ -280,7 +285,7 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public Page<Worker> getPageAllByFullNameContains(Pageable paging, String fullName) throws Exception {
         Page<Worker> workerPage =
-                workerRepository.findAllByFullNameContainsAndIsDeletedIsFalse(fullName, paging);
+                workerRepository.findAllByFullNameContainsAndStatusNotIn(fullName, N_D_S_STATUS_LIST, paging);
 
         if (workerPage.isEmpty())
             return null;
@@ -305,7 +310,7 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public Worker getByCitizenId(String citizenId) throws Exception {
         return workerRepository
-                .findByCitizenIdAndIsDeletedIsFalse(citizenId)
+                .findByCitizenIdAndStatusNotIn(citizenId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -320,7 +325,7 @@ public class WorkerServiceImpl implements WorkerService {
 
     @Override
     public List<Worker> getAllByCitizenIdContains(String citizenId) throws Exception {
-        List<Worker> workerList = workerRepository.findAllByCitizenIdContainsAndIsDeletedIsFalse(citizenId);
+        List<Worker> workerList = workerRepository.findAllByCitizenIdContainsAndStatusNotIn(citizenId, N_D_S_STATUS_LIST);
 
         if (workerList.isEmpty())
             return null;
@@ -339,7 +344,7 @@ public class WorkerServiceImpl implements WorkerService {
     @Override
     public Page<Worker> getPageAllByCitizenIdContains(Pageable paging, String citizenId) throws Exception {
         Page<Worker> workerPage =
-                workerRepository.findAllByCitizenIdContainsAndIsDeletedIsFalse(citizenId, paging);
+                workerRepository.findAllByCitizenIdContainsAndStatusNotIn(citizenId, N_D_S_STATUS_LIST, paging);
 
         if (workerPage.isEmpty())
             return null;
@@ -394,9 +399,10 @@ public class WorkerServiceImpl implements WorkerService {
 
         /* Check duplicate */
         if (workerRepository
-                .existsByCitizenIdAndWorkerIdIsNotAndIsDeletedIsFalse(
+                .existsByCitizenIdAndWorkerIdIsNotAndStatusNotIn(
                         updatedWorker.getCitizenId(),
-                        updatedWorker.getWorkerId())) {
+                        updatedWorker.getWorkerId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += errorMsg += "Already exists another Worker with citizenId: '"
                     + updatedWorker.getCitizenId() + "'. ";
         }
@@ -447,7 +453,7 @@ public class WorkerServiceImpl implements WorkerService {
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(workerId, ENTITY_TYPE);
 
-        worker.setIsDeleted(true);
+        worker.setStatus(Status.DELETED);
         workerRepository.saveAndFlush(worker);
 
         return true;

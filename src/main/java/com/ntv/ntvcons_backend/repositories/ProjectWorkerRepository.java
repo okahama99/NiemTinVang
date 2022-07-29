@@ -1,6 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
-import com.ntv.ntvcons_backend.entities.ProjectWorker;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,29 +13,43 @@ import java.util.Optional;
 
 @Repository
 public interface ProjectWorkerRepository extends JpaRepository<ProjectWorker, Long> {
-    Page<ProjectWorker> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<ProjectWorker> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<ProjectWorker> findByProjectWorkerIdAndIsDeletedIsFalse(long projectWorkerId);
-    List<ProjectWorker> findAllByProjectWorkerIdInAndIsDeletedIsFalse(Collection<Long> projectWorkerIdCollection);
+    Optional<ProjectWorker> findByProjectWorkerIdAndStatusNotIn
+            (long projectWorkerId, Collection<Status> statusCollection);
+    List<ProjectWorker> findAllByProjectWorkerIdInAndStatusNotIn
+            (Collection<Long> projectWorkerIdCollection, Collection<Status> statusCollection);
     /* Id & projectId & workerId */
-    boolean existsByProjectIdAndWorkerIdAndProjectWorkerIdIsNotAndIsDeletedIsFalse
-            (long projectId, long workerId, long projectWorkerId);
+    /** Check duplicate for Update */
+    boolean existsByProjectIdAndWorkerIdAndProjectWorkerIdIsNotAndStatusNotIn
+            (long projectId, long workerId, long projectWorkerId, Collection<Status> statusCollection);
 
 
     /* projectId */
-    List<ProjectWorker> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
-    Page<ProjectWorker> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable paging);
-    List<ProjectWorker> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
-    Page<ProjectWorker> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection, Pageable paging);
+    List<ProjectWorker> findAllByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection);
+    Page<ProjectWorker> findAllByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection, Pageable paging);
+    List<ProjectWorker> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
+    Page<ProjectWorker> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* workerId */
-    List<ProjectWorker> findAllByWorkerIdAndIsDeletedIsFalse(long workerId);
-    Page<ProjectWorker> findAllByWorkerIdAndIsDeletedIsFalse(long workerId, Pageable paging);
-    List<ProjectWorker> findAllByWorkerIdInAndIsDeletedIsFalse(Collection<Long> workerIdCollection);
-    Page<ProjectWorker> findAllByWorkerIdInAndIsDeletedIsFalse(Collection<Long> workerIdCollection, Pageable paging);
+    List<ProjectWorker> findAllByWorkerIdAndStatusNotIn
+            (long workerId, Collection<Status> statusCollection);
+    Page<ProjectWorker> findAllByWorkerIdAndStatusNotIn
+            (long workerId, Collection<Status> statusCollection, Pageable paging);
+    List<ProjectWorker> findAllByWorkerIdInAndStatusNotIn
+            (Collection<Long> workerIdCollection, Collection<Status> statusCollection);
+    Page<ProjectWorker> findAllByWorkerIdInAndStatusNotIn
+            (Collection<Long> workerIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* projectId & workerId */
-    boolean existsByProjectIdAndWorkerIdAndIsDeletedIsFalse(long projectId, long workerId);
+    /** Check duplicate for Create */
+    boolean existsByProjectIdAndWorkerIdAndStatusNotIn
+            (long projectId, long workerId, Collection<Status> statusCollection);
 }

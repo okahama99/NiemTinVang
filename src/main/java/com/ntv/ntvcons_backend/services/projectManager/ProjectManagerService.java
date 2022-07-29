@@ -58,6 +58,14 @@ public interface ProjectManagerService {
     List<ProjectManagerReadDTO> updateBulkProjectManagerByDTO(List<ProjectManagerUpdateDTO> updatedProjectManagerDTOList) throws Exception;
 
     /* DELETE */
+    boolean removeProjectManager(long projectManagerId) throws Exception;
+
+    boolean removeAllByUserId(long userId) throws Exception;
+    boolean removeAllByUserIdIn(Collection<Long> userIdCollection) throws Exception;
+
+    boolean removeAllByProjectId(long projectId) throws Exception;
+    boolean removeAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception;
+
     boolean deleteProjectManager(long projectManagerId) throws Exception;
 
     /** Cascade when delete User */

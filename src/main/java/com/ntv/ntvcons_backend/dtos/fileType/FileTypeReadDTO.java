@@ -12,5 +12,4 @@ public class FileTypeReadDTO extends BaseReadDTO {
     private Long fileTypeId;
     private String fileTypeName;
     private String fileTypeDesc;
-    private String fileTypeExtension;
 }

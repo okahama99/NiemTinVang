@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.FileType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,30 +13,31 @@ import java.util.Optional;
 
 @Repository
 public interface FileTypeRepository extends JpaRepository<FileType, Long> {
-    Page<FileType> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<FileType> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<FileType> findByFileTypeIdAndIsDeletedIsFalse(long fileTypeId);
-    List<FileType> findAllByFileTypeIdInAndIsDeletedIsFalse(Collection<Long> fileTypeIdCollection);
-    Page<FileType> findAllByFileTypeIdInAndIsDeletedIsFalse(Collection<Long> fileTypeIdCollection, Pageable paging);
-    /* Id & fileTypeName & fileTypeExtension */
-    boolean existsByFileTypeNameOrFileTypeExtensionAndFileTypeIdIsNotAndIsDeletedIsFalse
-            (String fileTypeName, String fileTypeExtension, long fileTypeId);
+    Optional<FileType> findByFileTypeIdAndStatusNotIn
+            (long fileTypeId, Collection<Status> statusCollection);
+    List<FileType> findAllByFileTypeIdInAndStatusNotIn
+            (Collection<Long> fileTypeIdCollection, Collection<Status> statusCollection);
+    Page<FileType> findAllByFileTypeIdInAndStatusNotIn
+            (Collection<Long> fileTypeIdCollection, Collection<Status> statusCollection, Pageable paging);
+    /* Id & fileTypeName */
+    /** Check duplicate for Update */
+    boolean existsByFileTypeNameAndFileTypeIdIsNotAndStatusNotIn
+            (String fileTypeName, long fileTypeId, Collection<Status> statusCollection);
 
 
     /* fileTypeName */
-    Optional<FileType> findByFileTypeNameAndIsDeletedIsFalse(String fileTypeName);
-    List<FileType> findAllByFileTypeNameContainsAndIsDeletedIsFalse(String fileTypeName);
-    Page<FileType> findAllByFileTypeNameContainsAndIsDeletedIsFalse(String fileTypeName, Pageable paging);
-
-
-    /* fileTypeExtension */
-    Optional<FileType> findByFileTypeExtensionAndIsDeletedIsFalse(String fileTypeExtension);
-    List<FileType> findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(String fileTypeExtension);
-    Page<FileType> findAllByFileTypeExtensionContainsAndIsDeletedIsFalse(String fileTypeExtension, Pageable paging);
-    List<FileType> findAllByFileTypeExtensionInAndIsDeletedIsFalse(Collection<String> fileTypeExtensionCollection);
-    Page<FileType> findAllByFileTypeExtensionInAndIsDeletedIsFalse(Collection<String> fileTypeExtensionCollection, Pageable paging);
-    /* fileTypeName & fileTypeExtension */
-    boolean existsByFileTypeNameOrFileTypeExtensionAndIsDeletedIsFalse(String fileTypeName, String fileTypeExtension);
+    /** Check duplicate for Create */
+    boolean existsByFileTypeNameAndStatusNotIn
+            (String fileTypeName, Collection<Status> statusCollection);
+    Optional<FileType> findByFileTypeNameAndStatusNotIn
+            (String fileTypeName, Collection<Status> statusCollection);
+    List<FileType> findAllByFileTypeNameContainsAndStatusNotIn
+            (String fileTypeName, Collection<Status> statusCollection);
+    Page<FileType> findAllByFileTypeNameContainsAndStatusNotIn
+            (String fileTypeName, Collection<Status> statusCollection, Pageable paging);
 }

@@ -4,6 +4,7 @@ import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.CreatePostCategoryModel;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.ShowPostCategoryModel;
 import com.ntv.ntvcons_backend.entities.PostCategoryModels.UpdatePostCategoryModel;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -12,16 +13,20 @@ public interface PostCategoryService {
     boolean createPostCategory(CreatePostCategoryModel createPostCategoryModel);
 
     /* READ */;
-    List<ShowPostCategoryModel> getAllAvailablePostCategory(int pageNo, int pageSize, String sortBy, boolean sortType);
+    List<ShowPostCategoryModel> getAllModel(Pageable paging);
 
-    List<ShowPostCategoryModel> getByPostCategoryName(String postCategoryName, int pageNo, int pageSize, String sortBy, boolean sortType);
+    boolean existsById(Long postCategoryId);
+    PostCategory getById(Long postCategoryId);
 
-    List<ShowPostCategoryModel> getByPostCategoryDesc(String postCategoryDesc, int pageNo, int pageSize, String sortBy, boolean sortType);
+    boolean existsByPostCategoryName(String postCategoryName);
+    List<ShowPostCategoryModel> getAllModelByPostCategoryNameContains(String postCategoryName, Pageable paging);
 
-    PostCategory getPostCategoryById(Long postCategoryId);
+    List<ShowPostCategoryModel> getAllModelByPostCategoryDescContains(String postCategoryDesc, Pageable paging);
 
     /* UPDATE */
     boolean updatePostCategory(UpdatePostCategoryModel updatePostCategoryModel);
+
+    boolean deactivatePostCategory(Long postCategoryId);
 
     /* DELETE */
     boolean deletePostCategory(Long postCategoryId);

@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.requestType;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
@@ -10,9 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -32,6 +31,8 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     @Autowired
     private UserService userService;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public RequestType createRequestType(RequestType newRequestType) throws Exception {
@@ -44,7 +45,10 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         }
 
         /* Check duplicate */
-        if (requestTypeRepository.existsByRequestTypeNameAndIsDeletedIsFalse(newRequestType.getRequestTypeName())) {
+        if (requestTypeRepository
+                .existsByRequestTypeNameAndStatusNotIn(
+                        newRequestType.getRequestTypeName(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another RequestType with name: '"
                     + newRequestType.getRequestTypeName() + "'. ";
         }
@@ -66,7 +70,8 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     /* READ */
     @Override
     public Page<RequestType> getPageAll(Pageable paging) throws Exception {
-        Page<RequestType> requestTypePage = requestTypeRepository.findAllByIsDeletedIsFalse(paging);
+        Page<RequestType> requestTypePage =
+                requestTypeRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (requestTypePage.isEmpty()) 
             return null;
@@ -90,12 +95,13 @@ public class RequestTypeServiceImpl implements RequestTypeService {
 
     @Override
     public boolean existsById(long requestTypeId) throws Exception {
-        return requestTypeRepository.existsByRequestTypeIdAndIsDeletedIsFalse(requestTypeId);
+        return requestTypeRepository
+                .existsByRequestTypeIdAndStatusNotIn(requestTypeId, N_D_S_STATUS_LIST);
     }
     @Override
     public RequestType getById(long requestTypeId) throws Exception {
         return requestTypeRepository
-                .findByRequestTypeIdAndIsDeletedIsFalse(requestTypeId)
+                .findByRequestTypeIdAndStatusNotIn(requestTypeId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -111,7 +117,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     @Override
     public List<RequestType> getAllByIdIn(Collection<Long> requestTypeIdCollection) throws Exception {
         List<RequestType> requestTypeList =
-                requestTypeRepository.findAllByRequestTypeIdInAndIsDeletedIsFalse(requestTypeIdCollection);
+                requestTypeRepository.findAllByRequestTypeIdInAndStatusNotIn(requestTypeIdCollection, N_D_S_STATUS_LIST);
 
         if (requestTypeList.isEmpty()) 
             return null;
@@ -141,7 +147,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     @Override
     public RequestType getByRequestTypeName(String requestTypeName) throws Exception {
         return requestTypeRepository
-                .findByRequestTypeNameAndIsDeletedIsFalse(requestTypeName)
+                .findByRequestTypeNameAndStatusNotIn(requestTypeName, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -157,7 +163,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     @Override
     public List<RequestType> getAllByRequestTypeNameContains(String requestTypeName) throws Exception {
         List<RequestType> requestTypeList =
-                requestTypeRepository.findAllByRequestTypeNameContainsAndIsDeletedIsFalse(requestTypeName);
+                requestTypeRepository.findAllByRequestTypeNameContainsAndStatusNotIn(requestTypeName, N_D_S_STATUS_LIST);
 
         if (requestTypeList.isEmpty())
             return null;
@@ -176,7 +182,8 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     @Override
     public Page<RequestType> getPageAllByRequestTypeNameContains(Pageable paging, String requestTypeName) throws Exception {
         Page<RequestType> requestTypePage =
-                requestTypeRepository.findAllByRequestTypeNameContainsAndIsDeletedIsFalse(requestTypeName, paging);
+                requestTypeRepository
+                        .findAllByRequestTypeNameContainsAndStatusNotIn(requestTypeName, N_D_S_STATUS_LIST, paging);
 
         if (requestTypePage.isEmpty())
             return null;
@@ -225,9 +232,10 @@ public class RequestTypeServiceImpl implements RequestTypeService {
 
         /* Check duplicate */
         if (requestTypeRepository
-                .existsByRequestTypeNameAndRequestTypeIdIsNotAndIsDeletedIsFalse(
+                .existsByRequestTypeNameAndRequestTypeIdIsNotAndStatusNotIn(
                         updatedRequestType.getRequestTypeName(),
-                        updatedRequestType.getRequestTypeId())) {
+                        updatedRequestType.getRequestTypeId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another RequestType with name: '" 
                     + updatedRequestType.getRequestTypeName() + "'. ";
         }
@@ -262,7 +270,7 @@ public class RequestTypeServiceImpl implements RequestTypeService {
             /* Not found with Id */
         }
 
-        requestType.setIsDeleted(true);
+        requestType.setStatus(Status.DELETED);
         requestTypeRepository.saveAndFlush(requestType);
 
         return true;

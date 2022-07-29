@@ -15,24 +15,24 @@ import javax.validation.constraints.Positive;
 @NoArgsConstructor
 public class TaskAssignmentUpdateDTO extends BaseUpdateDTO {
     @Positive
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long assignmentId;
 
     @Positive
-    @NotNull(message = "taskId REQUIRED for update")
+    @NotNull(message = "taskId REQUIRED for Update")
     private Long taskId;
 
     @Positive
-    @NotNull(message = "userId (assignerId) REQUIRED for update")
+    @NotNull(message = "userId (assignerId) REQUIRED for Update")
     private Long assignerId;
 
     @Positive
-    @NotNull(message = "userId (assigneeId)  REQUIRED for update")
+    @NotNull(message = "userId (assigneeId)  REQUIRED for Update")
     private Long assigneeId;
 
     /** yyyy-MM-dd HH:mm */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "assignDate REQUIRED for update")
+    @NotNull(message = "assignDate REQUIRED for Update")
     private String assignDate;
 
     /** yyyy-MM-dd HH:mm */

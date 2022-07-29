@@ -2,7 +2,7 @@ package com.ntv.ntvcons_backend.services.report;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.SearchOption;
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
@@ -61,6 +61,8 @@ public class ReportServiceImpl implements ReportService {
 
     private final EntityType ENTITY_TYPE = EntityType.REPORT_ENTITY;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public Report createReport(Report newReport) throws Exception {
@@ -86,9 +88,10 @@ public class ReportServiceImpl implements ReportService {
 
         /* Check duplicate */
         if (reportRepository
-                .existsByProjectIdAndReportNameAndIsDeletedIsFalse(
+                .existsByProjectIdAndReportNameAndStatusNotIn(
                         newReport.getProjectId(),
-                        newReport.getReportName())) {
+                        newReport.getReportName(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Report with name: '" + newReport.getReportName()
                     + "' for Project with Id:' " +  newReport.getProjectId() + "'. ";
         }
@@ -148,7 +151,8 @@ public class ReportServiceImpl implements ReportService {
     /* READ */
     @Override
     public Page<Report> getPageAll(Pageable paging) throws Exception {
-        Page<Report> reportPage = reportRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Report> reportPage =
+                reportRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (reportPage.isEmpty()) 
             return null;
@@ -172,12 +176,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public boolean existsById(long reportId) throws Exception {
-        return reportRepository.existsByReportIdAndIsDeletedIsFalse(reportId);
+        return reportRepository
+                .existsByReportIdAndStatusNotIn(reportId, N_D_S_STATUS_LIST);
     }
     @Override
     public Report getById(long reportId) throws Exception {
         return reportRepository
-                .findByReportIdAndIsDeletedIsFalse(reportId)
+                .findByReportIdAndStatusNotIn(reportId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -192,12 +197,13 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public boolean existsAllByIdIn(Collection<Long> reportIdCollection) throws Exception {
-        return reportRepository.existsAllByReportIdInAndIsDeletedIsFalse(reportIdCollection);
+        return reportRepository
+                .existsAllByReportIdInAndStatusNotIn(reportIdCollection, N_D_S_STATUS_LIST);
     }
     @Override
     public List<Report> getAllByIdIn(Collection<Long> reportIdCollection) throws Exception {
         List<Report> reportList =
-                reportRepository.findAllByReportIdInAndIsDeletedIsFalse(reportIdCollection);
+                reportRepository.findAllByReportIdInAndStatusNotIn(reportIdCollection, N_D_S_STATUS_LIST);
 
         if (reportList.isEmpty()) 
             return null;
@@ -217,7 +223,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getAllByProjectId(long projectId) throws Exception {
         List<Report> reportList =
-                reportRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId);
+                reportRepository.findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST);
 
         if (reportList.isEmpty()) 
             return null;
@@ -236,7 +242,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Page<Report> getPageAllByProjectId(Pageable paging, long projectId) throws Exception {
         Page<Report> reportPage =
-                reportRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
+                reportRepository.findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST, paging);
 
         if (reportPage.isEmpty()) 
             return null;
@@ -261,7 +267,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getAllByProjectIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Report> reportList =
-                reportRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+                reportRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST);
 
         if (reportList.isEmpty()) 
             return null;
@@ -308,7 +314,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getAllByReporterId(long reporterId) throws Exception {
         List<Report> reportList =
-                reportRepository.findAllByReporterIdAndIsDeletedIsFalse(reporterId);
+                reportRepository.findAllByReporterIdAndStatusNotIn(reporterId, N_D_S_STATUS_LIST);
 
         if (reportList.isEmpty()) 
             return null;
@@ -327,7 +333,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Page<Report> getPageAllByReporterId(Pageable paging, long reporterId) throws Exception {
         Page<Report> reportPage =
-                reportRepository.findAllByReporterIdAndIsDeletedIsFalse(reporterId, paging);
+                reportRepository.findAllByReporterIdAndStatusNotIn(reporterId, N_D_S_STATUS_LIST, paging);
 
         if (reportPage.isEmpty()) 
             return null;
@@ -352,7 +358,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getAllByReportName(String reportName) throws Exception {
         List<Report> reportList =
-                reportRepository.findAllByReportNameAndIsDeletedIsFalse(reportName);
+                reportRepository.findAllByReportNameAndStatusNotIn(reportName, N_D_S_STATUS_LIST);
 
         if (reportList.isEmpty())
             return null;
@@ -371,7 +377,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Page<Report> getPageAllByReportName(Pageable paging, String reportName) throws Exception {
         Page<Report> reportPage =
-                reportRepository.findAllByReportNameAndIsDeletedIsFalse(reportName, paging);
+                reportRepository.findAllByReportNameAndStatusNotIn(reportName, N_D_S_STATUS_LIST, paging);
 
         if (reportPage.isEmpty())
             return null;
@@ -396,7 +402,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getAllByReportNameContains(String reportName) throws Exception {
         List<Report> reportList =
-                reportRepository.findAllByReportNameContainsAndIsDeletedIsFalse(reportName);
+                reportRepository.findAllByReportNameContainsAndStatusNotIn(reportName, N_D_S_STATUS_LIST);
 
         if (reportList.isEmpty()) 
             return null;
@@ -415,7 +421,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Page<Report> getPageAllByReportNameContains(Pageable paging, String reportName) throws Exception {
         Page<Report> reportPage =
-                reportRepository.findAllByReportNameContainsAndIsDeletedIsFalse(reportName, paging);
+                reportRepository.findAllByReportNameContainsAndStatusNotIn(reportName, N_D_S_STATUS_LIST, paging);
 
         if (reportPage.isEmpty()) 
             return null;
@@ -440,7 +446,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getAllByReportTypeId(long reportTypeId) throws Exception {
         List<Report> reportList =
-                reportRepository.findAllByReportTypeIdAndIsDeletedIsFalse(reportTypeId);
+                reportRepository.findAllByReportTypeIdAndStatusNotIn(reportTypeId, N_D_S_STATUS_LIST);
 
         if (reportList.isEmpty()) 
             return null;
@@ -459,7 +465,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Page<Report> getPageAllByReportTypeId(Pageable paging, long reportTypeId) throws Exception {
         Page<Report> reportPage =
-                reportRepository.findAllByReportTypeIdAndIsDeletedIsFalse(reportTypeId, paging);
+                reportRepository.findAllByReportTypeIdAndStatusNotIn(reportTypeId, N_D_S_STATUS_LIST, paging);
 
         if (reportPage.isEmpty()) 
             return null;
@@ -484,7 +490,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public List<Report> getAllByProjectIdAndReporterId(int projectId, int reporterId) throws Exception {
         List<Report> reportList =
-                reportRepository.findAllByProjectIdAndReporterIdAndIsDeletedIsFalse(projectId, reporterId);
+                reportRepository.findAllByProjectIdAndReporterIdAndStatusNotIn(projectId, reporterId, N_D_S_STATUS_LIST);
 
         if (reportList.isEmpty()) 
             return null;
@@ -507,15 +513,15 @@ public class ReportServiceImpl implements ReportService {
 
         switch (searchOption) {
             case BEFORE_DATE:
-                reportList = reportRepository.findAllByReportDateBeforeAndIsDeletedIsFalse(toDate);
+                reportList = reportRepository.findAllByReportDateBeforeAndStatusNotIn(toDate, N_D_S_STATUS_LIST);
                 break;
 
             case AFTER_DATE:
-                reportList = reportRepository.findAllByReportDateAfterAndIsDeletedIsFalse(fromDate);
+                reportList = reportRepository.findAllByReportDateAfterAndStatusNotIn(fromDate, N_D_S_STATUS_LIST);
                 break;
 
             case BETWEEN_DATE:
-                reportList = reportRepository.findAllByReportDateBetweenAndIsDeletedIsFalse(fromDate, toDate);
+                reportList = reportRepository.findAllByReportDateBetweenAndStatusNotIn(fromDate, toDate, N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -584,10 +590,11 @@ public class ReportServiceImpl implements ReportService {
 
         /* Check duplicate */
         if (reportRepository
-                .existsByProjectIdAndReportNameAndReportIdIsNotAndIsDeletedIsFalse(
+                .existsByProjectIdAndReportNameAndReportIdIsNotAndStatusNotIn(
                         updatedReport.getProjectId(),
                         updatedReport.getReportName(),
-                        updatedReport.getReportId())) {
+                        updatedReport.getReportId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Report with name: '" + updatedReport.getReportName()
                     + "' for Project with Id:' " +  updatedReport.getProjectId() + "'. ";
         }
@@ -709,7 +716,7 @@ public class ReportServiceImpl implements ReportService {
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(reportId, ENTITY_TYPE);
 
-        report.setIsDeleted(true);
+        report.setStatus(Status.DELETED);
         reportRepository.saveAndFlush(report);
         
         return true;
@@ -729,7 +736,7 @@ public class ReportServiceImpl implements ReportService {
                 .peek(report -> {
                     reportIdSet.add(report.getReportId());
 
-                    report.setIsDeleted(true);})
+                    report.setStatus(Status.DELETED);})
                 .collect(Collectors.toList());
 
         /* Delete all associate detail */

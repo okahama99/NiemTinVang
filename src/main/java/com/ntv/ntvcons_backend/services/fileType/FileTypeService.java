@@ -34,14 +34,6 @@ public interface FileTypeService {
     Page<FileType> getPageAllByFileTypeNameContains(Pageable paging, String fileTypeName) throws Exception;
     List<FileTypeReadDTO> getAllDTOInPagingByFileTypeNameContains(Pageable paging, String fileTypeName) throws Exception;
 
-    FileType getByFileTypeExtension(String fileTypeExtension) throws Exception;
-    FileTypeReadDTO getDTOByFileTypeExtension(String fileTypeExtension) throws Exception;
-
-    List<FileType> getAllByFileTypeExtensionContains(String fileTypeExtension) throws Exception;
-    List<FileTypeReadDTO> getAllDTOByFileTypeExtensionContains(String fileTypeExtension) throws Exception;
-    Page<FileType> getPageAllByFileTypeExtensionContains(Pageable paging, String fileTypeExtension) throws Exception;
-    List<FileTypeReadDTO> getAllDTOInPagingByFileTypeExtensionContains(Pageable paging, String fileTypeExtension) throws Exception;
-
     /* UPDATE */
     FileType updateFileType(FileType updatedFileType) throws Exception;
     FileTypeReadDTO updateFileTypeByDTO(FileTypeUpdateDTO updatedFileTypeDTO) throws Exception;

@@ -21,40 +21,40 @@ import java.util.List;
 public class RequestCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "projectId REQUIRED for create")
+    @NotNull(message = "projectId REQUIRED for Create")
     private Long projectId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "requestTypeId REQUIRED for create")
+    @NotNull(message = "requestTypeId REQUIRED for Create")
     private Long requestTypeId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "RequesterId REQUIRED for create")
+    @NotNull(message = "RequesterId REQUIRED for Create")
     private Long RequesterId;
 
     @ApiModelProperty(example = "Yêu cầu xxx",
             notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "requestName max length: 100 characters")
-    @NotNull(message = "requestName REQUIRED for create")
+    @NotNull(message = "requestName REQUIRED for Create")
     private String requestName;
 
     /** yyyy-MM-dd HH:mm */
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
             notes = "NOT NULL; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "requestDate REQUIRED for create")
+    @NotNull(message = "requestDate REQUIRED for Create")
     private String requestDate;
 
     @ApiModelProperty(example = "Yêu cầu chi tiêu xxx",
             notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "requestDesc max length: 100 characters")
-    @NotNull(message = "requestDesc REQUIRED for create")
+    @NotNull(message = "requestDesc REQUIRED for Create")
     private String requestDesc;
 
     @ApiModelProperty(notes = "NOT NULL; size >= 1") /* Hint for Swagger */
     @Size(min = 1, message = "Needed at least 1 detail")
-    @NotNull(message = "requestDetailList REQUIRED for create")
+    @NotNull(message = "requestDetailList REQUIRED for Create")
     private List<RequestDetailCreateDTO> requestDetailList;
 }

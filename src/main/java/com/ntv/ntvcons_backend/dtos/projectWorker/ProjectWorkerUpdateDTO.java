@@ -18,17 +18,17 @@ import javax.validation.constraints.PositiveOrZero;
 public class ProjectWorkerUpdateDTO extends BaseUpdateDTO {
     @ApiModelProperty(notes = "NOT NULL; Id >= 0") /* Hint for Swagger */
     @PositiveOrZero
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long projectWorkerId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "projectId REQUIRED for update")
+    @NotNull(message = "projectId REQUIRED for Update")
     private Long projectId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "workerId REQUIRED for update")
+    @NotNull(message = "workerId REQUIRED for Update")
     private Long workerId;
 
     /** yyyy-MM-dd HH:mm */

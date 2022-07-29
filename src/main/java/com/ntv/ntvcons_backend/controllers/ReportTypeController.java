@@ -6,7 +6,7 @@ import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeUpdateDTO;
 import com.ntv.ntvcons_backend.services.reportType.ReportTypeService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -24,7 +24,7 @@ public class ReportTypeController {
     @Autowired
     private ReportTypeService reportTypeService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -51,7 +51,7 @@ public class ReportTypeController {
         try {
             List<ReportTypeReadDTO> reportTypeDTOList =
                     reportTypeService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (reportTypeDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ReportType found");
@@ -135,7 +135,7 @@ public class ReportTypeController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
             
             List<ReportTypeReadDTO> reportTypeDTOList;
 

@@ -15,12 +15,12 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class RoleUpdateDTO extends BaseUpdateDTO {
     @Positive
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long roleId;
 
     @ApiModelProperty(example = "Admin") /* Hint for Swagger */
     @Size(max = 100, message = "roleName max length: 100 characters")
-    @NotNull(message = "roleName REQUIRED for update")
+    @NotNull(message = "roleName REQUIRED for Update")
     private String roleName;
 
     @ApiModelProperty(example = "Quản trị") /* Hint for Swagger */

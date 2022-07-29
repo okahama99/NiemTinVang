@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.ReportType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,22 +13,33 @@ import java.util.Optional;
 
 @Repository
 public interface ReportTypeRepository extends JpaRepository<ReportType, Long> {
-    Page<ReportType> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<ReportType> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByReportTypeIdAndIsDeletedIsFalse(long reportTypeId);
-    Optional<ReportType> findByReportTypeIdAndIsDeletedIsFalse(long reportTypeId);
-    boolean existsAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection);
-    List<ReportType> findAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection);
+    boolean existsByReportTypeIdAndStatusNotIn
+            (long reportTypeId, Collection<Status> statusCollection);
+    Optional<ReportType> findByReportTypeIdAndStatusNotIn
+            (long reportTypeId, Collection<Status> statusCollection);
+    boolean existsAllByReportTypeIdInAndStatusNotIn
+            (Collection<Long> reportTypeIdCollection, Collection<Status> statusCollection);
+    List<ReportType> findAllByReportTypeIdInAndStatusNotIn
+            (Collection<Long> reportTypeIdCollection, Collection<Status> statusCollection);
     /* Id & reportTypeName */
-    /** Check duplicate name for update */
-    boolean existsByReportTypeNameAndReportTypeIdIsNotAndIsDeletedIsFalse(String reportTypeName, long reportTypeId);
+    /** Check duplicate for Update */
+    boolean existsByReportTypeNameAndReportTypeIdIsNotAndStatusNotIn
+            (String reportTypeName, long reportTypeId, Collection<Status> statusCollection);
 
 
     /* reportTypeName */
-    boolean existsByReportTypeNameAndIsDeletedIsFalse(String reportTypeName);
-    Optional<ReportType> findByReportTypeNameAndIsDeletedIsFalse(String reportTypeName);
-    List<ReportType> findAllByReportTypeNameContainsAndIsDeletedIsFalse(String reportTypeName);
-    Page<ReportType> findAllByReportTypeNameContainsAndIsDeletedIsFalse(String reportTypeName, Pageable paging);
+    /** Check duplicate for Create */
+    boolean existsByReportTypeNameAndStatusNotIn
+            (String reportTypeName, Collection<Status> statusCollection);
+    Optional<ReportType> findByReportTypeNameAndStatusNotIn
+            (String reportTypeName, Collection<Status> statusCollection);
+    List<ReportType> findAllByReportTypeNameContainsAndStatusNotIn
+            (String reportTypeName, Collection<Status> statusCollection);
+    Page<ReportType> findAllByReportTypeNameContainsAndStatusNotIn
+            (String reportTypeName, Collection<Status> statusCollection, Pageable paging);
 }

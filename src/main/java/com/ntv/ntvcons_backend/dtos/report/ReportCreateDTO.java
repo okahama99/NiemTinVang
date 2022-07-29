@@ -21,23 +21,23 @@ import java.util.List;
 public class ReportCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "projectId REQUIRED for create")
+    @NotNull(message = "projectId REQUIRED for Create")
     private Long projectId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "reportTypeId REQUIRED for create")
+    @NotNull(message = "reportTypeId REQUIRED for Create")
     private Long reportTypeId;
 
     @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
-    @NotNull(message = "reporterId REQUIRED for create")
+    @NotNull(message = "reporterId REQUIRED for Create")
     private Long reporterId;
 
     @ApiModelProperty(example = "Báo cáo xxx", 
             notes = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "reportName max length: 100 characters")
-    @NotNull(message = "reportName REQUIRED for create")
+    @NotNull(message = "reportName REQUIRED for Create")
     private String reportName;
 
     @ApiModelProperty(example = "Chuẩn bị xây tường, ...", 
@@ -49,14 +49,14 @@ public class ReportCreateDTO extends BaseCreateDTO {
     @ApiModelProperty(example = "yyyy-MM-dd HH:mm", 
             notes = "NOT NULL; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "reportDate REQUIRED for create")
+    @NotNull(message = "reportDate REQUIRED for Create")
     private String reportDate;
 
     @ApiModelProperty(notes = "Nullable; size >= 1 (if not null)") /* Hint for Swagger */
-    @Size(min = 1, message = "Needed at least 1 for create")
+    @Size(min = 1, message = "Needed at least 1 for Create")
     private List<ReportDetailCreateDTO> reportDetailList;
 
     @ApiModelProperty(notes = "Nullable; size >= 1 (if not null)") /* Hint for Swagger */
-    @Size(min = 1, message = "Needed at least 1 for create")
+    @Size(min = 1, message = "Needed at least 1 for Create")
     private List<TaskReportCreateDTO> taskReportList;
 }

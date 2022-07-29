@@ -6,7 +6,7 @@ import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -24,7 +24,7 @@ public class ProjectManagerController {
     @Autowired
     private ProjectManagerService projectManagerService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -57,7 +57,7 @@ public class ProjectManagerController {
         try {
             List<ProjectManagerReadDTO> projectManagerList =
                     projectManagerService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (projectManagerList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ProjectManager found");
@@ -128,7 +128,7 @@ public class ProjectManagerController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<ProjectManagerReadDTO> projectManagerDTOList;
 

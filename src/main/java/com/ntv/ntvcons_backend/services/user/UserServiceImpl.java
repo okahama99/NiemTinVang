@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.services.user;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
@@ -16,9 +16,7 @@ import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +45,8 @@ public class UserServiceImpl implements UserService{
 
     private final EntityType ENTITY_TYPE = EntityType.USER_ENTITY;
 
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+
     /* CREATE */
     @Override
     public User createUser(User newUser) throws Exception {
@@ -67,19 +67,21 @@ public class UserServiceImpl implements UserService{
         /* Check duplicate */
         if (newUser.getEmail() != null) {
             if (userRepository
-                    .existsByUsernameOrPhoneOrEmailAndIsDeletedIsFalse(
+                    .existsByUsernameOrPhoneOrEmailAndStatusNotIn(
                             newUser.getUsername(),
                             newUser.getPhone(),
-                            newUser.getEmail())) {
+                            newUser.getEmail(),
+                            N_D_S_STATUS_LIST)) {
                 errorMsg += "Already exists another User with username: '" + newUser.getUsername()
                         + "', or with phone: '" + newUser.getPhone()
                         + "', or with email: '" + newUser.getEmail() + "'. ";
             }
         } else {
             if (userRepository
-                    .existsByUsernameOrPhoneAndIsDeletedIsFalse(
+                    .existsByUsernameOrPhoneAndStatusNotIn(
                             newUser.getUsername(),
-                            newUser.getPhone())) {
+                            newUser.getPhone(),
+                            N_D_S_STATUS_LIST)) {
                 errorMsg += "Already exists another User with username: '" + newUser.getUsername()
                         + "', or with phone: '" + newUser.getPhone() + "'. ";
             }
@@ -116,7 +118,8 @@ public class UserServiceImpl implements UserService{
     /* READ */
     @Override
     public Page<User> getPageAll(Pageable paging) throws Exception {
-        Page<User> userPage = userRepository.findAllByIsDeletedIsFalse(paging);
+        Page<User> userPage =
+                userRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (userPage.isEmpty())
             return null;
@@ -140,12 +143,13 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public boolean existsById(long userId) throws Exception {
-        return userRepository.existsByUserIdAndIsDeletedIsFalse(userId);
+        return userRepository
+                .existsByUserIdAndStatusNotIn(userId, N_D_S_STATUS_LIST);
     }
     @Override
     public User getById(long userId) throws Exception {
         return userRepository
-                .findByUserIdAndIsDeletedIsFalse(userId)
+                .findByUserIdAndStatusNotIn(userId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -160,12 +164,13 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public boolean existsAllByIdIn(Collection<Long> userIdCollection) throws Exception {
-        return userRepository.existsAllByUserIdInAndIsDeletedIsFalse(userIdCollection);
+        return userRepository
+                .existsAllByUserIdInAndStatusNotIn(userIdCollection, N_D_S_STATUS_LIST);
     }
     @Override
     public List<User> getAllByIdIn(Collection<Long> userIdCollection) throws Exception {
         List<User> userList =
-                userRepository.findAllByUserIdInAndIsDeletedIsFalse(userIdCollection);
+                userRepository.findAllByUserIdInAndStatusNotIn(userIdCollection, N_D_S_STATUS_LIST);
 
         if (userList.isEmpty())
             return null;
@@ -194,7 +199,8 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<User> getAllByRoleId(long roleId) throws Exception {
-        List<User> userList = userRepository.findAllByRoleIdAndIsDeletedIsFalse(roleId);
+        List<User> userList =
+                userRepository.findAllByRoleIdAndStatusNotIn(roleId, N_D_S_STATUS_LIST);
 
         if (userList.isEmpty()) 
             return null;
@@ -213,7 +219,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public Page<User> getPageAllByRoleId(Pageable paging, long roleId) throws Exception {
         Page<User> userPage =
-                userRepository.findAllByRoleIdAndIsDeletedIsFalse(roleId, paging);
+                userRepository.findAllByRoleIdAndStatusNotIn(roleId, N_D_S_STATUS_LIST, paging);
 
         if (userPage.isEmpty())
             return null;
@@ -238,7 +244,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public User getByUsername(String username) throws Exception {
         return userRepository
-                .findByUsernameAndIsDeletedIsFalse(username)
+                .findByUsernameAndStatusNotIn(username, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -253,7 +259,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<User> getAllByUsernameContains(String username) throws Exception {
-        List<User> userList = userRepository.findAllByUsernameContainsAndIsDeletedIsFalse(username);
+        List<User> userList = userRepository.findAllByUsernameContainsAndStatusNotIn(username, N_D_S_STATUS_LIST);
 
         if (userList.isEmpty())
             return null;
@@ -272,7 +278,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public Page<User> getPageAllByUsernameContains(Pageable paging, String username) throws Exception {
         Page<User> userPage =
-                userRepository.findAllByUsernameContainsAndIsDeletedIsFalse(username, paging);
+                userRepository.findAllByUsernameContainsAndStatusNotIn(username, N_D_S_STATUS_LIST, paging);
 
         if (userPage.isEmpty())
             return null;
@@ -297,7 +303,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public User getByPhone(String phone) throws Exception {
         return userRepository
-                .findByPhoneAndIsDeletedIsFalse(phone)
+                .findByPhoneAndStatusNotIn(phone, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -312,7 +318,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<User> getAllByPhoneContains(String phone) throws Exception {
-        List<User> userList = userRepository.findAllByPhoneContainsAndIsDeletedIsFalse(phone);
+        List<User> userList = userRepository.findAllByPhoneContainsAndStatusNotIn(phone, N_D_S_STATUS_LIST);
 
         if (userList.isEmpty())
             return null;
@@ -331,7 +337,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public Page<User> getPageAllByPhoneContains(Pageable paging, String phone) throws Exception {
         Page<User> userPage =
-                userRepository.findAllByPhoneContainsAndIsDeletedIsFalse(phone, paging);
+                userRepository.findAllByPhoneContainsAndStatusNotIn(phone, N_D_S_STATUS_LIST, paging);
 
         if (userPage.isEmpty())
             return null;
@@ -356,7 +362,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public User getByEmail(String email) throws Exception {
         return userRepository
-                .findByEmailAndIsDeletedIsFalse(email)
+                .findByEmailAndStatusNotIn(email, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -371,7 +377,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<User> getAllByEmailContains(String email) throws Exception {
-        List<User> userList = userRepository.findAllByEmailContainsAndIsDeletedIsFalse(email);
+        List<User> userList = userRepository.findAllByEmailContainsAndStatusNotIn(email, N_D_S_STATUS_LIST);
 
         if (userList.isEmpty())
             return null;
@@ -390,7 +396,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public Page<User> getPageAllByEmailContains(Pageable paging, String email) throws Exception {
         Page<User> userPage =
-                userRepository.findAllByEmailContainsAndIsDeletedIsFalse(email, paging);
+                userRepository.findAllByEmailContainsAndStatusNotIn(email, N_D_S_STATUS_LIST, paging);
 
         if (userPage.isEmpty())
             return null;
@@ -446,21 +452,23 @@ public class UserServiceImpl implements UserService{
         /* Check duplicate */
         if (updatedUser.getEmail() != null) {
             if (userRepository
-                    .existsByUsernameOrPhoneOrEmailAndUserIdIsNotAndIsDeletedIsFalse(
+                    .existsByUsernameOrPhoneOrEmailAndUserIdIsNotAndStatusNotIn(
                             updatedUser.getUsername(),
                             updatedUser.getPhone(),
                             updatedUser.getEmail(),
-                            updatedUser.getUserId())) {
+                            updatedUser.getUserId(),
+                            N_D_S_STATUS_LIST)) {
                 errorMsg += "Already exists another User with username: '" + updatedUser.getUsername()
                         + "', or with phone: '" + updatedUser.getPhone()
                         + "', or with email: '" + updatedUser.getEmail() + "'. ";
             }
         } else {
             if (userRepository
-                    .existsByUsernameOrPhoneAndUserIdIsNotAndIsDeletedIsFalse(
+                    .existsByUsernameOrPhoneAndUserIdIsNotAndStatusNotIn(
                             updatedUser.getUsername(),
                             updatedUser.getPhone(),
-                            updatedUser.getUserId())) {
+                            updatedUser.getUserId(),
+                            N_D_S_STATUS_LIST)) {
                 errorMsg += "Already exists another User with username: '" + updatedUser.getUsername()
                         + "', or with phone: '" + updatedUser.getPhone() + "'. ";
             }
@@ -507,7 +515,7 @@ public class UserServiceImpl implements UserService{
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(userId, ENTITY_TYPE);
 
-        user.setIsDeleted(true);
+        user.setStatus(Status.DELETED);
         userRepository.saveAndFlush(user);
 
         return true;
@@ -521,9 +529,9 @@ public class UserServiceImpl implements UserService{
         userDTO.setRole(
                 roleService.getDTOById(user.getRoleId()));
         /* Get associated ExternalFile */
-//        userDTO.setFileList(
-//                eFEWPairingService
-//                        .getAllExternalFileDTOByEntityIdAndEntityType(user.getUserId(), ENTITY_TYPE));
+        userDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(user.getUserId(), ENTITY_TYPE));
 
         return userDTO;
     }

@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.repositories;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.entities.Report;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,53 +14,81 @@ import java.util.Optional;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
-    Page<Report> findAllByIsDeletedIsFalse(Pageable paging);
+    Page<Report> findAllByStatusNotIn
+            (Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByReportIdAndIsDeletedIsFalse(long reportId);
-    Optional<Report> findByReportIdAndIsDeletedIsFalse(long reportId);
-    boolean existsAllByReportIdInAndIsDeletedIsFalse(Collection<Long> reportIdCollection);
-    List<Report> findAllByReportIdInAndIsDeletedIsFalse(Collection<Long> reportIdCollection);
+    boolean existsByReportIdAndStatusNotIn
+            (long reportId, Collection<Status> statusCollection);
+    Optional<Report> findByReportIdAndStatusNotIn
+            (long reportId, Collection<Status> statusCollection);
+    boolean existsAllByReportIdInAndStatusNotIn
+            (Collection<Long> reportIdCollection, Collection<Status> statusCollection);
+    List<Report> findAllByReportIdInAndStatusNotIn
+            (Collection<Long> reportIdCollection, Collection<Status> statusCollection);
     /* Id & projectId & reportName */
-    boolean existsByProjectIdAndReportNameAndReportIdIsNotAndIsDeletedIsFalse
-            (long projectId, String reportName, long reportId);
+    /** Check duplicate for Update */
+    boolean existsByProjectIdAndReportNameAndReportIdIsNotAndStatusNotIn
+            (long projectId, String reportName, long reportId, Collection<Status> statusCollection);
 
 
     /* reportTypeId */
-    List<Report> findAllByReportTypeIdAndIsDeletedIsFalse(long reportTypeId);
-    Page<Report> findAllByReportTypeIdAndIsDeletedIsFalse(long reportTypeId, Pageable paging);
-    List<Report> findAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection);
-    Page<Report> findAllByReportTypeIdInAndIsDeletedIsFalse(Collection<Long> reportTypeIdCollection, Pageable paging);
+    List<Report> findAllByReportTypeIdAndStatusNotIn
+            (long reportTypeId, Collection<Status> statusCollection);
+    Page<Report> findAllByReportTypeIdAndStatusNotIn
+            (long reportTypeId, Collection<Status> statusCollection, Pageable paging);
+    List<Report> findAllByReportTypeIdInAndStatusNotIn
+            (Collection<Long> reportTypeIdCollection, Collection<Status> statusCollection);
+    Page<Report> findAllByReportTypeIdInAndStatusNotIn
+            (Collection<Long> reportTypeIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* projectId */
-    List<Report> findAllByProjectIdAndIsDeletedIsFalse(long projectId);
-    Page<Report> findAllByProjectIdAndIsDeletedIsFalse(long projectId, Pageable paging);
-    List<Report> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection);
-    Page<Report> findAllByProjectIdInAndIsDeletedIsFalse(Collection<Long> projectIdCollection, Pageable paging);
+    List<Report> findAllByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection);
+    Page<Report> findAllByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection, Pageable paging);
+    List<Report> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
+    Page<Report> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* reporterId */
-    List<Report> findAllByReporterIdAndIsDeletedIsFalse(long reporterId);
-    Page<Report> findAllByReporterIdAndIsDeletedIsFalse(long reporterId, Pageable paging);
-    List<Report> findAllByReporterIdInAndIsDeletedIsFalse(Collection<Long> reporterIdCollection);
-    Page<Report> findAllByReporterIdInAndIsDeletedIsFalse(Collection<Long> reporterIdCollection, Pageable paging);
+    List<Report> findAllByReporterIdAndStatusNotIn
+            (long reporterId, Collection<Status> statusCollection);
+    Page<Report> findAllByReporterIdAndStatusNotIn
+            (long reporterId, Collection<Status> statusCollection, Pageable paging);
+    List<Report> findAllByReporterIdInAndStatusNotIn
+            (Collection<Long> reporterIdCollection, Collection<Status> statusCollection);
+    Page<Report> findAllByReporterIdInAndStatusNotIn
+            (Collection<Long> reporterIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* projectId & reporterId */
-    List<Report> findAllByProjectIdAndReporterIdAndIsDeletedIsFalse(long projectId, long reporterId);
+    List<Report> findAllByProjectIdAndReporterIdAndStatusNotIn
+            (long projectId, long reporterId, Collection<Status> statusCollection);
 
 
     /* reportName */
-    List<Report> findAllByReportNameAndIsDeletedIsFalse(String reportName);
-    Page<Report> findAllByReportNameAndIsDeletedIsFalse(String reportName, Pageable paging);
-    List<Report> findAllByReportNameContainsAndIsDeletedIsFalse(String reportName);
-    Page<Report> findAllByReportNameContainsAndIsDeletedIsFalse(String reportName, Pageable paging);
+    List<Report> findAllByReportNameAndStatusNotIn
+            (String reportName, Collection<Status> statusCollection);
+    Page<Report> findAllByReportNameAndStatusNotIn
+            (String reportName, Collection<Status> statusCollection, Pageable paging);
+    List<Report> findAllByReportNameContainsAndStatusNotIn
+            (String reportName, Collection<Status> statusCollection);
+    Page<Report> findAllByReportNameContainsAndStatusNotIn
+            (String reportName, Collection<Status> statusCollection, Pageable paging);
     /* projectId & reportName */
-    boolean existsByProjectIdAndReportNameAndIsDeletedIsFalse(long projectId, String reportName);
+    /** Check duplicate for Create */
+    boolean existsByProjectIdAndReportNameAndStatusNotIn
+            (long projectId, String reportName, Collection<Status> statusCollection);
 
 
     /* reportDate */
-    List<Report> findAllByReportDateAfterAndIsDeletedIsFalse(LocalDateTime afterDate);
-    List<Report> findAllByReportDateBeforeAndIsDeletedIsFalse(LocalDateTime beforeDate);
-    List<Report> findAllByReportDateBetweenAndIsDeletedIsFalse(LocalDateTime from, LocalDateTime to);
+    List<Report> findAllByReportDateAfterAndStatusNotIn
+            (LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<Report> findAllByReportDateBeforeAndStatusNotIn
+            (LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<Report> findAllByReportDateBetweenAndStatusNotIn
+            (LocalDateTime from, LocalDateTime to, Collection<Status> statusCollection);
 }

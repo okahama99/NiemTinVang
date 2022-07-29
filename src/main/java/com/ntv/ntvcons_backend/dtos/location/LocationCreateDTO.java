@@ -57,7 +57,7 @@ public class LocationCreateDTO extends BaseCreateDTO {
     /** <b>*Required</b> */
     @ApiModelProperty(example = "10.841139984351623, 106.80988203281531",
             notes = "NOT NULL, size <= 100") /* Hint for Swagger */
-    @NotNull(message = "coordinate REQUIRED for create")
+    @NotNull(message = "coordinate REQUIRED for Create")
     @Size(max = 100, message = "coordinate max length: 100 characters")
     private String coordinate;
 }

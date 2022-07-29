@@ -8,7 +8,7 @@ import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailUpdateDTO;
 import com.ntv.ntvcons_backend.entities.RequestDetail;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.ShowRequestDetailModel;
 import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
-import com.ntv.ntvcons_backend.utils.ThanhUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -26,7 +26,7 @@ public class RequestDetailController {
     @Autowired
     private RequestDetailService requestDetailService;
     @Autowired
-    private ThanhUtil thanhUtil;
+    private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /*CREATE*/
@@ -91,7 +91,7 @@ public class RequestDetailController {
         try {
             List<RequestDetailReadDTO> requestDetailDTOList =
                     requestDetailService.getAllDTOInPaging(
-                            thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
+                            miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
             if (requestDetailDTOList == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No RequestDetail found");
@@ -163,7 +163,7 @@ public class RequestDetailController {
                                                 @RequestParam String sortBy,
                                                 @RequestParam boolean sortTypeAsc) {
         try {
-            Pageable paging = thanhUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
             List<RequestDetailReadDTO> requestDetailDTOList;
 

@@ -15,12 +15,12 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class RequestTypeUpdateDTO extends BaseUpdateDTO {
     @Positive
-    @NotNull(message = "Id REQUIRED for update")
+    @NotNull(message = "Id REQUIRED for Update")
     private Long requestTypeId;
 
     @ApiModelProperty(example = "Yêu cầu chi tiêu") /* Hint for Swagger */
     @Size(max = 100, message = "requestTypeName max length: 100 characters")
-    @NotNull(message = "requestTypeName REQUIRED for update")
+    @NotNull(message = "requestTypeName REQUIRED for Update")
     private String requestTypeName;
 
     @ApiModelProperty(example = "Yêu cầu chi tiêu") /* Hint for Swagger */

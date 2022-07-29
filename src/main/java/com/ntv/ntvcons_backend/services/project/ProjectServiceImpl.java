@@ -2,9 +2,10 @@ package com.ntv.ntvcons_backend.services.project;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
@@ -31,7 +32,6 @@ import com.ntv.ntvcons_backend.repositories.ProjectRepository;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
-import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
@@ -90,6 +90,7 @@ public class ProjectServiceImpl implements ProjectService{
     private RequestService requestService;
 
     private final EntityType ENTITY_TYPE = EntityType.PROJECT_ENTITY;
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* READ */
     @Override
@@ -114,7 +115,9 @@ public class ProjectServiceImpl implements ProjectService{
 //                blueprintModel.setEstimateCost(createProjectModel.getBlueprintEstimateCost());
 //                blueprintService.createProjectBlueprint(blueprintModel);
 
-                Location location = locationRepository.getByAddressNumberAndIsDeletedIsFalse(locationModel.getAddressNumber());
+                Location location =
+                        locationRepository
+                                .getByAddressNumberAndStatusNotIn(locationModel.getAddressNumber(), N_D_S_STATUS_LIST);
 
                 Project project = new Project();
                 project.setProjectName(createProjectModel.getProjectName());
@@ -158,8 +161,9 @@ public class ProjectServiceImpl implements ProjectService{
 
         /* Check duplicate */
         if (projectRepository
-                .existsByProjectNameAndIsDeletedIsFalse(
-                        newProject.getProjectName())) {
+                .existsByProjectNameAndStatusNotIn(
+                        newProject.getProjectName(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Project with name: '"
                     + newProject.getProjectName() + "'. ";
         }
@@ -177,6 +181,8 @@ public class ProjectServiceImpl implements ProjectService{
                     mapper.skip(Project::setPlanEndDate);});
 
         Project newProject = modelMapper.map(newProjectDTO, Project.class);
+
+        long createdBy = newProject.getCreatedBy();
 
         /* Already check NOT NULL */
         newProject.setPlanStartDate(
@@ -224,6 +230,7 @@ public class ProjectServiceImpl implements ProjectService{
         }*/
 
         /* Create Location first (to get locationId) */
+        newProjectDTO.getLocation().setCreatedBy(createdBy);
         locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation());
         /* Set locationId because createProject() check FK */
         newProject.setLocationId(locationDTO.getLocationId());
@@ -234,35 +241,50 @@ public class ProjectServiceImpl implements ProjectService{
 
         /* Create associate EntityWrapper */
         entityWrapperService
-                .createEntityWrapper(newProjectId, ENTITY_TYPE, newProject.getCreatedBy());
+                .createEntityWrapper(newProjectId, ENTITY_TYPE, createdBy);
 
         /* Set REQUIRED FK projectId to blueprint after create Project */
         BlueprintCreateDTO blueprintDTO = newProjectDTO.getBlueprint();
         blueprintDTO.setProjectId(newProjectId);
+        blueprintDTO.setCreatedBy(createdBy);
         /* Create associated Blueprint */
         blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
 
         /* Create associated ProjectManager (if present) */
-        List<ProjectManagerCreateDTO> projectManagerDTOList = newProjectDTO.getProjectManagerList();
-        if (projectManagerDTOList != null) {
-            projectManagerDTOList =
-                    projectManagerDTOList.stream()
-                            .peek(projectManagerDTO -> projectManagerDTO.setProjectId(newProjectId))
-                            .collect(Collectors.toList());
+        List<Long> managerIdList = newProjectDTO.getManagerIdList();
+        if (managerIdList != null) {
+            /* Set<> to avoid duplicate */
+            Set<Long> managerIdSet = new HashSet<>(managerIdList);
 
-            /* Create associated ProjectManager; Set required FK projectId */
+            ProjectManagerCreateDTO projectManagerDTO;
+            List<ProjectManagerCreateDTO> projectManagerDTOList = new ArrayList<>();
+
+            for (Long managerId : managerIdSet) {
+                projectManagerDTO = new ProjectManagerCreateDTO(newProjectId, managerId);
+                projectManagerDTO.setCreatedBy(createdBy);
+
+                projectManagerDTOList.add(projectManagerDTO);
+            }
+
             projectManagerService.createBulkProjectManagerByDTO(projectManagerDTOList);
         }
 
         /* Create associated ProjectWorker (if present) */
-        List<ProjectWorkerCreateDTO> projectWorkerDTOList = newProjectDTO.getProjectWorkerList();
-        if (projectWorkerDTOList != null) {
-            projectWorkerDTOList =
-                    projectWorkerDTOList.stream()
-                            .peek(projectWorkerDTO -> projectWorkerDTO.setProjectId(newProjectId))
-                            .collect(Collectors.toList());
+        List<Long> workerIdList = newProjectDTO.getWorkerIdList();
+        if (workerIdList != null) {
+            /* Set<> to avoid duplicate */
+            Set<Long> workerIdSet = new HashSet<>(workerIdList);
 
-            /* Create associated ProjectWorker; Set required FK projectId */
+            ProjectWorkerCreateDTO projectWorkerDTO;
+            List<ProjectWorkerCreateDTO> projectWorkerDTOList = new ArrayList<>();
+
+            for (Long workerId : workerIdSet) {
+                projectWorkerDTO = new ProjectWorkerCreateDTO(newProjectId, workerId);
+                projectWorkerDTO.setCreatedBy(createdBy);
+
+                projectWorkerDTOList.add(projectWorkerDTO);
+            }
+
             projectWorkerService.createBulkProjectWorkerByDTO(projectWorkerDTOList);
         }
 
@@ -279,7 +301,8 @@ public class ProjectServiceImpl implements ProjectService{
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Project> pagingResult = projectRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Project> pagingResult =
+                projectRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
@@ -349,7 +372,8 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public Page<Project> getPageAll(Pageable paging) throws Exception {
-        Page<Project> projectPage = projectRepository.findAllByIsDeletedIsFalse(paging);
+        Page<Project> projectPage =
+                projectRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         if (projectPage.isEmpty()) 
             return null;
@@ -373,12 +397,13 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public boolean existsById(long projectId) throws Exception {
-        return projectRepository.existsByProjectIdAndIsDeletedIsFalse(projectId);
+        return projectRepository
+                .existsByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST);
     }
     @Override
     public Project getById(long projectId) throws Exception {
         return projectRepository
-                .findByProjectIdAndIsDeletedIsFalse(projectId)
+                .findByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
     @Override
@@ -401,7 +426,10 @@ public class ProjectServiceImpl implements ProjectService{
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
-        Page<Project> pagingResult = projectRepository.findAllByProjectIdAndIsDeletedIsFalse(projectId, paging);
+        Page<Project> pagingResult =
+                projectRepository
+                        .findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST, paging);
+
         if (pagingResult.hasContent()){
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
             Page<ProjectModel> modelResult =
@@ -454,12 +482,13 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public boolean existsAllByIdIn(Collection<Long> projectIdCollection) throws Exception {
-        return projectRepository.existsAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+        return projectRepository
+                .existsAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST);
     }
     @Override
     public List<Project> getAllByIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Project> projectList =
-                projectRepository.findAllByProjectIdInAndIsDeletedIsFalse(projectIdCollection);
+                projectRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST);
 
         if (projectList.isEmpty()) 
             return null;
@@ -479,7 +508,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public List<Project> getAllByLocationId(long locationId) throws Exception {
         List<Project> projectList =
-                projectRepository.findAllByLocationIdAndIsDeletedIsFalse(locationId);
+                projectRepository.findAllByLocationIdAndStatusNotIn(locationId, N_D_S_STATUS_LIST);
 
         if (projectList.isEmpty()) 
             return null;
@@ -497,7 +526,8 @@ public class ProjectServiceImpl implements ProjectService{
     }
     @Override
     public Page<Project> getPageAllByLocationId(Pageable paging, long locationId) throws Exception {
-        Page<Project> projectPage = projectRepository.findAllByLocationIdAndIsDeletedIsFalse(locationId, paging);
+        Page<Project> projectPage =
+                projectRepository.findAllByLocationIdAndStatusNotIn(locationId, N_D_S_STATUS_LIST, paging);
 
         if (projectPage.isEmpty()) 
             return null;
@@ -522,7 +552,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public List<Project> getAllByLocationIdIn(Collection<Long> locationIdCollection) throws Exception {
         List<Project> projectList =
-                projectRepository.findAllByLocationIdInAndIsDeletedIsFalse(locationIdCollection);
+                projectRepository.findAllByLocationIdInAndStatusNotIn(locationIdCollection, N_D_S_STATUS_LIST);
 
         if (projectList.isEmpty()) 
             return null;
@@ -541,7 +571,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public Page<Project> getPageAllByLocationIdIn(Pageable paging, Collection<Long> locationIdCollection) throws Exception {
         Page<Project> projectPage =
-                projectRepository.findAllByLocationIdInAndIsDeletedIsFalse(locationIdCollection, paging);
+                projectRepository.findAllByLocationIdInAndStatusNotIn(locationIdCollection, N_D_S_STATUS_LIST, paging);
 
         if (projectPage.isEmpty()) 
             return null;
@@ -565,7 +595,8 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public boolean checkDuplicate(String projectName) {
-        Project checkDuplicateProject = projectRepository.getByProjectNameAndIsDeletedIsFalse(projectName);
+        Project checkDuplicateProject =
+                projectRepository.getByProjectNameAndStatusNotIn(projectName, N_D_S_STATUS_LIST);
         if (checkDuplicateProject != null) {
             return true;
         }
@@ -575,7 +606,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public Project getByProjectName(String projectName) throws Exception {
         return projectRepository
-                .findByProjectNameAndIsDeletedIsFalse(projectName)
+                .findByProjectNameAndStatusNotIn(projectName, N_D_S_STATUS_LIST)
                 .orElse(null);
     }
    @Override
@@ -591,7 +622,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public List<Project> getAllByProjectNameContains(String projectName) throws Exception {
         List<Project> projectList =
-                projectRepository.findAllByProjectNameContainsAndIsDeletedIsFalse(projectName);
+                projectRepository.findAllByProjectNameContainsAndStatusNotIn(projectName, N_D_S_STATUS_LIST);
 
         if (projectList.isEmpty()) 
             return null;
@@ -610,7 +641,7 @@ public class ProjectServiceImpl implements ProjectService{
     @Override
     public Page<Project> getPageAllByProjectNameContains(Pageable paging, String projectName) throws Exception {
         Page<Project> projectPage =
-                projectRepository.findAllByProjectNameContainsAndIsDeletedIsFalse(projectName, paging);
+                projectRepository.findAllByProjectNameContainsAndStatusNotIn(projectName, N_D_S_STATUS_LIST, paging);
 
         if (projectPage.isEmpty()) 
             return null;
@@ -649,7 +680,7 @@ public class ProjectServiceImpl implements ProjectService{
 
     @Override
     public List<ListUserIDAndName> getUserForDropdownSelection() {
-        List<User> listUser = userRepository.findByIsDeletedFalse();
+        List<User> listUser = userRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST);
         List<ListUserIDAndName> list = new ArrayList<>();
         ListUserIDAndName model;
         for (User user : listUser) {
@@ -743,9 +774,10 @@ public class ProjectServiceImpl implements ProjectService{
 
         /* Check duplicate */
         if (projectRepository
-                .existsByProjectNameAndProjectIdIsNotAndIsDeletedIsFalse(
+                .existsByProjectNameAndProjectIdIsNotAndStatusNotIn(
                         updatedProject.getProjectName(),
-                        updatedProject.getProjectId())) {
+                        updatedProject.getProjectId(),
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Project with name: '" + updatedProject.getProjectName() + "'. ";
         }
 
@@ -767,6 +799,8 @@ public class ProjectServiceImpl implements ProjectService{
                     mapper.skip(Project::setActualEndDate);});
 
         Project updatedProject = modelMapper.map(updatedProjectDTO, Project.class);
+
+        long updatedBy = updatedProject.getUpdatedBy();
 
         /* Already check NOT NULL */
         updatedProject.setPlanStartDate(
@@ -858,12 +892,14 @@ public class ProjectServiceImpl implements ProjectService{
         } */
 
         /* Update associated Location if changed */
-        LocationUpdateDTO location = updatedProjectDTO.getLocation();
-        if (location != null) {
-            if (locationService.updateLocationByDTO(location) == null) {
+        LocationUpdateDTO updatedLocation = updatedProjectDTO.getLocation();
+        if (updatedLocation != null) {
+            updatedLocation.setUpdatedBy(updatedBy);
+
+            if (locationService.updateLocationByDTO(updatedLocation) == null) {
                 /* Not found location with Id, NEED TO STOP */
                 throw new IllegalArgumentException("No location found with Id: '"
-                        + location.getLocationId() + "' to update");
+                        + updatedLocation.getLocationId() + "' to update");
             }
         }
 
@@ -875,80 +911,104 @@ public class ProjectServiceImpl implements ProjectService{
         long updatedProjectId = updatedProject.getProjectId();
 
         /* Update associated Blueprint if changed */
-        if (updatedProjectDTO.getBlueprint() != null) {
+        BlueprintUpdateDTO updateBlueprintDTO = updatedProjectDTO.getBlueprint();
+        if (updateBlueprintDTO != null) {
             /* Just in case */
-            updatedProjectDTO.getBlueprint().setProjectId(updatedProjectId);
+            updateBlueprintDTO.setProjectId(updatedProjectId);
+            updateBlueprintDTO.setUpdatedBy(updatedBy);
 
-            blueprintService.updateBlueprintByDTO(updatedProjectDTO.getBlueprint());
+            blueprintService.updateBlueprintByDTO(updateBlueprintDTO);
         }
 
         /* Update associated ProjectManager if changed */
-        if (updatedProjectDTO.getProjectManagerList() != null) {
-            /* Just in case */
-            updatedProjectDTO.setProjectManagerList(
-                    updatedProjectDTO.getProjectManagerList().stream()
-                            .peek(projectManagerDTO -> projectManagerDTO.setProjectId(updatedProjectId))
-                            .collect(Collectors.toList()));
+        List<Long> managerIdList = updatedProjectDTO.getManagerIdList();
+        if (managerIdList != null) {
+            /* Set<> to avoid duplicate */
+            Set<Long> managerIdSet = new HashSet<>(managerIdList);
 
-            /* TODO: reuse when login done
-            modelMapper.typeMap(ProjectManagerUpdateDTO.class, ProjectManagerCreateDTO.class)
-                    .addMappings(mapper -> {
-                        mapper.map(ProjectManagerUpdateDTO::getUpdatedBy, ProjectManagerCreateDTO::setCreatedBy);});*/
+            List<Long> oldManagerIdList = new ArrayList<>();
 
-            List<ProjectManagerCreateDTO> newProjectManagerDTOList = new ArrayList<>();
-            List<ProjectManagerUpdateDTO> updatedProjectManagerDTOList = new ArrayList<>();
+            List<ProjectManager> projectManagerList =
+                    projectManagerService.getAllByProjectId(updatedProjectId);
 
-            for (ProjectManagerUpdateDTO projectManagerDTO : updatedProjectDTO.getProjectManagerList()) {
-                if (projectManagerDTO.getProjectManagerId() <= 0) {
-                    newProjectManagerDTOList.add(modelMapper.map(projectManagerDTO, ProjectManagerCreateDTO.class));
-                } else {
-                    updatedProjectManagerDTOList.add(projectManagerDTO);
+            if (projectManagerList != null) {
+                for (ProjectManager projectManager : projectManagerList) {
+                    oldManagerIdList.add(projectManager.getManagerId());
                 }
             }
 
+            List<Long> tmpManagerIdList = new ArrayList<>();
+            tmpManagerIdList.addAll(managerIdSet);
+            tmpManagerIdList.removeAll(oldManagerIdList);
+
             /* Create associated ProjectManager */
-            if (!newProjectManagerDTOList.isEmpty()) {
+            if (!tmpManagerIdList.isEmpty()) {
+                ProjectManagerCreateDTO newProjectManagerDTO;
+                List<ProjectManagerCreateDTO> newProjectManagerDTOList = new ArrayList<>();
+
+                for (Long managerId : tmpManagerIdList) {
+                    newProjectManagerDTO = new ProjectManagerCreateDTO(updatedProjectId, managerId);
+                    newProjectManagerDTO.setCreatedBy(updatedBy);
+
+                    newProjectManagerDTOList.add(newProjectManagerDTO);
+                }
+
                 projectManagerService.createBulkProjectManagerByDTO(newProjectManagerDTOList);
             }
 
-            /* Update associated ProjectManager */
-            if (!updatedProjectManagerDTOList.isEmpty()) {
-                projectManagerService.updateBulkProjectManagerByDTO(updatedProjectManagerDTOList);
+            tmpManagerIdList = new ArrayList<>();
+            tmpManagerIdList.addAll(oldManagerIdList);
+            tmpManagerIdList.removeAll(managerIdSet);
+
+            /* Remove associated ProjectManager */
+            if (!tmpManagerIdList.isEmpty()) {
+                projectManagerService.removeAllByUserIdIn(tmpManagerIdList);
             }
         }
 
         /* Update associated ProjectWorker if changed */
-        if (updatedProjectDTO.getProjectWorkerList() != null) {
-            /* Just in case */
-            updatedProjectDTO.setProjectWorkerList(
-                    updatedProjectDTO.getProjectWorkerList().stream()
-                            .peek(projectWorkerDTO -> projectWorkerDTO.setProjectId(updatedProjectId))
-                            .collect(Collectors.toList()));
+        List<Long> workerIdList = updatedProjectDTO.getWorkerIdList();
+        if (updatedProjectDTO.getWorkerIdList() != null) {
+            /* Set<> to avoid duplicate */
+            Set<Long> workerIdSet = new HashSet<>(workerIdList);
 
-            /* TODO: reuse when login done
-            modelMapper.typeMap(ProjectManagerUpdateDTO.class, ProjectManagerCreateDTO.class)
-                    .addMappings(mapper -> {
-                        mapper.map(ProjectWorkerUpdateDTO::getUpdatedBy, ProjectWorkerCreateDTO::setCreatedBy);});*/
+            List<Long> oldWorkerIdList = new ArrayList<>();
 
-            List<ProjectWorkerCreateDTO> newProjectWorkerDTOList = new ArrayList<>();
-            List<ProjectWorkerUpdateDTO> updatedProjectWorkerDTOList = new ArrayList<>();
+            List<ProjectWorker> projectWorkerList =
+                    projectWorkerService.getAllByProjectId(updatedProjectId);
 
-            for (ProjectWorkerUpdateDTO projectWorkerDTO : updatedProjectDTO.getProjectWorkerList()) {
-                if (projectWorkerDTO.getProjectWorkerId() <= 0) {
-                    newProjectWorkerDTOList.add(modelMapper.map(projectWorkerDTO, ProjectWorkerCreateDTO.class));
-                } else {
-                    updatedProjectWorkerDTOList.add(projectWorkerDTO);
+            if (projectWorkerList != null) {
+                for (ProjectWorker projectWorker : projectWorkerList) {
+                    oldWorkerIdList.add(projectWorker.getWorkerId());
                 }
             }
 
+            List<Long> tmpWorkerIdList = new ArrayList<>();
+            tmpWorkerIdList.addAll(workerIdSet);
+            tmpWorkerIdList.removeAll(oldWorkerIdList);
+
             /* Create associated ProjectManager */
-            if (!newProjectWorkerDTOList.isEmpty()) {
+            if (!tmpWorkerIdList.isEmpty()) {
+                ProjectWorkerCreateDTO newProjectWorkerDTO;
+                List<ProjectWorkerCreateDTO> newProjectWorkerDTOList = new ArrayList<>();
+
+                for (Long workerId : tmpWorkerIdList) {
+                    newProjectWorkerDTO = new ProjectWorkerCreateDTO(updatedProjectId, workerId);
+                    newProjectWorkerDTO.setCreatedBy(updatedBy);
+
+                    newProjectWorkerDTOList.add(newProjectWorkerDTO);
+                }
+
                 projectWorkerService.createBulkProjectWorkerByDTO(newProjectWorkerDTOList);
             }
 
-            /* Update associated ProjectManager */
-            if (!updatedProjectWorkerDTOList.isEmpty()) {
-                projectWorkerService.updateBulkProjectWorkerByDTO(updatedProjectWorkerDTOList);
+            tmpWorkerIdList = new ArrayList<>();
+            tmpWorkerIdList.addAll(oldWorkerIdList);
+            tmpWorkerIdList.removeAll(workerIdSet);
+
+            /* Remove associated ProjectManager */
+            if (!tmpWorkerIdList.isEmpty()) {
+                projectWorkerService.removeAllByWorkerIdIn(tmpWorkerIdList);
             }
         }
 
@@ -965,7 +1025,7 @@ public class ProjectServiceImpl implements ProjectService{
             /* Not found with Id */
         }
 
-        project.setIsDeleted(true);
+        project.setStatus(Status.DELETED);
         projectRepository.saveAndFlush(project);
 
         return true;
