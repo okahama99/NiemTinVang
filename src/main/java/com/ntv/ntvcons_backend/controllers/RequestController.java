@@ -99,7 +99,8 @@ public class RequestController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<ShowRequestModel> requests = requestService.getAllAvailableRequest(pageNo, pageSize, sortBy, sortTypeAsc);
+            List<ShowRequestModel> requests =
+                    requestService.getAllAvailableRequest(pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (requests == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found");
@@ -320,7 +321,8 @@ public class RequestController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<ShowRequestModel> requests = requestService.getByProjectId(projectId, pageNo, pageSize, sortBy, sortTypeAsc);
+            List<ShowRequestModel> requests =
+                    requestService.getByProjectId(projectId, pageNo, pageSize, sortBy, sortTypeAsc);
 
             if (requests == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Request found");

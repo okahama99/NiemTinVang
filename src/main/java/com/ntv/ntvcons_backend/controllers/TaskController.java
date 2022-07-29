@@ -35,6 +35,7 @@ public class TaskController {
     public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO,
                                              @RequestHeader(name = "Authorization") String token) {
         try {
+            /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
             if (userId != null) {
                 taskDTO.setCreatedBy(userId);
@@ -210,6 +211,8 @@ public class TaskController {
     public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO,
                                              @RequestHeader(name = "Authorization") String token) {
         try {
+            /* TODO: jwtUtil get jwt auto */
+            /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
             if (userId != null) {
                 taskDTO.setUpdatedBy(userId);

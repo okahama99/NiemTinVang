@@ -95,7 +95,7 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
 
-        return Long.parseLong(claims.getSubject());
+        return claims.get("id", Long.class);
     }
 
     public String getUserNameFromJWT(String token) {
