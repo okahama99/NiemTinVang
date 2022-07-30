@@ -251,7 +251,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         Page<TaskAssignment> taskAssignmentPage =
                 taskAssignmentRepository.findAllByAssignerIdAndStatusNotIn(assignerId, N_D_S_STATUS_LIST, paging);
 
-        if (!taskAssignmentPage.isEmpty())
+        if (taskAssignmentPage.isEmpty())
             return null;
 
         return taskAssignmentPage;
@@ -295,7 +295,7 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
         Page<TaskAssignment> taskAssignmentPage =
                 taskAssignmentRepository.findAllByAssigneeIdAndStatusNotIn(assigneeId, N_D_S_STATUS_LIST, paging);
 
-        if (!taskAssignmentPage.isEmpty())
+        if (taskAssignmentPage.isEmpty())
             return null;
 
         return taskAssignmentPage;

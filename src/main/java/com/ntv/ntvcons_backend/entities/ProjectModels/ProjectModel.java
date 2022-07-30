@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.entities.ProjectModels;
 
+import com.ntv.ntvcons_backend.constants.Status;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,7 +14,7 @@ public class ProjectModel {
     private String projectName, addressNumber, street, area, ward, district, city, province, country, coordinate, designerName, blueprintName;
     private LocalDateTime planStartDate, planEndDate, actualStartDate, actualEndDate;
     private Double projectEstimateCost, actualCost, blueprintEstimateCost;
-    private Boolean isDelete;
+    private Status status;
     private Long createdBy, updatedBy;
     private LocalDateTime createdAt, updatedAt;
     private Double totalPage;

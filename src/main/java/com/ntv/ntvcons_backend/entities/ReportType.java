@@ -26,7 +26,5 @@ public class ReportType extends BaseEntity {
     @Column(name = "reportTypeDesc", length = 100)
     private String reportTypeDesc;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

@@ -32,7 +32,5 @@ public class Worker extends BaseEntity {
     @Column(name = "addressId", nullable = false)
     private Long addressId;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

@@ -38,7 +38,5 @@ public class User extends BaseEntity {
     @Column(name = "email", length = 320)
     private String email;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

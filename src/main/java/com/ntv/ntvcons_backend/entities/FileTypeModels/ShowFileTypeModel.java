@@ -8,5 +8,4 @@ import lombok.Setter;
 public class ShowFileTypeModel {
     private long fileTypeId;
     private String fileTypeName, fileTypeDesc, fileTypeExtension;
-
 }

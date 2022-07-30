@@ -65,7 +65,7 @@ public class PostCategoryController {
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for Request", e.getMessage()));
+                    new ErrorResponse("Error searching for PostCategory", e.getMessage()));
         }
     }
 

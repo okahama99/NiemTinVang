@@ -45,7 +45,5 @@ public class Project extends BaseEntity {
     @Column(name = "actualCost")
     private Double actualCost;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

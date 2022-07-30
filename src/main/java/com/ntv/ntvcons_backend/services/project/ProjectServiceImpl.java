@@ -322,7 +322,7 @@ public class ProjectServiceImpl implements ProjectService{
                     model.setActualEndDate(project.getActualEndDate());
                     model.setProjectEstimateCost(project.getEstimatedCost());
                     model.setActualCost(project.getActualCost());
-                    model.setIsDelete(project.getIsDeleted());
+                    model.setStatus(project.getStatus());
 
                     Optional<Location> location = locationRepository.findById(project.getLocationId());
                     if (location.isPresent()) { /* MISSING null check */
@@ -447,7 +447,7 @@ public class ProjectServiceImpl implements ProjectService{
                             model.setActualEndDate(project.getActualEndDate());
                             model.setProjectEstimateCost(project.getEstimatedCost());
                             model.setActualCost(project.getActualCost());
-                            model.setIsDelete(project.getIsDeleted());
+                            model.setStatus(project.getStatus());
 
                             Location location = locationRepository.findById(project.getLocationId()).get();
                             model.setLocationId(project.getLocationId());

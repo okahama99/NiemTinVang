@@ -23,9 +23,5 @@ public abstract class BaseUpdateDTO implements Serializable {
     /* TODO: replace later or dynamic change */
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
-    private final Status status = Status.ACTIVE;
-
-    @JsonIgnore /* No serialize/deserialize */
-    @ApiModelProperty(hidden = true) /* No show on swagger */
-    private final Boolean isDeleted = false;
+    private Status status = Status.ACTIVE;
 }

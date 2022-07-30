@@ -73,6 +73,7 @@ public class ProjectController {
     public ResponseEntity<Object> createProjectAlt1(@Valid @RequestBody ProjectCreateDTO projectDTO,
                                                     @RequestHeader(name = "Authorization") String token) {
         try {
+            /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
             if (userId != null) {
                 projectDTO.setCreatedBy(userId);
@@ -303,6 +304,7 @@ public class ProjectController {
     public ResponseEntity<Object> updateProjectAlt1(@Valid @RequestBody ProjectUpdateDTO projectDTO,
                                                     @RequestHeader(name = "Authorization") String token){
         try {
+            /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
             if (userId != null) {
                 projectDTO.setUpdatedBy(userId);

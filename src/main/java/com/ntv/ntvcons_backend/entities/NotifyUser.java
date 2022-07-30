@@ -25,7 +25,4 @@ public class NotifyUser extends BaseEntity{
 
     @Column(name = "receiverId", nullable = false)
     private Long receiverId;
-
-    @Column(name = "status", nullable = false)
-    private Status status;
 }

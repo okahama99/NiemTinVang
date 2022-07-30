@@ -61,45 +61,64 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                     + "'. Which violate constraint: FK_EntityWrapper_User_CreatedBy. ";
         }
         boolean isNotExists = false;
+        /* Check duplicate */
+        boolean isDuplicated = false;
+
         switch (type) {
             case BLUEPRINT_ENTITY:
                 if (!blueprintService.existsById(entityId))
                     isNotExists = true;
+                if (entityWrapperRepository.existsByBlueprintIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                    isDuplicated = true;
                 break;
 
 //            case POST_ENTITY:
 //            if (!postService.existsById(entityId))
 //                isNotExists = true;
+//            if (entityWrapperRepository.existsByPostIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+//                isDuplicated = true;
 //                break;
 
             case PROJECT_ENTITY:
                 if (!projectService.existsById(entityId))
                     isNotExists = true;
+                if (entityWrapperRepository.existsByProjectIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                    isDuplicated = true;
                 break;
 
             case REPORT_ENTITY:
                 if (!reportService.existsById(entityId))
                     isNotExists = true;
+                if (entityWrapperRepository.existsByReportIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                    isDuplicated = true;
                 break;
 
             case REQUEST_ENTITY:
                 if (!requestService.existsById(entityId))
                     isNotExists = true;
+                if (entityWrapperRepository.existsByRequestIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                    isDuplicated = true;
                 break;
 
             case TASK_ENTITY:
                 if (!taskService.existsById(entityId))
                     isNotExists = true;
+                if (entityWrapperRepository.existsByTaskIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                    isDuplicated = true;
                 break;
 
             case USER_ENTITY:
                 if (!userService.existsById(entityId))
                     isNotExists = true;
+                if (entityWrapperRepository.existsByUserIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                    isDuplicated = true;
                 break;
 
             case WORKER_ENTITY:
                 if (!workerService.existsById(entityId))
                     isNotExists = true;
+                if (entityWrapperRepository.existsByWorkerIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                    isDuplicated = true;
                 break;
 
             default:
@@ -112,53 +131,6 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                     + "FK_EntityWrapper_" + type.getEntityName() +  "_" + type.getEntityIdPCName() + ". ";
         }
 
-        /* Check duplicate */
-        boolean isDuplicated = false;
-        switch (type) {
-            case BLUEPRINT_ENTITY:
-                if (entityWrapperRepository.existsByBlueprintIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-                    isDuplicated = true;
-                break;
-
-            case POST_ENTITY:
-                if (entityWrapperRepository.existsByPostIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-                    isDuplicated = true;
-                break;
-
-            case PROJECT_ENTITY:
-                if (entityWrapperRepository.existsByProjectIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-                    isDuplicated = true;
-                break;
-
-            case REPORT_ENTITY:
-                if (entityWrapperRepository.existsByReportIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-                    isDuplicated = true;
-                break;
-
-            case REQUEST_ENTITY:
-                if (entityWrapperRepository.existsByRequestIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-                    isDuplicated = true;
-                break;
-
-            case TASK_ENTITY:
-                if (entityWrapperRepository.existsByTaskIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-                    isDuplicated = true;
-                break;
-
-            case USER_ENTITY:
-                if (entityWrapperRepository.existsByUserIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-                    isDuplicated = true;
-                break;
-
-            case WORKER_ENTITY:
-                if (entityWrapperRepository.existsByWorkerIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-                    isDuplicated = true;
-                break;
-
-            default:
-                throw new IllegalArgumentException("Invalid EntityType used, no such type exists!");
-        }
-
         if (isDuplicated)
             errorMsg += "Already exists another EntityWrapper with "
                     + type.getEntityIdCCName() + ": '" + entityId + "'. ";
@@ -167,6 +139,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
             throw new IllegalArgumentException(errorMsg);
 
         EntityWrapper newEntityWrapper = new EntityWrapper(entityId, type);
+        newEntityWrapper.setStatus(Status.ACTIVE);
         newEntityWrapper.setCreatedBy(createdBy);
         newEntityWrapper.setCreatedAt(LocalDateTime.now());
 

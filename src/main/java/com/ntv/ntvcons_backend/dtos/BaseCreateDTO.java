@@ -23,8 +23,4 @@ public abstract class BaseCreateDTO implements Serializable {
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
     private final Status status = Status.ACTIVE;
-
-    @JsonIgnore /* No serialize/deserialize */
-    @ApiModelProperty(hidden = true) /* No show on swagger */
-    private final Boolean isDeleted = false;
 }

@@ -50,8 +50,4 @@ public class UserCreateDTO implements Serializable { /* No extends BaseCreateDTO
     @JsonIgnore /* No serialize/deserialize */
     @ApiModelProperty(hidden = true) /* No show on swagger */
     private final LocalDateTime createdAt = LocalDateTime.now();
-
-    @JsonIgnore /* No serialize/deserialize */
-    @ApiModelProperty(hidden = true) /* No show on swagger */
-    private final Boolean isDeleted = false;
 }

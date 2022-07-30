@@ -36,7 +36,5 @@ public class TaskAssignment extends BaseEntity {
     @Column(name = "removeDate")
     private LocalDateTime removeDate;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }
