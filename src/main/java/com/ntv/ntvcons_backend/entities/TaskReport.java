@@ -32,7 +32,5 @@ public class TaskReport extends BaseEntity {
     @Column(name = "taskNote", length = 100)
     private String taskNote;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

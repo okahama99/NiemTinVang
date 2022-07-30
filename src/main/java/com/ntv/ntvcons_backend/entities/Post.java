@@ -42,7 +42,5 @@ public class Post extends BaseEntity {
     @Column(name = "status", nullable = false, length = 100)
     private Status status;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

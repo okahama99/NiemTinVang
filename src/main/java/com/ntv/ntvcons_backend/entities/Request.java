@@ -54,7 +54,5 @@ public class Request extends BaseEntity {
     @Column(name = "isApproved")
     private Boolean isApproved;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }
