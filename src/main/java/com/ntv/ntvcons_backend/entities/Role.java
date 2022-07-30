@@ -26,7 +26,5 @@ public class Role extends BaseEntity {
     @Column(name = "roleDesc", length = 100)
     private String roleDesc;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

@@ -39,7 +39,5 @@ public class Report extends BaseEntity {
     @Column(name = "reportDate", nullable = false)
     private LocalDateTime reportDate;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

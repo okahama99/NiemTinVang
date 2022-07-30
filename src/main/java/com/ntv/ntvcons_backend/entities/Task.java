@@ -42,7 +42,5 @@ public class Task extends BaseEntity {
     @Column(name = "actualEndDate")
     private LocalDateTime actualEndDate;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

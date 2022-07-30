@@ -27,13 +27,9 @@ public class ExternalFileEntityWrapperPairing extends BaseEntity {
     @Column(name = "entityWrapperId", nullable = false)
     private Long entityWrapperId;
 
-    @Column(name = "status")
-    private Status status;
-
     /** For CREATE only */
     public ExternalFileEntityWrapperPairing(Long externalFileId, Long entityWrapperId) {
         this.externalFileId = externalFileId;
         this.entityWrapperId = entityWrapperId;
-        this.status = Status.ACTIVE;
     }
 }

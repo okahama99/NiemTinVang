@@ -17,8 +17,7 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class BaseEntity {
-    /* TODO: remove comment when done testing */
-    @Column(name = "status", length = 50/*, nullable = false*/)
+    @Column(name = "status", nullable = false, length = 50)
     private Status status;
 
     @Column(name = "createdAt")

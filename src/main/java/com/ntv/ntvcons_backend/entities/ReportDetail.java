@@ -35,7 +35,5 @@ public class ReportDetail extends BaseEntity {
     @Column(name = "itemPrice", nullable = false)
     private Double itemPrice;
 
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

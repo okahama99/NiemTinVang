@@ -25,7 +25,4 @@ public class PostCategory extends BaseEntity{
 
     @Column(name = "postCategoryDesc", nullable = false, length = 100)
     private String postCategoryDesc;
-
-    @Column(name = "status", nullable = false, length = 100)
-    private Status status;
 }

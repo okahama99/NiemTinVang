@@ -31,7 +31,4 @@ public class Blueprint extends BaseEntity {
 
     @Column(name = "estimatedCost", nullable = false)
     private Double estimatedCost;
-
-    @Column(name = "isDeleted", nullable = false)
-    private Boolean isDeleted = false;
 }
