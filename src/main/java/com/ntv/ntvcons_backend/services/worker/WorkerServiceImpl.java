@@ -152,7 +152,7 @@ public class WorkerServiceImpl implements WorkerService {
         List<Worker> workerList =
                 workerRepository.findAllByWorkerIdInAndStatusNotIn(workerIdCollection, N_D_S_STATUS_LIST);
 
-        if (!workerList.isEmpty()) 
+        if (workerList.isEmpty())
             return null;
 
         return workerList;
