@@ -29,8 +29,4 @@ public class ExternalFile extends BaseEntity {
 
     @Column(name = "fileLink", nullable = false, length = 100, unique = true)
     private String fileLink;
-
-    @Column(name = "status")
-    private Status status;
-
 }

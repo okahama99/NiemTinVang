@@ -31,5 +31,4 @@ public class Blueprint extends BaseEntity {
 
     @Column(name = "estimatedCost", nullable = false)
     private Double estimatedCost;
-
 }

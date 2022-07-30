@@ -28,7 +28,4 @@ public class Notification extends BaseEntity{
 
     @Column(name = "notificationDesc", nullable = false)
     private String notificationDesc;
-
-    @Column(name = "status", nullable = false)
-    private Status status;
 }

@@ -46,9 +46,6 @@ public class EntityWrapper extends BaseEntity {
     @Column(name = "workerId")
     private Long workerId;
 
-    @Column(name = "status")
-    private Status status;
-
     /** For CREATE only */
     public EntityWrapper(long entityId, EntityType type) {
         this.entityWrapperId = null;
@@ -60,7 +57,6 @@ public class EntityWrapper extends BaseEntity {
         this.userId = null;
         this.workerId = null;
         this.taskId = null;
-        this.status = Status.ACTIVE;
 
         switch (type) {
             case BLUEPRINT_ENTITY:
