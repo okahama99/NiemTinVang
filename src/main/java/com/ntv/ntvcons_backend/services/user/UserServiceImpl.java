@@ -7,6 +7,7 @@ import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
 import com.ntv.ntvcons_backend.entities.User;
+import com.ntv.ntvcons_backend.entities.UserModels.RegisterUserModel;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -113,6 +115,41 @@ public class UserServiceImpl implements UserService{
                 .createEntityWrapper(newUser.getUserId(), ENTITY_TYPE, newUser.getCreatedBy());
 
         return fillDTO(newUser);
+    }
+
+    @Override
+    public User register(RegisterUserModel registerUserModel) throws Exception{
+        String errorMsg = "";
+        User user = new User();
+        if (registerUserModel.getEmail() != null) {
+            if(!userRepository.existsByUsernameOrPhoneOrEmailAndStatusNotIn(
+                    registerUserModel.getUsername(),
+                    registerUserModel.getPhone(),
+                    registerUserModel.getEmail(),
+                    N_D_S_STATUS_LIST))
+                errorMsg += "Already exists another User with username: '" + registerUserModel.getUsername()
+                        + "', or with phone: '" + registerUserModel.getPhone()
+                        + "', or with email: '" + registerUserModel.getEmail() + "'. ";
+            } else {
+            if (userRepository.existsByUsernameOrPhoneAndStatusNotIn(
+                            registerUserModel.getUsername(),
+                            registerUserModel.getPhone(),
+                            N_D_S_STATUS_LIST)) {
+                errorMsg += "Already exists another User with username: '" + registerUserModel.getUsername()
+                        + "', or with phone: '" + registerUserModel.getPhone() + "'. ";
+            }
+        }
+        if (!errorMsg.trim().isEmpty())
+        throw new IllegalArgumentException(errorMsg);
+            user.setEmail(registerUserModel.getEmail());
+            user.setUsername(registerUserModel.getUsername());
+            user.setPassword(passwordEncoder.encode(registerUserModel.getPassword()));
+            user.setPhone(registerUserModel.getPhone());
+            user.setFullName(registerUserModel.getFullName());
+            user.setCreatedAt(LocalDateTime.now());
+            user.setRoleId(Long.parseLong("4"));
+            userRepository.saveAndFlush(user);
+        return user;
     }
 
     /* READ */
@@ -567,5 +604,12 @@ public class UserServiceImpl implements UserService{
 
                     return userReadDTO;})
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void resetPasswordUser(String email, String password) {
+        User user = userRepository.findByEmailAndStatusNotIn(email, N_D_S_STATUS_LIST).orElse(null);
+        user.setPassword(password);
+        userRepository.save(user);
     }
 }

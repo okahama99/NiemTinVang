@@ -4,6 +4,7 @@ import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
 import com.ntv.ntvcons_backend.entities.User;
+import com.ntv.ntvcons_backend.entities.UserModels.RegisterUserModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,6 +16,7 @@ public interface UserService {
     /* CREATE */
     User createUser(User newUser) throws Exception;
     UserReadDTO createUserByDTO(UserCreateDTO newUserDTO) throws Exception;
+    User register(RegisterUserModel registerUserModel) throws Exception;
 
     /* READ */
     Page<User> getPageAll(Pageable paging) throws Exception;
@@ -64,4 +66,6 @@ public interface UserService {
 
     /* DELETE */
     boolean deleteUser(long userId) throws Exception;
+
+    void resetPasswordUser(String email, String password);
 }

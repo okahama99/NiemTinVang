@@ -1,5 +1,6 @@
-package com.ntv.ntvcons_backend.services.OTP2;
+package com.ntv.ntvcons_backend.services.OTPPhone;
 
+import com.ntv.ntvcons_backend.services.OTPEmail.OtpService;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.rest.api.v2010.account.MessageCreator;
 import com.twilio.type.PhoneNumber;
@@ -8,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SmsSenderImpl implements SmsSender{
+
+    @Autowired
+    private OtpService otpService;
 
     private final TwilioConfiguration twilioConfiguration;
 
@@ -18,21 +22,12 @@ public class SmsSenderImpl implements SmsSender{
 
     @Override
     public void smsSender(SmsRequest smsRequest) {
-        if(isPhoneNumberValid(smsRequest.getPhoneNumber()))
-        {
             MessageCreator creator = Message.creator(new PhoneNumber(smsRequest.getPhoneNumber()),
                     new PhoneNumber(twilioConfiguration.getTrialNumber()),
-                    smsRequest.getMessage()
+                    (smsRequest.getMessage()+otpService.generatePhoneOTP(smsRequest.getPhoneNumber()))
             ); //build sms
 
             creator.create(); // send sms
-        }else{
-            throw new IllegalArgumentException("Phone Number [ " + smsRequest.getPhoneNumber() + " ] is not a valid phone number");
-        }
-    }
 
-    private boolean isPhoneNumberValid(String phoneNumber) {
-        // implement phone number validate
-        return true;
     }
 }
