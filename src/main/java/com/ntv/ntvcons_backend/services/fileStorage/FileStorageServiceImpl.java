@@ -3,26 +3,21 @@ package com.ntv.ntvcons_backend.services.fileStorage;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.*;
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.FirebaseResource;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
@@ -32,7 +27,8 @@ public class FileStorageServiceImpl implements FileStorageService {
             String fileName = multipartFile.getOriginalFilename();
 
             /* generated random string values for file name */
-            fileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));
+            fileName =
+                    UUID.randomUUID().toString().concat(this.getExtension(fileName));
 
             /* convert multipartFile to File */
             File file = this.convertToFile(multipartFile, fileName);
@@ -41,10 +37,11 @@ public class FileStorageServiceImpl implements FileStorageService {
             String TEMP_URL = this.uploadFile(file, fileName);
 
             /* delete the copy of uploaded file stored in the project folder */
-            file.delete();
+            if (file.delete())
+                System.out.println("Deleted");
 
             // Your customized response
-            return new ExternalFileCreateDTO(file.getName(), TEMP_URL, 2);
+            return new ExternalFileCreateDTO(file.getName(), TEMP_URL, FileType.BLUEPRINT_DOC);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -53,19 +50,25 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     public Object download(String fileName) throws IOException {
-        // to set random string for destination file name
-        String destFileName = UUID.randomUUID().toString().concat(this.getExtension(fileName));
+        // Set random string for destination file name
+        String destFileName =
+                UUID.randomUUID().toString().concat(this.getExtension(fileName));
 
-        // to set destination file path
-        String destFilePath = "Z:\\New folder\\" + destFileName;
+        // Set destination file path
+        String destFilePath = "D:\\testFirebase\\" + destFileName;
 
-        ////////////////////////////////   Download  ////////////////////////////////////////////////////////////////////////
-        Credentials credentials = GoogleCredentials.fromStream(new FileInputStream("path of JSON with genarated private key"));
+        Credentials credentials =
+                GoogleCredentials.fromStream(
+                        Files.newInputStream(Paths.get(FirebaseResource.PRIVATE_KEY)));
 
         Storage storage = StorageOptions.newBuilder().setCredentials(credentials).build().getService();
-        Blob blob = storage.get(BlobId.of("your bucket name", fileName));
+
+        Blob blob = storage.get(
+                BlobId.of(FirebaseResource.BUCKET_NAME, fileName));
+
         blob.downloadTo(Paths.get(destFilePath));
-        return sendResponse("200", "Successfully Downloaded!");
+
+        return ResponseEntity.ok("Successfully Downloaded!");
     }
 
 
@@ -101,7 +104,8 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     /** Get extension of an uploaded file */
     private String getExtension(String fileName) {
-        return fileName.substring(fileName.lastIndexOf("."));
+        return fileName.substring(
+                fileName.lastIndexOf("."));
     }
 
 

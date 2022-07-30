@@ -1,11 +1,12 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.fileType.FileTypeCreateDTO;
-import com.ntv.ntvcons_backend.dtos.fileType.FileTypeReadDTO;
-import com.ntv.ntvcons_backend.dtos.fileType.FileTypeUpdateDTO;
-import com.ntv.ntvcons_backend.services.fileType.FileTypeService;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileUpdateDTO;
+import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -19,29 +20,30 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/fileType")
-public class FileTypeController {
+@RequestMapping("/externalFile")
+public class ExternalFileController {
     @Autowired
-    private FileTypeService fileTypeService;
+    private ExternalFileService externalFileService;
     @Autowired
     private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
-    @PostMapping(value = "/v1/createFileType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createFileType(@Valid @RequestBody FileTypeCreateDTO fileTypeDTO) {
+    @PostMapping(value = "/v1/createExternalFile", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createExternalFile(@Valid @RequestBody ExternalFileCreateDTO externalFileDTO) {
         try {
-            FileTypeReadDTO newFileTypeDTO = fileTypeService.createFileTypeByDTO(fileTypeDTO);
+            ExternalFileReadDTO newExternalFileDTO =
+                    externalFileService.createExternalFileByDTO(externalFileDTO);
 
-            return ResponseEntity.ok().body(newFileTypeDTO);
+            return ResponseEntity.ok().body(newExternalFileDTO);
         } catch (IllegalArgumentException iAE) {
             /* Catch not found User by Id (createdBy), which violate FK constraint */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error creating FileType", e.getMessage()));
+                    new ErrorResponse("Error creating ExternalFile", e.getMessage()));
         }
     }
 
@@ -53,15 +55,15 @@ public class FileTypeController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<FileTypeReadDTO> fileTypeDTOList =
-                    fileTypeService.getAllDTOInPaging(
+            List<ExternalFileReadDTO> externalFileDTOList =
+                    externalFileService.getAllDTOInPaging(
                             miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
-            if (fileTypeDTOList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No FileType found");
+            if (externalFileDTOList == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ExternalFile found");
             }
 
-            return ResponseEntity.ok().body(fileTypeDTOList);
+            return ResponseEntity.ok().body(externalFileDTOList);
 
         } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
             /* Catch invalid sortBy */
@@ -69,41 +71,50 @@ public class FileTypeController {
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for FileType", e.getMessage()));
+                    new ErrorResponse("Error searching for ExternalFile", e.getMessage()));
         }
     }
 
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
-                                             @RequestParam SearchType.FILE_TYPE searchType) {
+                                             @RequestParam SearchType.EXTERNAL_FILE searchType) {
         try {
-            FileTypeReadDTO fileTypeDTO;
+            ExternalFileReadDTO externalFileDTO;
 
             switch (searchType) {
                 case BY_ID:
-                    fileTypeDTO = fileTypeService.getDTOById(Long.parseLong(searchParam));
+                    externalFileDTO = externalFileService.getDTOById(Long.parseLong(searchParam));
 
-                    if (fileTypeDTO == null) {
+                    if (externalFileDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with Id: '" + searchParam + "'. ");
+                                .body("No ExternalFile found with Id: '" + searchParam + "'. ");
                     }
                     break;
 
                 case BY_NAME:
-                    fileTypeDTO = fileTypeService.getDTOByFileTypeName(searchParam);
+                    externalFileDTO = externalFileService.getDTOByFileName(searchParam);
 
-                    if (fileTypeDTO == null) {
+                    if (externalFileDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with name: '" + searchParam + "'. ");
+                                .body("No ExternalFile found with name: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_LINK:
+                    externalFileDTO = externalFileService.getDTOByFileLink(searchParam);
+
+                    if (externalFileDTO == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ExternalFile found with link: '" + searchParam + "'. ");
                     }
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity FileType");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ExternalFile");
             }
 
-            return ResponseEntity.ok().body(fileTypeDTO);
+            return ResponseEntity.ok().body(externalFileDTO);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
@@ -115,7 +126,7 @@ public class FileTypeController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "Error searching for FileType with ";
+            String errorMsg = "Error searching for ExternalFile with ";
 
             switch (searchType) {
                 case BY_ID:
@@ -124,6 +135,10 @@ public class FileTypeController {
 
                 case BY_NAME:
                     errorMsg += "name: '" + searchParam + "'. ";
+                    break;
+
+                case BY_LINK:
+                    errorMsg += "link: '" + searchParam + "'. ";
                     break;
             }
 
@@ -134,7 +149,7 @@ public class FileTypeController {
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                                @RequestParam SearchType.ALL_FILE_TYPE searchType,
+                                                @RequestParam SearchType.ALL_EXTERNAL_FILE searchType,
                                                 @RequestParam int pageNo,
                                                 @RequestParam int pageSize,
                                                 @RequestParam String sortBy,
@@ -142,24 +157,45 @@ public class FileTypeController {
         try {
             Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
-            List<FileTypeReadDTO> fileTypeDTOList;
+            List<ExternalFileReadDTO> externalFileDTOList;
 
             switch (searchType) {
-                case BY_NAME_CONTAINS:
-                    fileTypeDTOList =
-                            fileTypeService.getAllDTOInPagingByFileTypeNameContains(paging, searchParam);
+                case BY_FILETYPE:
+                    externalFileDTOList =
+                            externalFileService
+                                    .getAllDTOInPagingByFileType(paging, FileType.fromStringValue(searchParam));
 
-                    if (fileTypeDTOList == null) {
+                    if (externalFileDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with name contains: '" + searchParam + "'. ");
+                                .body("No ExternalFile found with fileType: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_NAME_CONTAINS:
+                    externalFileDTOList =
+                            externalFileService.getAllDTOInPagingByFileNameContains(paging, searchParam);
+
+                    if (externalFileDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ExternalFile found with name contains: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_LINK_CONTAINS:
+                    externalFileDTOList =
+                            externalFileService.getAllDTOInPagingByFileLinkContains(paging, searchParam);
+
+                    if (externalFileDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ExternalFile found with link contains: '" + searchParam + "'. ");
                     }
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity FileType");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ExternalFile");
             }
 
-            return ResponseEntity.ok().body(fileTypeDTOList);
+            return ResponseEntity.ok().body(externalFileDTOList);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
@@ -171,7 +207,7 @@ public class FileTypeController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "Error searching for FileType with ";
+            String errorMsg = "Error searching for ExternalFile with ";
 
             switch (searchType) {
                 case BY_NAME_CONTAINS:
@@ -185,42 +221,42 @@ public class FileTypeController {
 
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
-    @PutMapping(value = "/v1/updateFileType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateFileType(@Valid @RequestBody FileTypeUpdateDTO fileTypeDTO) {
+    @PutMapping(value = "/v1/updateExternalFile", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateExternalFile(@Valid @RequestBody ExternalFileUpdateDTO externalFileDTO) {
         try {
-            FileTypeReadDTO updatedFileTypeDTO = fileTypeService.updateFileTypeByDTO(fileTypeDTO);
+            ExternalFileReadDTO updatedExternalFileDTO = externalFileService.updateExternalFileByDTO(externalFileDTO);
 
-            if (updatedFileTypeDTO == null) {
+            if (updatedExternalFileDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No FileType found with Id: '" + fileTypeDTO.getFileTypeId() + "'. ");
+                        .body("No ExternalFile found with Id: '" + externalFileDTO.getFileId() + "'. ");
             }
 
-            return ResponseEntity.ok().body(updatedFileTypeDTO);
+            return ResponseEntity.ok().body(updatedExternalFileDTO);
         } catch (IllegalArgumentException iAE) {
             /* Catch not found User by Id (updatedBy), which violate FK constraint */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating FileType with Id: '" + fileTypeDTO.getFileTypeId() + "'. ",
+                    new ErrorResponse("Error updating ExternalFile with Id: '" + externalFileDTO.getFileId() + "'. ",
                             e.getMessage()));
         }
     }
 
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
-    @DeleteMapping(value = "/v1/deleteFileType/{fileTypeId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteFileType(@PathVariable(name = "fileTypeId") long fileTypeId) {
+    @DeleteMapping(value = "/v1/deleteExternalFile/{externalFileId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteExternalFile(@PathVariable(name = "externalFileId") long externalFileId) {
         try {
-            if (!fileTypeService.deleteFileType(fileTypeId)) {
+            if (!externalFileService.deleteExternalFile(externalFileId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No FileType found with Id: '" + fileTypeId + "'. ");
+                        .body("No ExternalFile found with Id: '" + externalFileId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted FileType with Id: '" + fileTypeId + "'. ");
+            return ResponseEntity.ok().body("Deleted ExternalFile with Id: '" + externalFileId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting FileType with Id: '" + fileTypeId + "'. ", e.getMessage()));
+                    new ErrorResponse("Error deleting ExternalFile with Id: '" + externalFileId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

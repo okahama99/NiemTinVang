@@ -13,10 +13,8 @@ import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
-import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
@@ -322,7 +320,7 @@ public class ProjectServiceImpl implements ProjectService{
                     model.setActualEndDate(project.getActualEndDate());
                     model.setProjectEstimateCost(project.getEstimatedCost());
                     model.setActualCost(project.getActualCost());
-                    model.setIsDelete(project.getIsDeleted());
+                    model.setStatus(project.getStatus());
 
                     Optional<Location> location = locationRepository.findById(project.getLocationId());
                     if (location.isPresent()) { /* MISSING null check */
@@ -447,7 +445,7 @@ public class ProjectServiceImpl implements ProjectService{
                             model.setActualEndDate(project.getActualEndDate());
                             model.setProjectEstimateCost(project.getEstimatedCost());
                             model.setActualCost(project.getActualCost());
-                            model.setIsDelete(project.getIsDeleted());
+                            model.setStatus(project.getStatus());
 
                             Location location = locationRepository.findById(project.getLocationId()).get();
                             model.setLocationId(project.getLocationId());

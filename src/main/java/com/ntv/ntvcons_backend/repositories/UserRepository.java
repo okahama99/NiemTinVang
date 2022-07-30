@@ -29,12 +29,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
         List<User> findAllByUserIdInAndStatusNotIn(
                 Collection<Long> userIdCollection, Collection<Status> statusCollection);
         /* !Id & (username || phone || email) */
+        /** Check duplicate for Update */
         @Query("SELECT case when count(u) > 0 then true else false end " +
                 "FROM User u " +
                 "WHERE (u.username = ?1 or u.phone = ?2 or u.email = ?3) and u.userId <> ?4 and u.status not in ?5 ")
         boolean existsByUsernameOrPhoneOrEmailAndUserIdIsNotAndStatusNotIn
         (String username, String phone, String email, long userId, Collection<Status> statusCollection);
         /* !Id & (username || phone) */
+        /** Check duplicate for Update */
         @Query("SELECT case when count(u) > 0 then true else false end " +
                 "FROM User u " +
                 "WHERE (u.username = ?1 or u.phone = ?2) and u.userId <> ?3 and u.status not in ?4 ")
@@ -79,12 +81,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
         Page<User> findAllByEmailContainsAndStatusNotIn(
                 String email, Collection<Status> statusCollection, Pageable paging);
         /* username || phone || email */
+        /** Check duplicate for Create */
         @Query("SELECT case when count(u) > 0 then true else false end " +
                 "FROM User u " +
                 "WHERE (u.username = ?1 or u.phone = ?2 or u.email = ?3) and u.status not in ?4 ")
         boolean existsByUsernameOrPhoneOrEmailAndStatusNotIn(
                 String username, String phone, String email, Collection<Status> statusCollection);
         /* username || phone */
+        /** Check duplicate for Create */
         @Query("SELECT case when count(u) > 0 then true else false end " +
                 "FROM User u " +
                 "WHERE (u.username = ?1 or u.phone = ?2) and u.status not in ?3 ")

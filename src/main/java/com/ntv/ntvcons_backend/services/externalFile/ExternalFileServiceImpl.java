@@ -1,13 +1,12 @@
 package com.ntv.ntvcons_backend.services.externalFile;
 
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.fileType.FileTypeReadDTO;
 import com.ntv.ntvcons_backend.entities.ExternalFile;
 import com.ntv.ntvcons_backend.repositories.ExternalFileRepository;
-import com.ntv.ntvcons_backend.services.fileType.FileTypeService;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,8 +32,6 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     private ExternalFileRepository externalFileRepository;
     @Autowired
     private ModelMapper modelMapper;
-    @Autowired
-    private FileTypeService fileTypeService;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
@@ -39,7 +43,21 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     public ExternalFile createExternalFile(ExternalFile newFile) throws Exception {
         String errorMsg = "";
 
-        /* TODO: check url link validate */
+        /* Check valid input */
+        try {
+            /* Check protocol */
+            URL url = new URL(newFile.getFileLink());
+
+            /* Check connection */
+            URLConnection conn = url.openConnection();
+            conn.connect();
+        } catch (MalformedURLException e) {
+            /* URL is not in a valid form */
+            errorMsg += "Invalid link: '" + newFile.getFileLink() + "'. ";
+        } catch (IOException e) {
+            /* Connection couldn't be established */
+            errorMsg += "Could not connect to link: '" + newFile.getFileLink() + "'. ";
+        }
 
         /* Check FK */
         if (userService.existsById(newFile.getCreatedBy())) {
@@ -49,11 +67,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         /* Check duplicate */
         if (externalFileRepository
-                .existsByFileLinkAndStatusNotIn(
+                .existsByFileNameOrFileLinkAndStatusNotIn(
+                        newFile.getFileName(),
                         newFile.getFileLink(),
                         N_D_S_STATUS_LIST)) {
-            errorMsg += "Already exists another ExternalFile with link: '"
-                    + newFile.getFileLink() + "'. ";
+            errorMsg += "Already exists another ExternalFile with name: '" + newFile.getFileName()
+                    + "', or with link: '" + newFile.getFileLink() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty())
@@ -153,9 +172,9 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     }
 
     @Override
-    public List<ExternalFile> getAllByFileTypeId(long fileTypeId) throws Exception {
+    public List<ExternalFile> getAllByFileType(FileType fileType) throws Exception {
         List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileTypeIdAndStatusNotIn(fileTypeId, N_D_S_STATUS_LIST);
+                externalFileRepository.findAllByFileTypeAndStatusNotIn(fileType, N_D_S_STATUS_LIST);
 
         if (fileList.isEmpty())
             return null;
@@ -163,8 +182,8 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return fileList;
     }
     @Override
-    public List<ExternalFileReadDTO> getAllDTOByFileTypeId(long fileTypeId) throws Exception {
-        List<ExternalFile> fileList = getAllByFileTypeId(fileTypeId);
+    public List<ExternalFileReadDTO> getAllDTOByFileType(FileType fileType) throws Exception {
+        List<ExternalFile> fileList = getAllByFileType(fileType);
 
         if (fileList == null)
             return null;
@@ -172,9 +191,9 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return fillAllDTO(fileList, null);
     }
     @Override
-    public Page<ExternalFile> getPageAllByFileTypeId(Pageable paging, long fileTypeId) throws Exception {
+    public Page<ExternalFile> getPageAllByFileType(Pageable paging, FileType fileType) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileTypeIdAndStatusNotIn(fileTypeId, paging, N_D_S_STATUS_LIST);
+                externalFileRepository.findAllByFileTypeAndStatusNotIn(fileType, N_D_S_STATUS_LIST, paging);
 
         if (filePage.isEmpty())
             return null;
@@ -182,8 +201,8 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return filePage;
     }
     @Override
-    public List<ExternalFileReadDTO> getAllDTOInPagingByFileTypeId(Pageable paging, long fileTypeId) throws Exception {
-        Page<ExternalFile> filePage = getPageAllByFileTypeId(paging, fileTypeId);
+    public List<ExternalFileReadDTO> getAllDTOInPagingByFileType(Pageable paging, FileType fileType) throws Exception {
+        Page<ExternalFile> filePage = getPageAllByFileType(paging, fileType);
 
         if (filePage == null)
             return null;
@@ -197,51 +216,23 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     }
 
     @Override
-    public List<ExternalFile> getAllByFileTypeIdIn(Collection<Long> fileTypeIdCollection) throws Exception {
-        List<ExternalFile> fileList =
-                externalFileRepository.findAllByFileTypeIdInAndStatusNotIn(fileTypeIdCollection, N_D_S_STATUS_LIST);
-
-        if (fileList.isEmpty())
-            return null;
-
-        return fileList;
+    public ExternalFile getByFileName(String fileName) throws Exception {
+        return externalFileRepository
+                .findByFileNameAndStatusNotIn(fileName, N_D_S_STATUS_LIST)
+                .orElse(null);
     }
     @Override
-    public List<ExternalFileReadDTO> getAllDTOByFileTypeIdIn(Collection<Long> fileTypeIdCollection) throws Exception {
-        List<ExternalFile> fileList = getAllByFileTypeIdIn(fileTypeIdCollection);
+    public ExternalFileReadDTO getDTOByFileName(String fileName) throws Exception {
+        ExternalFile file = getByFileName(fileName);
 
-        if (fileList == null)
+        if (file == null)
             return null;
 
-        return fillAllDTO(fileList, null);
-    }
-    @Override
-    public Page<ExternalFile> getPageAllByFileTypeIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception {
-        Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileTypeIdInAndStatusNotIn(fileTypeIdCollection, paging, N_D_S_STATUS_LIST);
-
-        if (filePage.isEmpty())
-            return null;
-
-        return filePage;
-    }
-    @Override
-    public List<ExternalFileReadDTO> getAllDTOInPagingByFileTypeIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception {
-        Page<ExternalFile> filePage = getPageAllByFileTypeIdIn(paging, fileTypeIdCollection);
-
-        if (filePage == null)
-            return null;
-
-        List<ExternalFile> fileList = filePage.getContent();
-
-        if (fileList.isEmpty())
-            return null;
-
-        return fillAllDTO(fileList, filePage.getTotalPages());
+        return fillDTO(file);
     }
 
     @Override
-    public List<ExternalFile> getAllByNameContains(String fileName) throws Exception {
+    public List<ExternalFile> getAllByFileNameContains(String fileName) throws Exception {
         List<ExternalFile> fileList =
                 externalFileRepository.findAllByFileNameContainsAndStatusNotIn(fileName, N_D_S_STATUS_LIST);
 
@@ -251,8 +242,8 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return fileList;
     }
     @Override
-    public List<ExternalFileReadDTO> getAllDTOByNameContains(String fileName) throws Exception {
-        List<ExternalFile> fileList = getAllByNameContains(fileName);
+    public List<ExternalFileReadDTO> getAllDTOByFileNameContains(String fileName) throws Exception {
+        List<ExternalFile> fileList = getAllByFileNameContains(fileName);
 
         if (fileList == null)
             return null;
@@ -260,9 +251,9 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return fillAllDTO(fileList, null);
     }
     @Override
-    public Page<ExternalFile> getPageAllByNameContains(Pageable paging, String fileName) throws Exception {
+    public Page<ExternalFile> getPageAllByFileNameContains(Pageable paging, String fileName) throws Exception {
         Page<ExternalFile> filePage =
-                externalFileRepository.findAllByFileNameContainsAndStatusNotIn(fileName, paging, N_D_S_STATUS_LIST);
+                externalFileRepository.findAllByFileNameContainsAndStatusNotIn(fileName, N_D_S_STATUS_LIST, paging);
 
         if (filePage.isEmpty())
             return null;
@@ -270,8 +261,68 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return filePage;
     }
     @Override
-    public List<ExternalFileReadDTO> getAllDTOInPagingByNameContains(Pageable paging, String fileName) throws Exception {
-        Page<ExternalFile> filePage = getPageAllByNameContains(paging, fileName);
+    public List<ExternalFileReadDTO> getAllDTOInPagingByFileNameContains(Pageable paging, String fileName) throws Exception {
+        Page<ExternalFile> filePage = getPageAllByFileNameContains(paging, fileName);
+
+        if (filePage == null)
+            return null;
+
+        List<ExternalFile> fileList = filePage.getContent();
+
+        if (fileList.isEmpty())
+            return null;
+
+        return fillAllDTO(fileList, filePage.getTotalPages());
+    }
+
+    @Override
+    public ExternalFile getByFileLink(String fileLink) throws Exception {
+        return externalFileRepository
+                .findByFileLinkAndStatusNotIn(fileLink, N_D_S_STATUS_LIST)
+                .orElse(null);
+    }
+    @Override
+    public ExternalFileReadDTO getDTOByFileLink(String fileLink) throws Exception {
+        ExternalFile file = getByFileLink(fileLink);
+
+        if (file == null)
+            return null;
+
+        return fillDTO(file);
+    }
+
+    @Override
+    public List<ExternalFile> getAllByFileLinkContains(String fileLink) throws Exception {
+        List<ExternalFile> fileList =
+                externalFileRepository.findAllByFileLinkContainsAndStatusNotIn(fileLink, N_D_S_STATUS_LIST);
+
+        if (fileList.isEmpty())
+            return null;
+
+        return fileList;
+    }
+    @Override
+    public List<ExternalFileReadDTO> getAllDTOByFileLinkContains(String fileLink) throws Exception {
+        List<ExternalFile> fileList = getAllByFileLinkContains(fileLink);
+
+        if (fileList == null)
+            return null;
+
+        return fillAllDTO(fileList, null);
+    }
+    @Override
+    public Page<ExternalFile> getPageAllByFileLinkContains(Pageable paging, String fileLink) throws Exception {
+        Page<ExternalFile> filePage =
+                externalFileRepository.findAllByFileLinkContainsAndStatusNotIn(fileLink, N_D_S_STATUS_LIST, paging);
+
+        if (filePage.isEmpty())
+            return null;
+
+        return filePage;
+    }
+    @Override
+    public List<ExternalFileReadDTO> getAllDTOInPagingByFileLinkContains(Pageable paging, String fileLink) throws Exception {
+        Page<ExternalFile> filePage = getPageAllByFileLinkContains(paging, fileLink);
 
         if (filePage == null)
             return null;
@@ -294,7 +345,21 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         String errorMsg = "";
 
-        /* TODO: check url link validate */
+        /* Check valid input */
+        try {
+            /* Check protocol */
+            URL url = new URL(updatedFile.getFileLink());
+
+            /* Check connection */
+            URLConnection conn = url.openConnection();
+            conn.connect();
+        } catch (MalformedURLException e) {
+            /* URL is not in a valid form */
+            errorMsg += "Invalid link: '" + updatedFile.getFileLink() + "'. ";
+        } catch (IOException e) {
+            /* Connection couldn't be established */
+            errorMsg += "Could not connect to link: '" + updatedFile.getFileLink() + "'. ";
+        }
 
         /* Check FK */
         if (oldFile.getUpdatedBy() != null) {
@@ -313,12 +378,13 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         /* Check duplicate */
         if (externalFileRepository
-                .existsByFileLinkAndFileIdNotAndStatusNotIn(
+                .existsByFileNameOrFileLinkAndFileIdIsNotAndStatusNotIn(
+                        updatedFile.getFileName(),
                         updatedFile.getFileLink(),
                         updatedFile.getFileId(),
                         N_D_S_STATUS_LIST)) {
-            errorMsg += "Already exists another ExternalFile with link: '"
-                    + updatedFile.getFileLink() + "'. ";
+            errorMsg += "Already exists another ExternalFile with name: '" + updatedFile.getFileName()
+                    + "', or with link: '" + updatedFile.getFileLink() + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty())
@@ -377,29 +443,29 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         ExternalFileReadDTO fileDTO = modelMapper.map(file, ExternalFileReadDTO.class);
 
         /* Get associate fileType */
-        fileDTO.setFileType(
-                fileTypeService.getDTOById(file.getFileTypeId()));
+//        fileDTO.setFileType(
+//                fileTypeService.getDTOById(file.getFileTypeId()));
 
         return fileDTO;
     }
 
     private List<ExternalFileReadDTO> fillAllDTO(Collection<ExternalFile> fileCollection, Integer totalPage) throws Exception {
-        Set<Long> fileTypeIdSet = new HashSet<>();
-
-        for (ExternalFile file : fileCollection) {
-            fileTypeIdSet.add(file.getFileTypeId());
-        }
-
-        /* Get associate fileType */
-        Map<Long, FileTypeReadDTO> fileTypeIdFileTypeDTOMap =
-                fileTypeService.mapFileTypeIdFileTypeDTOByIdIn(fileTypeIdSet);
+//        Set<Long> fileTypeIdSet = new HashSet<>();
+//
+//        for (ExternalFile file : fileCollection) {
+//            fileTypeIdSet.add(file.getFileTypeId());
+//        }
+//
+//        /* Get associate fileType */
+//        Map<Long, FileTypeReadDTO> fileTypeIdFileTypeDTOMap =
+//                fileTypeService.mapFileTypeIdFileTypeDTOByIdIn(fileTypeIdSet);
 
         return fileCollection.stream()
                 .map(file -> {
                     ExternalFileReadDTO fileDTO =
                             modelMapper.map(file, ExternalFileReadDTO.class);
 
-                    fileDTO.setFileType(fileTypeIdFileTypeDTOMap.get(file.getFileTypeId()));
+//                    fileDTO.setFileType(fileTypeIdFileTypeDTOMap.get(file.getFileTypeId()));
 
                     fileDTO.setTotalPage(totalPage);
 
