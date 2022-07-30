@@ -74,7 +74,7 @@ public class PostController {
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for Request", e.getMessage()));
+                    new ErrorResponse("Error searching for Post", e.getMessage()));
         }
     }
     
