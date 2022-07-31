@@ -32,7 +32,7 @@ public class RequestDetailController {
     /*CREATE*/
     @PreAuthorize("hasAnyAuthority('44','54','14','24')")
     @PostMapping(value = "/v1/createRequestDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRequestDetail(@Valid @RequestBody RequestDetailCreateDTO requestDetailDTO) {
+    public ResponseEntity<Object> createRequestDetail(@RequestBody @Valid RequestDetailCreateDTO requestDetailDTO) {
         try {
             RequestDetailReadDTO newRequestDetailDTO = 
                     requestDetailService.createRequestDetailByDTO(requestDetailDTO);
@@ -190,7 +190,7 @@ public class RequestDetailController {
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
         } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
-            /* Catch invalid sortBy || searchType */
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
@@ -209,7 +209,7 @@ public class RequestDetailController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('44')")
     @PutMapping(value = "/v1/updateRequestDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRequestDetail(@Valid @RequestBody RequestDetailUpdateDTO requestDetailDTO) {
+    public ResponseEntity<Object> updateRequestDetail(@RequestBody @Valid RequestDetailUpdateDTO requestDetailDTO) {
         try {
             RequestDetailReadDTO updatedRequestDetailDTO = 
                     requestDetailService.updateRequestDetailByDTO(requestDetailDTO);

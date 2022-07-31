@@ -30,7 +30,7 @@ public class ReportController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('44')")
     @PostMapping(value = "/v1/createReport", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createReport(@Valid @RequestBody ReportCreateDTO reportDTO){
+    public ResponseEntity<Object> createReport(@RequestBody @Valid ReportCreateDTO reportDTO){
         try {
             ReportReadDTO newReportDTO = reportService.createReportByDTO(reportDTO);
 
@@ -229,7 +229,7 @@ public class ReportController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('44')")
     @PutMapping(value = "/v1/updateReport", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateReport(@Valid @RequestBody ReportUpdateDTO reportDTO){
+    public ResponseEntity<Object> updateReport(@RequestBody @Valid ReportUpdateDTO reportDTO){
         try {
             ReportReadDTO updatedReportDTO = reportService.updateReportByDTO(reportDTO);
 

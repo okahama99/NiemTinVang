@@ -30,7 +30,7 @@ public class UserController {
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PostMapping(value = "/v1/createUser", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createUser(@Valid @RequestBody UserCreateDTO userDTO) {
+    public ResponseEntity<Object> createUser(@RequestBody @Valid UserCreateDTO userDTO) {
         try {
             UserReadDTO newUserDTO = userService.createUserByDTO(userDTO);
 
@@ -224,7 +224,7 @@ public class UserController {
                               + "'. Expecting parameter of type: Long",
                           nFE.getMessage()));
         } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
-            /* Catch invalid sortBy */
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
@@ -255,7 +255,7 @@ public class UserController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateUser", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateUser(@Valid @RequestBody UserUpdateDTO userDTO){
+    public ResponseEntity<Object> updateUser(@RequestBody @Valid UserUpdateDTO userDTO){
         try {
             UserReadDTO updatedUserDTO = userService.updateUserByDTO(userDTO);
 

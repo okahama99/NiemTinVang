@@ -23,12 +23,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             (long projectId, Collection<Status> statusCollection);
     Optional<Project> findByProjectIdAndStatusNotIn
             (long projectId, Collection<Status> statusCollection);
+    Page<Project> findAllByProjectIdAndStatusNotIn
+            (long projectId, Collection<Status> statusCollection, Pageable paging);
     boolean existsAllByProjectIdInAndStatusNotIn
             (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
     List<Project> findAllByProjectIdInAndStatusNotIn
             (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
-    Page<Project> findAllByProjectIdAndStatusNotIn
-            (long projectId, Collection<Status> statusCollection, Pageable paging);
+    Page<Project> findAllByProjectIdInAndStatusNotIn
+            (Collection<Long> projectIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* Id & projectName */
     /** Check duplicate for Update */
     boolean existsByProjectNameAndProjectIdIsNotAndStatusNotIn
