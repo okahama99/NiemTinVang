@@ -13,32 +13,32 @@ import java.util.Optional;
 
 @Repository
 public interface ReportDetailRepository extends JpaRepository<ReportDetail, Long> {
-    Page<ReportDetail> findAllByStatusNotIn
-            (Collection<Status> statusCollection, Pageable paging);
+    Page<ReportDetail> findAllByStatusNotIn(
+            Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<ReportDetail> findByReportDetailIdAndStatusNotIn
-            (long reportDetailId, Collection<Status> statusCollection);
-    List<ReportDetail> findAllByReportDetailIdInAndStatusNotIn
-            (Collection<Long> reportDetailIdCollection, Collection<Status> statusCollection);
+    Optional<ReportDetail> findByReportDetailIdAndStatusNotIn(
+            long reportDetailId, Collection<Status> statusCollection);
+    List<ReportDetail> findAllByReportDetailIdInAndStatusNotIn(
+            Collection<Long> reportDetailIdCollection, Collection<Status> statusCollection);
     /* reportId & itemDesc & itemPrice */
     /** Check duplicate for Update */
-    boolean existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndStatusNotIn
-            (long reportId, String itemDesc, double itemPrice, long reportDetailId, Collection<Status> statusCollection);
+    boolean existsByReportIdAndItemDescAndItemPriceAndReportDetailIdIsNotAndStatusNotIn(
+            long reportId, String itemDesc, double itemPrice, long reportDetailId, Collection<Status> statusCollection);
 
 
     /* reportId */
-    List<ReportDetail> findAllByReportIdAndStatusNotIn
-            (long reportId, Collection<Status> statusCollection);
-    Page<ReportDetail> findAllByReportIdAndStatusNotIn
-            (long reportId, Collection<Status> statusCollection, Pageable paging);
-    List<ReportDetail> findAllByReportIdInAndStatusNotIn
-            (Collection<Long> reportIdCollection, Collection<Status> statusCollection);
-    Page<ReportDetail> findAllByReportIdInAndStatusNotIn
-            (Collection<Long> reportIdCollection, Collection<Status> statusCollection, Pageable paging);
+    List<ReportDetail> findAllByReportIdAndStatusNotIn(
+            long reportId, Collection<Status> statusCollection);
+    Page<ReportDetail> findAllByReportIdAndStatusNotIn(
+            long reportId, Collection<Status> statusCollection, Pageable paging);
+    List<ReportDetail> findAllByReportIdInAndStatusNotIn(
+            Collection<Long> reportIdCollection, Collection<Status> statusCollection);
+    Page<ReportDetail> findAllByReportIdInAndStatusNotIn(
+            Collection<Long> reportIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* reportId & itemDesc & itemPrice */
     /** Check duplicate for Create */
-    boolean existsByReportIdAndItemDescAndItemPriceAndStatusNotIn
-            (long reportId, String itemDesc, double itemPrice, Collection<Status> statusCollection);
+    boolean existsByReportIdAndItemDescAndItemPriceAndStatusNotIn(
+            long reportId, String itemDesc, double itemPrice, Collection<Status> statusCollection);
 }

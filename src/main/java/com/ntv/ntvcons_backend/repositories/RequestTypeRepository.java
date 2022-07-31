@@ -13,32 +13,32 @@ import java.util.Optional;
 
 @Repository
 public interface RequestTypeRepository extends JpaRepository<RequestType, Long> {
-    Page<RequestType> findAllByStatusNotIn
-            (Collection<Status> statusCollection, Pageable paging);
+    Page<RequestType> findAllByStatusNotIn(
+            Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByRequestTypeIdAndStatusNotIn
-            (long requestTypeId, Collection<Status> statusCollection);
-    Optional<RequestType> findByRequestTypeIdAndStatusNotIn
-            (long requestTypeId, Collection<Status> statusCollection);
-    boolean existsAllByRequestTypeIdInAndStatusNotIn
-            (Collection<Long> requestTypeIdCollection, Collection<Status> statusCollection);
-    List<RequestType> findAllByRequestTypeIdInAndStatusNotIn
-            (Collection<Long> requestTypeIdCollection, Collection<Status> statusCollection);
+    boolean existsByRequestTypeIdAndStatusNotIn(
+            long requestTypeId, Collection<Status> statusCollection);
+    Optional<RequestType> findByRequestTypeIdAndStatusNotIn(
+            long requestTypeId, Collection<Status> statusCollection);
+    boolean existsAllByRequestTypeIdInAndStatusNotIn(
+            Collection<Long> requestTypeIdCollection, Collection<Status> statusCollection);
+    List<RequestType> findAllByRequestTypeIdInAndStatusNotIn(
+            Collection<Long> requestTypeIdCollection, Collection<Status> statusCollection);
     /* Id & requestTypeName */
     /** Check duplicate requestTypeName for update */
-    boolean existsByRequestTypeNameAndRequestTypeIdIsNotAndStatusNotIn
-            (String requestTypeName, long requestTypeId, Collection<Status> statusCollection);
+    boolean existsByRequestTypeNameAndRequestTypeIdIsNotAndStatusNotIn(
+            String requestTypeName, long requestTypeId, Collection<Status> statusCollection);
 
 
     /* requestTypeName */
-    boolean existsByRequestTypeNameAndStatusNotIn
-            (String requestTypeName, Collection<Status> statusCollection);
-    Optional<RequestType> findByRequestTypeNameAndStatusNotIn
-            (String requestTypeName, Collection<Status> statusCollection);
-    List<RequestType> findAllByRequestTypeNameContainsAndStatusNotIn
-            (String requestTypeName, Collection<Status> statusCollection);
-    Page<RequestType> findAllByRequestTypeNameContainsAndStatusNotIn
-            (String requestTypeName, Collection<Status> statusCollection, Pageable paging);
+    boolean existsByRequestTypeNameAndStatusNotIn(
+            String requestTypeName, Collection<Status> statusCollection);
+    Optional<RequestType> findByRequestTypeNameAndStatusNotIn(
+            String requestTypeName, Collection<Status> statusCollection);
+    List<RequestType> findAllByRequestTypeNameContainsAndStatusNotIn(
+            String requestTypeName, Collection<Status> statusCollection);
+    Page<RequestType> findAllByRequestTypeNameContainsAndStatusNotIn(
+            String requestTypeName, Collection<Status> statusCollection, Pageable paging);
 }

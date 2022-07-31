@@ -1,7 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.projectWorker;
 
 import com.ntv.ntvcons_backend.dtos.BaseReadDTO;
-import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -13,43 +13,43 @@ import java.util.Optional;
 
 @Repository
 public interface ProjectManagerRepository extends JpaRepository<ProjectManager, Long> {
-    Page<ProjectManager> findAllByStatusNotIn
-            (Collection<Status> statusCollection, Pageable paging);
+    Page<ProjectManager> findAllByStatusNotIn(
+            Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<ProjectManager> findByProjectManagerIdAndStatusNotIn
-            (long projectManagerId, Collection<Status> statusCollection);
-    List<ProjectManager> findAllByProjectManagerIdInAndStatusNotIn
-            (Collection<Long> projectManagerIdCollection, Collection<Status> statusCollection);
+    Optional<ProjectManager> findByProjectManagerIdAndStatusNotIn(
+            long projectManagerId, Collection<Status> statusCollection);
+    List<ProjectManager> findAllByProjectManagerIdInAndStatusNotIn(
+            Collection<Long> projectManagerIdCollection, Collection<Status> statusCollection);
     /* Id & projectId & managerId */
     /** Check duplicate for update */
-    boolean existsByProjectIdAndManagerIdAndProjectManagerIdIsNotAndStatusNotIn
-            (long projectId, long managerId, long projectManagerId, Collection<Status> statusCollection);
+    boolean existsByProjectIdAndManagerIdAndProjectManagerIdIsNotAndStatusNotIn(
+            long projectId, long managerId, long projectManagerId, Collection<Status> statusCollection);
 
 
     /* projectId */
-    List<ProjectManager> findAllByProjectIdAndStatusNotIn
-            (long projectId, Collection<Status> statusCollection);
-    Page<ProjectManager> findAllByProjectIdAndStatusNotIn
-            (long projectId, Collection<Status> statusCollection, Pageable paging);
-    List<ProjectManager> findAllByProjectIdInAndStatusNotIn
-            (Collection<Long> projectIdCollection, Collection<Status> statusCollection);
-    Page<ProjectManager> findAllByProjectIdInAndStatusNotIn
-            (Collection<Long> projectIdCollection, Collection<Status> statusCollection, Pageable paging);
+    List<ProjectManager> findAllByProjectIdAndStatusNotIn(
+            long projectId, Collection<Status> statusCollection);
+    Page<ProjectManager> findAllByProjectIdAndStatusNotIn(
+            long projectId, Collection<Status> statusCollection, Pageable paging);
+    List<ProjectManager> findAllByProjectIdInAndStatusNotIn(
+            Collection<Long> projectIdCollection, Collection<Status> statusCollection);
+    Page<ProjectManager> findAllByProjectIdInAndStatusNotIn(
+            Collection<Long> projectIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* managerId */
-    List<ProjectManager> findAllByManagerIdAndStatusNotIn
-            (long managerId, Collection<Status> statusCollection);
-    Page<ProjectManager> findAllByManagerIdAndStatusNotIn
-            (long managerId, Collection<Status> statusCollection, Pageable paging);
-    List<ProjectManager> findAllByManagerIdInAndStatusNotIn
-            (Collection<Long> managerIdCollection, Collection<Status> statusCollection);
-    Page<ProjectManager> findAllByManagerIdInAndStatusNotIn
-            (Collection<Long> managerIdCollection, Collection<Status> statusCollection, Pageable paging);
+    List<ProjectManager> findAllByManagerIdAndStatusNotIn(
+            long managerId, Collection<Status> statusCollection);
+    Page<ProjectManager> findAllByManagerIdAndStatusNotIn(
+            long managerId, Collection<Status> statusCollection, Pageable paging);
+    List<ProjectManager> findAllByManagerIdInAndStatusNotIn(
+            Collection<Long> managerIdCollection, Collection<Status> statusCollection);
+    Page<ProjectManager> findAllByManagerIdInAndStatusNotIn(
+            Collection<Long> managerIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* projectId & managerId */
     /** Check duplicate for Create */
-    boolean existsByProjectIdAndManagerIdAndStatusNotIn
-            (long projectId, long managerId, Collection<Status> statusCollection);
+    boolean existsByProjectIdAndManagerIdAndStatusNotIn(
+            long projectId, long managerId, Collection<Status> statusCollection);
 }

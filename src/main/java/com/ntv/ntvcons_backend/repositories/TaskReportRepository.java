@@ -13,36 +13,36 @@ import java.util.Optional;
 
 @Repository
 public interface TaskReportRepository extends JpaRepository<TaskReport, Long> {
-    Page<TaskReport> findAllByStatusNotIn
-            (Collection<Status> statusCollection, Pageable paging);
+    Page<TaskReport> findAllByStatusNotIn(
+            Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    boolean existsByTaskReportIdAndStatusNotIn
-            (long taskReportId, Collection<Status> statusCollection);
-    Optional<TaskReport> findByTaskReportIdAndStatusNotIn
-            (long taskReportId, Collection<Status> statusCollection);
-    List<TaskReport> findAllByTaskReportIdInAndStatusNotIn
-            (Collection<Long> taskReportIdCollection, Collection<Status> statusCollection);
+    boolean existsByTaskReportIdAndStatusNotIn(
+            long taskReportId, Collection<Status> statusCollection);
+    Optional<TaskReport> findByTaskReportIdAndStatusNotIn(
+            long taskReportId, Collection<Status> statusCollection);
+    List<TaskReport> findAllByTaskReportIdInAndStatusNotIn(
+            Collection<Long> taskReportIdCollection, Collection<Status> statusCollection);
     /* Id & reportId & taskId & taskProgress */
     /** Check duplicate reportId & taskId & taskProgress for update */
-    boolean existsByReportIdAndTaskIdAndTaskReportIdIsNotAndStatusNotIn
-            (long reportId, long taskId, long taskReportId, Collection<Status> statusCollection);
+    boolean existsByReportIdAndTaskIdAndTaskReportIdIsNotAndStatusNotIn(
+            long reportId, long taskId, long taskReportId, Collection<Status> statusCollection);
 
 
     /* reportId */
-    List<TaskReport> findAllByReportIdAndStatusNotIn
-            (long reportId, Collection<Status> statusCollection);
-    List<TaskReport> findAllByReportIdInAndStatusNotIn
-            (Collection<Long> reportIdCollection, Collection<Status> statusCollection);
+    List<TaskReport> findAllByReportIdAndStatusNotIn(
+            long reportId, Collection<Status> statusCollection);
+    List<TaskReport> findAllByReportIdInAndStatusNotIn(
+            Collection<Long> reportIdCollection, Collection<Status> statusCollection);
 
 
     /* taskId */
-    List<TaskReport> findAllByTaskIdAndStatusNotIn
-            (long taskId, Collection<Status> statusCollection);
-    List<TaskReport> findAllByTaskIdInAndStatusNotIn
-            (Collection<Long> taskIdCollection, Collection<Status> statusCollection);
+    List<TaskReport> findAllByTaskIdAndStatusNotIn(
+            long taskId, Collection<Status> statusCollection);
+    List<TaskReport> findAllByTaskIdInAndStatusNotIn(
+            Collection<Long> taskIdCollection, Collection<Status> statusCollection);
     /* Id & reportId & taskId */
-    boolean existsByReportIdAndTaskIdAndStatusNotIn
-            (long reportId, long taskId, Collection<Status> statusCollection);
+    boolean existsByReportIdAndTaskIdAndStatusNotIn(
+            long reportId, long taskId, Collection<Status> statusCollection);
 }

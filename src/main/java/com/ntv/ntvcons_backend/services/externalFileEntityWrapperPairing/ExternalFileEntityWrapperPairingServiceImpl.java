@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,37 +38,47 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
 
     /* CREATE */
     @Override
-    public ExternalFileEntityWrapperPairing createPairing(ExternalFileEntityWrapperPairing newPairing) throws Exception {
+    public ExternalFileEntityWrapperPairing createPairing(long entityId, EntityType type, long fileId, long createdBy) throws Exception {
         String errorMsg = "";
 
+        EntityWrapper entityWrapper = entityWrapperService.getByEntityIdAndEntityType(entityId, type);
+
+        if (entityWrapper == null)
+            entityWrapper = entityWrapperService.createEntityWrapper(entityId, type, createdBy);
+
         /* Check FK */
-        if (entityWrapperService.existsById(newPairing.getEntityWrapperId())) {
-            errorMsg += "No EntityWrapper found with Id: '" + newPairing.getEntityWrapperId()
+        if (!entityWrapperService.existsById(entityWrapper.getEntityWrapperId())) {
+            errorMsg += "No EntityWrapper found with Id: '" + entityWrapper.getEntityWrapperId()
                     + "'. Which violate constraint: FK_EFEWP_EntityWrapper. ";
         }
-        if (externalFileService.existsById(newPairing.getExternalFileId())) {
-            errorMsg += "No ExternalFile found with Id: '" + newPairing.getExternalFileId()
+        if (!externalFileService.existsById(fileId)) {
+            errorMsg += "No ExternalFile found with Id: '" + fileId
                     + "'. Which violate constraint: FK_EFEWP_ExternalFile. ";
         }
-        if (userService.existsById(newPairing.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newPairing.getCreatedBy()
+        if (!userService.existsById(createdBy)) {
+            errorMsg += "No User (CreatedBy) found with Id: '" + createdBy
                     + "'. Which violate constraint: FK_EFEWP_User_CreatedBy. ";
         }
 
         /* Check duplicate */
         if (eFEWPairingRepository
                 .existsByEntityWrapperIdAndExternalFileIdAndStatusNotIn(
-                        newPairing.getEntityWrapperId(),
-                        newPairing.getExternalFileId(),
+                        entityWrapper.getEntityWrapperId(),
+                        fileId,
                         N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another EWEFPairing relationship between with EntityWrapper with Id: '"
-                    + newPairing.getEntityWrapperId()
-                    + "' and ExternalFile with Id: '"
-                    + newPairing.getExternalFileId() + "'. ";
+                    + entityWrapper.getEntityWrapperId()
+                    + "' and ExternalFile with Id: '" + entityWrapper + "'. ";
         }
 
         if (!errorMsg.trim().isEmpty())
             throw new IllegalArgumentException(errorMsg);
+
+        ExternalFileEntityWrapperPairing newPairing =
+                new ExternalFileEntityWrapperPairing(fileId, entityWrapper.getEntityWrapperId());
+        newPairing.setStatus(Status.ACTIVE);
+        newPairing.setCreatedBy(createdBy);
+        newPairing.setCreatedAt(LocalDateTime.now());
 
         return eFEWPairingRepository.saveAndFlush(newPairing);
     }
@@ -254,13 +265,13 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
 
         /* Check FK */
         if (!oldPairing.getEntityWrapperId().equals(updatedPairing.getEntityWrapperId())) {
-            if (entityWrapperService.existsById(updatedPairing.getEntityWrapperId())) {
+            if (!entityWrapperService.existsById(updatedPairing.getEntityWrapperId())) {
                 errorMsg += "No EntityWrapper found with Id: '" + updatedPairing.getEntityWrapperId()
                         + "'. Which violate constraint: FK_EFEWP_EntityWrapper. ";
             }
         }
         if (!oldPairing.getEntityWrapperId().equals(updatedPairing.getEntityWrapperId())) {
-            if (externalFileService.existsById(updatedPairing.getExternalFileId())) {
+            if (!externalFileService.existsById(updatedPairing.getExternalFileId())) {
                 errorMsg += "No ExternalFile found with Id: '" + updatedPairing.getExternalFileId()
                         + "'. Which violate constraint: FK_EFEWP_ExternalFile. ";
             }

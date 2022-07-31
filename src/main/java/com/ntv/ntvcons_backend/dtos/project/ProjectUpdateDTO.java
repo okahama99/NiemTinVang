@@ -4,7 +4,7 @@ import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,65 +19,65 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectUpdateDTO extends BaseUpdateDTO {
-    @ApiModelProperty(notes = "NOT NULL; Id > 0") /* Hint for Swagger */
+    @Schema(description = "NOT NULL; Id > 0") /* Hint for Swagger */
     @Positive
     @NotNull(message = "Id REQUIRED for Update")
     private Long projectId;
 
-    @ApiModelProperty(example = "Dự án xxx",
-            notes = "NOT NULL; size <= 100") /* Hint for Swagger */
+    @Schema(example = "Dự án xxx",
+            description = "NOT NULL; size <= 100") /* Hint for Swagger */
     @Size(max = 100, message = "projectName max length: 100 characters")
     @NotNull(message = "projectName REQUIRED for Update")
     private String projectName;
 
     /* TODO: reuse later
     private LocationUpdateOptionDTO location;*/
-    @ApiModelProperty(notes = "Nullable") /* Hint for Swagger */
+    @Schema(description = "Nullable") /* Hint for Swagger */
     private LocationUpdateDTO location;
 
-    @ApiModelProperty(notes = "Nullable") /* Hint for Swagger */
+    @Schema(description = "Nullable") /* Hint for Swagger */
     private BlueprintUpdateDTO blueprint;
 
-    @ApiModelProperty(notes = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
+    @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
     @Size(min = 1, message = "Need at least 1 for Update")
     private List<Long> managerIdList;
 
-    @ApiModelProperty(notes = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
+    @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
     @Size(min = 1, message = "Need at least 1 for Update")
     private List<Long> workerIdList;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
-            notes = "NOT NULL") /* Hint for Swagger */
+    @Schema(example = "yyyy-MM-dd HH:mm",
+            description = "NOT NULL") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     @NotNull(message = "planStartDate REQUIRED for Create")
     private String planStartDate;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
-            notes = "Nullable; endDate >= startDate") /* Hint for Swagger */
+    @Schema(example = "yyyy-MM-dd HH:mm",
+            description = "Nullable; endDate >= startDate") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     private String planEndDate;
 
-    @ApiModelProperty(example = "00.00",
-            notes = "Nullable; cost > 0 (if not null)") /* Hint for Swagger */
+    @Schema(example = "00.00",
+            description = "Nullable; cost > 0 (if not null)") /* Hint for Swagger */
     @Positive
     private Double estimatedCost;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
-            notes = "Nullable; date <= now") /* Hint for Swagger */
+    @Schema(example = "yyyy-MM-dd HH:mm",
+            description = "Nullable; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     private String actualStartDate;
 
     /** yyyy-MM-dd HH:mm */
-    @ApiModelProperty(example = "yyyy-MM-dd HH:mm",
-            notes = "Nullable; endDate >= startDate; date <= now") /* Hint for Swagger */
+    @Schema(example = "yyyy-MM-dd HH:mm",
+            description = "Nullable; endDate >= startDate; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     private String actualEndDate;
 
-    @ApiModelProperty(example = "00.00",
-            notes = "Nullable; cost > 0 (if not null)") /* Hint for Swagger */
+    @Schema(example = "00.00",
+            description = "Nullable; cost > 0 (if not null)") /* Hint for Swagger */
     @Positive
     private Double actualCost;
 }
