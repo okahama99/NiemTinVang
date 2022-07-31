@@ -13,31 +13,31 @@ import java.util.Optional;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
-        Page<Role> findAllByStatusNotIn
-                (Collection<Status> statusCollection, Pageable paging);
+        Page<Role> findAllByStatusNotIn(
+                Collection<Status> statusCollection, Pageable paging);
 
 
         /* Id */
-        boolean existsByRoleIdAndStatusNotIn
-                (long roleId, Collection<Status> statusCollection);
-        Optional<Role> findByRoleIdAndStatusNotIn
-                (long roleId, Collection<Status> statusCollection);
-        boolean existsAllByRoleIdInAndStatusNotIn
-                (Collection<Long> roleIdCollection, Collection<Status> statusCollection);
-        List<Role> findAllByRoleIdInAndStatusNotIn
-                (Collection<Long> roleIdCollection, Collection<Status> statusCollection);
+        boolean existsByRoleIdAndStatusNotIn(
+                long roleId, Collection<Status> statusCollection);
+        Optional<Role> findByRoleIdAndStatusNotIn(
+                long roleId, Collection<Status> statusCollection);
+        boolean existsAllByRoleIdInAndStatusNotIn(
+                Collection<Long> roleIdCollection, Collection<Status> statusCollection);
+        List<Role> findAllByRoleIdInAndStatusNotIn(
+                Collection<Long> roleIdCollection, Collection<Status> statusCollection);
         /* Id & roleName */
         /** Check duplicate roleName for update */
-        boolean existsByRoleNameAndRoleIdIsNotAndStatusNotIn
-                (String roleName, long roleId, Collection<Status> statusCollection);
+        boolean existsByRoleNameAndRoleIdIsNotAndStatusNotIn(
+                String roleName, long roleId, Collection<Status> statusCollection);
 
         /* roleName */
-        boolean existsByRoleNameAndStatusNotIn
-                (String roleName, Collection<Status> statusCollection);
-        Optional<Role> findByRoleNameAndStatusNotIn
-                (String roleName, Collection<Status> statusCollection);
-        List<Role> findAllByRoleNameContainsAndStatusNotIn
-                (String roleName, Collection<Status> statusCollection);
-        Page<Role> findAllByRoleNameContainsAndStatusNotIn
-                (String roleName, Collection<Status> statusCollection, Pageable paging);
+        boolean existsByRoleNameAndStatusNotIn(
+                String roleName, Collection<Status> statusCollection);
+        Optional<Role> findByRoleNameAndStatusNotIn(
+                String roleName, Collection<Status> statusCollection);
+        List<Role> findAllByRoleNameContainsAndStatusNotIn(
+                String roleName, Collection<Status> statusCollection);
+        Page<Role> findAllByRoleNameContainsAndStatusNotIn(
+                String roleName, Collection<Status> statusCollection, Pageable paging);
 }

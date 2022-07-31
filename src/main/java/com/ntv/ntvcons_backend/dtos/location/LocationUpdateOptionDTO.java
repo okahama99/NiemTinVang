@@ -1,6 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.location;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class LocationUpdateOptionDTO implements Serializable {
-    @ApiModelProperty(example = "UPDATE_EXISTING_LOCATION_USED") /* Hint for Swagger */
+    @Schema(example = "UPDATE_EXISTING_LOCATION_USED") /* Hint for Swagger */
     @NotNull(message = "updateOption REQUIRED for Update")
     private UpdateOption updateOption;
 

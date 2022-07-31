@@ -1,7 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.taskReport;
 
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,12 +27,12 @@ public class TaskReportUpdateDTO extends BaseUpdateDTO {
     @NotNull(message = "reportId REQUIRED for Update")
     private Long reportId;
 
-    @ApiModelProperty(example = "50%") /* Hint for Swagger */
+    @Schema(example = "50%") /* Hint for Swagger */
     @Size(max = 100, message = "taskName max length: 100 characters")
     @NotNull(message = "taskProgress REQUIRED for Update")
     private String taskProgress;
 
-    @ApiModelProperty(example = "Xây xxx") /* Hint for Swagger */
+    @Schema(example = "Xây xxx") /* Hint for Swagger */
     @Size(max = 100, message = "taskNote max length: 100 characters")
     private String taskNote;
 }

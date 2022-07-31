@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.services.externalFile;
 
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileUpdateDTO;
@@ -29,20 +30,30 @@ public interface ExternalFileService {
     List<ExternalFileReadDTO> getAllDTOByIdIn(Collection<Long> fileIdCollection) throws Exception;
     Map<Long, ExternalFileReadDTO> mapFileIdExternalFileDTOByIdIn(Collection<Long> fileIdCollection) throws Exception;
 
-    List<ExternalFile> getAllByFileTypeId(long fileTypeId) throws Exception;
-    List<ExternalFileReadDTO> getAllDTOByFileTypeId(long fileTypeId) throws Exception;
-    Page<ExternalFile> getPageAllByFileTypeId(Pageable paging, long fileTypeId) throws Exception;
-    List<ExternalFileReadDTO> getAllDTOInPagingByFileTypeId(Pageable paging, long fileTypeId) throws Exception;
+    List<ExternalFile> getAllByFileType(FileType fileType) throws Exception;
+    List<ExternalFileReadDTO> getAllDTOByFileType(FileType fileType) throws Exception;
+    Page<ExternalFile> getPageAllByFileType(Pageable paging, FileType fileTypeId) throws Exception;
+    List<ExternalFileReadDTO> getAllDTOInPagingByFileType(Pageable paging, FileType fileType) throws Exception;
 
-    List<ExternalFile> getAllByFileTypeIdIn(Collection<Long> fileTypeIdCollection) throws Exception;
-    List<ExternalFileReadDTO> getAllDTOByFileTypeIdIn(Collection<Long> fileTypeIdCollection) throws Exception;
-    Page<ExternalFile> getPageAllByFileTypeIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception;
-    List<ExternalFileReadDTO> getAllDTOInPagingByFileTypeIdIn(Pageable paging, Collection<Long> fileTypeIdCollection) throws Exception;
+    boolean existsByFileName(String fileName) throws Exception;
+    ExternalFile getByFileName(String fileName) throws Exception;
+    ExternalFileReadDTO getDTOByFileName(String fileName) throws Exception;
 
-    List<ExternalFile> getAllByNameContains(String fileName) throws Exception;
-    List<ExternalFileReadDTO> getAllDTOByNameContains(String fileName) throws Exception;
-    Page<ExternalFile> getPageAllByNameContains(Pageable paging, String fileName) throws Exception;
-    List<ExternalFileReadDTO> getAllDTOInPagingByNameContains(Pageable paging, String fileName) throws Exception;
+    List<ExternalFile> getAllByFileNameContains(String fileName) throws Exception;
+    List<ExternalFileReadDTO> getAllDTOByFileNameContains(String fileName) throws Exception;
+    Page<ExternalFile> getPageAllByFileNameContains(Pageable paging, String fileName) throws Exception;
+    List<ExternalFileReadDTO> getAllDTOInPagingByFileNameContains(Pageable paging, String fileName) throws Exception;
+
+    boolean existsByFileLink(String fileLink) throws Exception;
+    ExternalFile getByFileLink(String fileLink) throws Exception;
+    ExternalFileReadDTO getDTOByFileLink(String fileLink) throws Exception;
+
+    List<ExternalFile> getAllByFileLinkContains(String fileLink) throws Exception;
+    List<ExternalFileReadDTO> getAllDTOByFileLinkContains(String fileLink) throws Exception;
+    Page<ExternalFile> getPageAllByFileLinkContains(Pageable paging, String fileLink) throws Exception;
+    List<ExternalFileReadDTO> getAllDTOInPagingByFileLinkContains(Pageable paging, String fileLink) throws Exception;
+
+    boolean existsByFileNameOrFileLink(String fileName, String fileLink) throws Exception;
 
     /* UPDATE */
     ExternalFile updateExternalFile(ExternalFile updatedFile) throws Exception;

@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.entities;
 
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,12 +22,12 @@ public class ExternalFile extends BaseEntity {
     @Column(name = "fileId", nullable = false)
     private Long fileId;
 
-    @Column(name = "fileTypeId", nullable = false)
-    private Long fileTypeId;
+    @Column(name = "fileType" /*, nullable = false*/, length = 50)
+    private FileType fileType;
 
     @Column(name = "fileName", nullable = false, length = 100)
     private String fileName;
 
-    @Column(name = "fileLink", nullable = false, length = 100, unique = true)
+    @Column(name = "fileLink", nullable = false, length = 255, unique = true)
     private String fileLink;
 }

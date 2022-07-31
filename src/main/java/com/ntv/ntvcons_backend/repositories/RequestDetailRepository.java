@@ -13,32 +13,32 @@ import java.util.Optional;
 
 @Repository
 public interface RequestDetailRepository extends JpaRepository<RequestDetail, Long> {
-    Page<RequestDetail> findAllByStatusNotIn
-            (Collection<Status> statusCollection, Pageable paging);
+    Page<RequestDetail> findAllByStatusNotIn(
+            Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<RequestDetail> findByRequestDetailIdAndStatusNotIn
-            (long requestDetailId, Collection<Status> statusCollection);
-    List<RequestDetail> findAllByRequestDetailIdInAndStatusNotIn
-            (Collection<Long> requestDetailIdCollection, Collection<Status> statusCollection);
+    Optional<RequestDetail> findByRequestDetailIdAndStatusNotIn(
+            long requestDetailId, Collection<Status> statusCollection);
+    List<RequestDetail> findAllByRequestDetailIdInAndStatusNotIn(
+            Collection<Long> requestDetailIdCollection, Collection<Status> statusCollection);
     /* Id & requestId & itemDesc & itemPrice */
     /** Check duplicate for Update */
-    boolean existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndStatusNotIn
-            (long requestId, String itemDesc, double itemPrice, long requestDetailId, Collection<Status> statusCollection);
+    boolean existsByRequestIdAndItemDescAndItemPriceAndRequestDetailIdIsNotAndStatusNotIn(
+            long requestId, String itemDesc, double itemPrice, long requestDetailId, Collection<Status> statusCollection);
 
 
     /* requestId */
-    List<RequestDetail> findAllByRequestIdAndStatusNotIn
-            (long requestId, Collection<Status> statusCollection);
-    Page<RequestDetail> findAllByRequestIdAndStatusNotIn
-            (long requestId, Collection<Status> statusCollection, Pageable paging);
-    List<RequestDetail> findAllByRequestIdInAndStatusNotIn
-            (Collection<Long> requestIdCollection, Collection<Status> statusCollection);
-    Page<RequestDetail> findAllByRequestIdInAndStatusNotIn
-            (Collection<Long> requestIdCollection, Collection<Status> statusCollection, Pageable paging);
+    List<RequestDetail> findAllByRequestIdAndStatusNotIn(
+            long requestId, Collection<Status> statusCollection);
+    Page<RequestDetail> findAllByRequestIdAndStatusNotIn(
+            long requestId, Collection<Status> statusCollection, Pageable paging);
+    List<RequestDetail> findAllByRequestIdInAndStatusNotIn(
+            Collection<Long> requestIdCollection, Collection<Status> statusCollection);
+    Page<RequestDetail> findAllByRequestIdInAndStatusNotIn(
+            Collection<Long> requestIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* requestId & itemDesc & itemPrice */
     /** Check duplicate for Update */
-    boolean existsByRequestIdAndItemDescAndItemPriceAndStatusNotIn
-            (long requestId, String itemDesc, double itemPrice, Collection<Status> statusCollection);
+    boolean existsByRequestIdAndItemDescAndItemPriceAndStatusNotIn(
+            long requestId, String itemDesc, double itemPrice, Collection<Status> statusCollection);
 }

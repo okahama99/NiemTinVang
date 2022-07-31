@@ -7,8 +7,6 @@ import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostModels.CreatePostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
-import com.ntv.ntvcons_backend.repositories.PostCategoryRepository;
-import com.ntv.ntvcons_backend.repositories.PostRepository;
 import com.ntv.ntvcons_backend.services.post.PostService;
 import com.ntv.ntvcons_backend.services.postCategory.PostCategoryService;
 import com.ntv.ntvcons_backend.utils.MiscUtil;

@@ -14,59 +14,59 @@ import java.util.Optional;
 
 @Repository
 public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Long> {
-    Page<TaskAssignment> findAllByStatusNotIn
-            (Collection<Status> statusCollection, Pageable paging);
+    Page<TaskAssignment> findAllByStatusNotIn(
+            Collection<Status> statusCollection, Pageable paging);
 
 
     /* Id */
-    Optional<TaskAssignment> findByAssignmentIdAndStatusNotIn
-            (long assignmentId, Collection<Status> statusCollection);
-    List<TaskAssignment> findAllByAssignmentIdInAndStatusNotIn
-            (Collection<Long> assignmentIdCollection, Collection<Status> statusCollection);
+    Optional<TaskAssignment> findByAssignmentIdAndStatusNotIn(
+            long assignmentId, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByAssignmentIdInAndStatusNotIn(
+            Collection<Long> assignmentIdCollection, Collection<Status> statusCollection);
     /* Id & taskId & assignerId & assigneeId */
-    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndStatusNotIn
-            (long taskId, long assignerId, long assigneeId, long assignmentId, Collection<Status> statusCollection);
+    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndAssignmentIdIsNotAndStatusNotIn(
+            long taskId, long assignerId, long assigneeId, long assignmentId, Collection<Status> statusCollection);
 
 
     /* taskId */
-    Optional<TaskAssignment> findByTaskIdAndStatusNotIn
-            (long taskId, Collection<Status> statusCollection);
-    List<TaskAssignment> findAllByTaskIdInAndStatusNotIn
-            (Collection<Long> taskIdCollection, Collection<Status> statusCollection);
-    Page<TaskAssignment> findAllByTaskIdInAndStatusNotIn
-            (Collection<Long> taskIdCollection, Collection<Status> statusCollection, Pageable paging);
+    Optional<TaskAssignment> findByTaskIdAndStatusNotIn(
+            long taskId, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByTaskIdInAndStatusNotIn(
+            Collection<Long> taskIdCollection, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByTaskIdInAndStatusNotIn(
+            Collection<Long> taskIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* assignerId */
-    List<TaskAssignment> findAllByAssignerIdAndStatusNotIn
-            (long assignerId, Collection<Status> statusCollection);
-    Page<TaskAssignment> findAllByAssignerIdAndStatusNotIn
-            (long assignerId, Collection<Status> statusCollection, Pageable paging);
-    List<TaskAssignment> findAllByAssignerIdInAndStatusNotIn
-            (Collection<Long> assignerIdCollection, Collection<Status> statusCollection);
-    Page<TaskAssignment> findAllByAssignerIdInAndStatusNotIn
-            (Collection<Long> assignerIdCollection, Collection<Status> statusCollection, Pageable paging);
+    List<TaskAssignment> findAllByAssignerIdAndStatusNotIn(
+            long assignerId, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByAssignerIdAndStatusNotIn(
+            long assignerId, Collection<Status> statusCollection, Pageable paging);
+    List<TaskAssignment> findAllByAssignerIdInAndStatusNotIn(
+            Collection<Long> assignerIdCollection, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByAssignerIdInAndStatusNotIn(
+            Collection<Long> assignerIdCollection, Collection<Status> statusCollection, Pageable paging);
 
 
     /* assigneeId */
-    List<TaskAssignment> findAllByAssigneeIdAndStatusNotIn
-            (long assigneeId, Collection<Status> statusCollection);
-    Page<TaskAssignment> findAllByAssigneeIdAndStatusNotIn
-            (long assigneeId, Collection<Status> statusCollection, Pageable paging);
-    List<TaskAssignment> findAllByAssigneeIdInAndStatusNotIn
-            (Collection<Long> assigneeIdCollection, Collection<Status> statusCollection);
-    Page<TaskAssignment> findAllByAssigneeIdInAndStatusNotIn
-            (Collection<Long> assigneeIdCollection, Collection<Status> statusCollection, Pageable paging);
+    List<TaskAssignment> findAllByAssigneeIdAndStatusNotIn(
+            long assigneeId, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByAssigneeIdAndStatusNotIn(
+            long assigneeId, Collection<Status> statusCollection, Pageable paging);
+    List<TaskAssignment> findAllByAssigneeIdInAndStatusNotIn(
+            Collection<Long> assigneeIdCollection, Collection<Status> statusCollection);
+    Page<TaskAssignment> findAllByAssigneeIdInAndStatusNotIn(
+            Collection<Long> assigneeIdCollection, Collection<Status> statusCollection, Pageable paging);
     /* taskId & assignerId & assigneeId */
-    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndStatusNotIn
-            (long taskId, long assignerId, long assigneeId, Collection<Status> statusCollection);
+    boolean existsByTaskIdAndAssignerIdAndAssigneeIdAndStatusNotIn(
+            long taskId, long assignerId, long assigneeId, Collection<Status> statusCollection);
 
 
     /* assignDate */
-    List<TaskAssignment> findAllByAssignDateAfterAndStatusNotIn
-            (LocalDateTime afterDate, Collection<Status> statusCollection);
-    List<TaskAssignment> findAllByAssignDateBeforeAndStatusNotIn
-            (LocalDateTime beforeDate, Collection<Status> statusCollection);
-    List<TaskAssignment> findAllByAssignDateBetweenAndStatusNotIn
-            (LocalDateTime fromDate, LocalDateTime toDate, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByAssignDateAfterAndStatusNotIn(
+            LocalDateTime afterDate, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByAssignDateBeforeAndStatusNotIn(
+            LocalDateTime beforeDate, Collection<Status> statusCollection);
+    List<TaskAssignment> findAllByAssignDateBetweenAndStatusNotIn(
+            LocalDateTime fromDate, LocalDateTime toDate, Collection<Status> statusCollection);
 }

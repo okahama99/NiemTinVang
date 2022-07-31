@@ -2,8 +2,7 @@ package com.ntv.ntvcons_backend.dtos.worker;
 
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.location.LocationUpdateOptionDTO;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,17 +19,17 @@ public class WorkerUpdateDTO extends BaseCreateDTO {
     @NotNull(message = "Id REQUIRED for Update")
     private Long workerId;
 
-    @ApiModelProperty(example = "Nguyen Van A") /* Hint for Swagger */
+    @Schema(example = "Nguyen Van A") /* Hint for Swagger */
     @Size(max = 100, message = "fullName max length: 100 characters")
     @NotNull(message = "fullName REQUIRED for Update")
     private String fullName;
 
-    @ApiModelProperty(example = "xxxxxxxxx") /* Hint for Swagger */
+    @Schema(example = "xxxxxxxxx") /* Hint for Swagger */
     @Size(max = 20, message = "citizenId max length: 20 characters")
     @NotNull(message = "citizenId REQUIRED for Update")
     private String citizenId;
 
-    @ApiModelProperty(example = "xxxxxxxxx") /* Hint for Swagger */
+    @Schema(example = "xxxxxxxxx") /* Hint for Swagger */
     @Size(max = 100, message = "socialSecurityCode max length: 100 characters")
     @NotNull(message = "socialSecurityCode REQUIRED for Update")
     private String socialSecurityCode;
