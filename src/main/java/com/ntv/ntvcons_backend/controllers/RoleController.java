@@ -30,7 +30,7 @@ public class RoleController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createRole", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRole(@Valid @RequestBody RoleCreateDTO roleDTO){
+    public ResponseEntity<Object> createRole(@RequestBody @Valid RoleCreateDTO roleDTO){
         try {
             RoleReadDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
 
@@ -166,10 +166,10 @@ public class RoleController {
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for Role with ";
 
@@ -186,7 +186,7 @@ public class RoleController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateRole", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRole(@Valid @RequestBody RoleUpdateDTO roleDTO){
+    public ResponseEntity<Object> updateRole(@RequestBody @Valid RoleUpdateDTO roleDTO){
         try {
             RoleReadDTO updatedRoleDTO = roleService.updateRoleByDTO(roleDTO);
 

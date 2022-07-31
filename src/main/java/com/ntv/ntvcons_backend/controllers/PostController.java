@@ -72,7 +72,7 @@ public class PostController {
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for Request", e.getMessage()));
+                    new ErrorResponse("Error searching for Post", e.getMessage()));
         }
     }
     
@@ -198,10 +198,10 @@ public class PostController {
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        }  catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for Post with ";
 

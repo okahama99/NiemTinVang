@@ -2,10 +2,10 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
-import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerUpdateDTO;
+import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -19,30 +19,30 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/projectManager")
-public class ProjectManagerController {
+@RequestMapping("/projectWorker")
+public class ProjectWorkerController {
     @Autowired
-    private ProjectManagerService projectManagerService;
+    private ProjectWorkerService projectWorkerService;
     @Autowired
     private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @PostMapping(value = "/v1/createProjectManager", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createProjectManager(@RequestBody @Valid ProjectManagerCreateDTO projectManagerDTO) {
+    @PostMapping(value = "/v1/createProjectWorker", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createProjectWorker(@RequestBody @Valid ProjectWorkerCreateDTO projectWorkerDTO) {
         try {
-            ProjectManagerReadDTO newProjectManagerDTO =
-                    projectManagerService.createProjectManagerByDTO(projectManagerDTO);
+            ProjectWorkerReadDTO newProjectWorkerDTO =
+                    projectWorkerService.createProjectWorkerByDTO(projectWorkerDTO);
 
-            return ResponseEntity.ok().body(newProjectManagerDTO);
+            return ResponseEntity.ok().body(newProjectWorkerDTO);
         } catch (IllegalArgumentException iAE) {
-            /* Catch not found Project/User by respective Id, which violate FK constraint */
+            /* Catch not found Project/Worker by respective Id, which violate FK constraint */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error creating ProjectManager. ",
+                    new ErrorResponse("Error creating ProjectWorker. ",
                             e.getMessage()));
         }
     }
@@ -55,47 +55,47 @@ public class ProjectManagerController {
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<ProjectManagerReadDTO> projectManagerList =
-                    projectManagerService.getAllDTOInPaging(
+            List<ProjectWorkerReadDTO> projectWorkerList =
+                    projectWorkerService.getAllDTOInPaging(
                             miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
-            if (projectManagerList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ProjectManager found");
+            if (projectWorkerList == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ProjectWorker found");
             }
 
-            return ResponseEntity.ok().body(projectManagerList);
+            return ResponseEntity.ok().body(projectWorkerList);
         } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
             /* Catch invalid sortBy */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for ProjectManager", e.getMessage()));
+                    new ErrorResponse("Error searching for ProjectWorker", e.getMessage()));
         }
     }
 
     @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
-                                             @RequestParam SearchType.PROJECT_MANAGER searchType) {
+                                             @RequestParam SearchType.PROJECT_WORKER searchType) {
         try {
-            ProjectManagerReadDTO projectManagerDTO;
+            ProjectWorkerReadDTO projectWorkerDTO;
 
             switch (searchType) {
                 case BY_ID:
-                    projectManagerDTO = projectManagerService.getDTOById(Long.parseLong(searchParam));
+                    projectWorkerDTO = projectWorkerService.getDTOById(Long.parseLong(searchParam));
 
-                    if (projectManagerDTO == null) {
+                    if (projectWorkerDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No ProjectManager found with Id: '" + searchParam + "'. ");
+                                .body("No ProjectWorker found with Id: '" + searchParam + "'. ");
                     }
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity ProjectManager");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ProjectWorker");
             }
 
-            return ResponseEntity.ok().body(projectManagerDTO);
+            return ResponseEntity.ok().body(projectWorkerDTO);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
@@ -107,7 +107,7 @@ public class ProjectManagerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "Error searching for ProjectManager with ";
+            String errorMsg = "Error searching for ProjectWorker with ";
 
             switch (searchType) {
                 case BY_ID:
@@ -122,7 +122,7 @@ public class ProjectManagerController {
     @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                                @RequestParam SearchType.ALL_PROJECT_MANAGER searchType,
+                                                @RequestParam SearchType.ALL_PROJECT_WORKER searchType,
                                                 @RequestParam int pageNo,
                                                 @RequestParam int pageSize,
                                                 @RequestParam String sortBy,
@@ -130,54 +130,54 @@ public class ProjectManagerController {
         try {
             Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
-            List<ProjectManagerReadDTO> projectManagerDTOList;
+            List<ProjectWorkerReadDTO> projectWorkerDTOList;
 
             switch (searchType) {
                 case BY_PROJECT_ID:
-                    projectManagerDTOList =
-                            projectManagerService.getAllDTOInPagingByProjectId(paging, Long.parseLong(searchParam));
+                    projectWorkerDTOList =
+                            projectWorkerService.getAllDTOInPagingByProjectId(paging, Long.parseLong(searchParam));
 
-                    if (projectManagerDTOList == null) {
+                    if (projectWorkerDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No ProjectManager found with projectId: '" + searchParam + "'. ");
+                                .body("No ProjectWorker found with projectId: '" + searchParam + "'. ");
                     }
                     break;
 
-                case BY_MANAGER_ID:
-                    projectManagerDTOList =
-                            projectManagerService.getAllDTOInPagingByManagerId(paging, Long.parseLong(searchParam));
+                case BY_WORKER_ID:
+                    projectWorkerDTOList =
+                            projectWorkerService.getAllDTOInPagingByWorkerId(paging, Long.parseLong(searchParam));
 
-                    if (projectManagerDTOList == null) {
+                    if (projectWorkerDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No ProjectManager found with userId (managerId): '" + searchParam + "'. ");
+                                .body("No ProjectWorker found with userId (managerId): '" + searchParam + "'. ");
                     }
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity ProjectManager");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ProjectWorker");
             }
 
-            return ResponseEntity.ok().body(projectManagerDTOList);
+            return ResponseEntity.ok().body(projectWorkerDTOList);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+        }  catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
             /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "Error searching for ProjectManager with ";
+            String errorMsg = "Error searching for ProjectWorker with ";
 
             switch (searchType) {
                 case BY_PROJECT_ID:
                     errorMsg += "projectId: '" + searchParam + "'. ";
                     break;
 
-                case BY_MANAGER_ID:
-                    errorMsg += "userId (managerId): '" + searchParam + "'. ";
+                case BY_WORKER_ID:
+                    errorMsg += "workerId: '" + searchParam + "'. ";
                     break;
             }
 
@@ -187,39 +187,39 @@ public class ProjectManagerController {
     
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @PutMapping(value = "/v1/updateProjectManager", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProjectManager(@RequestBody @Valid ProjectManagerUpdateDTO projectManagerDTO){
+    @PutMapping(value = "/v1/updateProjectWorker", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateProjectWorker(@RequestBody @Valid ProjectWorkerUpdateDTO projectWorkerDTO){
         try {
-            ProjectManagerReadDTO updatedProjectManagerDTO =
-                    projectManagerService.updateProjectManagerByDTO(projectManagerDTO);
+            ProjectWorkerReadDTO updatedProjectWorkerDTO =
+                    projectWorkerService.updateProjectWorkerByDTO(projectWorkerDTO);
 
-            if (updatedProjectManagerDTO == null) {
+            if (updatedProjectWorkerDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No ProjectManager found with Id: '" + projectManagerDTO.getProjectManagerId() + "'. ");
+                        .body("No ProjectWorker found with Id: '" + projectWorkerDTO.getProjectWorkerId() + "'. ");
             }
 
-            return ResponseEntity.ok().body(updatedProjectManagerDTO);
+            return ResponseEntity.ok().body(updatedProjectWorkerDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating ProjectManager with Id: '" + projectManagerDTO.getProjectManagerId() + "'. ",
+                    new ErrorResponse("Error updating ProjectWorker with Id: '" + projectWorkerDTO.getProjectWorkerId() + "'. ",
                             e.getMessage()));
         }
     }
 
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @DeleteMapping(value = "/v1/deleteProjectManager/{projectManagerId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteProjectManager(@PathVariable(name = "projectManagerId") long projectManagerId){
+    @DeleteMapping(value = "/v1/deleteProjectWorker/{projectWorkerId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteProjectWorker(@PathVariable(name = "projectWorkerId") long projectWorkerId){
         try {
-            if (!projectManagerService.deleteProjectManager(projectManagerId)) {
+            if (!projectWorkerService.deleteProjectWorker(projectWorkerId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No ProjectManager found with Id: '" + projectManagerId + "'. ");
+                        .body("No ProjectWorker found with Id: '" + projectWorkerId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted ProjectManager with Id: '" + projectManagerId + "'. ");
+            return ResponseEntity.ok().body("Deleted ProjectWorker with Id: '" + projectWorkerId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting ProjectManager with Id: '" + projectManagerId + "'. ", e.getMessage()));
+                    new ErrorResponse("Error deleting ProjectWorker with Id: '" + projectWorkerId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

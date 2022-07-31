@@ -62,7 +62,7 @@ public class RequestController {
     }
     @PreAuthorize("hasAnyAuthority('44')")
     @PostMapping(value = "/v1.1/createRequest", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRequestAlt1(@Valid @RequestBody RequestCreateDTO requestDTO) {
+    public ResponseEntity<Object> createRequestAlt1(@RequestBody @Valid RequestCreateDTO requestDTO) {
         try {
             RequestReadDTO newRequestDTO = requestService.createRequestByDTO(requestDTO);
 

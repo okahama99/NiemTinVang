@@ -31,7 +31,7 @@ public class ExternalFileController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @PostMapping(value = "/v1/createExternalFile", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createExternalFile(@Valid @RequestBody ExternalFileCreateDTO externalFileDTO) {
+    public ResponseEntity<Object> createExternalFile(@RequestBody @Valid ExternalFileCreateDTO externalFileDTO) {
         try {
             ExternalFileReadDTO newExternalFileDTO =
                     externalFileService.createExternalFileByDTO(externalFileDTO);
@@ -222,7 +222,7 @@ public class ExternalFileController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @PutMapping(value = "/v1/updateExternalFile", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateExternalFile(@Valid @RequestBody ExternalFileUpdateDTO externalFileDTO) {
+    public ResponseEntity<Object> updateExternalFile(@RequestBody @Valid ExternalFileUpdateDTO externalFileDTO) {
         try {
             ExternalFileReadDTO updatedExternalFileDTO = externalFileService.updateExternalFileByDTO(externalFileDTO);
 

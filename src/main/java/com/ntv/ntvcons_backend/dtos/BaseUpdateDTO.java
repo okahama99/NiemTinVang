@@ -21,5 +21,5 @@ public abstract class BaseUpdateDTO implements Serializable {
     /* TODO: replace later or dynamic change */
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */
-    private final Status status = Status.ACTIVE;
+    private Status status = Status.ACTIVE;
 }

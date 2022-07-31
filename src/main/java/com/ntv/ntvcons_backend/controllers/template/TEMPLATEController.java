@@ -12,7 +12,7 @@ public class TEMPLATEController {
 //    /* ================================================ Ver 1 ================================================ */
 //    /* CREATE */
 //    @PostMapping(value = "/v1/createTEMPLATE", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> createTEMPLATE(@Valid @RequestBody TEMPLATECreateDTO temPlateDTO){
+//    public ResponseEntity<Object> createTEMPLATE(@RequestBody @Valid TEMPLATECreateDTO temPlateDTO){
 //        try {
 //            TEMPLATEReadDTO newTEMPLATEDTO = temPlateService.createTEMPLATEByDTO(temPlateDTO);
 //
@@ -90,10 +90,10 @@ public class TEMPLATEController {
 //                          "Invalid parameter type for searchType: '" + searchType
 //                              + "'. Expecting parameter of type: Long",
 //                          nFE.getMessage()));
-//        } catch (IllegalArgumentException iAE) {
-//            /* Catch invalid searchType */
+//        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+//            /* Catch invalid sortBy/searchType */
 //            return ResponseEntity.badRequest().body(
-//                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+//                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
 //        } catch (Exception e) {
 //            String errorMsg = "Error searching for TEMPLATE with ";
 //
@@ -113,7 +113,7 @@ public class TEMPLATEController {
 //
 //    /* UPDATE */
 //    @PutMapping(value = "/v1/updateTEMPLATE", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> updateTEMPLATE(@Valid @RequestBody TEMPLATEUpdateDTO temPlateDTO){
+//    public ResponseEntity<Object> updateTEMPLATE(@RequestBody @Valid TEMPLATEUpdateDTO temPlateDTO){
 //        try {
 //            TEMPLATEReadDTO updatedTEMPLATEDTO = temPlateService.updateTEMPLATEByDTO(temPlateDTO);
 //

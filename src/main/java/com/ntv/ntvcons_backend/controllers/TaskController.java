@@ -32,7 +32,7 @@ public class TaskController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createTask", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createTask(@Valid @RequestBody TaskCreateDTO taskDTO,
+    public ResponseEntity<Object> createTask(@RequestBody @Valid TaskCreateDTO taskDTO,
                                              @RequestHeader(name = "Authorization") String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
@@ -181,9 +181,10 @@ public class TaskController {
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for Task with ";
 
@@ -208,7 +209,7 @@ public class TaskController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateTask", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateTask(@Valid @RequestBody TaskUpdateDTO taskDTO,
+    public ResponseEntity<Object> updateTask(@RequestBody @Valid TaskUpdateDTO taskDTO,
                                              @RequestHeader(name = "Authorization") String token) {
         try {
             /* TODO: jwtUtil get jwt auto */

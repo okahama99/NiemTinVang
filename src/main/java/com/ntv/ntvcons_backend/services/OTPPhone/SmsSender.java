@@ -1,4 +1,4 @@
-package com.ntv.ntvcons_backend.services.OTP2;
+package com.ntv.ntvcons_backend.services.OTPPhone;
 
 public interface SmsSender {
 

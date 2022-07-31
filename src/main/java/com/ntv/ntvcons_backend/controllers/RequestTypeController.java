@@ -30,7 +30,7 @@ public class RequestTypeController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createRequestType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRequestType(@Valid @RequestBody RequestTypeCreateDTO requestTypeDTO){
+    public ResponseEntity<Object> createRequestType(@RequestBody @Valid RequestTypeCreateDTO requestTypeDTO){
         try {
             RequestTypeReadDTO newRequestTypeDTO = 
                     requestTypeService.createRequestTypeByDTO(requestTypeDTO);
@@ -167,10 +167,10 @@ public class RequestTypeController {
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for RequestType with ";
 
@@ -187,7 +187,7 @@ public class RequestTypeController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateRequestType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRequestType(@Valid @RequestBody RequestTypeUpdateDTO requestTypeDTO){
+    public ResponseEntity<Object> updateRequestType(@RequestBody @Valid RequestTypeUpdateDTO requestTypeDTO){
         try {
             RequestTypeReadDTO updatedRequestTypeDTO = requestTypeService.updateRequestTypeByDTO(requestTypeDTO);
 
