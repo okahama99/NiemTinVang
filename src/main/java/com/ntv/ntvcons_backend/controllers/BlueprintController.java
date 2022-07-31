@@ -32,7 +32,7 @@ public class BlueprintController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createBlueprint(@Valid @RequestBody BlueprintCreateDTO blueprintDTO) {
+    public ResponseEntity<Object> createBlueprint(@RequestBody @Valid BlueprintCreateDTO blueprintDTO) {
         try {
             BlueprintReadDTO newBlueprintDTO = blueprintService.createBlueprintByDTO(blueprintDTO);
 
@@ -223,10 +223,10 @@ public class BlueprintController {
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
         } */
-        catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for Blueprint with ";
 
@@ -257,7 +257,7 @@ public class BlueprintController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateBlueprint(@Valid @RequestBody BlueprintUpdateDTO blueprintDTO) {
+    public ResponseEntity<Object> updateBlueprint(@RequestBody @Valid BlueprintUpdateDTO blueprintDTO) {
         try {
             BlueprintReadDTO updatedBlueprintDTO = blueprintService.updateBlueprintByDTO(blueprintDTO);
 

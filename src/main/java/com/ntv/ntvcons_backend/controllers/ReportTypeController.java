@@ -30,7 +30,7 @@ public class ReportTypeController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createReportType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createReportType(@Valid @RequestBody ReportTypeCreateDTO reportTypeDTO){
+    public ResponseEntity<Object> createReportType(@RequestBody @Valid ReportTypeCreateDTO reportTypeDTO){
         try {
             ReportTypeReadDTO newReportTypeDTO = reportTypeService.createReportTypeByDTO(reportTypeDTO);
 
@@ -161,10 +161,10 @@ public class ReportTypeController {
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for ReportType with ";
 
@@ -181,7 +181,7 @@ public class ReportTypeController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateReportType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateReportType(@Valid @RequestBody ReportTypeUpdateDTO reportTypeDTO){
+    public ResponseEntity<Object> updateReportType(@RequestBody @Valid ReportTypeUpdateDTO reportTypeDTO){
         try {
             ReportTypeReadDTO updatedReportTypeDTO = reportTypeService.updateReportTypeByDTO(reportTypeDTO);
 

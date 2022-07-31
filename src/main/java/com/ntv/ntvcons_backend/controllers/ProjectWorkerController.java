@@ -2,10 +2,10 @@ package com.ntv.ntvcons_backend.controllers;
 
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.fileType.FileTypeCreateDTO;
-import com.ntv.ntvcons_backend.dtos.fileType.FileTypeReadDTO;
-import com.ntv.ntvcons_backend.dtos.fileType.FileTypeUpdateDTO;
-import com.ntv.ntvcons_backend.services.fileType.FileTypeService;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
+import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerUpdateDTO;
+import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -19,91 +19,83 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/fileType")
-public class FileTypeController {
+@RequestMapping("/projectWorker")
+public class ProjectWorkerController {
     @Autowired
-    private FileTypeService fileTypeService;
+    private ProjectWorkerService projectWorkerService;
     @Autowired
     private MiscUtil miscUtil;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
-    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
-    @PostMapping(value = "/v1/createFileType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createFileType(@RequestBody @Valid FileTypeCreateDTO fileTypeDTO) {
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PostMapping(value = "/v1/createProjectWorker", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createProjectWorker(@RequestBody @Valid ProjectWorkerCreateDTO projectWorkerDTO) {
         try {
-            FileTypeReadDTO newFileTypeDTO = fileTypeService.createFileTypeByDTO(fileTypeDTO);
+            ProjectWorkerReadDTO newProjectWorkerDTO =
+                    projectWorkerService.createProjectWorkerByDTO(projectWorkerDTO);
 
-            return ResponseEntity.ok().body(newFileTypeDTO);
+            return ResponseEntity.ok().body(newProjectWorkerDTO);
         } catch (IllegalArgumentException iAE) {
-            /* Catch not found User by Id (createdBy), which violate FK constraint */
+            /* Catch not found Project/Worker by respective Id, which violate FK constraint */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error creating FileType", e.getMessage()));
+                    new ErrorResponse("Error creating ProjectWorker. ",
+                            e.getMessage()));
         }
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
                                          @RequestParam String sortBy,
                                          @RequestParam boolean sortTypeAsc) {
         try {
-            List<FileTypeReadDTO> fileTypeDTOList =
-                    fileTypeService.getAllDTOInPaging(
+            List<ProjectWorkerReadDTO> projectWorkerList =
+                    projectWorkerService.getAllDTOInPaging(
                             miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
-            if (fileTypeDTOList == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No FileType found");
+            if (projectWorkerList == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No ProjectWorker found");
             }
 
-            return ResponseEntity.ok().body(fileTypeDTOList);
-
+            return ResponseEntity.ok().body(projectWorkerList);
         } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
             /* Catch invalid sortBy */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error searching for FileType", e.getMessage()));
+                    new ErrorResponse("Error searching for ProjectWorker", e.getMessage()));
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
-                                             @RequestParam SearchType.FILE_TYPE searchType) {
+                                             @RequestParam SearchType.PROJECT_WORKER searchType) {
         try {
-            FileTypeReadDTO fileTypeDTO;
+            ProjectWorkerReadDTO projectWorkerDTO;
 
             switch (searchType) {
                 case BY_ID:
-                    fileTypeDTO = fileTypeService.getDTOById(Long.parseLong(searchParam));
+                    projectWorkerDTO = projectWorkerService.getDTOById(Long.parseLong(searchParam));
 
-                    if (fileTypeDTO == null) {
+                    if (projectWorkerDTO == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with Id: '" + searchParam + "'. ");
-                    }
-                    break;
-
-                case BY_NAME:
-                    fileTypeDTO = fileTypeService.getDTOByFileTypeName(searchParam);
-
-                    if (fileTypeDTO == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with name: '" + searchParam + "'. ");
+                                .body("No ProjectWorker found with Id: '" + searchParam + "'. ");
                     }
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity FileType");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ProjectWorker");
             }
 
-            return ResponseEntity.ok().body(fileTypeDTO);
+            return ResponseEntity.ok().body(projectWorkerDTO);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
@@ -115,15 +107,11 @@ public class FileTypeController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "Error searching for FileType with ";
+            String errorMsg = "Error searching for ProjectWorker with ";
 
             switch (searchType) {
                 case BY_ID:
                     errorMsg += "Id: '" + searchParam + "'. ";
-                    break;
-
-                case BY_NAME:
-                    errorMsg += "name: '" + searchParam + "'. ";
                     break;
             }
 
@@ -131,10 +119,10 @@ public class FileTypeController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
+    @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
-                                                @RequestParam SearchType.ALL_FILE_TYPE searchType,
+                                                @RequestParam SearchType.ALL_PROJECT_WORKER searchType,
                                                 @RequestParam int pageNo,
                                                 @RequestParam int pageSize,
                                                 @RequestParam String sortBy,
@@ -142,87 +130,97 @@ public class FileTypeController {
         try {
             Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
-            List<FileTypeReadDTO> fileTypeDTOList;
+            List<ProjectWorkerReadDTO> projectWorkerDTOList;
 
             switch (searchType) {
-                case BY_NAME_CONTAINS:
-                    fileTypeDTOList =
-                            fileTypeService.getAllDTOInPagingByFileTypeNameContains(paging, searchParam);
+                case BY_PROJECT_ID:
+                    projectWorkerDTOList =
+                            projectWorkerService.getAllDTOInPagingByProjectId(paging, Long.parseLong(searchParam));
 
-                    if (fileTypeDTOList == null) {
+                    if (projectWorkerDTOList == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No FileType found with name contains: '" + searchParam + "'. ");
+                                .body("No ProjectWorker found with projectId: '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_WORKER_ID:
+                    projectWorkerDTOList =
+                            projectWorkerService.getAllDTOInPagingByWorkerId(paging, Long.parseLong(searchParam));
+
+                    if (projectWorkerDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No ProjectWorker found with userId (managerId): '" + searchParam + "'. ");
                     }
                     break;
 
                 default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity FileType");
+                    throw new IllegalArgumentException("Invalid SearchType used for entity ProjectWorker");
             }
 
-            return ResponseEntity.ok().body(fileTypeDTOList);
+            return ResponseEntity.ok().body(projectWorkerDTOList);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
-            /* Catch invalid sortBy || searchType */
+        }  catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
-            String errorMsg = "Error searching for FileType with ";
+            String errorMsg = "Error searching for ProjectWorker with ";
 
             switch (searchType) {
-                case BY_NAME_CONTAINS:
-                    errorMsg += "name contains: '" + searchParam + "'. ";
+                case BY_PROJECT_ID:
+                    errorMsg += "projectId: '" + searchParam + "'. ";
+                    break;
+
+                case BY_WORKER_ID:
+                    errorMsg += "workerId: '" + searchParam + "'. ";
                     break;
             }
 
             return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
         }
     }
-
+    
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
-    @PutMapping(value = "/v1/updateFileType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateFileType(@RequestBody @Valid FileTypeUpdateDTO fileTypeDTO) {
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1/updateProjectWorker", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateProjectWorker(@RequestBody @Valid ProjectWorkerUpdateDTO projectWorkerDTO){
         try {
-            FileTypeReadDTO updatedFileTypeDTO = fileTypeService.updateFileTypeByDTO(fileTypeDTO);
+            ProjectWorkerReadDTO updatedProjectWorkerDTO =
+                    projectWorkerService.updateProjectWorkerByDTO(projectWorkerDTO);
 
-            if (updatedFileTypeDTO == null) {
+            if (updatedProjectWorkerDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No FileType found with Id: '" + fileTypeDTO.getFileTypeId() + "'. ");
+                        .body("No ProjectWorker found with Id: '" + projectWorkerDTO.getProjectWorkerId() + "'. ");
             }
 
-            return ResponseEntity.ok().body(updatedFileTypeDTO);
-        } catch (IllegalArgumentException iAE) {
-            /* Catch not found User by Id (updatedBy), which violate FK constraint */
-            return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+            return ResponseEntity.ok().body(updatedProjectWorkerDTO);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error updating FileType with Id: '" + fileTypeDTO.getFileTypeId() + "'. ",
+                    new ErrorResponse("Error updating ProjectWorker with Id: '" + projectWorkerDTO.getProjectWorkerId() + "'. ",
                             e.getMessage()));
         }
     }
 
     /* DELETE */
-    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
-    @DeleteMapping(value = "/v1/deleteFileType/{fileTypeId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteFileType(@PathVariable(name = "fileTypeId") long fileTypeId) {
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @DeleteMapping(value = "/v1/deleteProjectWorker/{projectWorkerId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteProjectWorker(@PathVariable(name = "projectWorkerId") long projectWorkerId){
         try {
-            if (!fileTypeService.deleteFileType(fileTypeId)) {
+            if (!projectWorkerService.deleteProjectWorker(projectWorkerId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No FileType found with Id: '" + fileTypeId + "'. ");
+                        .body("No ProjectWorker found with Id: '" + projectWorkerId + "'. ");
             }
 
-            return ResponseEntity.ok().body("Deleted FileType with Id: '" + fileTypeId + "'. ");
+            return ResponseEntity.ok().body("Deleted ProjectWorker with Id: '" + projectWorkerId + "'. ");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error deleting FileType with Id: '" + fileTypeId + "'. ", e.getMessage()));
+                    new ErrorResponse("Error deleting ProjectWorker with Id: '" + projectWorkerId + "'. ", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */
-
 }

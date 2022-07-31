@@ -5,12 +5,16 @@ import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
+import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.ProjectModels.CreateProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
+import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
+import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
+import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.utils.JwtUtil;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +26,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/project")
@@ -31,6 +38,10 @@ public class ProjectController {
     private ProjectService projectService;
     @Autowired
     private LocationService locationService;
+    @Autowired
+    private ProjectManagerService projectManagerService;
+    @Autowired
+    private ProjectWorkerService projectWorkerService;
     @Autowired
     private MiscUtil miscUtil;
     @Autowired
@@ -70,7 +81,7 @@ public class ProjectController {
     /** Alternate create project by Thanh, with check FK */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1.1/createProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createProjectAlt1(@Valid @RequestBody ProjectCreateDTO projectDTO,
+    public ResponseEntity<Object> createProjectAlt1(@RequestBody @Valid ProjectCreateDTO projectDTO,
                                                     @RequestHeader(name = "Authorization") String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
@@ -212,6 +223,8 @@ public class ProjectController {
         try {
             Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
 
+            Set<Long> projectIdSet;
+
             List<ProjectReadDTO> projectDTOList;
 
             switch (searchType) {
@@ -233,6 +246,50 @@ public class ProjectController {
                     }
                     break;
 
+                case BY_MANAGER_ID:
+                    List<ProjectManager> projectManagerList =
+                            projectManagerService.getAllByManagerId(Long.parseLong(searchParam));
+
+                    if (projectManagerList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Project found with userId (managerId): '" + searchParam + "'. ");
+                    }
+
+                    projectIdSet =
+                            projectManagerList.stream()
+                                    .map(ProjectManager::getProjectId)
+                                    .collect(Collectors.toSet());
+
+                    projectDTOList = projectService.getAllDTOInPagingByIdIn(paging, projectIdSet);
+
+                    if (projectDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Project found with userId (managerId): '" + searchParam + "'. ");
+                    }
+                    break;
+
+                case BY_WORKER_ID:
+                    List<ProjectWorker> projectWorkerList =
+                            projectWorkerService.getAllByWorkerId(Long.parseLong(searchParam));
+
+                    if (projectWorkerList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Project found with workerId: '" + searchParam + "'. ");
+                    }
+
+                    projectIdSet =
+                            projectWorkerList.stream()
+                                    .map(ProjectWorker::getProjectId)
+                                    .collect(Collectors.toSet());
+
+                    projectDTOList = projectService.getAllDTOInPagingByIdIn(paging, projectIdSet);
+
+                    if (projectDTOList == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body("No Project found with workerId: '" + searchParam + "'. ");
+                    }
+                    break;
+
                 default:
                     throw new IllegalArgumentException("Invalid SearchType used for entity Project");
             }
@@ -244,10 +301,10 @@ public class ProjectController {
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for Project with ";
 
@@ -301,7 +358,7 @@ public class ProjectController {
     /** Alternate update project by Thanh, with check FK */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1.1/updateProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProjectAlt1(@Valid @RequestBody ProjectUpdateDTO projectDTO,
+    public ResponseEntity<Object> updateProjectAlt1(@RequestBody @Valid ProjectUpdateDTO projectDTO,
                                                     @RequestHeader(name = "Authorization") String token){
         try {
             /* TODO: jwtUtil get jwt auto */

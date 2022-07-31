@@ -30,7 +30,7 @@ public class TaskAssignmentController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createTaskAssignment", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createTaskAssignment(@Valid @RequestBody TaskAssignmentCreateDTO taskAssignmentDTO){
+    public ResponseEntity<Object> createTaskAssignment(@RequestBody @Valid TaskAssignmentCreateDTO taskAssignmentDTO){
         try {
             TaskAssignmentReadDTO newTaskAssignmentDTO =
                     taskAssignmentService.createTaskAssignmentByDTO(taskAssignmentDTO);
@@ -176,10 +176,10 @@ public class TaskAssignmentController {
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for TaskAssignment with ";
 
@@ -200,7 +200,7 @@ public class TaskAssignmentController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateTaskAssignment", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateTaskAssignment(@Valid @RequestBody TaskAssignmentUpdateDTO taskAssignmentDTO){
+    public ResponseEntity<Object> updateTaskAssignment(@RequestBody @Valid TaskAssignmentUpdateDTO taskAssignmentDTO){
         try {
             TaskAssignmentReadDTO updatedTaskAssignmentDTO =
                     taskAssignmentService.updateTaskAssignmentByDTO(taskAssignmentDTO);

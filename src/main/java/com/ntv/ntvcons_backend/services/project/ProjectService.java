@@ -37,6 +37,8 @@ public interface ProjectService {
     boolean existsAllByIdIn(Collection<Long> projectIdCollection) throws Exception;
     List<Project> getAllByIdIn(Collection<Long> projectIdCollection) throws Exception;
     List<ProjectReadDTO> getAllDTOByIdIn(Collection<Long> projectIdCollection) throws Exception;
+    Page<Project> getPageAllByIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception;
+    List<ProjectReadDTO> getAllDTOInPagingByIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception;
 
     List<Project> getAllByLocationId(long locationId) throws Exception;
     List<ProjectReadDTO> getAllDTOByLocationId(long locationId) throws Exception;

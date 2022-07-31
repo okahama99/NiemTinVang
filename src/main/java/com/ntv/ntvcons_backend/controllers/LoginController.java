@@ -50,7 +50,7 @@ public class LoginController {
     private UserService userService;
 
     @PostMapping(value = "/login", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> login(@Valid @RequestBody UserLoginModel user){
+    public ResponseEntity<Object> login(@RequestBody @Valid UserLoginModel user){
         try {
             Authentication authentication =
                     authenticationManager.authenticate(
@@ -166,7 +166,7 @@ public class LoginController {
     }
 
     @PostMapping
-    public void smsSender(@Valid @RequestBody SmsRequest smsRequest) {
+    public void smsSender(@RequestBody @Valid SmsRequest smsRequest) {
         serviceOTP.smsSender(smsRequest);
     }
 }

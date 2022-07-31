@@ -30,7 +30,7 @@ public class ProjectManagerController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createProjectManager", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createProjectManager(@Valid @RequestBody ProjectManagerCreateDTO projectManagerDTO) {
+    public ResponseEntity<Object> createProjectManager(@RequestBody @Valid ProjectManagerCreateDTO projectManagerDTO) {
         try {
             ProjectManagerReadDTO newProjectManagerDTO =
                     projectManagerService.createProjectManagerByDTO(projectManagerDTO);
@@ -164,10 +164,10 @@ public class ProjectManagerController {
                             "Invalid parameter type for searchType: '" + searchType
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
-        } catch (IllegalArgumentException iAE) {
-            /* Catch invalid searchType */
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
-                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
             String errorMsg = "Error searching for ProjectManager with ";
 
@@ -188,7 +188,7 @@ public class ProjectManagerController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateProjectManager", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProjectManager(@Valid @RequestBody ProjectManagerUpdateDTO projectManagerDTO){
+    public ResponseEntity<Object> updateProjectManager(@RequestBody @Valid ProjectManagerUpdateDTO projectManagerDTO){
         try {
             ProjectManagerReadDTO updatedProjectManagerDTO =
                     projectManagerService.updateProjectManagerByDTO(projectManagerDTO);
@@ -210,9 +210,17 @@ public class ProjectManagerController {
     @PreAuthorize("hasAnyAuthority('54','24')")
     @DeleteMapping(value = "/v1/deleteProjectManager/{projectManagerId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteProjectManager(@PathVariable(name = "projectManagerId") long projectManagerId){
-        // TODO:
-        return null;
-    }
+        try {
+            if (!projectManagerService.deleteProjectManager(projectManagerId)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No ProjectManager found with Id: '" + projectManagerId + "'. ");
+            }
 
+            return ResponseEntity.ok().body("Deleted ProjectManager with Id: '" + projectManagerId + "'. ");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error deleting ProjectManager with Id: '" + projectManagerId + "'. ", e.getMessage()));
+        }
+    }
     /* ================================================ Ver 1 ================================================ */
 }
