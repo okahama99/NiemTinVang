@@ -33,6 +33,8 @@ public class SearchType {
     public enum ALL_PROJECT {
         BY_LOCATION_ID,
         BY_NAME_CONTAINS,
+        BY_MANAGER_ID,
+        BY_WORKER_ID,
         BY_PLAN_START_DATE,
         BY_PLAN_END_DATE,
         BY_ESTIMATED_COST,
@@ -47,6 +49,14 @@ public class SearchType {
     public enum ALL_PROJECT_MANAGER {
         BY_PROJECT_ID,
         BY_MANAGER_ID,
+    }
+
+    public enum PROJECT_WORKER {
+        BY_ID,
+    }
+    public enum ALL_PROJECT_WORKER {
+        BY_PROJECT_ID,
+        BY_WORKER_ID,
     }
 
     public enum REPORT_DETAIL {

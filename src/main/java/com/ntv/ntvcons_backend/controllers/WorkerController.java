@@ -31,7 +31,7 @@ public class WorkerController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createWorker", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createWorker(@Valid @RequestBody WorkerCreateDTO workerDTO){
+    public ResponseEntity<Object> createWorker(@RequestBody @Valid WorkerCreateDTO workerDTO){
         try {
             WorkerReadDTO newWorkerDTO = workerService.createWorkerByDTO(workerDTO);
 
@@ -197,7 +197,7 @@ public class WorkerController {
                               + "'. Expecting parameter of type: Long",
                           nFE.getMessage()));
         } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
-            /* Catch invalid sortBy */
+            /* Catch invalid sortBy/searchType */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
@@ -228,7 +228,7 @@ public class WorkerController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateWorker", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateWorker(@Valid @RequestBody WorkerUpdateDTO workerDTO){
+    public ResponseEntity<Object> updateWorker(@RequestBody @Valid WorkerUpdateDTO workerDTO){
         try {
             WorkerReadDTO updatedWorkerDTO = workerService.updateWorkerByDTO(workerDTO);
 

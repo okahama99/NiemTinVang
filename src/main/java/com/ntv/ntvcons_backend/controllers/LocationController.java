@@ -30,7 +30,7 @@ public class LocationController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createLocation", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createLocation(@Valid @RequestBody LocationCreateDTO locationDTO) {
+    public ResponseEntity<Object> createLocation(@RequestBody @Valid LocationCreateDTO locationDTO) {
         try {
             LocationReadDTO newLocationDTO = locationService.createLocationByDTO(locationDTO);
 
@@ -230,7 +230,7 @@ public class LocationController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateLocation", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateLocation(@Valid @RequestBody LocationUpdateDTO locationDTO) {
+    public ResponseEntity<Object> updateLocation(@RequestBody @Valid LocationUpdateDTO locationDTO) {
         try {
             LocationReadDTO updatedLocationDTO = locationService.updateLocationByDTO(locationDTO);
 

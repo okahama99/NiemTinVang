@@ -490,7 +490,7 @@ public class ProjectServiceImpl implements ProjectService{
         List<Project> projectList =
                 projectRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST);
 
-        if (projectList.isEmpty()) 
+        if (projectList.isEmpty())
             return null;
 
         return projectList;
@@ -499,10 +499,34 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Project> projectList = getAllByIdIn(projectIdCollection);
 
-        if (projectList.isEmpty()) 
+        if (projectList.isEmpty())
             return null;
 
         return fillAllDTO(projectList, null);
+    }
+    @Override
+    public Page<Project> getPageAllByIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
+        Page<Project> projectPage =
+                projectRepository.findAllByProjectIdInAndStatusNotIn(projectIdCollection, N_D_S_STATUS_LIST, paging);
+
+        if (projectPage.isEmpty())
+            return null;
+
+        return projectPage;
+    }
+    @Override
+    public List<ProjectReadDTO> getAllDTOInPagingByIdIn(Pageable paging, Collection<Long> projectIdCollection) throws Exception {
+        Page<Project> projectPage = getPageAllByIdIn(paging, projectIdCollection);
+
+        if (projectPage == null)
+            return null;
+
+        List<Project> projectList = projectPage.getContent();
+
+        if (projectList.isEmpty())
+            return null;
+
+        return fillAllDTO(projectList, projectPage.getTotalPages());
     }
 
     @Override
