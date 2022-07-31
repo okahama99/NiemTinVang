@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public abstract class BaseCreateDTO implements Serializable {
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */
-    private Long createdBy = 4L;
+    private Long createdBy = 264L; /* userAdmin */
 
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */
@@ -21,8 +21,4 @@ public abstract class BaseCreateDTO implements Serializable {
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */
     private final Status status = Status.ACTIVE;
-
-    @JsonIgnore /* No serialize/deserialize */
-    @Schema(hidden = true) /* No show on swagger */
-    private final Boolean isDeleted = false;
 }

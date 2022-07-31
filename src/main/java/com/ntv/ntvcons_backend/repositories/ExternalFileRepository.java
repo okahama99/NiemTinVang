@@ -40,6 +40,8 @@ public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long
 
 
     /* fileName */
+    boolean existsByFileNameAndStatusNotIn(
+            String fileName, Collection<Status> statusCollection);
     Optional<ExternalFile> findByFileNameAndStatusNotIn(
             String fileName, Collection<Status> statusCollection);
     List<ExternalFile> findAllByFileNameContainsAndStatusNotIn(
@@ -49,6 +51,8 @@ public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long
 
 
     /* fileLink */
+    boolean existsByFileLinkAndStatusNotIn(
+            String fileLink, Collection<Status> statusCollection);
     Optional<ExternalFile> findByFileLinkAndStatusNotIn(
             String fileLink, Collection<Status> statusCollection);
     List<ExternalFile> findAllByFileLinkContainsAndStatusNotIn(

@@ -6,6 +6,7 @@ import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
@@ -575,9 +576,16 @@ public class BlueprintServiceImpl implements BlueprintService {
 
         BlueprintReadDTO blueprintDTO = modelMapper.map(blueprint, BlueprintReadDTO.class);
 
-//        blueprintDTO.setFileList(
-//                eFEWPairingService
-//                        .getAllExternalFileDTOByEntityIdAndEntityType(blueprintId, ENTITY_TYPE));
+
+        List<ExternalFileReadDTO> fileReadDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(blueprintId, ENTITY_TYPE);
+
+        if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+            /* if (fileReadDTOList.size() > 1)
+                Log Error, blueprint only have 1 file at a time */
+            blueprintDTO.setFile(fileReadDTOList.get(0));
+        }
 
         return blueprintDTO;
     }
@@ -590,17 +598,23 @@ public class BlueprintServiceImpl implements BlueprintService {
         }
 
         /* Get associated ExternalFile */
-//        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
-//                eFEWPairingService
-//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(blueprintIdSet, ENTITY_TYPE);
+        Map<Long, List<ExternalFileReadDTO>> blueprintIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(blueprintIdSet, ENTITY_TYPE);
 
         return blueprintCollection.stream()
                 .map(blueprint -> {
                     BlueprintReadDTO blueprintDTO =
                             modelMapper.map(blueprint, BlueprintReadDTO.class);
 
-//                    blueprintDTO.setFileList(
-//                            projectIdExternalFileDTOListMap.get(blueprint.getBlueprintId()));
+                    List<ExternalFileReadDTO> fileReadDTOList =
+                            blueprintIdExternalFileDTOListMap.get(blueprint.getBlueprintId());
+
+                    if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+                        /* if (fileReadDTOList.size() > 1)
+                            Log Error, blueprint only have 1 file at a time */
+                        blueprintDTO.setFile(fileReadDTOList.get(0));
+                    }
 
                     blueprintDTO.setTotalPage(totalPage);
 

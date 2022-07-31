@@ -10,7 +10,7 @@ import java.util.Map;
 
 public interface ExternalFileEntityWrapperPairingService {
     /* CREATE */
-    ExternalFileEntityWrapperPairing createPairing(ExternalFileEntityWrapperPairing newPairing) throws Exception;
+    ExternalFileEntityWrapperPairing createPairing(long entityId, EntityType type, long fileId, long createdBy) throws Exception;
 
     /* READ */
 //    Page<ExternalFileEntityWrapperPairing> getPageAll(Pageable paging) throws Exception;

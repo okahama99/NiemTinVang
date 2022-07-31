@@ -25,5 +25,8 @@ public abstract class BaseReadDTO implements Serializable {
     private List<ExternalFileReadDTO> fileList;
 
     @JsonInclude(Include.NON_NULL) /* if null => no return JSON */
+    private ExternalFileReadDTO file;
+
+    @JsonInclude(Include.NON_NULL) /* if null => no return JSON */
     private Integer totalPage;
 }

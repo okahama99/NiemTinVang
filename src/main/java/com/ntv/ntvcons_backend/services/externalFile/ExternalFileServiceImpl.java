@@ -6,7 +6,9 @@ import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileUpdateDTO;
 import com.ntv.ntvcons_backend.entities.ExternalFile;
+import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
 import com.ntv.ntvcons_backend.repositories.ExternalFileRepository;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,8 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
     private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
@@ -60,7 +64,7 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         }
 
         /* Check FK */
-        if (userService.existsById(newFile.getCreatedBy())) {
+        if (!userService.existsById(newFile.getCreatedBy())) {
             errorMsg += "No User (CreatedBy) found with Id: '" + newFile.getCreatedBy()
                     + "'. Which violate constraint: FK_ExternalFile_User_CreatedBy. ";
         }
@@ -216,6 +220,11 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     }
 
     @Override
+    public boolean existsByFileName(String fileName) throws Exception {
+        return externalFileRepository
+                .existsByFileNameAndStatusNotIn(fileName, N_D_S_STATUS_LIST);
+    }
+    @Override
     public ExternalFile getByFileName(String fileName) throws Exception {
         return externalFileRepository
                 .findByFileNameAndStatusNotIn(fileName, N_D_S_STATUS_LIST)
@@ -276,6 +285,11 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     }
 
     @Override
+    public boolean existsByFileLink(String fileLink) throws Exception {
+        return externalFileRepository
+                .existsByFileLinkAndStatusNotIn(fileLink, N_D_S_STATUS_LIST);
+    }
+    @Override
     public ExternalFile getByFileLink(String fileLink) throws Exception {
         return externalFileRepository
                 .findByFileLinkAndStatusNotIn(fileLink, N_D_S_STATUS_LIST)
@@ -335,6 +349,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         return fillAllDTO(fileList, filePage.getTotalPages());
     }
 
+    @Override
+    public boolean existsByFileNameOrFileLink(String fileName, String fileLink) throws Exception {
+        return externalFileRepository
+                .existsByFileNameOrFileLinkAndStatusNotIn(fileName, fileLink, N_D_S_STATUS_LIST);
+    }
+
     /* UPDATE */
     @Override
     public ExternalFile updateExternalFile(ExternalFile updatedFile) throws Exception {
@@ -364,13 +384,13 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         /* Check FK */
         if (oldFile.getUpdatedBy() != null) {
             if (!oldFile.getUpdatedBy().equals(updatedFile.getUpdatedBy())) {
-                if (userService.existsById(updatedFile.getUpdatedBy())) {
+                if (!userService.existsById(updatedFile.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedFile.getUpdatedBy()
                             + "'. Which violate constraint: FK_ExternalFile_User_UpdatedBy. ";
                 }
             }
         } else {
-            if (userService.existsById(updatedFile.getUpdatedBy())) {
+            if (!userService.existsById(updatedFile.getUpdatedBy())) {
                 errorMsg += "No User (UpdatedBy) found with Id: '" + updatedFile.getUpdatedBy()
                         + "'. Which violate constraint: FK_ExternalFile_User_UpdatedBy. ";
             }
@@ -415,6 +435,9 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         if (file == null)
             return false;
 
+        /* Delete all associated EFEWPairing */
+        eFEWPairingService.deleteAllByExternalFileId(fileId);
+
         file.setStatus(Status.DELETED);
         externalFileRepository.saveAndFlush(file);
 
@@ -428,11 +451,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         if (fileList == null)
             return false;
 
+        /* Delete all associated EFEWPairing */
+        eFEWPairingService.deleteAllByExternalFileIdIn(fileIdCollection);
 
         fileList = fileList.stream()
                 .peek(file -> file.setStatus(Status.DELETED))
                 .collect(Collectors.toList());
-
         externalFileRepository.saveAllAndFlush(fileList);
 
         return true;
@@ -440,32 +464,14 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
     /* Utils */
     private ExternalFileReadDTO fillDTO(ExternalFile file) throws Exception {
-        ExternalFileReadDTO fileDTO = modelMapper.map(file, ExternalFileReadDTO.class);
-
-        /* Get associate fileType */
-//        fileDTO.setFileType(
-//                fileTypeService.getDTOById(file.getFileTypeId()));
-
-        return fileDTO;
+        return modelMapper.map(file, ExternalFileReadDTO.class);
     }
 
     private List<ExternalFileReadDTO> fillAllDTO(Collection<ExternalFile> fileCollection, Integer totalPage) throws Exception {
-//        Set<Long> fileTypeIdSet = new HashSet<>();
-//
-//        for (ExternalFile file : fileCollection) {
-//            fileTypeIdSet.add(file.getFileTypeId());
-//        }
-//
-//        /* Get associate fileType */
-//        Map<Long, FileTypeReadDTO> fileTypeIdFileTypeDTOMap =
-//                fileTypeService.mapFileTypeIdFileTypeDTOByIdIn(fileTypeIdSet);
-
         return fileCollection.stream()
                 .map(file -> {
                     ExternalFileReadDTO fileDTO =
                             modelMapper.map(file, ExternalFileReadDTO.class);
-
-//                    fileDTO.setFileType(fileTypeIdFileTypeDTOMap.get(file.getFileTypeId()));
 
                     fileDTO.setTotalPage(totalPage);
 

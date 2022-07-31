@@ -33,8 +33,8 @@ public class ProjectCreateDTO extends BaseCreateDTO {
     @NotNull(message = "blueprint REQUIRED for Create")
     private LocationCreateDTO location;
 
-    @Schema(description = "NOT NULL") /* Hint for Swagger */
-    @NotNull(message = "blueprint REQUIRED for Create")
+    @Schema(description = /*"NOT NULL"*/"Nullable") /* Hint for Swagger */
+//    @NotNull(message = "blueprint REQUIRED for Create")
     private BlueprintCreateDTO blueprint;
 
     @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */

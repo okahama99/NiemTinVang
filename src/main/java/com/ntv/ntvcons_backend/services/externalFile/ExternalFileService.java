@@ -35,6 +35,7 @@ public interface ExternalFileService {
     Page<ExternalFile> getPageAllByFileType(Pageable paging, FileType fileTypeId) throws Exception;
     List<ExternalFileReadDTO> getAllDTOInPagingByFileType(Pageable paging, FileType fileType) throws Exception;
 
+    boolean existsByFileName(String fileName) throws Exception;
     ExternalFile getByFileName(String fileName) throws Exception;
     ExternalFileReadDTO getDTOByFileName(String fileName) throws Exception;
 
@@ -43,6 +44,7 @@ public interface ExternalFileService {
     Page<ExternalFile> getPageAllByFileNameContains(Pageable paging, String fileName) throws Exception;
     List<ExternalFileReadDTO> getAllDTOInPagingByFileNameContains(Pageable paging, String fileName) throws Exception;
 
+    boolean existsByFileLink(String fileLink) throws Exception;
     ExternalFile getByFileLink(String fileLink) throws Exception;
     ExternalFileReadDTO getDTOByFileLink(String fileLink) throws Exception;
 
@@ -50,6 +52,8 @@ public interface ExternalFileService {
     List<ExternalFileReadDTO> getAllDTOByFileLinkContains(String fileLink) throws Exception;
     Page<ExternalFile> getPageAllByFileLinkContains(Pageable paging, String fileLink) throws Exception;
     List<ExternalFileReadDTO> getAllDTOInPagingByFileLinkContains(Pageable paging, String fileLink) throws Exception;
+
+    boolean existsByFileNameOrFileLink(String fileName, String fileLink) throws Exception;
 
     /* UPDATE */
     ExternalFile updateExternalFile(ExternalFile updatedFile) throws Exception;

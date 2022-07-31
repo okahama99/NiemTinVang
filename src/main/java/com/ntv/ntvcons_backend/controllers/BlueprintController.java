@@ -1,13 +1,21 @@
 package com.ntv.ntvcons_backend.controllers;
 
 
+import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
+import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
+import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.firebase.FirebaseService;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,7 +29,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/blueprint")
@@ -29,22 +40,68 @@ public class BlueprintController {
     @Autowired
     private BlueprintService blueprintService;
     @Autowired
+    private ExternalFileService externalFileService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
+    @Autowired
+    private FirebaseService firebaseService;
+    @Autowired
     private MiscUtil miscUtil;
+
+    private final EntityType ENTITY_TYPE = EntityType.BLUEPRINT_ENTITY;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @PostMapping(value = "/v1/createBlueprint",
-            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createBlueprint(
-            @RequestPart @Valid /* For regular FE input */
-            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
-            BlueprintCreateDTO blueprintDTO,
-            @RequestPart(required = false) MultipartFile blueprintDoc) {
+    @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createBlueprint(@RequestBody @Valid BlueprintCreateDTO blueprintDTO) {
         try {
             BlueprintReadDTO newBlueprintDTO = blueprintService.createBlueprintByDTO(blueprintDTO);
 
-            /* TODO: upload to firebase */
+            return ResponseEntity.ok().body(newBlueprintDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project/User by respective Id, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating Blueprint", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PostMapping(value = "/v1/createBlueprint/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createBlueprintWithFile(
+            @RequestPart @Valid /* For regular FE input */
+            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
+                    BlueprintCreateDTO blueprintDTO,
+            @RequestPart(required = false) MultipartFile blueprintDoc) {
+        try {
+            /* Create to get Id */
+            BlueprintReadDTO newBlueprintDTO = blueprintService.createBlueprintByDTO(blueprintDTO);
+
+            if (blueprintDoc != null) {
+                long blueprintId = newBlueprintDTO.getBlueprintId();
+                long createdBy = newBlueprintDTO.getCreatedBy();
+
+                /* Save File to Firebase (get name & link) */
+                ExternalFileCreateDTO fileCreateDTO =
+                        firebaseService.uploadToFirebase(blueprintDoc);
+                fileCreateDTO.setFileType(FileType.BLUEPRINT_DOC);
+                fileCreateDTO.setCreatedBy(createdBy);
+
+                /* Save fileName & fileLink to DB */
+                ExternalFileReadDTO newFileDTO =
+                        externalFileService.createExternalFileByDTO(fileCreateDTO);
+
+                /* Create pairing */
+                eFEWPairingService
+                        .createPairing(blueprintId, ENTITY_TYPE, newFileDTO.getFileId(), createdBy);
+
+                /* Get again after file created & save */
+                newBlueprintDTO = blueprintService.getDTOById(blueprintId);
+            }
 
             return ResponseEntity.ok().body(newBlueprintDTO);
         } catch (IllegalArgumentException iAE) {
@@ -266,12 +323,34 @@ public class BlueprintController {
 
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @PutMapping(value = "/v1/updateBlueprint",
+    @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateBlueprint(@RequestBody @Valid BlueprintUpdateDTO blueprintDTO) {
+        try {
+            BlueprintReadDTO updatedBlueprintDTO = blueprintService.updateBlueprintByDTO(blueprintDTO);
+
+            if (updatedBlueprintDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Blueprint found with Id: '" + blueprintDTO.getBlueprintId() + "'. ");
+            }
+
+            return ResponseEntity.ok().body(updatedBlueprintDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project/User by respective Id, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating Blueprint", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1/updateBlueprint/withFile",
             consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateBlueprint(
+    public ResponseEntity<Object> updateBlueprintWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
-            BlueprintUpdateDTO blueprintDTO,
+                    BlueprintUpdateDTO blueprintDTO,
             @RequestPart(required = false) MultipartFile blueprintDoc) {
         try {
             BlueprintReadDTO updatedBlueprintDTO = blueprintService.updateBlueprintByDTO(blueprintDTO);
@@ -281,7 +360,35 @@ public class BlueprintController {
                         .body("No Blueprint found with Id: '" + blueprintDTO.getBlueprintId() + "'. ");
             }
 
-            /* TODO: send to Firebase */
+            if (blueprintDoc != null) {
+                long blueprintId = updatedBlueprintDTO.getBlueprintId();
+                long createdBy = updatedBlueprintDTO.getCreatedBy();
+
+                /* Remove old file */
+                ExternalFileReadDTO fileDTO =
+                        updatedBlueprintDTO.getFile();
+                if (fileDTO != null) {
+                    externalFileService.deleteExternalFile(fileDTO.getFileId());
+                    firebaseService.deleteFromFirebase(fileDTO.getFileName());
+                }
+
+                /* Save File to Firebase (get name & link) */
+                ExternalFileCreateDTO fileCreateDTO =
+                        firebaseService.uploadToFirebase(blueprintDoc);
+                fileCreateDTO.setFileType(FileType.BLUEPRINT_DOC);
+                fileCreateDTO.setCreatedBy(createdBy);
+
+                /* Save fileName & fileLink to DB */
+                ExternalFileReadDTO newFileDTO =
+                        externalFileService.createExternalFileByDTO(fileCreateDTO);
+
+                /* Create pairing */
+                eFEWPairingService
+                        .createPairing(blueprintId, ENTITY_TYPE, newFileDTO.getFileId(), createdBy);
+
+                /* Get again after file created & save */
+                updatedBlueprintDTO = blueprintService.getDTOById(blueprintId);
+            }
 
             return ResponseEntity.ok().body(updatedBlueprintDTO);
         } catch (IllegalArgumentException iAE) {
