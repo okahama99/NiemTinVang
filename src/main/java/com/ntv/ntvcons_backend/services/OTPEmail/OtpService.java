@@ -87,14 +87,14 @@ public class OtpService {
 
     private String buildSendOtpEmail(String name, int otp) {
         return "<h1 style=\"color: #5e9ca0; text-align: center;\">Niềm Tin Vàng</h1>\n" +
-                "<h2 style=\"color: #2e6c80; text-align: center;\">Thay đổi mật khẩu:</h2>\n" +
-                "<p>Xin ch&agrave;o&nbsp;"+ name + "<br />Ch&uacute;ng t&ocirc;i l&agrave; team Hoya Plant Việt Nam,&nbsp;</p>\n" +
-                "<p>Qu&yacute; kh&aacute;ch nhận được mail n&agrave;y l&agrave; v&igrave; qu&yacute; kh&aacute;ch (cũng c&oacute; thể l&agrave; ai đ&oacute; giả mạo danh nghĩa qu&yacute; kh&aacute;ch thực hiện thay đổi mật khẩu tr&ecirc;n diễn đ&agrave;n HoyaPlant VietNam, vui l&ograve;ng ghi lại m&atilde; otp dưới đ&acirc;y để tiếp tục tạo mật khẩu mới.</p>\n" +
+                "<h3 style=\"color: #2e6c80; text-align: center;\">Thay đổi mật khẩu:</h3>\n" +
+                "<p>Xin ch&agrave;o&nbsp;"+ name + "<br />Ch&uacute;ng t&ocirc;i l&agrave; team Niềm Tin Vàng,&nbsp;</p>\n" +
+                "<p>Qu&yacute; kh&aacute;ch nhận được mail n&agrave;y l&agrave; v&igrave; qu&yacute; kh&aacute;ch (cũng c&oacute; thể l&agrave; ai đ&oacute; giả mạo danh nghĩa qu&yacute; kh&aacute;ch thực hiện thay đổi mật khẩu tr&ecirc;n website niemtinvang.vn, vui l&ograve;ng ghi lại m&atilde; OTP dưới đ&acirc;y để tiếp tục tạo mật khẩu mới.</p>\n" +
                 "<p>"+ otp + "&nbsp;</p>\n" +
-                "<p>M&atilde; opt sẽ c&oacute; hiệu lực trong v&ograve;ng 5 ph&uacute;t.</p>\n" +
+                "<p>M&atilde; OTP sẽ c&oacute; hiệu lực trong v&ograve;ng 5 ph&uacute;t.</p>\n" +
                 "<p>Nếu đ&acirc;y kh&ocirc;ng phải do qu&yacute; kh&aacute;ch thực hiện thao t&aacute;c, c&oacute; thể y&ecirc;n t&acirc;m bỏ qua nội dung mail n&agrave;y.</p>\n" +
                 "<p>Cảm ơn qu&yacute; kh&aacute;ch đ&atilde; sử dụng diễn đ&agrave;n về hoa của ch&uacute;ng t&ocirc;i, xin ch&uacute;c qu&yacute; kh&aacute;ch c&oacute; một ng&agrave;y tốt l&agrave;nh.</p>\n" +
-                "<p>Đường dẫn tới website: <a href=\"\\&quot;hoyaplantvietnam.com\\&quot;\">hoyaplantvietnam.com</a></p>\n" +
+                "<p>Đường dẫn tới website: niemtinvang.vn</p>\n" +
                 "<p>Xin vui l&ograve;ng kh&ocirc;ng trả lời mail từ hệ thống.</p>\n" +
                 "<p><strong>&nbsp;</strong></p>";
     }
