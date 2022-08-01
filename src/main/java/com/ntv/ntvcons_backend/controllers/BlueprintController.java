@@ -50,7 +50,11 @@ public class BlueprintController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createBlueprint(@RequestBody @Valid BlueprintCreateDTO blueprintDTO) {
+    public ResponseEntity<Object> createBlueprint(
+            @RequestBody @Valid BlueprintCreateDTO blueprintDTO,
+            @RequestHeader(name = "Authorization")
+            @Parameter(hidden = true)
+                    String token) {
         try {
             BlueprintReadDTO newBlueprintDTO = blueprintService.createBlueprintByDTO(blueprintDTO);
 
@@ -72,7 +76,10 @@ public class BlueprintController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     BlueprintCreateDTO blueprintDTO,
-            @RequestPart(required = false) MultipartFile blueprintDoc) {
+            @RequestPart(required = false) MultipartFile blueprintDoc,
+            @RequestHeader(name = "Authorization")
+            @Parameter(hidden = true)
+                    String token) {
         try {
             /* Create to get Id */
             BlueprintReadDTO newBlueprintDTO = blueprintService.createBlueprintByDTO(blueprintDTO);
@@ -320,7 +327,11 @@ public class BlueprintController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateBlueprint(@RequestBody @Valid BlueprintUpdateDTO blueprintDTO) {
+    public ResponseEntity<Object> updateBlueprint(
+            @RequestBody @Valid BlueprintUpdateDTO blueprintDTO,
+            @RequestHeader(name = "Authorization")
+            @Parameter(hidden = true)
+                    String token) {
         try {
             BlueprintReadDTO updatedBlueprintDTO = blueprintService.updateBlueprintByDTO(blueprintDTO);
 
@@ -347,7 +358,10 @@ public class BlueprintController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     BlueprintUpdateDTO blueprintDTO,
-            @RequestPart(required = false) MultipartFile blueprintDoc) {
+            @RequestPart(required = false) MultipartFile blueprintDoc,
+            @RequestHeader(name = "Authorization")
+            @Parameter(hidden = true)
+                    String token) {
         try {
             BlueprintReadDTO updatedBlueprintDTO = blueprintService.updateBlueprintByDTO(blueprintDTO);
 

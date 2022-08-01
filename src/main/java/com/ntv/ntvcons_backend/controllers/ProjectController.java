@@ -17,6 +17,7 @@ import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.utils.JwtUtil;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -80,8 +81,11 @@ public class ProjectController {
     /** Alternate create project by Thanh, with check FK */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1.1/createProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createProjectAlt1(@RequestBody @Valid ProjectCreateDTO projectDTO,
-                                                    @RequestHeader(name = "Authorization") String token) {
+    public ResponseEntity<Object> createProjectAlt1(
+            @RequestBody @Valid ProjectCreateDTO projectDTO,
+            @RequestHeader(name = "Authorization")
+            @Parameter(hidden = true)
+                    String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
@@ -357,8 +361,11 @@ public class ProjectController {
     /** Alternate update project by Thanh, with check FK */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1.1/updateProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProjectAlt1(@RequestBody @Valid ProjectUpdateDTO projectDTO,
-                                                    @RequestHeader(name = "Authorization") String token){
+    public ResponseEntity<Object> updateProjectAlt1(
+            @RequestBody @Valid ProjectUpdateDTO projectDTO,
+            @RequestHeader(name = "Authorization")
+            @Parameter(hidden = true)
+                    String token){
         try {
             /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
