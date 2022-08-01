@@ -11,9 +11,12 @@ import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
+import com.ntv.ntvcons_backend.entities.EntityWrapper;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
+import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.firebase.FirebaseService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
@@ -46,6 +49,10 @@ public class BlueprintServiceImpl implements BlueprintService {
     private EntityWrapperService entityWrapperService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
+    @Autowired
+    private ExternalFileService externalFileService;
+    @Autowired
+    private FirebaseService firebaseService;
 
     private final EntityType ENTITY_TYPE = EntityType.BLUEPRINT_ENTITY;
     private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
@@ -526,10 +533,28 @@ public class BlueprintServiceImpl implements BlueprintService {
     public boolean deleteBlueprint(long blueprintId) throws Exception {
         Blueprint blueprint = getById(blueprintId);
 
-        if (blueprint == null) {
-            return false;
-            /* Not found with Id */
+        if (blueprint == null)
+            return false; /* Not found with Id */
+
+        /* Delete associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileReadDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(blueprintId, ENTITY_TYPE);
+        if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+            Set<Long> fileIdSet = new HashSet<>();
+            Set<String> fileNameSet = new HashSet<>();
+
+            for (ExternalFileReadDTO fileDTO : fileReadDTOList) {
+                fileIdSet.add(fileDTO.getFileId());
+                fileNameSet.add(fileDTO.getFileName());
+            }
+
+            externalFileService.deleteAllByIdIn(fileIdSet);
+            firebaseService.deleteAllFromFirebase(fileNameSet);
         }
+
+        /* Delete associated EntityWrapper */
+        entityWrapperService.deleteByEntityIdAndEntityType(blueprintId, ENTITY_TYPE);
 
         blueprint.setStatus(Status.DELETED);
         blueprintRepository.saveAndFlush(blueprint);
@@ -545,6 +570,27 @@ public class BlueprintServiceImpl implements BlueprintService {
             return false;
             /* Not found with Id */
         }
+        long blueprintId = blueprint.getBlueprintId();
+
+        /* Delete associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileReadDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(blueprintId, ENTITY_TYPE);
+        if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+            Set<Long> fileIdSet = new HashSet<>();
+            Set<String> fileNameSet = new HashSet<>();
+
+            for (ExternalFileReadDTO fileDTO : fileReadDTOList) {
+                fileIdSet.add(fileDTO.getFileId());
+                fileNameSet.add(fileDTO.getFileName());
+            }
+
+            externalFileService.deleteAllByIdIn(fileIdSet);
+            firebaseService.deleteAllFromFirebase(fileNameSet);
+        }
+
+        /* Delete associated EntityWrapper */
+        entityWrapperService.deleteByEntityIdAndEntityType(blueprintId, ENTITY_TYPE);
 
         blueprint.setStatus(Status.DELETED);
         blueprintRepository.saveAndFlush(blueprint);
@@ -559,6 +605,42 @@ public class BlueprintServiceImpl implements BlueprintService {
             return false;
             /* Not found with Id */
         }
+
+        Set<Long> blueprintIdSet = blueprintList.stream()
+                .map(Blueprint::getBlueprintId)
+                .collect(Collectors.toSet());
+
+        /* Delete associated File (In DB And Firebase) */
+        Map<Long, List<ExternalFileReadDTO>> blueprintIdFileListDTOMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(blueprintIdSet, ENTITY_TYPE);
+        if (blueprintIdFileListDTOMap != null && !blueprintIdFileListDTOMap.isEmpty()) {
+            List<ExternalFileReadDTO> fileDTOList = new ArrayList<>();
+
+            List<ExternalFileReadDTO> tmpFileDTOList;
+            for (Long blueprintId : blueprintIdFileListDTOMap.keySet()) {
+                tmpFileDTOList = blueprintIdFileListDTOMap.get(blueprintId);
+                if (tmpFileDTOList != null) {
+                    fileDTOList.addAll(tmpFileDTOList);
+                }
+            }
+
+            if (!fileDTOList.isEmpty()) {
+                Set<Long> fileIdSet = new HashSet<>();
+                Set<String> fileNameSet = new HashSet<>();
+
+                for (ExternalFileReadDTO fileDTO : fileDTOList) {
+                    fileIdSet.add(fileDTO.getFileId());
+                    fileNameSet.add(fileDTO.getFileName());
+                }
+
+                externalFileService.deleteAllByIdIn(fileIdSet);
+                firebaseService.deleteAllFromFirebase(fileNameSet);
+            }
+        }
+
+        /* Delete associated EntityWrapper */
+        entityWrapperService.deleteAllByEntityIdInAndEntityType(blueprintIdSet, ENTITY_TYPE);
 
         blueprintList =
                 blueprintList.stream()
