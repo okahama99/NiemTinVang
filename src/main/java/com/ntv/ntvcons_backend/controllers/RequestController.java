@@ -424,7 +424,7 @@ public class RequestController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('44','54')")
     @DeleteMapping(value = "/v1/deleteRequest/{requestId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteRequest(@PathVariable(name = "requestId") Long requestId) {
+    public ResponseEntity<Object> deleteRequest(@PathVariable Long requestId) {
         try {
             if (!requestService.deleteRequest(requestId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

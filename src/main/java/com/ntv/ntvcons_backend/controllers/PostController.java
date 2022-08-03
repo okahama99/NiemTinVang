@@ -263,7 +263,7 @@ public class PostController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deletePost/{postId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deletePost(@PathVariable(name = "postId") Long postId) {
+    public ResponseEntity<Object> deletePost(@PathVariable Long postId) {
         try {
             if (!postService.deletePost(postId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

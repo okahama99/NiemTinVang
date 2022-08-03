@@ -234,7 +234,7 @@ public class RequestDetailController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('44','54')")
     @DeleteMapping(value = "/v1/deleteRequestDetail/{requestDetailId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteRequestDetail(@PathVariable(name = "requestDetailId") long requestDetailId) {
+    public ResponseEntity<Object> deleteRequestDetail(@PathVariable long requestDetailId) {
         try {
             if (!requestDetailService.deleteRequestDetail(requestDetailId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

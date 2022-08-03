@@ -250,7 +250,7 @@ public class WorkerController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @DeleteMapping(value = "/v1/deleteWorker/{workerId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteWorker(@PathVariable(name = "workerId") long workerId){
+    public ResponseEntity<Object> deleteWorker(@PathVariable long workerId){
         try {
             if (!workerService.deleteWorker(workerId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

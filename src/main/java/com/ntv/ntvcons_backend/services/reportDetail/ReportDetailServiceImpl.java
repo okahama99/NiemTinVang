@@ -500,8 +500,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
             if (oldReportDetail.getUpdatedBy() != null)
                 oldUpdateBySet.add(oldReportDetail.getUpdatedBy());
 
-            reportDetailIdCreatedAtMap.put(oldReportDetail.getReportDetailId(), oldReportDetail.getCreatedAt());
             reportDetailIdCreatedByMap.put(oldReportDetail.getReportDetailId(), oldReportDetail.getCreatedBy());
+            reportDetailIdCreatedAtMap.put(oldReportDetail.getReportDetailId(), oldReportDetail.getCreatedAt());
         }
 
         /* Remove all unchanged reportId */
@@ -512,14 +512,14 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         /* Check FK (if change) */
         if (!updatedReportIdSet.isEmpty()) {
             if (!reportService.existsAllByIdIn(updatedReportIdSet)) {
-                errorMsg.append("1 or more Report not found with Id: '")
-                        .append("'. Which violate constraint: FK_ReportDetail_Report. ");
+                errorMsg.append("1 or more Report not found with Id. ")
+                        .append("Which violate constraint: FK_ReportDetail_Report. ");
             }
         }
         if (!updatedUpdatedBySet.isEmpty()) {
             if (!userService.existsAllByIdIn(updatedUpdatedBySet)) {
-                errorMsg.append("1 or more User (UpdatedBy) not found with Id: '")
-                        .append("'. Which violate constraint: FK_ReportDetail_User_UpdatedBy. ");
+                errorMsg.append("1 or more User (UpdatedBy) not found with Id. ")
+                        .append("Which violate constraint: FK_ReportDetail_User_UpdatedBy. ");
             }
         }
 
@@ -546,11 +546,13 @@ public class ReportDetailServiceImpl implements ReportDetailService {
         updatedReportDetailList =
                 updatedReportDetailList.stream()
                         .peek(reportDetail -> {
+                            long reportDetailId = reportDetail.getReportDetailId();
+
                             reportDetail.setCreatedAt(
-                                    reportDetailIdCreatedAtMap.get(reportDetail.getReportDetailId()));
+                                    reportDetailIdCreatedAtMap.get(reportDetailId));
 
                             reportDetail.setCreatedBy(
-                                    reportDetailIdCreatedByMap.get(reportDetail.getReportDetailId()));})
+                                    reportDetailIdCreatedByMap.get(reportDetailId));})
                         .collect(Collectors.toList());
 
         return reportDetailRepository.saveAllAndFlush(updatedReportDetailList);

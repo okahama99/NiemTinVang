@@ -439,15 +439,18 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
     @Override
     public boolean removeAllByUserId(long userId) throws Exception {
-        List<TaskAssignment> taskAssignmentList = getAllByAssignerId(userId);
+        List<TaskAssignment> taskAssignmentList = new ArrayList<>();
 
-        if (taskAssignmentList == null) {
-            taskAssignmentList = getAllByAssigneeId(userId);
+        List<TaskAssignment> taskAssignmentListByAssigner = getAllByAssignerId(userId);
+        List<TaskAssignment> taskAssignmentListByAssignee = getAllByAssigneeId(userId);
 
-            if (taskAssignmentList == null) {
-                return false;
-            }
-        }
+        if (taskAssignmentListByAssigner != null)
+            taskAssignmentList.addAll(taskAssignmentListByAssigner);
+        if (taskAssignmentListByAssignee != null)
+            taskAssignmentList.addAll(taskAssignmentListByAssignee);
+
+        if (taskAssignmentList.isEmpty())
+            return false;
 
         taskAssignmentList =
                 taskAssignmentList.stream()
@@ -487,15 +490,18 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
     @Override
     public boolean deleteAllByUserId(long userId) throws Exception {
-        List<TaskAssignment> taskAssignmentList = getAllByAssignerId(userId);
+        List<TaskAssignment> taskAssignmentList = new ArrayList<>();
 
-        if (taskAssignmentList == null) {
-            taskAssignmentList = getAllByAssigneeId(userId);
+        List<TaskAssignment> taskAssignmentListByAssigner = getAllByAssignerId(userId);
+        List<TaskAssignment> taskAssignmentListByAssignee = getAllByAssigneeId(userId);
 
-            if (taskAssignmentList == null) {
-                return false;
-            }
-        }
+        if (taskAssignmentListByAssigner != null)
+            taskAssignmentList.addAll(taskAssignmentListByAssigner);
+        if (taskAssignmentListByAssignee != null)
+            taskAssignmentList.addAll(taskAssignmentListByAssignee);
+
+        if (taskAssignmentList.isEmpty())
+            return false;
 
         taskAssignmentList =
                 taskAssignmentList.stream()
@@ -516,6 +522,22 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
         taskAssignment.setStatus(Status.DELETED);
         taskAssignmentRepository.saveAndFlush(taskAssignment);
+
+        return true;
+    }
+    @Override
+    public boolean deleteAllByTaskIdIn(Collection<Long> taskIdCollection) throws Exception {
+        List<TaskAssignment> taskAssignmentList = getAllByTaskIdIn(taskIdCollection);
+
+        if (taskAssignmentList == null)
+            return false;
+
+        taskAssignmentList =
+                taskAssignmentList.stream()
+                        .peek(taskAssignment -> taskAssignment.setStatus(Status.DELETED))
+                        .collect(Collectors.toList());
+
+        taskAssignmentRepository.saveAllAndFlush(taskAssignmentList);
 
         return true;
     }

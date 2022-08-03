@@ -6,6 +6,7 @@ import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
@@ -32,6 +33,7 @@ import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.services.report.ReportService;
@@ -71,6 +73,8 @@ public class ProjectServiceImpl implements ProjectService{
     private EntityWrapperService entityWrapperService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
+    @Autowired
+    private FileCombineService fileCombineService;
     @Lazy
     @Autowired
     private UserService userService;
@@ -1042,10 +1046,38 @@ public class ProjectServiceImpl implements ProjectService{
     public boolean deleteProject(long projectId) throws Exception {
         Project project = getById(projectId);
 
-        if (project == null) {
-            return false;
-            /* Not found with Id */
+        if (project == null)
+            return false; /* Not found with Id */
+
+        /* Deleted associated Blueprint */
+        blueprintService.deleteByProjectId(projectId);
+
+        /* Deleted associated Task */
+        taskService.deleteAllByProjectId(projectId);
+
+        /* Deleted associated Report */
+        reportService.deleteAllByProjectId(projectId);
+
+        /* Deleted associated Request */
+        requestService.deleteAllByProjectId(projectId);
+
+        /* Deleted associated ProjectManager */
+        projectManagerService.deleteAllByProjectId(projectId);
+
+        /* Deleted associated ProjectWorker */
+        projectWorkerService.deleteAllByProjectId(projectId);
+
+        /* Delete all associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(projectId, ENTITY_TYPE);
+
+        if (fileDTOList != null && !fileDTOList.isEmpty()) {
+            fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
         }
+
+        /* Delete associated EntityWrapper */
+        entityWrapperService.deleteByEntityIdAndEntityType(projectId, ENTITY_TYPE);
 
         project.setStatus(Status.DELETED);
         projectRepository.saveAndFlush(project);
@@ -1069,9 +1101,9 @@ public class ProjectServiceImpl implements ProjectService{
         projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(projectId));
-//        projectDTO.setFileList(
-//                eFEWPairingService
-//                        .getAllExternalFileDTOByEntityIdAndEntityType(projectId, ENTITY_TYPE));
+        projectDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(projectId, ENTITY_TYPE));
 
         return projectDTO;
     }
@@ -1108,9 +1140,9 @@ public class ProjectServiceImpl implements ProjectService{
         Map<Long, List<ProjectWorkerReadDTO>> projectIdProjectWorkerDTOListMap =
                 projectWorkerService.mapProjectIdProjectWorkerDTOListByProjectIdIn(projectIdSet);
         /* Get associated ExternalFile */
-//        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
-//                eFEWPairingService
-//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
+        Map<Long, List<ExternalFileReadDTO>> projectIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(projectIdSet, ENTITY_TYPE);
 
         return projectCollection.stream()
                 .map(project -> {
@@ -1129,8 +1161,8 @@ public class ProjectServiceImpl implements ProjectService{
                     projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectWorkerList(projectIdProjectWorkerDTOListMap.get(tmpProjectId));
-//                    projectDTO.setFileList(
-//                            projectIdExternalFileDTOListMap.get(tmpProjectId));
+                    projectDTO.setFileList(
+                            projectIdExternalFileDTOListMap.get(tmpProjectId));
 
                     projectDTO.setTotalPage(totalPage);
 

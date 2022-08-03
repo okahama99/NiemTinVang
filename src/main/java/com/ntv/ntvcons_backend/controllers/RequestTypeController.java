@@ -207,7 +207,7 @@ public class RequestTypeController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteRequestType/{requestTypeId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteRequestType(@PathVariable(name = "requestTypeId") long requestTypeId){
+    public ResponseEntity<Object> deleteRequestType(@PathVariable long requestTypeId){
         try {
             if (!requestTypeService.deleteRequestType(requestTypeId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

@@ -210,7 +210,7 @@ public class RoleController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteRole/{roleId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteRole(@PathVariable(name = "roleId") long roleId){
+    public ResponseEntity<Object> deleteRole(@PathVariable long roleId){
         try {
             if (!roleService.deleteRole(roleId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

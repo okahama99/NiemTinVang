@@ -246,7 +246,7 @@ public class ExternalFileController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @DeleteMapping(value = "/v1/deleteExternalFile/{externalFileId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteExternalFile(@PathVariable(name = "externalFileId") long externalFileId) {
+    public ResponseEntity<Object> deleteExternalFile(@PathVariable long externalFileId) {
         try {
             if (!externalFileService.deleteExternalFile(externalFileId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
