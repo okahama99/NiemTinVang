@@ -612,14 +612,14 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         /* Check FK (if change) */
         if (!updatedRequestIdSet.isEmpty()) {
             if (!requestService.existsAllByIdIn(updatedRequestIdSet)) {
-                errorMsg.append("1 or more Request not found with Id: '")
-                        .append("'. Which violate constraint: FK_RequestDetail_Request. ");
+                errorMsg.append("1 or more Request not found with Id. ")
+                        .append("Which violate constraint: FK_RequestDetail_Request. ");
             }
         }
         if (!updatedUpdatedBySet.isEmpty()) {
             if (!userService.existsAllByIdIn(updatedUpdatedBySet)) {
-                errorMsg.append("1 or more User (UpdatedBy) not found with Id: '")
-                        .append("'. Which violate constraint: FK_RequestDetail_User_UpdatedBy. ");
+                errorMsg.append("1 or more User (UpdatedBy) not found with Id. ")
+                        .append("Which violate constraint: FK_RequestDetail_User_UpdatedBy. ");
             }
         }
 

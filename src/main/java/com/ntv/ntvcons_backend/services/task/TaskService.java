@@ -76,4 +76,6 @@ public interface TaskService {
 
     /* DELETE */
     boolean deleteTask(long taskId) throws Exception;
+
+    boolean deleteAllByProjectId(long projectId) throws Exception;
 }

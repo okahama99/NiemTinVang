@@ -1,7 +1,12 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
@@ -11,13 +16,19 @@ import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
+import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.firebase.FirebaseService;
+import com.ntv.ntvcons_backend.services.firebase.FirebaseServiceImpl;
 import com.ntv.ntvcons_backend.services.location.LocationService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.utils.JwtUtil;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -25,8 +36,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,9 +58,13 @@ public class ProjectController {
     @Autowired
     private ProjectWorkerService projectWorkerService;
     @Autowired
-    private MiscUtil miscUtil;
+    private FileCombineService fileCombineService;
+    @Autowired
+    private ExternalFileService externalFileService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private MiscUtil miscUtil;
     
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -83,19 +102,109 @@ public class ProjectController {
     @PostMapping(value = "/v1.1/createProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProjectAlt1(
             @RequestBody @Valid ProjectCreateDTO projectDTO,
-            @RequestHeader(name = "Authorization")
-            @Parameter(hidden = true)
-                    String token) {
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
-            if (userId != null) {
-                projectDTO.setCreatedBy(userId);
-            }
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            projectDTO.setCreatedBy(userId);
 
             ProjectReadDTO newProjectDTO = projectService.createProjectByDTO(projectDTO);
 
             return ResponseEntity.ok().body(newProjectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PostMapping(value = "/v1/createProject/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createProjectWithFile(
+            @RequestPart @Valid /* For regular FE input */
+            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
+                    ProjectCreateDTO projectDTO,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
+            @RequestPart(required = false) MultipartFile blueprintDoc,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            if (projectDTO.getBlueprint() == null && blueprintDoc != null)
+                throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
+
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            projectDTO.setCreatedBy(userId);
+
+            ProjectReadDTO newProjectDTO = projectService.createProjectByDTO(projectDTO);
+
+            long projectId = newProjectDTO.getProjectId();
+
+            if (projectDocList != null) {
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
+
+                /* Get again after file created & save */
+                newProjectDTO = projectService.getDTOById(projectId);
+            }
+
+            if (blueprintDoc != null) {
+                BlueprintReadDTO blueprintDTO = newProjectDTO.getBlueprint();
+                long blueprintId = blueprintDTO.getBlueprintId();
+
+                fileCombineService.saveFileInDBAndFirebase(
+                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
+
+                /* Get again after file created & save */
+                newProjectDTO = projectService.getDTOById(projectId);
+            }
+
+            return ResponseEntity.ok().body(newProjectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PostMapping(value = "/v1/addFile/{projectId}",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> addFileToProjectById(
+            @PathVariable long projectId,
+            @RequestPart @Size(min = 1) List<MultipartFile> projectDocList,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            ProjectReadDTO projectDTO = projectService.getDTOById(projectId);
+
+            if (projectDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Project found with Id: '" + projectId + "' to add file.");
+
+            fileCombineService.saveAllFileInDBAndFirebase(
+                    projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
+
+            /* Get again after file created & save */
+            projectDTO = projectService.getDTOById(projectId);
+
+            return ResponseEntity.ok().body(projectDTO);
         } catch (IllegalArgumentException iAE) {
             /* Catch invalid input */
             return ResponseEntity.badRequest().body(
@@ -363,15 +472,14 @@ public class ProjectController {
     @PutMapping(value = "/v1.1/updateProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProjectAlt1(
             @RequestBody @Valid ProjectUpdateDTO projectDTO,
-            @RequestHeader(name = "Authorization")
-            @Parameter(hidden = true)
-                    String token){
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token){
         try {
             /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
-            if (userId != null) {
-                projectDTO.setUpdatedBy(userId);
-            }
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            projectDTO.setUpdatedBy(userId);
 
             ProjectReadDTO updatedProjectDTO = projectService.updateProjectByDTO(projectDTO);
 
@@ -391,10 +499,201 @@ public class ProjectController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1.1/updateProject/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updateProjectWithFile(
+            @RequestPart @Valid /* For regular FE input */
+            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
+                    ProjectUpdateDTO projectDTO,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
+            @RequestPart(required = false) MultipartFile blueprintDoc,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token){
+        try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            projectDTO.setUpdatedBy(userId);
+
+            ProjectReadDTO updatedProjectDTO = projectService.updateProjectByDTO(projectDTO);
+
+            if (updatedProjectDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Project found with Id: '" + projectDTO.getProjectId() + "'. ");
+            }
+
+            long projectId = updatedProjectDTO.getProjectId();
+
+            if (projectDocList != null) {
+                /* Deleted old project file */
+                List<ExternalFileReadDTO> fileDTOList =
+                        updatedProjectDTO.getFileList();
+                if (fileDTOList != null) {
+                    fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+                }
+
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
+
+                /* Get again after file created & save */
+                updatedProjectDTO = projectService.getDTOById(projectId);
+            }
+
+            if (blueprintDoc != null) {
+                BlueprintReadDTO blueprintDTO = updatedProjectDTO.getBlueprint();
+
+                if (blueprintDTO == null)
+                    throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
+
+                long blueprintId = blueprintDTO.getBlueprintId();
+
+                /* Deleted old blueprint file */
+                ExternalFileReadDTO fileDTO =
+                        blueprintDTO.getFile();
+                if (fileDTO != null) {
+                    fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
+                }
+
+                fileCombineService.saveFileInDBAndFirebase(
+                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
+
+                /* Get again after file created & save */
+                updatedProjectDTO = projectService.getDTOById(projectId);
+            }
+
+            return ResponseEntity.ok().body(updatedProjectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error Updating Project", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1/replaceFile/{projectId}",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> replaceFileOfProjectById(
+            @PathVariable long projectId,
+            @RequestParam @Size(min = 1) List<Long> removeFileIdList,
+            @RequestPart @Size(min = 1) List<MultipartFile> projectDocList,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            ProjectReadDTO projectDTO = projectService.getDTOById(projectId);
+
+            if (projectDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Project found with Id: '" + projectId + "' to add file.");
+
+            List<ExternalFileReadDTO> fileDTOList = projectDTO.getFileList();
+            if (fileDTOList == null) {
+                return ResponseEntity.badRequest()
+                        .body("Project with Id: '" + projectId + "' has no file to replace. "
+                                + "Try using 'POST:../addFile/{projectId}' instead");
+            } else {
+                Set<Long> oldFileIdSet =
+                        fileDTOList.stream()
+                                .map(ExternalFileReadDTO::getFileId)
+                                .collect(Collectors.toSet());
+
+                StringBuilder errorMsg = new StringBuilder();
+                for (Long removeFileId : removeFileIdList) {
+                    if (!oldFileIdSet.contains(removeFileId)) {
+                        errorMsg.append("Project with Id: '").
+                                append(projectId).append("' has no File with Id: '")
+                                .append(removeFileId).append("' to remove. ");
+                    }
+                }
+
+                if (!errorMsg.toString().trim().isEmpty())
+                    throw new IllegalArgumentException(errorMsg.toString());
+
+                List<ExternalFileReadDTO> removeFileDTOList = new ArrayList<>();
+
+                for (ExternalFileReadDTO fileDTO : fileDTOList) {
+                    if (removeFileIdList.contains(fileDTO.getFileId())) {
+                        removeFileDTOList.add(fileDTO);
+                    }
+                }
+
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(removeFileDTOList);
+            }
+
+            fileCombineService.saveAllFileInDBAndFirebase(
+                    projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
+
+            /* Get again after file created & save */
+            projectDTO = projectService.getDTOById(projectId);
+
+            return ResponseEntity.ok().body(projectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1/replaceAllFile/{projectId}",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> replaceAllFileOfProjectById(
+            @PathVariable long projectId,
+            @RequestPart @Size(min = 1) List<MultipartFile> projectDocList,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            ProjectReadDTO projectDTO = projectService.getDTOById(projectId);
+
+            if (projectDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Project found with Id: '" + projectId + "' to add file.");
+
+            List<ExternalFileReadDTO> fileDTOList = projectDTO.getFileList();
+            if (fileDTOList == null) {
+                return ResponseEntity.badRequest()
+                        .body("Project with Id: '" + projectId + "' has no file to replace. "
+                                + "Try using 'POST:../addFile/{projectId}' instead");
+            } else {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+
+            fileCombineService.saveAllFileInDBAndFirebase(
+                    projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
+
+            /* Get again after file created & save */
+            projectDTO = projectService.getDTOById(projectId);
+
+            return ResponseEntity.ok().body(projectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+        }
+    }
+
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteProject/{projectId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteProject(@PathVariable(name = "projectId") int projectId) {
+    public ResponseEntity<Object> deleteProject(@PathVariable int projectId) {
         try {
             if (!projectService.deleteProject(projectId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Project found with Id: '" + projectId + "'. ");
@@ -404,6 +703,38 @@ public class ProjectController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Project with Id: '" + projectId + "'. ", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @DeleteMapping(value = "/v1/deleteAllFile/{projectId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteAllFileOfProjectById(@PathVariable long projectId) {
+        try {
+            ProjectReadDTO projectDTO = projectService.getDTOById(projectId);
+
+            if (projectDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Project found with Id: '" + projectId + "' to add file.");
+
+            List<ExternalFileReadDTO> fileDTOList = projectDTO.getFileList();
+            if (fileDTOList == null) {
+                return ResponseEntity.badRequest()
+                        .body("Project with Id: '" + projectId + "' has no file to delete. ");
+            } else {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+
+            /* Get again after file created & save */
+            projectDTO = projectService.getDTOById(projectId);
+
+            return ResponseEntity.ok().body(projectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

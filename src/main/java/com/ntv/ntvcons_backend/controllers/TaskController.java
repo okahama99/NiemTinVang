@@ -241,7 +241,7 @@ public class TaskController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value ="/v1/deleteTask/{taskId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteTask(@PathVariable(name = "taskId") long taskId) {
+    public ResponseEntity<Object> deleteTask(@PathVariable long taskId) {
         try {
             if (!taskService.deleteTask(taskId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Task found with Id: '" + taskId + "'. ");

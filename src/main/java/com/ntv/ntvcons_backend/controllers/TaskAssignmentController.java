@@ -225,7 +225,7 @@ public class TaskAssignmentController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteTaskAssignment/{assignmentId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteTaskAssignment(@PathVariable(name = "assignmentId") long assignmentId){
+    public ResponseEntity<Object> deleteTaskAssignment(@PathVariable long assignmentId){
         try {
             if (!taskAssignmentService.deleteTaskAssignment(assignmentId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

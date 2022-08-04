@@ -253,7 +253,7 @@ public class ReportController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('44','54')")
     @DeleteMapping(value = "/v1/deleteReport/{reportId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteReport(@PathVariable(name = "reportId") long reportId){
+    public ResponseEntity<Object> deleteReport(@PathVariable long reportId){
         try {
             if (!reportService.deleteReport(reportId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Report found with Id: '" + reportId + "'. ");

@@ -15,6 +15,8 @@ import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.firebase.FirebaseService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
+import com.ntv.ntvcons_backend.utils.JwtUtil;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,15 +38,11 @@ public class BlueprintController {
     @Autowired
     private BlueprintService blueprintService;
     @Autowired
-    private ExternalFileService externalFileService;
+    private FileCombineService fileCombineService;
     @Autowired
-    private ExternalFileEntityWrapperPairingService eFEWPairingService;
-    @Autowired
-    private FirebaseService firebaseService;
+    private JwtUtil jwtUtil;
     @Autowired
     private MiscUtil miscUtil;
-
-    private final EntityType ENTITY_TYPE = EntityType.BLUEPRINT_ENTITY;
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
@@ -52,10 +50,15 @@ public class BlueprintController {
     @PostMapping(value = "/v1/createBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createBlueprint(
             @RequestBody @Valid BlueprintCreateDTO blueprintDTO,
-            @RequestHeader(name = "Authorization")
-            @Parameter(hidden = true)
-                    String token) {
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            blueprintDTO.setCreatedBy(userId);
+
             BlueprintReadDTO newBlueprintDTO = blueprintService.createBlueprintByDTO(blueprintDTO);
 
             return ResponseEntity.ok().body(newBlueprintDTO);
@@ -76,31 +79,25 @@ public class BlueprintController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     BlueprintCreateDTO blueprintDTO,
-            @RequestPart(required = false) MultipartFile blueprintDoc,
-            @RequestHeader(name = "Authorization")
-            @Parameter(hidden = true)
-                    String token) {
+            @RequestPart MultipartFile blueprintDoc,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            blueprintDTO.setCreatedBy(userId);
+
             /* Create to get Id */
-            BlueprintReadDTO newBlueprintDTO = blueprintService.createBlueprintByDTO(blueprintDTO);
+            BlueprintReadDTO newBlueprintDTO =
+                    blueprintService.createBlueprintByDTO(blueprintDTO);
 
             if (blueprintDoc != null) {
                 long blueprintId = newBlueprintDTO.getBlueprintId();
-                long createdBy = newBlueprintDTO.getCreatedBy();
 
-                /* Save File to Firebase (get name & link) */
-                ExternalFileCreateDTO fileCreateDTO =
-                        firebaseService.uploadToFirebase(blueprintDoc);
-                fileCreateDTO.setFileType(FileType.BLUEPRINT_DOC);
-                fileCreateDTO.setCreatedBy(createdBy);
-
-                /* Save fileName & fileLink to DB */
-                ExternalFileReadDTO newFileDTO =
-                        externalFileService.createExternalFileByDTO(fileCreateDTO);
-
-                /* Create pairing */
-                eFEWPairingService
-                        .createPairing(blueprintId, ENTITY_TYPE, newFileDTO.getFileId(), createdBy);
+                fileCombineService.saveFileInDBAndFirebase(
+                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.PROJECT_ENTITY, userId);
 
                 /* Get again after file created & save */
                 newBlueprintDTO = blueprintService.getDTOById(blueprintId);
@@ -114,6 +111,50 @@ public class BlueprintController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Blueprint", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PostMapping(value = "/v1/addFile/{blueprintId}",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> addFileToBlueprintById(
+            @PathVariable long blueprintId,
+            @RequestPart MultipartFile blueprintDoc,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            /* Get by Id */
+            BlueprintReadDTO blueprintDTO =
+                    blueprintService.getDTOById(blueprintId);
+
+            if (blueprintDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Blueprint found with Id: '" + blueprintId + "' to add file.");
+
+            if (blueprintDTO.getFile() != null)
+                return ResponseEntity.badRequest()
+                        .body("Blueprint with Id: '" + blueprintId + "' already has file. " +
+                                "Try using 'PUT:../replaceFile/{blueprintId}' instead");
+
+            fileCombineService.saveFileInDBAndFirebase(
+                    blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
+
+            /* Get again after file created & save */
+            blueprintDTO = blueprintService.getDTOById(blueprintId);
+
+            return ResponseEntity.ok().body(blueprintDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project/User by respective Id, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error adding file to Blueprint with Id: '" + blueprintId + "'. ",
+                            e.getMessage()));
         }
     }
 
@@ -329,10 +370,15 @@ public class BlueprintController {
     @PutMapping(value = "/v1/updateBlueprint", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateBlueprint(
             @RequestBody @Valid BlueprintUpdateDTO blueprintDTO,
-            @RequestHeader(name = "Authorization")
-            @Parameter(hidden = true)
-                    String token) {
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            blueprintDTO.setUpdatedBy(userId);
+
             BlueprintReadDTO updatedBlueprintDTO = blueprintService.updateBlueprintByDTO(blueprintDTO);
 
             if (updatedBlueprintDTO == null) {
@@ -358,12 +404,18 @@ public class BlueprintController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     BlueprintUpdateDTO blueprintDTO,
-            @RequestPart(required = false) MultipartFile blueprintDoc,
-            @RequestHeader(name = "Authorization")
-            @Parameter(hidden = true)
-                    String token) {
+            @RequestPart MultipartFile blueprintDoc,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            BlueprintReadDTO updatedBlueprintDTO = blueprintService.updateBlueprintByDTO(blueprintDTO);
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            blueprintDTO.setUpdatedBy(userId);
+
+            BlueprintReadDTO updatedBlueprintDTO =
+                    blueprintService.updateBlueprintByDTO(blueprintDTO);
 
             if (updatedBlueprintDTO == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -372,29 +424,16 @@ public class BlueprintController {
 
             if (blueprintDoc != null) {
                 long blueprintId = updatedBlueprintDTO.getBlueprintId();
-                long createdBy = updatedBlueprintDTO.getCreatedBy();
 
-                /* Remove old file */
+                /* Delete old file */
                 ExternalFileReadDTO fileDTO =
                         updatedBlueprintDTO.getFile();
                 if (fileDTO != null) {
-                    externalFileService.deleteExternalFile(fileDTO.getFileId());
-                    firebaseService.deleteFromFirebase(fileDTO.getFileName());
+                    fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
                 }
 
-                /* Save File to Firebase (get name & link) */
-                ExternalFileCreateDTO fileCreateDTO =
-                        firebaseService.uploadToFirebase(blueprintDoc);
-                fileCreateDTO.setFileType(FileType.BLUEPRINT_DOC);
-                fileCreateDTO.setCreatedBy(createdBy);
-
-                /* Save fileName & fileLink to DB */
-                ExternalFileReadDTO newFileDTO =
-                        externalFileService.createExternalFileByDTO(fileCreateDTO);
-
-                /* Create pairing */
-                eFEWPairingService
-                        .createPairing(blueprintId, ENTITY_TYPE, newFileDTO.getFileId(), createdBy);
+                fileCombineService.saveFileInDBAndFirebase(
+                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
 
                 /* Get again after file created & save */
                 updatedBlueprintDTO = blueprintService.getDTOById(blueprintId);
@@ -411,10 +450,59 @@ public class BlueprintController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1/replaceFile/{blueprintId}",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> replaceFileOfBlueprintById(
+            @PathVariable long blueprintId,
+            @RequestPart MultipartFile blueprintDoc,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            /* Get by Id */
+            BlueprintReadDTO blueprintDTO =
+                    blueprintService.getDTOById(blueprintId);
+
+            if (blueprintDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Blueprint found with Id: '" + blueprintId + "' to replace file.");
+
+            /* Delete old file */
+            ExternalFileReadDTO fileDTO = blueprintDTO.getFile();
+            if (fileDTO == null) {
+                return ResponseEntity.badRequest()
+                        .body("Blueprint with Id: '" + blueprintId + "' has no file to replace. "
+                                + "Try using 'POST:../addFile/{blueprintId}' instead");
+            } else {
+                fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
+            }
+
+            fileCombineService.saveFileInDBAndFirebase(
+                    blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
+
+            /* Get again after file created & save */
+            blueprintDTO = blueprintService.getDTOById(blueprintId);
+
+            return ResponseEntity.ok().body(blueprintDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project/User by respective Id, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error adding file to Blueprint with Id: '" + blueprintId + "'. ",
+                            e.getMessage()));
+        }
+    }
+
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteBlueprint/{blueprintId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteBlueprint(@PathVariable(name = "blueprintId") long blueprintId) {
+    public ResponseEntity<Object> deleteBlueprint(@PathVariable long blueprintId) {
         try {
             if (!blueprintService.deleteBlueprint(blueprintId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -425,6 +513,42 @@ public class BlueprintController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Blueprint with Id: '" + blueprintId + "'. ", e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @DeleteMapping(value = "/v1/deleteFile/{blueprintId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteFileOfBlueprintById(@PathVariable long blueprintId) {
+        try {
+            /* Get by Id */
+            BlueprintReadDTO blueprintDTO =
+                    blueprintService.getDTOById(blueprintId);
+
+            if (blueprintDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Blueprint found with Id: '" + blueprintId + "' to replace file.");
+
+            /* Delete old file */
+            ExternalFileReadDTO fileDTO = blueprintDTO.getFile();
+            if (fileDTO != null) {
+                fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
+            } else {
+                return ResponseEntity.badRequest()
+                        .body("Blueprint with Id: '" + blueprintId + "' has no file to delete. ");
+            }
+
+            /* Get again after file deleted */
+            blueprintDTO = blueprintService.getDTOById(blueprintId);
+
+            return ResponseEntity.ok().body(blueprintDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project/User by respective Id, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error adding file to Blueprint with Id: '" + blueprintId + "'. ",
+                            e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

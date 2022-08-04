@@ -7,6 +7,7 @@ import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileUpdateDTO;
 import com.ntv.ntvcons_backend.entities.ExternalFile;
 import com.ntv.ntvcons_backend.entities.ExternalFileEntityWrapperPairing;
+import com.ntv.ntvcons_backend.entities.ReportDetail;
 import com.ntv.ntvcons_backend.repositories.ExternalFileRepository;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -21,10 +22,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -91,6 +90,103 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         newFile = createExternalFile(newFile);
 
         return fillDTO(newFile);
+    }
+
+    @Override
+    public List<ExternalFile> createBulkExternalFile(List<ExternalFile> newFileList) throws Exception {
+        StringBuilder errorMsg = new StringBuilder();
+
+        Set<Long> createdBySet = new HashSet<>();
+
+        List<String> tmpFileNameList = new ArrayList<>();
+        List<String> tmpFileLinkList = new ArrayList<>();
+        String tmpString;
+
+        boolean isDuplicated = false;
+
+        /* Check duplicate 1 (at input) */
+        for (ExternalFile newFile : newFileList) {
+            createdBySet.add(newFile.getCreatedBy());
+
+            tmpString = newFile.getFileName();
+
+            if (!tmpFileNameList.contains(tmpString)) {
+                tmpFileNameList.add(tmpString);
+            } else {
+                isDuplicated = true;
+
+                errorMsg.append("Already exist another ExternalFile with name: '")
+                        .append(tmpString).append("'. ");
+            }
+
+            tmpString = newFile.getFileLink();
+            if (!tmpFileLinkList.contains(tmpString)) {
+                /* Check valid input */
+                try {
+                    /* Check protocol */
+                    URL url = new URL(tmpString);
+
+                    /* Check connection */
+                    URLConnection conn = url.openConnection();
+                    conn.connect();
+
+                    tmpFileLinkList.add(tmpString);
+                } catch (MalformedURLException e) {
+                    /* URL is not in a valid form */
+                    errorMsg.append("Invalid link: '")
+                            .append(tmpString).append("'. ");
+                } catch (IOException e) {
+                    /* Connection couldn't be established */
+                    errorMsg.append("Could not connect to link: '")
+                            .append(tmpString).append("'. ");
+                }
+            } else {
+                isDuplicated = true;
+
+                errorMsg.append("Already exist another ExternalFile with link: '")
+                        .append(tmpString).append("'. ");
+            }
+        }
+
+        /* Check FK */
+        if (!userService.existsAllByIdIn(createdBySet)) {
+            errorMsg.append("1 or more User (CreatedBy) not found with Id: '")
+                    .append("'. Which violate constraint: FK_ExternalFile_User_CreatedBy. ");
+        }
+
+        /* Check duplicate */
+        /* If already duplicate within input, no need to check with DB */
+        if (!isDuplicated) {
+            /* Check duplicate 2 (input vs DB) */
+            for (ExternalFile newFile : newFileList) {
+                if (externalFileRepository
+                        .existsByFileNameOrFileLinkAndStatusNotIn(
+                                newFile.getFileName(),
+                                newFile.getFileLink(),
+                                N_D_S_STATUS_LIST)) {
+                    errorMsg.append("Already exists another ExternalFile with name: '")
+                            .append(newFile.getFileName())
+                            .append("', or with link: '")
+                            .append(newFile.getFileLink()).append("'. ");
+                }
+            }
+        }
+
+        if (!errorMsg.toString().trim().isEmpty())
+            throw new IllegalArgumentException(errorMsg.toString());
+
+        return externalFileRepository.saveAllAndFlush(newFileList);
+    }
+    @Override
+    public List<ExternalFileReadDTO> createBulkExternalFileByDTO(List<ExternalFileCreateDTO> newFileDTOList) throws Exception {
+        List<ExternalFile> newFileList =
+                newFileDTOList.stream()
+                        .map(newFileDTO -> modelMapper.map(newFileDTO, ExternalFile.class))
+                        .collect(Collectors.toList());
+
+        newFileList = createBulkExternalFile(newFileList);
+
+        return fillAllDTO(newFileList, null);
     }
 
     /* READ */
@@ -425,6 +521,143 @@ public class ExternalFileServiceImpl implements ExternalFileService {
             return null;
 
         return fillDTO(updatedFile);
+    }
+
+    @Override
+    public List<ExternalFile> updateBulkExternalFile(List<ExternalFile> updatedFileList) throws Exception {
+        StringBuilder errorMsg = new StringBuilder();
+
+        Set<Long> fileIdSet = new HashSet<>();
+        Set<Long> updatedUpdatedBySet = new HashSet<>();
+
+        List<String> tmpFileNameList = new ArrayList<>();
+        List<String> tmpFileLinkList = new ArrayList<>();
+        String tmpString;
+
+        boolean isDuplicated = false;
+
+        Map<String, List<Double>> tmpItemDescItemPriceListMap;
+
+        /* Check duplicate 1 (at input) */
+        for (ExternalFile updatedFile : updatedFileList) {
+            fileIdSet.add(updatedFile.getFileId());
+            updatedUpdatedBySet.add(updatedFile.getUpdatedBy());
+
+            tmpString = updatedFile.getFileName();
+
+            if (!tmpFileNameList.contains(tmpString)) {
+                tmpFileNameList.add(tmpString);
+            } else {
+                isDuplicated = true;
+
+                errorMsg.append("Already exist another ExternalFile with name: '")
+                        .append(tmpString).append("'. ");
+            }
+
+            tmpString = updatedFile.getFileLink();
+            if (!tmpFileLinkList.contains(tmpString)) {
+                /* Check valid input */
+                try {
+                    /* Check protocol */
+                    URL url = new URL(tmpString);
+
+                    /* Check connection */
+                    URLConnection conn = url.openConnection();
+                    conn.connect();
+
+                    tmpFileLinkList.add(tmpString);
+                } catch (MalformedURLException e) {
+                    /* URL is not in a valid form */
+                    errorMsg.append("Invalid link: '")
+                            .append(tmpString).append("'. ");
+                } catch (IOException e) {
+                    /* Connection couldn't be established */
+                    errorMsg.append("Could not connect to link: '")
+                            .append(tmpString).append("'. ");
+                }
+            } else {
+                isDuplicated = true;
+
+                errorMsg.append("Already exist another ExternalFile with link: '")
+                        .append(tmpString).append("'. ");
+            }
+        }
+
+        List<ExternalFile> oldFileList = getAllByIdIn(fileIdSet);
+
+        if (oldFileList == null)
+            return null;
+
+        Set<Long> oldUpdateBySet = new HashSet<>();
+
+        Map<Long, Long> fileIdCreatedByMap = new HashMap<>();
+        Map<Long, LocalDateTime> fileIdCreatedAtMap = new HashMap<>();
+
+        for (ExternalFile oldFile : oldFileList) {
+            if (oldFile.getUpdatedBy() != null)
+                oldUpdateBySet.add(oldFile.getUpdatedBy());
+
+            fileIdCreatedByMap.put(oldFile.getFileId(), oldFile.getCreatedBy());
+            fileIdCreatedAtMap.put(oldFile.getFileId(), oldFile.getCreatedAt());
+        }
+
+        /* Remove all unchanged updateBy */
+        updatedUpdatedBySet.removeAll(oldUpdateBySet);
+
+        /* Check FK (if change) */
+        if (!updatedUpdatedBySet.isEmpty()) {
+            if (!userService.existsAllByIdIn(updatedUpdatedBySet)) {
+                errorMsg.append("1 or more User (UpdatedBy) not found with Id. ")
+                        .append("Which violate constraint: FK_ExternalFile_User_UpdatedBy. ");
+            }
+        }
+
+        /* Check duplicate */
+        /* Check duplicate 2 (input vs DB) */
+        for (ExternalFile updatedFile : updatedFileList) {
+            if (externalFileRepository
+                    .existsByFileNameOrFileLinkAndFileIdIsNotAndStatusNotIn(
+                            updatedFile.getFileName(),
+                            updatedFile.getFileLink(),
+                            updatedFile.getFileId(),
+                            N_D_S_STATUS_LIST)) {
+                errorMsg.append("Already exists another ExternalFile with name: '")
+                        .append(updatedFile.getFileName())
+                        .append("', or with link: '")
+                        .append(updatedFile.getFileLink()).append("'. ");
+            }
+        }
+
+        if (!errorMsg.toString().trim().isEmpty())
+            throw new IllegalArgumentException(errorMsg.toString());
+
+        updatedFileList =
+                updatedFileList.stream()
+                        .peek(file -> {
+                            long fileId = file.getFileId();
+
+                            file.setCreatedAt(
+                                    fileIdCreatedAtMap.get(fileId));
+
+                            file.setCreatedBy(
+                                    fileIdCreatedByMap.get(fileId));})
+                        .collect(Collectors.toList());
+
+        return externalFileRepository.saveAllAndFlush(updatedFileList);
+    }
+    @Override
+    public List<ExternalFileReadDTO> updateBulkExternalFileByDTO(List<ExternalFileUpdateDTO> updatedFileDTOList) throws Exception {
+        List<ExternalFile> updatedFileList =
+                updatedFileDTOList.stream()
+                        .map(updatedFileDTO -> modelMapper.map(updatedFileDTO, ExternalFile.class))
+                        .collect(Collectors.toList());
+
+        updatedFileList = updateBulkExternalFile(updatedFileList);
+
+        if (updatedFileList == null)
+            return null;
+
+        return fillAllDTO(updatedFileList, null);
     }
 
     /* DELETE */

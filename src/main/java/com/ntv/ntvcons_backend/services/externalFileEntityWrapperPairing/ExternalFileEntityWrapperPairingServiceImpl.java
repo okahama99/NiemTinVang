@@ -83,6 +83,65 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
         return eFEWPairingRepository.saveAndFlush(newPairing);
     }
 
+    @Override
+    public List<ExternalFileEntityWrapperPairing> createBulkPairingByEntityIdAndEntityType(
+            long entityId, EntityType type, Collection<Long> fileIdCollection, long createdBy) throws Exception {
+        StringBuilder errorMsg = new StringBuilder();
+
+        EntityWrapper entityWrapper = entityWrapperService.getByEntityIdAndEntityType(entityId, type);
+
+        if (entityWrapper == null)
+            entityWrapper = entityWrapperService.createEntityWrapper(entityId, type, createdBy);
+
+        /* Check FK */
+        if (!entityWrapperService.existsById(entityWrapper.getEntityWrapperId())) {
+            errorMsg.append("No EntityWrapper found with Id: '")
+                    .append(entityWrapper.getEntityWrapperId())
+                    .append("'. Which violate constraint: FK_EFEWP_EntityWrapper. ");
+        }
+        if (!externalFileService.existsAllByIdIn(fileIdCollection)) {
+            errorMsg.append("1 or more file not found with Id. ")
+                    .append("Which violate constraint: FK_EFEWP_File. ");
+        }
+        if (!userService.existsById(createdBy)) {
+            errorMsg.append("No User (CreatedBy) found with Id: '")
+                    .append(createdBy)
+                    .append("'. Which violate constraint: FK_EFEWP_User_CreatedBy. ");
+        }
+
+        /* Check duplicate */
+        for (Long fileId : fileIdCollection) {
+            if (eFEWPairingRepository
+                    .existsByEntityWrapperIdAndExternalFileIdAndStatusNotIn(
+                            entityWrapper.getEntityWrapperId(),
+                            fileId,
+                            N_D_S_STATUS_LIST)) {
+                errorMsg.append("Already exists another EWEFPairing relationship between with EntityWrapper with Id: '")
+                        .append(entityWrapper.getEntityWrapperId())
+                        .append("' and ExternalFile with Id: '").append(entityWrapper).append("'. ");
+            }
+        }
+
+        if (!errorMsg.toString().trim().isEmpty())
+            throw new IllegalArgumentException(errorMsg.toString());
+
+        LocalDateTime createdAt = LocalDateTime.now();
+
+        List<ExternalFileEntityWrapperPairing> eWEFPairingList = new ArrayList<>();
+
+        for (Long fileId : fileIdCollection) {
+            ExternalFileEntityWrapperPairing newPairing =
+                    new ExternalFileEntityWrapperPairing(fileId, entityWrapper.getEntityWrapperId());
+            newPairing.setStatus(Status.ACTIVE);
+            newPairing.setCreatedBy(createdBy);
+            newPairing.setCreatedAt(createdAt);
+
+            eWEFPairingList.add(newPairing);
+        }
+
+        return eFEWPairingRepository.saveAllAndFlush(eWEFPairingList);
+    }
+
     /* READ */
     @Override
     public List<ExternalFileEntityWrapperPairing> getAll() throws Exception {

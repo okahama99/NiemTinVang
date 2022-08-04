@@ -64,4 +64,5 @@ public interface TaskAssignmentService {
 
     /** Cascade when delete Task */
     boolean deleteByTaskId(long taskId) throws Exception;
+    boolean deleteAllByTaskIdIn(Collection<Long> taskIdCollection) throws Exception;
 }

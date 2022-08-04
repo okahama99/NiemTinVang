@@ -187,7 +187,7 @@ public class PostCategoryController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deletePostCategory/{postCategoryId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deletePostCategory(@PathVariable(name = "postCategoryId") Long postCategoryId) {
+    public ResponseEntity<Object> deletePostCategory(@PathVariable Long postCategoryId) {
         try {
             if (!postCategoryService.deletePostCategory(postCategoryId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
