@@ -17,6 +17,9 @@ public interface ExternalFileService {
     ExternalFile createExternalFile(ExternalFile newFile) throws Exception;
     ExternalFileReadDTO createExternalFileByDTO(ExternalFileCreateDTO newFileDTO) throws Exception;
 
+    List<ExternalFile> createBulkExternalFile(List<ExternalFile> newFileList) throws Exception;
+    List<ExternalFileReadDTO> createBulkExternalFileByDTO(List<ExternalFileCreateDTO> newFileDTOList) throws Exception;
+
     /* READ */
     Page<ExternalFile> getPageAll(Pageable paging) throws Exception;
     List<ExternalFileReadDTO> getAllDTOInPaging(Pageable paging) throws Exception;
@@ -58,6 +61,9 @@ public interface ExternalFileService {
     /* UPDATE */
     ExternalFile updateExternalFile(ExternalFile updatedFile) throws Exception;
     ExternalFileReadDTO updateExternalFileByDTO(ExternalFileUpdateDTO updatedFileDTO) throws Exception;
+
+    List<ExternalFile> updateBulkExternalFile(List<ExternalFile> updatedFileList) throws Exception;
+    List<ExternalFileReadDTO> updateBulkExternalFileByDTO(List<ExternalFileUpdateDTO> updatedFileDTOList) throws Exception;
 
     /* DELETE */
     boolean deleteExternalFile(long fileId) throws Exception;

@@ -773,6 +773,36 @@ public class TaskServiceImpl implements TaskService{
         return true;
     }
 
+    @Override
+    public boolean deleteAllByProjectId(long projectId) throws Exception {
+        List<Task> taskList = getAllByProjectId(projectId);
+
+        if (taskList == null)
+            return false; /* Not found with Id */
+
+        Set<Long> taskIdSet =
+                taskList.stream()
+                        .map(Task::getTaskId)
+                        .collect(Collectors.toSet());
+
+        /* Delete associated TaskAssignment */
+        taskAssignmentService.deleteAllByTaskIdIn(taskIdSet);
+
+        /* Delete all associated TaskReport */
+        taskReportService.deleteAllByTaskIdIn(taskIdSet);
+
+        /* Delete associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteAllByEntityIdInAndEntityType(taskIdSet, ENTITY_TYPE);
+
+        taskList = taskList.stream()
+                .peek(task -> task.setStatus(Status.DELETED))
+                .collect(Collectors.toList());
+
+        taskRepository.saveAllAndFlush(taskList);
+
+        return true;
+    }
+
     /* Utils */
     private TaskReadDTO fillDTO(Task task) throws Exception {
         long taskId = task.getTaskId();

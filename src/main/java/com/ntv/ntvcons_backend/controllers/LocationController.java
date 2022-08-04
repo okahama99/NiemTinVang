@@ -252,7 +252,7 @@ public class LocationController {
 
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteLocation/{locationId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteLocation(@PathVariable(name = "locationId") long locationId) {
+    public ResponseEntity<Object> deleteLocation(@PathVariable long locationId) {
         try {
             if (!locationService.deleteLocation(locationId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

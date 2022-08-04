@@ -32,8 +32,15 @@ public class ProjectUpdateDTO extends BaseUpdateDTO {
 
     /* TODO: reuse later
     private LocationUpdateOptionDTO location;*/
-    @Schema(description = "Nullable") /* Hint for Swagger */
-    private LocationUpdateDTO location;
+
+//    @Schema(description = "Nullable") /* Hint for Swagger */
+//    private LocationUpdateDTO location;
+
+    @Schema(example = "10.841139984351623, 106.80988203281531",
+            description = "NOT NULL, size <= 100") /* Hint for Swagger */
+    @NotNull(message = "coordinate REQUIRED for Create")
+    @Size(max = 100, message = "coordinate max length: 100 characters")
+    private String coordinate;
 
     @Schema(description = "Nullable") /* Hint for Swagger */
     private BlueprintUpdateDTO blueprint;

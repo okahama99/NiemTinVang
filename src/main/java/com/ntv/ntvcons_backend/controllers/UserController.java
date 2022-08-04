@@ -278,7 +278,7 @@ public class UserController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @DeleteMapping(value = "/v1/deleteUser/{userId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteUser(@PathVariable(name = "userId") long userId){
+    public ResponseEntity<Object> deleteUser(@PathVariable long userId){
         try {
             if (!userService.deleteUser(userId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

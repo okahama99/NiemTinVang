@@ -12,6 +12,9 @@ public interface ExternalFileEntityWrapperPairingService {
     /* CREATE */
     ExternalFileEntityWrapperPairing createPairing(long entityId, EntityType type, long fileId, long createdBy) throws Exception;
 
+    List<ExternalFileEntityWrapperPairing> createBulkPairingByEntityIdAndEntityType(
+            long entityId, EntityType type, Collection<Long> fileIdCollection, long createdBy) throws Exception;
+
     /* READ */
 //    Page<ExternalFileEntityWrapperPairing> getPageAll(Pageable paging) throws Exception;
     List<ExternalFileEntityWrapperPairing> getAll() throws Exception;

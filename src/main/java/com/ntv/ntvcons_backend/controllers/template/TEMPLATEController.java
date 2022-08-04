@@ -132,7 +132,7 @@ public class TEMPLATEController {
 //
 //    /* DELETE */
 //    @DeleteMapping(value = "/v1/deleteTEMPLATE/{temPlateId}", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> deleteTEMPLATE(@PathVariable(name = "temPlateId") long temPlateId){
+//    public ResponseEntity<Object> deleteTEMPLATE(@PathVariable long temPlateId){
 //        try {
 //            if (!temPlateService.deleteTEMPLATE(temPlateId)) {
 //                return ResponseEntity.status(HttpStatus.NOT_FOUND)

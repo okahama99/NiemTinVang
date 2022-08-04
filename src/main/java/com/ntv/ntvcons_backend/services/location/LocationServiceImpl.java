@@ -218,7 +218,7 @@ public class LocationServiceImpl implements LocationService {
     public Map<Long, LocationReadDTO> mapLocationIdLocationDTOByIdIn(Collection<Long> locationIdCollection) throws Exception {
         List<LocationReadDTO> locationDTOList = getAllDTOByIdIn(locationIdCollection);
 
-        if (locationDTOList.isEmpty()) 
+        if (locationDTOList == null)
             return new HashMap<>();
 
         return locationDTOList.stream()
