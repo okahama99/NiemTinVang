@@ -7,6 +7,7 @@ import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
@@ -231,9 +232,20 @@ public class ProjectServiceImpl implements ProjectService{
                 throw new IllegalArgumentException("Invalid createOption used");
         }*/
 
-        /* Create Location first (to get locationId) */
-        newProjectDTO.getLocation().setCreatedBy(createdBy);
-        locationDTO = locationService.createLocationByDTO(newProjectDTO.getLocation());
+        String coordinate = newProjectDTO.getCoordinate();
+
+        /* Get Location by Coordinate (to get locationId) */
+        locationDTO = locationService.getDTOByCoordinate(coordinate);
+
+        if (locationDTO == null) {
+            /* Create Location if not already exists by coordinate (to get locationId) */
+            LocationCreateDTO locationCreateDTO = new LocationCreateDTO();
+            locationCreateDTO.setCoordinate(coordinate);
+            locationCreateDTO.setCreatedBy(createdBy);
+
+            locationDTO = locationService.createLocationByDTO(locationCreateDTO);
+        }
+
         /* Set locationId because createProject() check FK */
         newProject.setLocationId(locationDTO.getLocationId());
 
@@ -247,10 +259,12 @@ public class ProjectServiceImpl implements ProjectService{
 
         /* Set REQUIRED FK projectId to blueprint after create Project */
         BlueprintCreateDTO blueprintDTO = newProjectDTO.getBlueprint();
-        blueprintDTO.setProjectId(newProjectId);
-        blueprintDTO.setCreatedBy(createdBy);
-        /* Create associated Blueprint */
-        blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
+        if (blueprintDTO != null) {
+            blueprintDTO.setProjectId(newProjectId);
+            blueprintDTO.setCreatedBy(createdBy);
+            /* Create associated Blueprint */
+            blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
+        }
 
         /* Create associated ProjectManager (if present) */
         List<Long> managerIdList = newProjectDTO.getManagerIdList();
@@ -501,7 +515,7 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByIdIn(Collection<Long> projectIdCollection) throws Exception {
         List<Project> projectList = getAllByIdIn(projectIdCollection);
 
-        if (projectList.isEmpty())
+        if (projectList == null)
             return null;
 
         return fillAllDTO(projectList, null);
@@ -545,7 +559,7 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByLocationId(long locationId) throws Exception {
         List<Project> projectList = getAllByLocationId(locationId);
 
-        if (projectList.isEmpty()) 
+        if (projectList == null)
             return null;
 
         return fillAllDTO(projectList, null);
@@ -589,7 +603,7 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByLocationIdIn(Collection<Long> locationIdCollection) throws Exception {
         List<Project> projectList = getAllByLocationIdIn(locationIdCollection);
 
-        if (projectList.isEmpty()) 
+        if (projectList == null)
             return null;
 
         return fillAllDTO(projectList, null);
@@ -659,7 +673,7 @@ public class ProjectServiceImpl implements ProjectService{
     public List<ProjectReadDTO> getAllDTOByProjectNameContains(String projectName) throws Exception {
         List<Project> projectList = getAllByProjectNameContains(projectName);
 
-        if (projectList.isEmpty()) 
+        if (projectList == null)
             return null;
 
         return fillAllDTO(projectList, null);
@@ -918,15 +932,21 @@ public class ProjectServiceImpl implements ProjectService{
         } */
 
         /* Update associated Location if changed */
-        LocationUpdateDTO updatedLocation = updatedProjectDTO.getLocation();
-        if (updatedLocation != null) {
-            updatedLocation.setUpdatedBy(updatedBy);
+        String coordinate = updatedProjectDTO.getCoordinate();
+        if (coordinate != null) {
+            /* Get location by coordinate (to get locationId) */
+            LocationReadDTO locationDTO = locationService.getDTOByCoordinate(coordinate);
 
-            if (locationService.updateLocationByDTO(updatedLocation) == null) {
-                /* Not found location with Id, NEED TO STOP */
-                throw new IllegalArgumentException("No location found with Id: '"
-                        + updatedLocation.getLocationId() + "' to update");
+            if (locationDTO == null) {
+                /* Create Location if not already exists by coordinate (to get locationId) */
+                LocationCreateDTO locationCreateDTO = new LocationCreateDTO();
+                locationCreateDTO.setCoordinate(coordinate);
+                locationCreateDTO.setCreatedBy(updatedBy);
+
+                locationDTO = locationService.createLocationByDTO(locationCreateDTO);
             }
+
+            updatedProject.setLocationId(locationDTO.getLocationId());
         }
 
         updatedProject = updateProject(updatedProject);

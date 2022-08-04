@@ -79,7 +79,7 @@ public class BlueprintController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     BlueprintCreateDTO blueprintDTO,
-            @RequestPart(required = false) MultipartFile blueprintDoc,
+            @RequestPart MultipartFile blueprintDoc,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
@@ -404,7 +404,7 @@ public class BlueprintController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     BlueprintUpdateDTO blueprintDTO,
-            @RequestPart(required = false) MultipartFile blueprintDoc,
+            @RequestPart MultipartFile blueprintDoc,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             /* TODO: jwtUtil get jwt auto */

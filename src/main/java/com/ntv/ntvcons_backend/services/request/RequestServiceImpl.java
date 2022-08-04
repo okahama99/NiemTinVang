@@ -326,7 +326,7 @@ public class RequestServiceImpl implements RequestService{
     public List<RequestReadDTO> getAllDTOByIdIn(Collection<Long> requestIdCollection) throws Exception {
         List<Request> requestList = getAllByIdIn(requestIdCollection);
 
-        if (requestList.isEmpty()) 
+        if (requestList == null)
             return null;
 
         return fillAllDTO(requestList, null);
