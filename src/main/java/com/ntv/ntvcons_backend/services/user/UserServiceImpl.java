@@ -2,6 +2,7 @@ package com.ntv.ntvcons_backend.services.user;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
@@ -11,6 +12,7 @@ import com.ntv.ntvcons_backend.entities.UserModels.RegisterUserModel;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.role.RoleService;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
@@ -42,6 +44,8 @@ public class UserServiceImpl implements UserService{
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EntityWrapperService entityWrapperService;
+    @Autowired
+    private FileCombineService fileCombineService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
@@ -552,6 +556,18 @@ public class UserServiceImpl implements UserService{
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(userId, ENTITY_TYPE);
 
+        /* Delete associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(userId, ENTITY_TYPE);
+
+        if (fileDTOList != null && !fileDTOList.isEmpty()) {
+            fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+        }
+
+        /* Delete associated EntityWrapper */
+        entityWrapperService.deleteByEntityIdAndEntityType(userId, ENTITY_TYPE);
+
         user.setStatus(Status.DELETED);
         userRepository.saveAndFlush(user);
 
@@ -560,15 +576,23 @@ public class UserServiceImpl implements UserService{
 
     /* Utils */
     private UserReadDTO fillDTO(User user) throws Exception {
+        long userId = user.getUserId();;
+
         UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
 
         /* Get associated Role */
         userDTO.setRole(
                 roleService.getDTOById(user.getRoleId()));
         /* Get associated ExternalFile */
-        userDTO.setFileList(
+        List<ExternalFileReadDTO> fileReadDTOList =
                 eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(user.getUserId(), ENTITY_TYPE));
+                        .getAllExternalFileDTOByEntityIdAndEntityType(userId, ENTITY_TYPE);
+
+        if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+            /* if (fileReadDTOList.size() > 1)
+                Log Error, user only have 1 avatar file at a time */
+            userDTO.setFile(fileReadDTOList.get(0));
+        }
 
         return userDTO;
     }
@@ -586,23 +610,29 @@ public class UserServiceImpl implements UserService{
         Map<Long, RoleReadDTO> roleIdRoleDTOMap =
                 roleService.mapRoleIdRoleDTOByIdIn(roleIdSet);
         /* Get associated ExternalFile */
-//        Map<Long, List<ExternalFileReadDTO>> userIdExternalFileDTOListMap =
-//                eFEWPairingService
-//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(userIdSet, ENTITY_TYPE);
+        Map<Long, List<ExternalFileReadDTO>> userIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(userIdSet, ENTITY_TYPE);
 
         return userCollection.stream()
                 .map(user -> {
-                    UserReadDTO userReadDTO =
+                    UserReadDTO userDTO =
                             modelMapper.map(user, UserReadDTO.class);
 
-                    userReadDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
+                    userDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
 
-//                    userReadDTO.setFileList(
-//                            userIdExternalFileDTOListMap.get(user.getUserId()));
+                    List<ExternalFileReadDTO> fileReadDTOList =
+                            userIdExternalFileDTOListMap.get(user.getUserId());
 
-                    userReadDTO.setTotalPage(totalPage);
+                    if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+                        /* if (fileReadDTOList.size() > 1)
+                            Log Error, user only have 1 avatar file at a time */
+                        userDTO.setFile(fileReadDTOList.get(0));
+                    }
 
-                    return userReadDTO;})
+                    userDTO.setTotalPage(totalPage);
+
+                    return userDTO;})
                 .collect(Collectors.toList());
     }
 

@@ -634,7 +634,6 @@ public class BlueprintServiceImpl implements BlueprintService {
 
         BlueprintReadDTO blueprintDTO = modelMapper.map(blueprint, BlueprintReadDTO.class);
 
-
         List<ExternalFileReadDTO> fileReadDTOList =
                 eFEWPairingService
                         .getAllExternalFileDTOByEntityIdAndEntityType(blueprintId, ENTITY_TYPE);

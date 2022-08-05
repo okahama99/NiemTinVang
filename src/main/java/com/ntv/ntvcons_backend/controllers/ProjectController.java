@@ -134,6 +134,7 @@ public class ProjectController {
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestPart(required = false) MultipartFile blueprintDoc,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        long projectId = 0;
         try {
             if (projectDTO.getBlueprint() == null && blueprintDoc != null)
                 throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
@@ -147,7 +148,7 @@ public class ProjectController {
 
             ProjectReadDTO newProjectDTO = projectService.createProjectByDTO(projectDTO);
 
-            long projectId = newProjectDTO.getProjectId();
+            projectId = newProjectDTO.getProjectId();
 
             if (projectDocList != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
@@ -211,7 +212,8 @@ public class ProjectController {
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+                    .body(new ErrorResponse("Error adding file to Project with Id: '" + projectId + "'. ",
+                            e.getMessage()));
         }
     }
 
@@ -608,8 +610,8 @@ public class ProjectController {
                 StringBuilder errorMsg = new StringBuilder();
                 for (Long removeFileId : removeFileIdList) {
                     if (!oldFileIdSet.contains(removeFileId)) {
-                        errorMsg.append("Project with Id: '").
-                                append(projectId).append("' has no File with Id: '")
+                        errorMsg.append("Project with Id: '")
+                                .append(projectId).append("' has no File with Id: '")
                                 .append(removeFileId).append("' to remove. ");
                     }
                 }
@@ -641,7 +643,8 @@ public class ProjectController {
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+                    .body(new ErrorResponse("Error replacing file of Project with Id: '" + projectId + "'. ",
+                            e.getMessage()));
         }
     }
 
@@ -686,7 +689,8 @@ public class ProjectController {
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+                    .body(new ErrorResponse("Error replacing file of Project with Id: '" + projectId + "'. ",
+                            e.getMessage()));
         }
     }
 
@@ -734,7 +738,8 @@ public class ProjectController {
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                    .body(new ErrorResponse("Error creating Project", e.getMessage()));
+                    .body(new ErrorResponse("Error deleting file of Project with Id: '" + projectId + "'. ",
+                            e.getMessage()));
         }
     }
     /* ================================================ Ver 1 ================================================ */

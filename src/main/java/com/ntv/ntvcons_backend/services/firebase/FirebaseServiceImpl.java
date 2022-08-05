@@ -3,30 +3,29 @@ package com.ntv.ntvcons_backend.services.firebase;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.*;
-import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.FirebaseResource;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
 import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class FirebaseServiceImpl implements FirebaseService {
     @Lazy
     @Autowired
     private ExternalFileService externalFileService;
+    @Autowired
+    private MiscUtil miscUtil;
 
     /* CREATE */
     /** Luồng đi: <br/>
@@ -42,15 +41,15 @@ public class FirebaseServiceImpl implements FirebaseService {
         if(fileName == null)
             throw new IllegalArgumentException("Filename can not be null");
 
-        String fileExtension = getExtension(fileName);
+        String fileExtension = miscUtil.getExtension(fileName);
 
         do { /* generated random fileName */
             fileName = UUID.randomUUID().toString().concat(fileExtension);
         } while(externalFileService /* Test duplicate */
-                .existsByFileNameOrFileLink(fileName, makeLink(fileName)));
+                .existsByFileNameOrFileLink(fileName, makeFirebaseLink(fileName)));
 
         /* convert multipartFile to File (Create a File in current project folder) */
-        File file = convertMultipartFileToFile(multipartFile, fileName);
+        File file = miscUtil.convertMultipartFileToFile(multipartFile, fileName);
 
         /* get uploaded fileLink (upload to Firebase) */
         String fileLink = uploadFileToGetUrl(fileName, file);
@@ -88,9 +87,9 @@ public class FirebaseServiceImpl implements FirebaseService {
                 throw new IllegalArgumentException("Filename can not be null");
 
             do { /* generated random fileName */
-                tmpFileName = UUID.randomUUID().toString().concat(getExtension(tmpFileName));
+                tmpFileName = UUID.randomUUID().toString().concat(miscUtil.getExtension(tmpFileName));
             } while(externalFileService /* Test duplicate */
-                    .existsByFileNameOrFileLink(tmpFileName, makeLink(tmpFileName))
+                    .existsByFileNameOrFileLink(tmpFileName, makeFirebaseLink(tmpFileName))
                     || fileNameMultipartFileMap.containsKey(tmpFileName));
 
             fileNameMultipartFileMap.put(tmpFileName, multipartFile);
@@ -103,7 +102,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         for (String fileName : fileNameSet) {
             fileNameFileMap.put(
                     fileName,
-                    convertMultipartFileToFile(
+                    miscUtil.convertMultipartFileToFile(
                             fileNameMultipartFileMap.get(fileName), fileName));
         }
 
@@ -231,7 +230,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         storage.create(blobInfo, Files.readAllBytes(file.toPath()));
 
         /* Return url */
-        return makeLink(fileName);
+        return makeFirebaseLink(fileName);
     }
 
     private Map<String, String> uploadAllFileToGetNameUrlMap(Map<String, File> fileNameFileMap) throws Exception {
@@ -254,37 +253,17 @@ public class FirebaseServiceImpl implements FirebaseService {
             /* Create file on Firebase storage */
             storage.create(blobInfo, Files.readAllBytes(fileNameFileMap.get(fileName).toPath()));
 
-            fileNameFileLinkMap.put(fileName, makeLink(fileName));
+            fileNameFileLinkMap.put(fileName, makeFirebaseLink(fileName));
         }
 
         /* Return nameUrlMap */
         return fileNameFileLinkMap;
     }
 
-    private String makeLink(String fileName) throws Exception {
+    private String makeFirebaseLink(String fileName) throws Exception {
         return String.format(
                 FirebaseResource.DOWNLOAD_URL,
                 URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
     }
 
-    private File convertMultipartFileToFile(MultipartFile multipartFile, String fileName) throws Exception {
-        File file = new File(fileName);
-
-        /* Create a File in current project folder */
-        try (FileOutputStream fos = new FileOutputStream(file)) {
-            fos.write(multipartFile.getBytes());
-        }
-
-        return file;
-    }
-
-    private String getExtension(String fileName) throws Exception {
-        int lastDotIndex = fileName.lastIndexOf(".");
-
-        /* If file don't have extension, return empty String */
-        if (lastDotIndex <= -1)
-            return "";
-
-        return fileName.substring(lastDotIndex);
-    }
 }
