@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.services.report;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.SearchOption;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
@@ -17,6 +18,7 @@ import com.ntv.ntvcons_backend.entities.Report;
 import com.ntv.ntvcons_backend.repositories.ReportRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.reportDetail.ReportDetailService;
 import com.ntv.ntvcons_backend.services.reportType.ReportTypeService;
@@ -56,6 +58,8 @@ public class ReportServiceImpl implements ReportService {
     private TaskReportService taskReportService;
     @Autowired
     private EntityWrapperService entityWrapperService;
+    @Autowired
+    private FileCombineService fileCombineService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
@@ -713,6 +717,16 @@ public class ReportServiceImpl implements ReportService {
 
         /* Delete all associate detail */
         reportDetailService.deleteAllByReportId(reportId);
+
+        /* Delete all associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(reportId, ENTITY_TYPE);
+
+        if (fileDTOList != null && !fileDTOList.isEmpty()) {
+            fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+        }
+
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(reportId, ENTITY_TYPE);
 
@@ -741,6 +755,28 @@ public class ReportServiceImpl implements ReportService {
 
         /* Delete all associate detail */
         reportDetailService.deleteAllByReportIdIn(reportIdSet);
+
+        /* Delete associated File (In DB And Firebase) */
+        Map<Long, List<ExternalFileReadDTO>> reportIdFileListDTOMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(reportIdSet, ENTITY_TYPE);
+
+        if (reportIdFileListDTOMap != null && !reportIdFileListDTOMap.isEmpty()) {
+            List<ExternalFileReadDTO> fileDTOList = new ArrayList<>();
+
+            List<ExternalFileReadDTO> tmpFileDTOList;
+            for (Long blueprintId : reportIdFileListDTOMap.keySet()) {
+                tmpFileDTOList = reportIdFileListDTOMap.get(blueprintId);
+                if (tmpFileDTOList != null) {
+                    fileDTOList.addAll(tmpFileDTOList);
+                }
+            }
+
+            if (!fileDTOList.isEmpty()) {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+        }
+
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteAllByEntityIdInAndEntityType(reportIdSet, ENTITY_TYPE);
 
@@ -765,9 +801,9 @@ public class ReportServiceImpl implements ReportService {
         /* Get associated TaskReport */
         reportDTO.setTaskReportList(taskReportService.getAllDTOByReportId(reportId));
         /* Get associated ExternalFile */
-//        reportDTO.setFileList(
-//                eFEWPairingService
-//                        .getAllExternalFileDTOByEntityIdAndEntityType(reportId, ENTITY_TYPE));
+        reportDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(reportId, ENTITY_TYPE));
 
         return reportDTO;
     }
@@ -792,9 +828,9 @@ public class ReportServiceImpl implements ReportService {
         Map<Long, List<TaskReportReadDTO>> reportIdTaskReportDTOListMap =
                 taskReportService.mapReportIdTaskReportDTOListByReportIdIn(reportIdSet);
         /* Get associated ExternalFile */
-//        Map<Long, List<ExternalFileReadDTO>> reportIdExternalFileDTOListMap =
-//                eFEWPairingService
-//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(reportIdSet, ENTITY_TYPE);
+        Map<Long, List<ExternalFileReadDTO>> reportIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(reportIdSet, ENTITY_TYPE);
 
         return reportCollection.stream()
                 .map(report -> {
@@ -809,8 +845,8 @@ public class ReportServiceImpl implements ReportService {
                     /* Nullable */
                     reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(tmpReportId));
                     reportDTO.setTaskReportList(reportIdTaskReportDTOListMap.get(tmpReportId));
-//                    reportDTO.setFileList(
-//                            reportIdExternalFileDTOListMap.get(tmpReportId));
+                    reportDTO.setFileList(
+                            reportIdExternalFileDTOListMap.get(tmpReportId));
 
                     reportDTO.setTotalPage(totalPage);
 

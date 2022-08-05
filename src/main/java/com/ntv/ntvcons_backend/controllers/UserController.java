@@ -380,7 +380,7 @@ public class UserController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     UserUpdateDTO userDTO,
-            @RequestPart MultipartFile userAvatar){
+            @RequestPart MultipartFile userAvatar) {
         try {
             UserReadDTO updatedUserDTO = userService.updateUserByDTO(userDTO);
 
@@ -479,7 +479,7 @@ public class UserController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @DeleteMapping(value = "/v1/deleteUser/{userId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteUser(@PathVariable long userId){
+    public ResponseEntity<Object> deleteUser(@PathVariable long userId) {
         try {
             if (!userService.deleteUser(userId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

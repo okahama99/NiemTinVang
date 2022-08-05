@@ -224,7 +224,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         Page<RequestDetail> pagingResult =
                 requestDetailRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
-        if (pagingResult.hasContent()){
+        if (pagingResult.hasContent()) {
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
 
             Page<ShowRequestDetailModel> modelResult = pagingResult.map(new Converter<RequestDetail, ShowRequestDetailModel>() {

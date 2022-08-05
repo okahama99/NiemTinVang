@@ -30,7 +30,7 @@ public class ReportTypeController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createReportType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createReportType(@RequestBody @Valid ReportTypeCreateDTO reportTypeDTO){
+    public ResponseEntity<Object> createReportType(@RequestBody @Valid ReportTypeCreateDTO reportTypeDTO) {
         try {
             ReportTypeReadDTO newReportTypeDTO = reportTypeService.createReportTypeByDTO(reportTypeDTO);
 
@@ -181,7 +181,7 @@ public class ReportTypeController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateReportType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateReportType(@RequestBody @Valid ReportTypeUpdateDTO reportTypeDTO){
+    public ResponseEntity<Object> updateReportType(@RequestBody @Valid ReportTypeUpdateDTO reportTypeDTO) {
         try {
             ReportTypeReadDTO updatedReportTypeDTO = reportTypeService.updateReportTypeByDTO(reportTypeDTO);
 
@@ -201,7 +201,7 @@ public class ReportTypeController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteReportType/{reportTypeId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteReportType(@PathVariable long reportTypeId){
+    public ResponseEntity<Object> deleteReportType(@PathVariable long reportTypeId) {
         try {
             if (!reportTypeService.deleteReportType(reportTypeId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

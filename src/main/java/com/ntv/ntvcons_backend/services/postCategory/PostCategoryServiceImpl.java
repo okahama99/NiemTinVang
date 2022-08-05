@@ -126,7 +126,7 @@ public class PostCategoryServiceImpl implements PostCategoryService {
 
     /* Utils */
     private List<ShowPostCategoryModel> getShowPostCategoryModels(Page<PostCategory> pagingResult) {
-        if(pagingResult.hasContent()){
+        if(pagingResult.hasContent()) {
             int totalPage = pagingResult.getTotalPages();
 
             Page<ShowPostCategoryModel> modelResult = pagingResult.map(new Converter<PostCategory, ShowPostCategoryModel>() {

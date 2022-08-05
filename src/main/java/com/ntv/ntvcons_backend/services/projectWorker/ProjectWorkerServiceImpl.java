@@ -623,7 +623,7 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
                     projectWorkerIdUpdatedProjectWorkerMap.get(oldProjectWorker.getProjectWorkerId());
 
             if (updatedProjectWorker.getAssignDate() == null) {
-                if (updatedProjectWorker.getRemoveDate() != null){
+                if (updatedProjectWorker.getRemoveDate() != null) {
                     if (updatedProjectWorker.getRemoveDate().isBefore(oldProjectWorker.getAssignDate())) {
                         errorMsg.append("Invalid Input: removeDate is before assignDate. ")
                                 .append("At ProjectWorker with id: '")

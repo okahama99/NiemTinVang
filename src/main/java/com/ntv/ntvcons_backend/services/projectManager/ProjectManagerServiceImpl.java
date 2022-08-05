@@ -617,7 +617,7 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                     projectManagerIdUpdatedProjectManagerMap.get(oldProjectManager.getProjectManagerId());
 
             if (updatedProjectManager.getAssignDate() == null) {
-                if (updatedProjectManager.getRemoveDate() != null){
+                if (updatedProjectManager.getRemoveDate() != null) {
                     if (updatedProjectManager.getRemoveDate().isBefore(oldProjectManager.getAssignDate())) {
                         errorMsg.append("Invalid Input: removeDate is before assignDate. ")
                                 .append("At ProjectManager with id: '")

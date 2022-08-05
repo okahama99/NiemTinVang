@@ -30,7 +30,7 @@ public class TaskAssignmentController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createTaskAssignment", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createTaskAssignment(@RequestBody @Valid TaskAssignmentCreateDTO taskAssignmentDTO){
+    public ResponseEntity<Object> createTaskAssignment(@RequestBody @Valid TaskAssignmentCreateDTO taskAssignmentDTO) {
         try {
             TaskAssignmentReadDTO newTaskAssignmentDTO =
                     taskAssignmentService.createTaskAssignmentByDTO(taskAssignmentDTO);
@@ -200,7 +200,7 @@ public class TaskAssignmentController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateTaskAssignment", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateTaskAssignment(@RequestBody @Valid TaskAssignmentUpdateDTO taskAssignmentDTO){
+    public ResponseEntity<Object> updateTaskAssignment(@RequestBody @Valid TaskAssignmentUpdateDTO taskAssignmentDTO) {
         try {
             TaskAssignmentReadDTO updatedTaskAssignmentDTO =
                     taskAssignmentService.updateTaskAssignmentByDTO(taskAssignmentDTO);
@@ -225,7 +225,7 @@ public class TaskAssignmentController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteTaskAssignment/{assignmentId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteTaskAssignment(@PathVariable long assignmentId){
+    public ResponseEntity<Object> deleteTaskAssignment(@PathVariable long assignmentId) {
         try {
             if (!taskAssignmentService.deleteTaskAssignment(assignmentId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

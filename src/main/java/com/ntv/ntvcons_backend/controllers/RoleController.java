@@ -30,7 +30,7 @@ public class RoleController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createRole", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRole(@RequestBody @Valid RoleCreateDTO roleDTO){
+    public ResponseEntity<Object> createRole(@RequestBody @Valid RoleCreateDTO roleDTO) {
         try {
             RoleReadDTO newRoleDTO = roleService.createRoleByDTO(roleDTO);
 
@@ -186,7 +186,7 @@ public class RoleController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateRole", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRole(@RequestBody @Valid RoleUpdateDTO roleDTO){
+    public ResponseEntity<Object> updateRole(@RequestBody @Valid RoleUpdateDTO roleDTO) {
         try {
             RoleReadDTO updatedRoleDTO = roleService.updateRoleByDTO(roleDTO);
 
@@ -210,7 +210,7 @@ public class RoleController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteRole/{roleId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteRole(@PathVariable long roleId){
+    public ResponseEntity<Object> deleteRole(@PathVariable long roleId) {
         try {
             if (!roleService.deleteRole(roleId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
