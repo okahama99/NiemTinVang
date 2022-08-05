@@ -93,15 +93,13 @@ public class BlueprintController {
             BlueprintReadDTO newBlueprintDTO =
                     blueprintService.createBlueprintByDTO(blueprintDTO);
 
-            if (blueprintDoc != null) {
-                long blueprintId = newBlueprintDTO.getBlueprintId();
+            long blueprintId = newBlueprintDTO.getBlueprintId();
 
-                fileCombineService.saveFileInDBAndFirebase(
-                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.PROJECT_ENTITY, userId);
+            fileCombineService.saveFileInDBAndFirebase(
+                    blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.PROJECT_ENTITY, userId);
 
-                /* Get again after file created & save */
-                newBlueprintDTO = blueprintService.getDTOById(blueprintId);
-            }
+            /* Get again after file created & save */
+            newBlueprintDTO = blueprintService.getDTOById(blueprintId);
 
             return ResponseEntity.ok().body(newBlueprintDTO);
         } catch (IllegalArgumentException iAE) {
@@ -137,7 +135,7 @@ public class BlueprintController {
 
             if (blueprintDTO.getFile() != null)
                 return ResponseEntity.badRequest()
-                        .body("Blueprint with Id: '" + blueprintId + "' already has file. " +
+                        .body("Blueprint with Id: '" + blueprintId + "' already has file (Max 1). " +
                                 "Try using 'PUT:../replaceFile/{blueprintId}' instead");
 
             fileCombineService.saveFileInDBAndFirebase(
@@ -417,27 +415,24 @@ public class BlueprintController {
             BlueprintReadDTO updatedBlueprintDTO =
                     blueprintService.updateBlueprintByDTO(blueprintDTO);
 
-            if (updatedBlueprintDTO == null) {
+            if (updatedBlueprintDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No Blueprint found with Id: '" + blueprintDTO.getBlueprintId() + "'. ");
+
+            long blueprintId = updatedBlueprintDTO.getBlueprintId();
+
+            /* Delete old file */
+            ExternalFileReadDTO fileDTO =
+                    updatedBlueprintDTO.getFile();
+            if (fileDTO != null) {
+                fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
             }
 
-            if (blueprintDoc != null) {
-                long blueprintId = updatedBlueprintDTO.getBlueprintId();
+            fileCombineService.saveFileInDBAndFirebase(
+                    blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
 
-                /* Delete old file */
-                ExternalFileReadDTO fileDTO =
-                        updatedBlueprintDTO.getFile();
-                if (fileDTO != null) {
-                    fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
-                }
-
-                fileCombineService.saveFileInDBAndFirebase(
-                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
-
-                /* Get again after file created & save */
-                updatedBlueprintDTO = blueprintService.getDTOById(blueprintId);
-            }
+            /* Get again after file created & save */
+            updatedBlueprintDTO = blueprintService.getDTOById(blueprintId);
 
             return ResponseEntity.ok().body(updatedBlueprintDTO);
         } catch (IllegalArgumentException iAE) {
@@ -494,7 +489,7 @@ public class BlueprintController {
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error adding file to Blueprint with Id: '" + blueprintId + "'. ",
+                    new ErrorResponse("Error replacing file of Blueprint with Id: '" + blueprintId + "'. ",
                             e.getMessage()));
         }
     }
@@ -547,7 +542,7 @@ public class BlueprintController {
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
-                    new ErrorResponse("Error adding file to Blueprint with Id: '" + blueprintId + "'. ",
+                    new ErrorResponse("Error deleting file of Blueprint with Id: '" + blueprintId + "'. ",
                             e.getMessage()));
         }
     }
