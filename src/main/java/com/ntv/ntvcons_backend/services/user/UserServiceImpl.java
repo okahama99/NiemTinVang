@@ -12,6 +12,7 @@ import com.ntv.ntvcons_backend.entities.UserModels.RegisterUserModel;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.projectManager.ProjectManagerService;
 import com.ntv.ntvcons_backend.services.role.RoleService;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
@@ -43,6 +44,8 @@ public class UserServiceImpl implements UserService{
     private PasswordEncoder passwordEncoder;
     @Autowired
     private EntityWrapperService entityWrapperService;
+    @Autowired
+    private FileCombineService fileCombineService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
@@ -551,6 +554,18 @@ public class UserServiceImpl implements UserService{
         projectManagerService.deleteAllByUserId(userId);
 
         /* Delete associated EntityWrapper => All EFEWPairing */
+        entityWrapperService.deleteByEntityIdAndEntityType(userId, ENTITY_TYPE);
+
+        /* Delete associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(userId, ENTITY_TYPE);
+
+        if (fileDTOList != null && !fileDTOList.isEmpty()) {
+            fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+        }
+
+        /* Delete associated EntityWrapper */
         entityWrapperService.deleteByEntityIdAndEntityType(userId, ENTITY_TYPE);
 
         user.setStatus(Status.DELETED);
