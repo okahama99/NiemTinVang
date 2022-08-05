@@ -31,7 +31,7 @@ public class ReportDetailController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('44')")
     @PostMapping(value = "/v1/createReportDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createReportDetail(@RequestBody @Valid ReportDetailCreateDTO reportDetailDTO){
+    public ResponseEntity<Object> createReportDetail(@RequestBody @Valid ReportDetailCreateDTO reportDetailDTO) {
         try {
             ReportDetailReadDTO newReportDetailDTO = reportDetailService.createReportDetailByDTO(reportDetailDTO);
 
@@ -175,7 +175,7 @@ public class ReportDetailController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('44')")
     @PutMapping(value = "/v1/updateReportDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateReportDetail(@RequestBody @Valid ReportDetailUpdateDTO reportDetailDTO){
+    public ResponseEntity<Object> updateReportDetail(@RequestBody @Valid ReportDetailUpdateDTO reportDetailDTO) {
         try {
             ReportDetailReadDTO updatedReportDetailDTO = reportDetailService.updateReportDetailByDTO(reportDetailDTO);
 
@@ -199,7 +199,7 @@ public class ReportDetailController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('44','54')")
     @DeleteMapping(value = "/v1/deleteReportDetail/{reportDetailId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteReportDetail(@PathVariable long reportDetailId){
+    public ResponseEntity<Object> deleteReportDetail(@PathVariable long reportDetailId) {
         try {
             if (!reportDetailService.deleteReportDetail(reportDetailId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

@@ -50,7 +50,7 @@ public class LoginController {
     private UserService userService;
 
     @PostMapping(value = "/login", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> login(@RequestBody @Valid UserLoginModel user){
+    public ResponseEntity<Object> login(@RequestBody @Valid UserLoginModel user) {
         try {
             Authentication authentication =
                     authenticationManager.authenticate(
@@ -78,7 +78,7 @@ public class LoginController {
     @RequestMapping(value="/logout", method= RequestMethod.GET, produces = "application/json;charset=UTF-8")
     public String logoutPage(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null){
+        if (auth != null) {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
         return "redirect:/";

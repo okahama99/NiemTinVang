@@ -188,7 +188,7 @@ public class ProjectWorkerController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateProjectWorker", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateProjectWorker(@RequestBody @Valid ProjectWorkerUpdateDTO projectWorkerDTO){
+    public ResponseEntity<Object> updateProjectWorker(@RequestBody @Valid ProjectWorkerUpdateDTO projectWorkerDTO) {
         try {
             ProjectWorkerReadDTO updatedProjectWorkerDTO =
                     projectWorkerService.updateProjectWorkerByDTO(projectWorkerDTO);
@@ -209,7 +209,7 @@ public class ProjectWorkerController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @DeleteMapping(value = "/v1/deleteProjectWorker/{projectWorkerId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteProjectWorker(@PathVariable long projectWorkerId){
+    public ResponseEntity<Object> deleteProjectWorker(@PathVariable long projectWorkerId) {
         try {
             if (!projectWorkerService.deleteProjectWorker(projectWorkerId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

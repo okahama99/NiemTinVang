@@ -12,7 +12,7 @@ public class OTPService {
         this.smsSenderImpl = smsSenderImpl;
     }
 
-    public void smsSender(SmsRequest smsRequest){
+    public void smsSender(SmsRequest smsRequest) {
         smsSenderImpl.smsSender(smsRequest);
     }
 }

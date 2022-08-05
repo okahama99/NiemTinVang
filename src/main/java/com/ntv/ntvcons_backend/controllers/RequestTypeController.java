@@ -30,7 +30,7 @@ public class RequestTypeController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createRequestType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRequestType(@RequestBody @Valid RequestTypeCreateDTO requestTypeDTO){
+    public ResponseEntity<Object> createRequestType(@RequestBody @Valid RequestTypeCreateDTO requestTypeDTO) {
         try {
             RequestTypeReadDTO newRequestTypeDTO = 
                     requestTypeService.createRequestTypeByDTO(requestTypeDTO);
@@ -187,7 +187,7 @@ public class RequestTypeController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/updateRequestType", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateRequestType(@RequestBody @Valid RequestTypeUpdateDTO requestTypeDTO){
+    public ResponseEntity<Object> updateRequestType(@RequestBody @Valid RequestTypeUpdateDTO requestTypeDTO) {
         try {
             RequestTypeReadDTO updatedRequestTypeDTO = requestTypeService.updateRequestTypeByDTO(requestTypeDTO);
 
@@ -207,7 +207,7 @@ public class RequestTypeController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteRequestType/{requestTypeId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteRequestType(@PathVariable long requestTypeId){
+    public ResponseEntity<Object> deleteRequestType(@PathVariable long requestTypeId) {
         try {
             if (!requestTypeService.deleteRequestType(requestTypeId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

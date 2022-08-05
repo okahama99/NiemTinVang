@@ -30,7 +30,7 @@ public class WorkerController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createWorker", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createWorker(@RequestBody @Valid WorkerCreateDTO workerDTO){
+    public ResponseEntity<Object> createWorker(@RequestBody @Valid WorkerCreateDTO workerDTO) {
         try {
             WorkerReadDTO newWorkerDTO = workerService.createWorkerByDTO(workerDTO);
 
@@ -227,7 +227,7 @@ public class WorkerController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateWorker", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateWorker(@RequestBody @Valid WorkerUpdateDTO workerDTO){
+    public ResponseEntity<Object> updateWorker(@RequestBody @Valid WorkerUpdateDTO workerDTO) {
         try {
             WorkerReadDTO updatedWorkerDTO = workerService.updateWorkerByDTO(workerDTO);
 
@@ -250,7 +250,7 @@ public class WorkerController {
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @DeleteMapping(value = "/v1/deleteWorker/{workerId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteWorker(@PathVariable long workerId){
+    public ResponseEntity<Object> deleteWorker(@PathVariable long workerId) {
         try {
             if (!workerService.deleteWorker(workerId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)

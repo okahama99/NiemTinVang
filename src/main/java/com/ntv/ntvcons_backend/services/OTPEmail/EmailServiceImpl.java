@@ -26,7 +26,7 @@ public class EmailServiceImpl implements EmailService {
             helper.setSubject(subject);
             helper.setFrom("NiemTinVang");
             mailSender.send(mimeMessage);
-        }catch (MessagingException e){
+        }catch (MessagingException e) {
             System.out.println("gửi mail sai rồi");
         }
     }

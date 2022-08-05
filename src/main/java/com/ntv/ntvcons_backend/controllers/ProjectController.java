@@ -70,7 +70,7 @@ public class ProjectController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createProject", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createProject(@RequestBody CreateProjectModel createProjectModel){
+    public ResponseEntity<Object> createProject(@RequestBody CreateProjectModel createProjectModel) {
         try {
             if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
                 return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
@@ -134,7 +134,6 @@ public class ProjectController {
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestPart(required = false) MultipartFile blueprintDoc,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
-        long projectId = 0;
         try {
             if (projectDTO.getBlueprint() == null && blueprintDoc != null)
                 throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
@@ -148,7 +147,7 @@ public class ProjectController {
 
             ProjectReadDTO newProjectDTO = projectService.createProjectByDTO(projectDTO);
 
-            projectId = newProjectDTO.getProjectId();
+            long projectId = newProjectDTO.getProjectId();
 
             if (projectDocList != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
@@ -474,7 +473,7 @@ public class ProjectController {
     @PutMapping(value = "/v1.1/updateProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProjectAlt1(
             @RequestBody @Valid ProjectUpdateDTO projectDTO,
-            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token){
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
@@ -510,7 +509,7 @@ public class ProjectController {
                     ProjectUpdateDTO projectDTO,
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestPart(required = false) MultipartFile blueprintDoc,
-            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token){
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
@@ -530,11 +529,9 @@ public class ProjectController {
 
             if (projectDocList != null) {
                 /* Deleted old project file */
-                List<ExternalFileReadDTO> fileDTOList =
-                        updatedProjectDTO.getFileList();
-                if (fileDTOList != null) {
+                List<ExternalFileReadDTO> fileDTOList = updatedProjectDTO.getFileList();
+                if (fileDTOList != null)
                     fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
-                }
 
                 fileCombineService.saveAllFileInDBAndFirebase(
                         projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
@@ -552,11 +549,9 @@ public class ProjectController {
                 long blueprintId = blueprintDTO.getBlueprintId();
 
                 /* Deleted old blueprint file */
-                ExternalFileReadDTO fileDTO =
-                        blueprintDTO.getFile();
-                if (fileDTO != null) {
+                ExternalFileReadDTO fileDTO = blueprintDTO.getFile();
+                if (fileDTO != null)
                     fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
-                }
 
                 fileCombineService.saveFileInDBAndFirebase(
                         blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
@@ -710,7 +705,67 @@ public class ProjectController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PreAuthorize("hasAnyAuthority('54')")
+    @DeleteMapping(value = "/v1/deleteFile/{projectId}", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> deleteFileOfProjectById(
+            @PathVariable long projectId,
+            @RequestParam @Size(min = 1) List<Long> removeFileIdList) {
+        try {
+            ProjectReadDTO projectDTO = projectService.getDTOById(projectId);
+
+            if (projectDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Project found with Id: '" + projectId + "' to add file.");
+
+            List<ExternalFileReadDTO> fileDTOList = projectDTO.getFileList();
+            if (fileDTOList == null) {
+                return ResponseEntity.badRequest()
+                        .body("Project with Id: '" + projectId + "' has no file to delete. ");
+            } else {
+                Set<Long> oldFileIdSet =
+                        fileDTOList.stream()
+                                .map(ExternalFileReadDTO::getFileId)
+                                .collect(Collectors.toSet());
+
+                StringBuilder errorMsg = new StringBuilder();
+                for (Long removeFileId : removeFileIdList) {
+                    if (!oldFileIdSet.contains(removeFileId)) {
+                        errorMsg.append("Project with Id: '")
+                                .append(projectId).append("' has no File with Id: '")
+                                .append(removeFileId).append("' to remove. ");
+                    }
+                }
+
+                if (!errorMsg.toString().trim().isEmpty())
+                    throw new IllegalArgumentException(errorMsg.toString());
+
+                List<ExternalFileReadDTO> removeFileDTOList = new ArrayList<>();
+
+                for (ExternalFileReadDTO fileDTO : fileDTOList) {
+                    if (removeFileIdList.contains(fileDTO.getFileId())) {
+                        removeFileDTOList.add(fileDTO);
+                    }
+                }
+
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(removeFileDTOList);
+            }
+
+            /* Get again after file delete & save */
+            projectDTO = projectService.getDTOById(projectId);
+
+            return ResponseEntity.ok().body(projectDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch invalid input */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ErrorResponse("Error deleting file of Project with Id: '" + projectId + "'. ",
+                            e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54')")
     @DeleteMapping(value = "/v1/deleteAllFile/{projectId}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> deleteAllFileOfProjectById(@PathVariable long projectId) {
         try {

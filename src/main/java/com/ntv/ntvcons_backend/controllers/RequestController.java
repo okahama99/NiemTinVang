@@ -44,11 +44,11 @@ public class RequestController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('44')")
     @PostMapping(value = "/v1/createRequest", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createRequest(@RequestBody CreateRequestModel createRequestModel){
-        if(!projectRepository.existsById(createRequestModel.getProjectId())){
+    public ResponseEntity<Object> createRequest(@RequestBody CreateRequestModel createRequestModel) {
+        if(!projectRepository.existsById(createRequestModel.getProjectId())) {
             return ResponseEntity.ok().body("ProjectId không tồn tại.");
         }else{
-            if(!requestTypeRepository.existsById(createRequestModel.getRequestTypeId())){
+            if(!requestTypeRepository.existsById(createRequestModel.getRequestTypeId())) {
                 return ResponseEntity.ok().body("RequestTypeId không tồn tại.");
             }else{
                 boolean result = requestService.createRequest(createRequestModel);
@@ -83,7 +83,7 @@ public class RequestController {
 
     @PreAuthorize("hasAnyAuthority('44')")
     @PostMapping(value = "/v1/addRequestDetail", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> addRequestDetail(@RequestBody CreateRequestDetailModel createRequestDetailModel){
+    public ResponseEntity<Object> addRequestDetail(@RequestBody CreateRequestDetailModel createRequestDetailModel) {
         boolean result = requestDetailService.createRequestDetail(createRequestDetailModel);
         if (result) {
             return ResponseEntity.ok().body("Tạo thành công.");

@@ -814,7 +814,7 @@ public class RequestServiceImpl implements RequestService{
     @Override
     public boolean approveUpdate(Long requestId, Boolean decision) {
         Request request = requestRepository.findById(requestId).orElse(null);
-        if (request != null){
+        if (request != null) {
             request.setIsApproved(decision);
             requestRepository.saveAndFlush(request);
             return true;
@@ -1044,12 +1044,12 @@ public class RequestServiceImpl implements RequestService{
         Set<Request> requestSet = new HashSet<>();
 
         List<Request> requestList = getAllByRequesterId(userId);
-        if (requestList != null){
+        if (requestList != null) {
             requestSet.addAll(requestList);
         }
 
         requestList = getAllByVerifierId(userId);
-        if (requestList != null){
+        if (requestList != null) {
             requestSet.addAll(requestList);
         }
 
@@ -1079,12 +1079,12 @@ public class RequestServiceImpl implements RequestService{
         Set<Request> requestSet = new HashSet<>();
 
         List<Request> requestList = getAllByRequesterIdIn(userIdCollection);
-        if (requestList != null){
+        if (requestList != null) {
             requestSet.addAll(requestList);
         }
 
         requestList = getAllByVerifierIdIn(userIdCollection);
-        if (requestList != null){
+        if (requestList != null) {
             requestSet.addAll(requestList);
         }
 
@@ -1195,7 +1195,7 @@ public class RequestServiceImpl implements RequestService{
     }
 
     private List<ShowRequestModel> fillAllModel(Page<Request> pagingResult) {
-        if (pagingResult.hasContent()){
+        if (pagingResult.hasContent()) {
             int totalPage = pagingResult.getTotalPages();
 
             Page<ShowRequestModel> modelResult = pagingResult.map(new Converter<Request, ShowRequestModel>() {
@@ -1213,21 +1213,21 @@ public class RequestServiceImpl implements RequestService{
                     model.setRequestId(request.getRequestId());
                     model.setRequestName(request.getRequestName());
                     model.setProjectId(request.getProjectId());
-                    if (project.isPresent()){
+                    if (project.isPresent()) {
                         model.setProjectName(project.get().getProjectName());
                     }else{
                         model.setProjectName(null);
                     }
 
                     model.setRequesterId(request.getRequesterId());
-                    if (requester.isPresent()){
+                    if (requester.isPresent()) {
                         model.setRequesterName(requester.get().getUsername());
                     }else{
                         model.setRequesterName(null);
                     }
 
                     model.setRequestTypeId(request.getRequestTypeId());
-                    if (requestType.isPresent()){
+                    if (requestType.isPresent()) {
                         model.setRequestTypeName(requestType.get().getRequestTypeName());
                     }else{
                         model.setRequestTypeName(null);
@@ -1240,7 +1240,7 @@ public class RequestServiceImpl implements RequestService{
                     {
                         model.setVerifierId(request.getVerifierId());
                         Optional<User> verifier = userRepository.findById(request.getVerifierId());
-                        if (verifier.isPresent()){
+                        if (verifier.isPresent()) {
                             model.setVerifierName(verifier.get().getUsername());
                         }else{
                             model.setVerifierName(null);

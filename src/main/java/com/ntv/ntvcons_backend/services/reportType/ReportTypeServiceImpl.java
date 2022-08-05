@@ -39,7 +39,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         String errorMsg = "";
 
         /* Check FK */
-        if (!userService.existsById(newReportType.getCreatedBy())){
+        if (!userService.existsById(newReportType.getCreatedBy())) {
             errorMsg += "No User (CreatedBy) found with Id: '" + newReportType.getCreatedBy()
                     + "'. Which violate constraint: FK_ReportType_User_CreatedBy. ";
         }
@@ -48,7 +48,7 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         if (reportTypeRepository
                 .existsByReportTypeNameAndStatusNotIn(
                         newReportType.getReportTypeName(),
-                        N_D_S_STATUS_LIST)){
+                        N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another ReportType with name: '" 
                     + newReportType.getReportTypeName() + "'. ";
         }

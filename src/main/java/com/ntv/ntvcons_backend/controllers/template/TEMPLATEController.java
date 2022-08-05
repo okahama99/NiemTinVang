@@ -12,7 +12,7 @@ public class TEMPLATEController {
 //    /* ================================================ Ver 1 ================================================ */
 //    /* CREATE */
 //    @PostMapping(value = "/v1/createTEMPLATE", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> createTEMPLATE(@RequestBody @Valid TEMPLATECreateDTO temPlateDTO){
+//    public ResponseEntity<Object> createTEMPLATE(@RequestBody @Valid TEMPLATECreateDTO temPlateDTO) {
 //        try {
 //            TEMPLATEReadDTO newTEMPLATEDTO = temPlateService.createTEMPLATEByDTO(temPlateDTO);
 //
@@ -113,7 +113,7 @@ public class TEMPLATEController {
 //
 //    /* UPDATE */
 //    @PutMapping(value = "/v1/updateTEMPLATE", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> updateTEMPLATE(@RequestBody @Valid TEMPLATEUpdateDTO temPlateDTO){
+//    public ResponseEntity<Object> updateTEMPLATE(@RequestBody @Valid TEMPLATEUpdateDTO temPlateDTO) {
 //        try {
 //            TEMPLATEReadDTO updatedTEMPLATEDTO = temPlateService.updateTEMPLATEByDTO(temPlateDTO);
 //
@@ -132,7 +132,7 @@ public class TEMPLATEController {
 //
 //    /* DELETE */
 //    @DeleteMapping(value = "/v1/deleteTEMPLATE/{temPlateId}", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> deleteTEMPLATE(@PathVariable long temPlateId){
+//    public ResponseEntity<Object> deleteTEMPLATE(@PathVariable long temPlateId) {
 //        try {
 //            if (!temPlateService.deleteTEMPLATE(temPlateId)) {
 //                return ResponseEntity.status(HttpStatus.NOT_FOUND)

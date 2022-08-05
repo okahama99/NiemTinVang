@@ -320,7 +320,7 @@ public class ProjectServiceImpl implements ProjectService{
         Page<Project> pagingResult =
                 projectRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
-        if (pagingResult.hasContent()){
+        if (pagingResult.hasContent()) {
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
 
             Page<ProjectModel> modelResult =
@@ -446,7 +446,7 @@ public class ProjectServiceImpl implements ProjectService{
                 projectRepository
                         .findAllByProjectIdAndStatusNotIn(projectId, N_D_S_STATUS_LIST, paging);
 
-        if (pagingResult.hasContent()){
+        if (pagingResult.hasContent()) {
             double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
             Page<ProjectModel> modelResult =
                     pagingResult.map(new Converter<Project, ProjectModel>() {

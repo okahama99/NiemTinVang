@@ -35,7 +35,7 @@
 //            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
 //        }
 //        Page<Notification> pagingResult = notificationRepository.findByUser(user, paging);
-//        if (pagingResult.hasContent()){
+//        if (pagingResult.hasContent()) {
 //            double totalPage = Math.ceil((double)pagingResult.getTotalElements() / pageSize);
 //            Page<ShowNotificationModels> modelResult = pagingResult.map(new Converter<Notification, ShowNotificationModels>() {
 //                @Override
@@ -45,10 +45,10 @@
 //                    showNotificationModel.setId((notification.getId()));
 //                    showNotificationModel.setUserName(notification.getUser().getUsername());
 //                    showNotificationModel.setCreatedAt(notification.getCreatedAt());
-//                    if (notification.getChatRoom()!=null){
+//                    if (notification.getChatRoom()!=null) {
 //                        showNotificationModel.setChatRoomName(notification.getChatRoom().getName()+ "_"+notification.getDescription().replace(" đã gửi cho bạn một tin nhắn mới.", "").trim());
 //                    }
-////                    if (notification.getReport()!=null){
+////                    if (notification.getReport()!=null) {
 ////                        showNotificationModel.setReportId(notification.getReport().getId());
 ////                    }
 //
