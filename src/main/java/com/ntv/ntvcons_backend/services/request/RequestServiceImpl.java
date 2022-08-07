@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.services.request;
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
@@ -22,6 +23,7 @@ import com.ntv.ntvcons_backend.entities.RequestModels.UpdateRequestVerifierModel
 import com.ntv.ntvcons_backend.repositories.*;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.requestDetail.RequestDetailService;
 import com.ntv.ntvcons_backend.services.requestType.RequestTypeService;
@@ -68,6 +70,8 @@ public class RequestServiceImpl implements RequestService{
     private RequestDetailRepository requestDetailRepository;
     @Autowired
     private EntityWrapperService entityWrapperService;
+    @Autowired
+    private FileCombineService fileCombineService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
@@ -979,6 +983,16 @@ public class RequestServiceImpl implements RequestService{
 
         /* Delete all associate detail */
         requestDetailService.deleteAllByRequestId(requestId);
+
+        /* Delete all associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(requestId, ENTITY_TYPE);
+
+        if (fileDTOList != null && !fileDTOList.isEmpty()) {
+            fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+        }
+
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(requestId, ENTITY_TYPE);
 
@@ -1006,6 +1020,28 @@ public class RequestServiceImpl implements RequestService{
 
         /* Delete all associate detail */
         requestDetailService.deleteAllByRequestIdIn(requestIdSet);
+
+        /* Delete associated File (In DB And Firebase) */
+        Map<Long, List<ExternalFileReadDTO>> requestIdFileListDTOMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
+
+        if (requestIdFileListDTOMap != null && !requestIdFileListDTOMap.isEmpty()) {
+            List<ExternalFileReadDTO> fileDTOList = new ArrayList<>();
+
+            List<ExternalFileReadDTO> tmpFileDTOList;
+            for (Long blueprintId : requestIdFileListDTOMap.keySet()) {
+                tmpFileDTOList = requestIdFileListDTOMap.get(blueprintId);
+                if (tmpFileDTOList != null) {
+                    fileDTOList.addAll(tmpFileDTOList);
+                }
+            }
+
+            if (!fileDTOList.isEmpty()) {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+        }
+
         /* Delete all associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteAllByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
@@ -1031,6 +1067,28 @@ public class RequestServiceImpl implements RequestService{
 
         /* Delete all associate detail */
         requestDetailService.deleteAllByRequestIdIn(requestIdSet);
+
+        /* Delete associated File (In DB And Firebase) */
+        Map<Long, List<ExternalFileReadDTO>> requestIdFileListDTOMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
+
+        if (requestIdFileListDTOMap != null && !requestIdFileListDTOMap.isEmpty()) {
+            List<ExternalFileReadDTO> fileDTOList = new ArrayList<>();
+
+            List<ExternalFileReadDTO> tmpFileDTOList;
+            for (Long blueprintId : requestIdFileListDTOMap.keySet()) {
+                tmpFileDTOList = requestIdFileListDTOMap.get(blueprintId);
+                if (tmpFileDTOList != null) {
+                    fileDTOList.addAll(tmpFileDTOList);
+                }
+            }
+
+            if (!fileDTOList.isEmpty()) {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+        }
+
         /* Delete all associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteAllByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
@@ -1067,6 +1125,28 @@ public class RequestServiceImpl implements RequestService{
 
         /* Delete all associate detail */
         requestDetailService.deleteAllByRequestIdIn(requestIdSet);
+
+        /* Delete associated File (In DB And Firebase) */
+        Map<Long, List<ExternalFileReadDTO>> requestIdFileListDTOMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
+
+        if (requestIdFileListDTOMap != null && !requestIdFileListDTOMap.isEmpty()) {
+            List<ExternalFileReadDTO> fileDTOList = new ArrayList<>();
+
+            List<ExternalFileReadDTO> tmpFileDTOList;
+            for (Long blueprintId : requestIdFileListDTOMap.keySet()) {
+                tmpFileDTOList = requestIdFileListDTOMap.get(blueprintId);
+                if (tmpFileDTOList != null) {
+                    fileDTOList.addAll(tmpFileDTOList);
+                }
+            }
+
+            if (!fileDTOList.isEmpty()) {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+        }
+
         /* Delete all associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteAllByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
@@ -1102,6 +1182,28 @@ public class RequestServiceImpl implements RequestService{
 
         /* Delete all associate detail */
         requestDetailService.deleteAllByRequestIdIn(requestIdSet);
+
+        /* Delete associated File (In DB And Firebase) */
+        Map<Long, List<ExternalFileReadDTO>> requestIdFileListDTOMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
+
+        if (requestIdFileListDTOMap != null && !requestIdFileListDTOMap.isEmpty()) {
+            List<ExternalFileReadDTO> fileDTOList = new ArrayList<>();
+
+            List<ExternalFileReadDTO> tmpFileDTOList;
+            for (Long blueprintId : requestIdFileListDTOMap.keySet()) {
+                tmpFileDTOList = requestIdFileListDTOMap.get(blueprintId);
+                if (tmpFileDTOList != null) {
+                    fileDTOList.addAll(tmpFileDTOList);
+                }
+            }
+
+            if (!fileDTOList.isEmpty()) {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+        }
+
         /* Delete all associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteAllByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
@@ -1134,9 +1236,9 @@ public class RequestServiceImpl implements RequestService{
         requestDTO.setRequestDetailList(
                 requestDetailService.getAllDTOByRequestId(requestId));
         /* Get associated ExternalFile */
-//        requestDTO.setFileList(
-//                eFEWPairingService
-//                        .getAllExternalFileDTOByEntityIdAndEntityType(requestId, ENTITY_TYPE));
+        requestDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(requestId, ENTITY_TYPE));
 
         return requestDTO;
     }
@@ -1167,9 +1269,9 @@ public class RequestServiceImpl implements RequestService{
         Map<Long, List<RequestDetailReadDTO>> requestIdRequestDetailDTOListMap =
                 requestDetailService.mapRequestIdRequestDetailDTOListByRequestIdIn(requestIdSet);
         /* Get associated ExternalFile */
-//        Map<Long, List<ExternalFileReadDTO>> requestIdExternalFileDTOListMap =
-//                eFEWPairingService
-//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
+        Map<Long, List<ExternalFileReadDTO>> requestIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(requestIdSet, ENTITY_TYPE);
 
         return requestCollection.stream()
                 .map(request -> {
@@ -1185,8 +1287,8 @@ public class RequestServiceImpl implements RequestService{
                         requestDTO.setVerifier(userIdUserDTOMap.get(request.getVerifierId()));
 
                     requestDTO.setRequestDetailList(requestIdRequestDetailDTOListMap.get(tmpRequestId));
-//                    requestDTO.setFileList(
-//                            requestIdExternalFileDTOListMap.get(tmpRequestId));
+                    requestDTO.setFileList(
+                            requestIdExternalFileDTOListMap.get(tmpRequestId));
 
                     requestDTO.setTotalPage(totalPage);
 

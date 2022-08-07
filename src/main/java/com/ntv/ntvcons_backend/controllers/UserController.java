@@ -4,7 +4,7 @@ import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
@@ -495,7 +495,7 @@ public class UserController {
 
     @PreAuthorize("hasAnyAuthority('54','24')")
     @DeleteMapping(value = "/v1/deleteFile/{userId}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> deleteFileOfBlueprintById(@PathVariable long userId) {
+    public ResponseEntity<Object> deleteFileOfUserById(@PathVariable long userId) {
         try {
             /* Get by Id */
             UserReadDTO userDTO =
