@@ -5,10 +5,9 @@ import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
+import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
@@ -64,10 +63,10 @@ public class RequestController {
     public ResponseEntity<Object> createRequest(@RequestBody CreateRequestModel createRequestModel) {
         if(!projectRepository.existsById(createRequestModel.getProjectId())) {
             return ResponseEntity.ok().body("ProjectId không tồn tại.");
-        }else{
+        } else {
             if(!requestTypeRepository.existsById(createRequestModel.getRequestTypeId())) {
                 return ResponseEntity.ok().body("RequestTypeId không tồn tại.");
-            }else{
+            } else {
                 boolean result = requestService.createRequest(createRequestModel);
                 if (result) {
                     return ResponseEntity.ok().body("Tạo thành công.");
@@ -109,7 +108,8 @@ public class RequestController {
     }
 
     @PreAuthorize("hasAnyAuthority('44')")
-    @PostMapping(value = "/v1/createRequest/withFile", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/createRequest/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequestWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
@@ -507,7 +507,8 @@ public class RequestController {
     }
 
     @PreAuthorize("hasAnyAuthority('44')")
-    @PutMapping(value = "/v1/updateRequest/withFile", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateRequest/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequestWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */

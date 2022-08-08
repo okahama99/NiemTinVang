@@ -4,7 +4,6 @@ import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
@@ -375,7 +374,8 @@ public class UserController {
     }
 
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @PutMapping(value = "/v1/updateUser/withFile", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateUser/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateUserWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */

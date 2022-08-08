@@ -43,7 +43,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class RequestServiceImpl implements RequestService{
+public class RequestServiceImpl implements RequestService {
     @Autowired
     private RequestRepository requestRepository;
     @Autowired
@@ -187,7 +187,7 @@ public class RequestServiceImpl implements RequestService{
         Pageable paging;
         if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
+        } else {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
@@ -341,7 +341,7 @@ public class RequestServiceImpl implements RequestService{
         Pageable paging;
         if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
+        } else {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
@@ -1317,21 +1317,21 @@ public class RequestServiceImpl implements RequestService{
                     model.setProjectId(request.getProjectId());
                     if (project.isPresent()) {
                         model.setProjectName(project.get().getProjectName());
-                    }else{
+                    } else {
                         model.setProjectName(null);
                     }
 
                     model.setRequesterId(request.getRequesterId());
                     if (requester.isPresent()) {
                         model.setRequesterName(requester.get().getUsername());
-                    }else{
+                    } else {
                         model.setRequesterName(null);
                     }
 
                     model.setRequestTypeId(request.getRequestTypeId());
                     if (requestType.isPresent()) {
                         model.setRequestTypeName(requestType.get().getRequestTypeName());
-                    }else{
+                    } else {
                         model.setRequestTypeName(null);
                     }
 
@@ -1344,10 +1344,10 @@ public class RequestServiceImpl implements RequestService{
                         Optional<User> verifier = userRepository.findById(request.getVerifierId());
                         if (verifier.isPresent()) {
                             model.setVerifierName(verifier.get().getUsername());
-                        }else{
+                        } else {
                             model.setVerifierName(null);
                         }
-                    }else{
+                    } else {
                         model.setVerifierId(null);
                         model.setVerifierName("");
                     }
@@ -1355,7 +1355,7 @@ public class RequestServiceImpl implements RequestService{
                     if (detail != null)
                     {
                         model.setRequestDetailList(detail);
-                    }else{
+                    } else {
                         model.setRequestDetailList(null);
                     }
 
@@ -1378,7 +1378,7 @@ public class RequestServiceImpl implements RequestService{
                 }
             });
             return modelResult.getContent();
-        }else{
+        } else {
             return new ArrayList<ShowRequestModel>();
         }
     }

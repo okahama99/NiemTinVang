@@ -5,7 +5,6 @@ import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
@@ -16,10 +15,6 @@ import com.ntv.ntvcons_backend.entities.ProjectModels.ProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectModels.UpdateProjectModel;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.entities.UserModels.ListUserIDAndName;
-import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
-import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
-import com.ntv.ntvcons_backend.services.firebase.FirebaseService;
-import com.ntv.ntvcons_backend.services.firebase.FirebaseServiceImpl;
 import com.ntv.ntvcons_backend.services.location.LocationService;
 import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
@@ -41,7 +36,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,8 +54,6 @@ public class ProjectController {
     @Autowired
     private FileCombineService fileCombineService;
     @Autowired
-    private ExternalFileService externalFileService;
-    @Autowired
     private JwtUtil jwtUtil;
     @Autowired
     private MiscUtil miscUtil;
@@ -75,15 +67,14 @@ public class ProjectController {
             if(projectService.checkDuplicate(createProjectModel.getProjectName())) {
                 return ResponseEntity.badRequest().body("Tên dự án đã tồn tại.");
             } else {
-                if(!locationService.checkCoordinate(createProjectModel.getCoordinate()))
-                {
+                if(!locationService.checkCoordinate(createProjectModel.getCoordinate())) {
                     boolean result = projectService.createProject(createProjectModel);
 
                     if (result) {
                         return ResponseEntity.ok().body("Tạo thành công.");
                     }
                     return ResponseEntity.badRequest().body("Tạo thất bại.");
-                }else{
+                } else {
                     return ResponseEntity.badRequest().body("Coordinate đã tồn tại.");
                 }
             }
@@ -531,6 +522,8 @@ public class ProjectController {
 
             long projectId = updatedProjectDTO.getProjectId();
 
+            boolean addedFile = false;
+
             if (projectDocList != null) {
                 /* Deleted old project file */
                 List<ExternalFileReadDTO> fileDTOList = updatedProjectDTO.getFileList();
@@ -540,8 +533,7 @@ public class ProjectController {
                 fileCombineService.saveAllFileInDBAndFirebase(
                         projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
 
-                /* Get again after file created & save */
-                updatedProjectDTO = projectService.getDTOById(projectId);
+                addedFile = true;
             }
 
             if (blueprintDoc != null) {
@@ -560,9 +552,12 @@ public class ProjectController {
                 fileCombineService.saveFileInDBAndFirebase(
                         blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
 
-                /* Get again after file created & save */
-                updatedProjectDTO = projectService.getDTOById(projectId);
+                addedFile = true;
             }
+
+            /* Get again after file created & save */
+            if (addedFile)
+                updatedProjectDTO = projectService.getDTOById(projectId);
 
             return ResponseEntity.ok().body(updatedProjectDTO);
         } catch (IllegalArgumentException iAE) {

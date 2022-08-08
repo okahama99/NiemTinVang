@@ -154,7 +154,7 @@ public class PostCategoryServiceImpl implements PostCategoryService {
                 }
             });
             return modelResult.getContent();
-        }else{
+        } else {
             return new ArrayList<ShowPostCategoryModel>();
         }
     }

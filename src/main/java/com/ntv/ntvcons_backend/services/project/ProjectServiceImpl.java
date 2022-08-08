@@ -9,7 +9,6 @@ import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
-import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectUpdateDTO;
@@ -57,7 +56,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ProjectServiceImpl implements ProjectService{
+public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private ProjectRepository projectRepository;
     @Autowired
@@ -311,7 +310,7 @@ public class ProjectServiceImpl implements ProjectService{
         Pageable paging;
         if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
+        } else {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
@@ -379,7 +378,7 @@ public class ProjectServiceImpl implements ProjectService{
                 }
             });
             return modelResult.getContent();
-        }else{
+        } else {
             return new ArrayList<ProjectModel>();
         }
     }
@@ -436,7 +435,7 @@ public class ProjectServiceImpl implements ProjectService{
         Pageable paging;
         if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
+        } else {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
@@ -489,7 +488,7 @@ public class ProjectServiceImpl implements ProjectService{
                         }
                     });
             return modelResult.getContent();
-        }else{
+        } else {
             return new ArrayList<ProjectModel>();
         }
     }

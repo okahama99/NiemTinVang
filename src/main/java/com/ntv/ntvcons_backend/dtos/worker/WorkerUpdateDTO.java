@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.dtos.worker;
 
-import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import io.swagger.v3.oas.annotations.media.Schema;

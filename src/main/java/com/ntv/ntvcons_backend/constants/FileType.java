@@ -1,8 +1,5 @@
 package com.ntv.ntvcons_backend.constants;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public enum FileType {
     BLUEPRINT_DOC("BLUEPRINT_DOC"),
     PROJECT_DOC("PROJECT_DOC"),

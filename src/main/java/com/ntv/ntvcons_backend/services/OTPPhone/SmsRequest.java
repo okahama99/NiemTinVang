@@ -1,8 +1,6 @@
 package com.ntv.ntvcons_backend.services.OTPPhone;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ntv.ntvcons_backend.services.OTPEmail.OtpService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.NotBlank;
 

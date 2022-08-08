@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.utils;
 
+import com.ntv.ntvcons_backend.configs.UserDetailsImpl;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.services.role.RoleService;
@@ -9,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-import com.ntv.ntvcons_backend.configs.UserDetailsImpl;
 
 import java.util.Date;
 // xí m, 2 cái trùng tên kìa
@@ -27,7 +27,7 @@ public class JwtUtil {
     private final long JWT_EXPIRATION = 10800000L;
 
     //hàm này có dùng ko ko m, tụi t chỉ xài otp phone thôi
-//    public String generateTokenEmail(String email){
+//    public String generateTokenEmail(String email) {
 //        Date now = new Date();
 //        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
 //        User user = userRepository.findUserByEmail(email);

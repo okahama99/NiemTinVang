@@ -8,9 +8,6 @@ import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
-import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
-import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
 import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.task.TaskService;
 import com.ntv.ntvcons_backend.utils.JwtUtil;
@@ -72,7 +69,8 @@ public class TaskController {
     }
 
     @PreAuthorize("hasAnyAuthority('44')")
-    @PostMapping(value = "/v1/createTask/withFile", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/createTask/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createTaskWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
@@ -331,7 +329,8 @@ public class TaskController {
 
 
     @PreAuthorize("hasAnyAuthority('54')")
-    @PutMapping(value = "/v1/updateTask/withFile", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateTask/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateTaskWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */

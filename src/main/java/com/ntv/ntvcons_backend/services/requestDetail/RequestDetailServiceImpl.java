@@ -217,7 +217,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
         Pageable paging;
         if (sortType) {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-        }else{
+        } else {
             paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
         }
 
@@ -253,7 +253,7 @@ public class RequestDetailServiceImpl implements RequestDetailService {
                 }
             });
             return modelResult.getContent();
-        }else{
+        } else {
             return new ArrayList<ShowRequestDetailModel>();
         }
     }

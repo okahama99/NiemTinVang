@@ -16,7 +16,7 @@
 //import java.util.List;
 //
 //@Service
-//public class NotificationServiceImpl implements NotificationService{
+//public class NotificationServiceImpl implements NotificationService {
 //
 //    @Autowired
 //    UserRepository userRepository;
@@ -31,7 +31,7 @@
 //        if (sortType)
 //        {
 //            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
-//        }else{
+//        } else {
 //            paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
 //        }
 //        Page<Notification> pagingResult = notificationRepository.findByUser(user, paging);
@@ -62,7 +62,7 @@
 //                }
 //            });
 //            return modelResult.getContent();
-//        }else{
+//        } else {
 //            return null;
 //        }
 //    }

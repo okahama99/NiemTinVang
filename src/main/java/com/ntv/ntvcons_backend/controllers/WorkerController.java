@@ -404,7 +404,8 @@ public class WorkerController {
     }
     
     @PreAuthorize("hasAnyAuthority('54','24')")
-    @PutMapping(value = "/v1/updateWorker/withFile", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateWorker/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateWorkerWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */

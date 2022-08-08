@@ -5,7 +5,6 @@ import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
@@ -63,7 +62,8 @@ public class ReportController {
     }
 
     @PreAuthorize("hasAnyAuthority('44')")
-    @PostMapping(value = "/v1/createReport/withFile", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/createReport/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createReportWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
@@ -342,7 +342,8 @@ public class ReportController {
     }
 
     @PreAuthorize("hasAnyAuthority('44')")
-    @PutMapping(value = "/v1/updateReport/withFile", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/updateReport/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateReportWithFile(
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
