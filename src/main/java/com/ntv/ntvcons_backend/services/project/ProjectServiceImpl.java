@@ -232,17 +232,15 @@ public class ProjectServiceImpl implements ProjectService{
                 throw new IllegalArgumentException("Invalid createOption used");
         }*/
 
-        String coordinate = newProjectDTO.getCoordinate();
+        LocationCreateDTO locationCreateDTO = newProjectDTO.getLocation();
+        String coordinate = locationCreateDTO.getCoordinate();
 
         /* Get Location by Coordinate (to get locationId) */
         locationDTO = locationService.getDTOByCoordinate(coordinate);
 
         if (locationDTO == null) {
-            /* Create Location if not already exists by coordinate (to get locationId) */
-            LocationCreateDTO locationCreateDTO = new LocationCreateDTO();
-            locationCreateDTO.setCoordinate(coordinate);
             locationCreateDTO.setCreatedBy(createdBy);
-
+            /* Create if not exists */
             locationDTO = locationService.createLocationByDTO(locationCreateDTO);
         }
 
@@ -932,17 +930,14 @@ public class ProjectServiceImpl implements ProjectService{
         } */
 
         /* Update associated Location if changed */
-        String coordinate = updatedProjectDTO.getCoordinate();
-        if (coordinate != null) {
+        LocationCreateDTO locationCreateDTO = updatedProjectDTO.getLocation();
+        if (locationCreateDTO != null) {
+            String coordinate = locationCreateDTO.getCoordinate();
             /* Get location by coordinate (to get locationId) */
             LocationReadDTO locationDTO = locationService.getDTOByCoordinate(coordinate);
 
             if (locationDTO == null) {
-                /* Create Location if not already exists by coordinate (to get locationId) */
-                LocationCreateDTO locationCreateDTO = new LocationCreateDTO();
-                locationCreateDTO.setCoordinate(coordinate);
                 locationCreateDTO.setCreatedBy(updatedBy);
-
                 locationDTO = locationService.createLocationByDTO(locationCreateDTO);
             }
 

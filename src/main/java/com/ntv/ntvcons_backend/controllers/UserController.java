@@ -430,7 +430,6 @@ public class UserController {
             @PathVariable long userId,
             @RequestPart MultipartFile userAvatar) {
         try {
-            /* Create to get Id */
             UserReadDTO userDTO =
                     userService.getDTOById(userId);
 

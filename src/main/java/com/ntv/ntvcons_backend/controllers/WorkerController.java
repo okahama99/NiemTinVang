@@ -26,7 +26,10 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.activation.MimetypesFileTypeMap;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/worker")
@@ -468,60 +471,177 @@ public class WorkerController {
         }
     }
 
-//    @PreAuthorize("hasAnyAuthority('54','24')")
-//    @PutMapping(value = "/v1/replaceFile/{workerId}",
-//            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
-//    public ResponseEntity<Object> replaceFileOfWorkerById(
-//            @PathVariable long workerId,
-//            @RequestParam @Size(min = 1) List<Long> removeFileIdList,
-//            @RequestPart MultipartFile workerAvatar,
-//            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
-//        try {
-//            /* Create to get Id */
-//            WorkerReadDTO workerDTO =
-//                    workerService.getDTOById(workerId);
-//
-//            if (workerDTO == null)
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                        .body("No Worker found with Id: '" + workerId + "' to add file.");
-//
-//            ExternalFileReadDTO fileDTO = workerDTO.getFile();
-//            if (fileDTO == null) {
-//                return ResponseEntity.badRequest()
-//                        .body("Worker with Id: '" + workerId + "' has no file to replace. "
-//                                + "Try using 'POST:../addFile/{workerId}' instead");
-//            } else {
-//                fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
-//            }
-//
-//            String fileName = workerAvatar.getOriginalFilename();
-//            if (fileName == null || fileName.isEmpty())
-//                throw new IllegalArgumentException(
-//                        "Invalid file name, could not assert file type from the file name given. ");
-//
-//            String extension = miscUtil.getExtension(fileName);
-//            String type = new MimetypesFileTypeMap().getContentType(fileName)
-//                    .split("/")[0];
-//            if (extension.isEmpty() || !type.equals("image"))
-//                throw new IllegalArgumentException("Invalid file type for worker avatar. ");
-//
-//            fileCombineService.saveFileInDBAndFirebase(
-//                    workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, workerId);
-//
-//            /* Get again after file created & save */
-//            workerDTO = workerService.getDTOById(workerId);
-//
-//            return ResponseEntity.ok().body(workerDTO);
-//        } catch (IllegalArgumentException iAE) {
-//            /* Catch not found Role by roleId, which violate FK constraint */
-//            return ResponseEntity.badRequest().body(
-//                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError().body(
-//                    new ErrorResponse("Error replacing file of Worker with Id: '" + workerId + "'. ",
-//                            e.getMessage()));
-//        }
-//    }
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1/replaceFile/{workerId}",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> replaceFileOfWorkerById(
+            @PathVariable long workerId,
+            @RequestPart MultipartFile workerAvatar,
+            @RequestParam @Size(min = 1) List<Long> removeFileIdList,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> workerDocList,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            WorkerReadDTO workerDTO =
+                    workerService.getDTOById(workerId);
+
+            if (workerDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Worker found with Id: '" + workerId + "' to add file.");
+
+            List<ExternalFileReadDTO> fileDTOList = workerDTO.getFileList();
+            if (fileDTOList == null) {
+                return ResponseEntity.badRequest()
+                        .body("Worker with Id: '" + workerId + "' has no file to replace. "
+                                + "Try using 'POST:../addFile/{workerId}' instead");
+            } else {
+                Set<Long> oldFileIdSet =
+                        fileDTOList.stream()
+                                .map(ExternalFileReadDTO::getFileId)
+                                .collect(Collectors.toSet());
+
+                StringBuilder errorMsg = new StringBuilder();
+                for (Long removeFileId : removeFileIdList) {
+                    if (!oldFileIdSet.contains(removeFileId)) {
+                        errorMsg.append("Worker with Id: '")
+                                .append(workerId).append("' has no File with Id: '")
+                                .append(removeFileId).append("' to remove. ");
+                    }
+                }
+
+                if (!errorMsg.toString().trim().isEmpty())
+                    throw new IllegalArgumentException(errorMsg.toString());
+
+                List<ExternalFileReadDTO> removeFileDTOList = new ArrayList<>();
+
+                for (ExternalFileReadDTO fileDTO : fileDTOList) {
+                    if (removeFileIdList.contains(fileDTO.getFileId())) {
+                        removeFileDTOList.add(fileDTO);
+                    }
+                }
+
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(removeFileDTOList);
+            }
+
+            boolean addedFile = false;
+
+            if (workerAvatar != null) {
+                String fileName = workerAvatar.getOriginalFilename();
+                if (fileName == null || fileName.isEmpty())
+                    throw new IllegalArgumentException(
+                            "Invalid file name, could not assert file type from the file name given. ");
+
+                String extension = miscUtil.getExtension(fileName);
+                String type = new MimetypesFileTypeMap().getContentType(fileName)
+                        .split("/")[0];
+                if (extension.isEmpty() || !type.equals("image"))
+                    throw new IllegalArgumentException("Invalid file type for worker avatar. ");
+
+                fileCombineService.saveFileInDBAndFirebase(
+                        workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
+
+                addedFile = true;
+            }
+
+            if (workerDocList != null) {
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        workerDocList, FileType.WORKER_DOC, workerId, EntityType.WORKER_ENTITY, userId);
+
+                addedFile = true;
+            }
+
+            /* Get again after file created & save */
+            if (addedFile)
+                workerDTO = workerService.getDTOById(workerId);
+
+            return ResponseEntity.ok().body(workerDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Role by roleId, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error replacing file of Worker with Id: '" + workerId + "'. ",
+                            e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1/replaceAllFile/{workerId}",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> replaceAllFileOfWorkerById(
+            @PathVariable long workerId,
+            @RequestPart MultipartFile workerAvatar,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> workerDocList,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            /* TODO: jwtUtil get jwt auto */
+            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            WorkerReadDTO workerDTO =
+                    workerService.getDTOById(workerId);
+
+            if (workerDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Worker found with Id: '" + workerId + "' to add file.");
+
+            List<ExternalFileReadDTO> fileDTOList = workerDTO.getFileList();
+            if (fileDTOList == null) {
+                return ResponseEntity.badRequest()
+                        .body("Worker with Id: '" + workerId + "' has no file to replace. "
+                                + "Try using 'POST:../addFile/{workerId}' instead");
+            } else {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+
+            boolean addedFile = false;
+
+            if (workerAvatar != null) {
+                String fileName = workerAvatar.getOriginalFilename();
+                if (fileName == null || fileName.isEmpty())
+                    throw new IllegalArgumentException(
+                            "Invalid file name, could not assert file type from the file name given. ");
+
+                String extension = miscUtil.getExtension(fileName);
+                String type = new MimetypesFileTypeMap().getContentType(fileName)
+                        .split("/")[0];
+                if (extension.isEmpty() || !type.equals("image"))
+                    throw new IllegalArgumentException("Invalid file type for worker avatar. ");
+
+                fileCombineService.saveFileInDBAndFirebase(
+                        workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
+
+                addedFile = true;
+            }
+
+            if (workerDocList != null) {
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        workerDocList, FileType.WORKER_DOC, workerId, EntityType.WORKER_ENTITY, userId);
+
+                addedFile = true;
+            }
+
+            /* Get again after file created & save */
+            if (addedFile)
+                workerDTO = workerService.getDTOById(workerId);
+
+            return ResponseEntity.ok().body(workerDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Role by roleId, which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error replacing file of Worker with Id: '" + workerId + "'. ",
+                            e.getMessage()));
+        }
+    }
 
     /* DELETE */
     @PreAuthorize("hasAnyAuthority('54','24')")

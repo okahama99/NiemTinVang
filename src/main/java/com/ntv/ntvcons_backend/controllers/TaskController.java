@@ -50,7 +50,7 @@ public class TaskController {
     @PreAuthorize("hasAnyAuthority('54')")
     @PostMapping(value = "/v1/createTask", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createTask(@RequestBody @Valid TaskCreateDTO taskDTO,
-                                             @RequestHeader(name = "Authorization") String token) {
+                                             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
             Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
@@ -302,7 +302,7 @@ public class TaskController {
     @PutMapping(value = "/v1/updateTask", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateTask(
             @RequestBody @Valid TaskUpdateDTO taskDTO,
-            @RequestHeader(name = "Authorization") String token) {
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
             /* TODO: jwtUtil get jwt auto */
