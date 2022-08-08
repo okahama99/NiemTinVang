@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.services.task;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.SearchOption;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
@@ -15,6 +16,7 @@ import com.ntv.ntvcons_backend.entities.TaskAssignment;
 import com.ntv.ntvcons_backend.repositories.TaskRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.taskAssignment.TaskAssignmentService;
 import com.ntv.ntvcons_backend.services.taskReport.TaskReportService;
@@ -54,6 +56,8 @@ public class TaskServiceImpl implements TaskService{
     private EntityWrapperService entityWrapperService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
+    @Autowired
+    private FileCombineService fileCombineService;
 
     private final EntityType ENTITY_TYPE = EntityType.TASK_ENTITY;
 
@@ -764,6 +768,15 @@ public class TaskServiceImpl implements TaskService{
         /* Delete all associated TaskReport */
         taskReportService.deleteAllByTaskId(taskId);
 
+        /* Delete all associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(taskId, ENTITY_TYPE);
+
+        if (fileDTOList != null && !fileDTOList.isEmpty()) {
+            fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+        }
+
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(taskId, ENTITY_TYPE);
 
@@ -791,6 +804,27 @@ public class TaskServiceImpl implements TaskService{
         /* Delete all associated TaskReport */
         taskReportService.deleteAllByTaskIdIn(taskIdSet);
 
+        /* Delete associated File (In DB And Firebase) */
+        Map<Long, List<ExternalFileReadDTO>> taskIdFileListDTOMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(taskIdSet, ENTITY_TYPE);
+
+        if (taskIdFileListDTOMap != null && !taskIdFileListDTOMap.isEmpty()) {
+            List<ExternalFileReadDTO> fileDTOList = new ArrayList<>();
+
+            List<ExternalFileReadDTO> tmpFileDTOList;
+            for (Long blueprintId : taskIdFileListDTOMap.keySet()) {
+                tmpFileDTOList = taskIdFileListDTOMap.get(blueprintId);
+                if (tmpFileDTOList != null) {
+                    fileDTOList.addAll(tmpFileDTOList);
+                }
+            }
+
+            if (!fileDTOList.isEmpty()) {
+                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+            }
+        }
+
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteAllByEntityIdInAndEntityType(taskIdSet, ENTITY_TYPE);
 
@@ -816,9 +850,9 @@ public class TaskServiceImpl implements TaskService{
         taskDTO.setTaskReportList(
                 taskReportService.getAllDTOByTaskId(taskId));
         /* Get associated ExternalFile */
-//        taskDTO.setFileList(
-//                eFEWPairingService
-//                        .getAllExternalFileDTOByEntityIdAndEntityType(taskId, ENTITY_TYPE));
+        taskDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(taskId, ENTITY_TYPE));
 
         return taskDTO;
     }
@@ -838,9 +872,9 @@ public class TaskServiceImpl implements TaskService{
         Map<Long, List<TaskReportReadDTO>> taskIdTaskReportDTOListMap =
                 taskReportService.mapTaskIdTaskReportDTOListByTaskIdIn(taskIdSet);
         /* Get associated ExternalFile */
-//        Map<Long, List<ExternalFileReadDTO>> taskIdExternalFileDTOListMap =
-//                eFEWPairingService
-//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(taskIdSet, ENTITY_TYPE);
+        Map<Long, List<ExternalFileReadDTO>> taskIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(taskIdSet, ENTITY_TYPE);
 
         return taskCollection.stream()
                 .map(task -> {
@@ -851,8 +885,8 @@ public class TaskServiceImpl implements TaskService{
 
                     taskReadDTO.setTaskAssignment(taskIdTaskAssignmentDTOMap.get(tmpTaskID));
                     taskReadDTO.setTaskReportList(taskIdTaskReportDTOListMap.get(tmpTaskID));
-//                    taskReadDTO.setFileList(
-//                            taskIdExternalFileDTOListMap.get(tmpTaskID));
+                    taskReadDTO.setFileList(
+                            taskIdExternalFileDTOListMap.get(tmpTaskID));
 
                     taskReadDTO.setTotalPage(totalPage);
 

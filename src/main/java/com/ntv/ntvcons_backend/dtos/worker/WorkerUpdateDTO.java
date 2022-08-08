@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.dtos.worker;
 
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
+import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import javax.validation.constraints.Size;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkerUpdateDTO extends BaseCreateDTO {
+public class WorkerUpdateDTO extends BaseUpdateDTO {
     @Positive
     @NotNull(message = "Id REQUIRED for Update")
     private Long workerId;

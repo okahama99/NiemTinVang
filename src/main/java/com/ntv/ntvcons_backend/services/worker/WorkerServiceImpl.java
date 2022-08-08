@@ -2,6 +2,7 @@ package com.ntv.ntvcons_backend.services.worker;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
@@ -12,6 +13,7 @@ import com.ntv.ntvcons_backend.repositories.WorkerRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.location.LocationService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.projectWorker.ProjectWorkerService;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import org.modelmapper.ModelMapper;
@@ -42,6 +44,8 @@ public class WorkerServiceImpl implements WorkerService {
     private EntityWrapperService entityWrapperService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
+    @Autowired
+    private FileCombineService fileCombineService;
 
     private final EntityType ENTITY_TYPE = EntityType.WORKER_ENTITY;
 
@@ -450,6 +454,15 @@ public class WorkerServiceImpl implements WorkerService {
         /* Delete all associated projectWorker */
         projectWorkerService.deleteAllByWorkerId(workerId);
 
+        /* Delete associated File (In DB And Firebase) */
+        List<ExternalFileReadDTO> fileDTOList =
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(workerId, ENTITY_TYPE);
+
+        if (fileDTOList != null && !fileDTOList.isEmpty()) {
+            fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+        }
+
         /* Delete associated EntityWrapper => All EFEWPairing */
         entityWrapperService.deleteByEntityIdAndEntityType(workerId, ENTITY_TYPE);
 
@@ -467,9 +480,9 @@ public class WorkerServiceImpl implements WorkerService {
         workerDTO.setAddress(
                 locationService.getDTOById(worker.getAddressId()));
         /* Get associated ExternalFile */
-//        workerDTO.setFileList(
-//                eFEWPairingService
-//                        .getAllExternalFileDTOByEntityIdAndEntityType(worker.getWorkerId(), ENTITY_TYPE));
+        workerDTO.setFileList(
+                eFEWPairingService
+                        .getAllExternalFileDTOByEntityIdAndEntityType(worker.getWorkerId(), ENTITY_TYPE));
 
         return workerDTO;
     }
@@ -487,9 +500,9 @@ public class WorkerServiceImpl implements WorkerService {
         Map<Long, LocationReadDTO> locationIdLocationDTOMap =
                 locationService.mapLocationIdLocationDTOByIdIn(locationIdSet);
         /* Get associated ExternalFile */
-//        Map<Long, List<ExternalFileReadDTO>> workerIdExternalFileDTOListMap =
-//                eFEWPairingService
-//                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(workerIdSet, ENTITY_TYPE);
+        Map<Long, List<ExternalFileReadDTO>> workerIdExternalFileDTOListMap =
+                eFEWPairingService
+                        .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(workerIdSet, ENTITY_TYPE);
 
         return workerCollection.stream()
                 .map(worker -> {
@@ -498,8 +511,8 @@ public class WorkerServiceImpl implements WorkerService {
 
                     workerReadDTO.setAddress(locationIdLocationDTOMap.get(worker.getAddressId()));
 
-//                    workerReadDTO.setFileList(
-//                            workerIdExternalFileDTOListMap.get(worker.getWorkerId()));
+                    workerReadDTO.setFileList(
+                            workerIdExternalFileDTOListMap.get(worker.getWorkerId()));
 
                     workerReadDTO.setTotalPage(totalPage);
 

@@ -149,12 +149,13 @@ public class ProjectController {
 
             long projectId = newProjectDTO.getProjectId();
 
+            boolean addedFile = false;
+
             if (projectDocList != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
                         projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
 
-                /* Get again after file created & save */
-                newProjectDTO = projectService.getDTOById(projectId);
+                addedFile = true;
             }
 
             if (blueprintDoc != null) {
@@ -164,9 +165,12 @@ public class ProjectController {
                 fileCombineService.saveFileInDBAndFirebase(
                         blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
 
-                /* Get again after file created & save */
-                newProjectDTO = projectService.getDTOById(projectId);
+                addedFile = true;
             }
+
+            /* Get again after file created & save */
+            if (addedFile)
+                newProjectDTO = projectService.getDTOById(projectId);
 
             return ResponseEntity.ok().body(newProjectDTO);
         } catch (IllegalArgumentException iAE) {

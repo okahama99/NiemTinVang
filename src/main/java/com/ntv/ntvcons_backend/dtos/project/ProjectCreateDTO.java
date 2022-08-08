@@ -29,15 +29,15 @@ public class ProjectCreateDTO extends BaseCreateDTO {
     @NotNull(message = "location REQUIRED for Create")
     private LocationCreateOptionDTO location;*/
 
-//    @Schema(description = "NOT NULL") /* Hint for Swagger */
-//    @NotNull(message = "blueprint REQUIRED for Create")
-//    private LocationCreateDTO location;
+    @Schema(description = "NOT NULL") /* Hint for Swagger */
+    @NotNull(message = "blueprint REQUIRED for Create")
+    private LocationCreateDTO location;
 
-    @Schema(example = "10.841139984351623, 106.80988203281531",
-            description = "NOT NULL, size <= 100") /* Hint for Swagger */
-    @NotNull(message = "coordinate REQUIRED for Create")
-    @Size(max = 100, message = "coordinate max length: 100 characters")
-    private String coordinate;
+//    @Schema(example = "10.841139984351623, 106.80988203281531",
+//            description = "NOT NULL, size <= 100") /* Hint for Swagger */
+//    @NotNull(message = "coordinate REQUIRED for Create")
+//    @Size(max = 100, message = "coordinate max length: 100 characters")
+//    private String coordinate;
 
     @Schema(description = /*"NOT NULL"*/"Nullable") /* Hint for Swagger */
 //    @NotNull(message = "blueprint REQUIRED for Create")
