@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
 // xí m, 2 cái trùng tên kìa
@@ -121,6 +122,34 @@ public class JwtUtil {
             log.error("JWT claims string is empty.");
         }
         return false;
+    }
+
+    public String getAndValidateJwt(String bearerToken) throws Exception {
+        String error = "";
+        String jwt = "";
+
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            jwt = bearerToken.substring(7);
+
+            try {
+                Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(jwt);
+            } catch (MalformedJwtException ex) {
+                error += "Invalid JWT token. ";
+            } catch (ExpiredJwtException ex) {
+                error += "Expired JWT token. ";
+            } catch (UnsupportedJwtException ex) {
+                error += "Unsupported JWT token. ";
+            } catch (IllegalArgumentException ex) {
+                error += "JWT claims string is empty. ";
+            }
+        } else {
+            error += "JWT is empty. ";
+        }
+
+        if (!error.trim().isEmpty())
+            throw new IllegalArgumentException(error);
+
+        return jwt;
     }
 
 }

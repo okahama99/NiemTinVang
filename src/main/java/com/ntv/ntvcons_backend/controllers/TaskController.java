@@ -49,8 +49,8 @@ public class TaskController {
     public ResponseEntity<Object> createTask(@RequestBody @Valid TaskCreateDTO taskDTO,
                                              @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId != null) {
                 taskDTO.setCreatedBy(userId);
             }
@@ -78,8 +78,8 @@ public class TaskController {
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> taskDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -114,8 +114,8 @@ public class TaskController {
             @RequestPart @Size(min = 1) List<MultipartFile> taskDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -303,8 +303,8 @@ public class TaskController {
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             /* TODO: jwtUtil get jwt auto */
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId != null) {
                 taskDTO.setUpdatedBy(userId);
             }
@@ -338,8 +338,8 @@ public class TaskController {
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> taskDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -385,8 +385,8 @@ public class TaskController {
             @RequestPart @Size(min = 1) List<MultipartFile> taskDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -456,8 +456,8 @@ public class TaskController {
             @RequestPart @Size(min = 1) List<MultipartFile> taskDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 

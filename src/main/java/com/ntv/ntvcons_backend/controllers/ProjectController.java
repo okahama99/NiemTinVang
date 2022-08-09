@@ -95,8 +95,8 @@ public class ProjectController {
             @RequestBody @Valid ProjectCreateDTO projectDTO,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -129,8 +129,8 @@ public class ProjectController {
             if (projectDTO.getBlueprint() == null && blueprintDoc != null)
                 throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
 
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -182,8 +182,8 @@ public class ProjectController {
             @RequestPart @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -470,8 +470,8 @@ public class ProjectController {
             @RequestBody @Valid ProjectUpdateDTO projectDTO,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -506,8 +506,8 @@ public class ProjectController {
             @RequestPart(required = false) MultipartFile blueprintDoc,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -579,8 +579,8 @@ public class ProjectController {
             @RequestPart @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -650,8 +650,8 @@ public class ProjectController {
             @RequestPart @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 

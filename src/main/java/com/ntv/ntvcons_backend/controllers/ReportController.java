@@ -71,8 +71,8 @@ public class ReportController {
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> reportDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -107,8 +107,8 @@ public class ReportController {
             @RequestPart @Size(min = 1) List<MultipartFile> reportDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -351,8 +351,8 @@ public class ReportController {
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> reportDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -398,8 +398,8 @@ public class ReportController {
             @RequestPart @Size(min = 1) List<MultipartFile> reportDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
@@ -469,8 +469,8 @@ public class ReportController {
             @RequestPart @Size(min = 1) List<MultipartFile> reportDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            /* TODO: jwtUtil get jwt auto */
-            Long userId = jwtUtil.getUserIdFromJWT(token.substring(7));
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
