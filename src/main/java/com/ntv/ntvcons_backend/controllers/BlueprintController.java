@@ -153,7 +153,7 @@ public class BlueprintController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('54','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -177,7 +177,7 @@ public class BlueprintController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1.1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllAlt1(@RequestParam int pageNo,
                                              @RequestParam int pageSize,
@@ -203,7 +203,7 @@ public class BlueprintController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.BLUEPRINT searchType) {
@@ -274,7 +274,7 @@ public class BlueprintController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_BLUEPRINT searchType,
@@ -353,7 +353,7 @@ public class BlueprintController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24','14')")
+    @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/checkDuplicate", produces = "application/json;charset=UTF-8")
     public @ResponseBody String checkDuplicate(@RequestParam String blueprintName) {
         return blueprintService.checkDuplicate(blueprintName);
