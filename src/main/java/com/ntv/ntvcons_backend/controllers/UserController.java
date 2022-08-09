@@ -435,7 +435,7 @@ public class UserController {
 
             if (userDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No User found with Id: '" + userId + "' to add file.");
+                        .body("No User found with Id: '" + userId + "' to replace file.");
 
             ExternalFileReadDTO fileDTO = userDTO.getFile();
             if (fileDTO == null) {

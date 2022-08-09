@@ -492,7 +492,7 @@ public class WorkerController {
 
             if (workerDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Worker found with Id: '" + workerId + "' to add file.");
+                        .body("No Worker found with Id: '" + workerId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = workerDTO.getFileList();
             if (fileDTOList == null) {
@@ -590,7 +590,7 @@ public class WorkerController {
 
             if (workerDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Worker found with Id: '" + workerId + "' to add file.");
+                        .body("No Worker found with Id: '" + workerId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = workerDTO.getFileList();
             if (fileDTOList == null) {

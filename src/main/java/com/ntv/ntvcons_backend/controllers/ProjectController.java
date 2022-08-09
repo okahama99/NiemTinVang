@@ -588,7 +588,7 @@ public class ProjectController {
 
             if (projectDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Project found with Id: '" + projectId + "' to add file.");
+                        .body("No Project found with Id: '" + projectId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = projectDTO.getFileList();
             if (fileDTOList == null) {
@@ -659,7 +659,7 @@ public class ProjectController {
 
             if (projectDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Project found with Id: '" + projectId + "' to add file.");
+                        .body("No Project found with Id: '" + projectId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = projectDTO.getFileList();
             if (fileDTOList == null) {
@@ -714,7 +714,7 @@ public class ProjectController {
 
             if (projectDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Project found with Id: '" + projectId + "' to add file.");
+                        .body("No Project found with Id: '" + projectId + "' to delete file.");
 
             List<ExternalFileReadDTO> fileDTOList = projectDTO.getFileList();
             if (fileDTOList == null) {
@@ -772,7 +772,7 @@ public class ProjectController {
 
             if (projectDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Project found with Id: '" + projectId + "' to add file.");
+                        .body("No Project found with Id: '" + projectId + "' to delete file.");
 
             List<ExternalFileReadDTO> fileDTOList = projectDTO.getFileList();
             if (fileDTOList == null) {

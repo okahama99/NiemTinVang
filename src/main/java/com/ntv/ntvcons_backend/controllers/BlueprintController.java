@@ -92,7 +92,7 @@ public class BlueprintController {
             long blueprintId = newBlueprintDTO.getBlueprintId();
 
             fileCombineService.saveFileInDBAndFirebase(
-                    blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.PROJECT_ENTITY, userId);
+                    blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
 
             /* Get again after file created & save */
             newBlueprintDTO = blueprintService.getDTOById(blueprintId);

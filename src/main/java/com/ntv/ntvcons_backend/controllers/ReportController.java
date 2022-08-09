@@ -407,7 +407,7 @@ public class ReportController {
 
             if (reportDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Report found with Id: '" + reportId + "' to add file.");
+                        .body("No Report found with Id: '" + reportId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = reportDTO.getFileList();
             if (fileDTOList == null) {
@@ -478,7 +478,7 @@ public class ReportController {
 
             if (reportDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Report found with Id: '" + reportId + "' to add file.");
+                        .body("No Report found with Id: '" + reportId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = reportDTO.getFileList();
             if (fileDTOList == null) {
@@ -533,7 +533,7 @@ public class ReportController {
 
             if (reportDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Report found with Id: '" + reportId + "' to add file.");
+                        .body("No Report found with Id: '" + reportId + "' to delete file.");
 
             List<ExternalFileReadDTO> fileDTOList = reportDTO.getFileList();
             if (fileDTOList == null) {
@@ -591,7 +591,7 @@ public class ReportController {
 
             if (reportDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Report found with Id: '" + reportId + "' to add file.");
+                        .body("No Report found with Id: '" + reportId + "' to delete file.");
 
             List<ExternalFileReadDTO> fileDTOList = reportDTO.getFileList();
             if (fileDTOList == null) {
