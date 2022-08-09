@@ -134,16 +134,17 @@ public class LoginController {
         return new ResponseEntity<>("Đổi mật khẩu thành công", HttpStatus.OK);
     }
     @PostMapping(value = "/validateOTP", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> validateOTP(@RequestBody UserResetPasswordModel userResetPasswordModel)
+    public ResponseEntity<Object> validateOTP(@RequestParam String email,
+                                              @RequestParam Integer otp)
     {
         // validate provided OTP.
-        Boolean isValid = otpService.validateOTP(userResetPasswordModel.getEmail(), userResetPasswordModel.getOtp());
+        Boolean isValid = otpService.validateOTP(email, otp);
         if (!isValid)
         {
             return new ResponseEntity<>("OTP không chính xác", HttpStatus.BAD_REQUEST);
         }
 
-        return ResponseEntity.ok(userResetPasswordModel.getEmail());
+        return new ResponseEntity<>("OTP chính xác", HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping(value = "/register", produces = "application/json;charset=UTF-8")
@@ -165,7 +166,7 @@ public class LoginController {
         this.serviceOTP = otpService;
     }
 
-    @PostMapping
+    @PostMapping(value = "/phoneOTPVerification", produces = "application/json;charset=UTF-8")
     public void smsSender(@RequestBody @Valid SmsRequest smsRequest) {
         serviceOTP.smsSender(smsRequest);
     }
