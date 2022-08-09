@@ -144,7 +144,7 @@ public class LoginController {
             return new ResponseEntity<>("OTP không chính xác", HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>("OTP chính xác", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("OTP chính xác", HttpStatus.OK);
     }
 
     @PostMapping(value = "/register", produces = "application/json;charset=UTF-8")
