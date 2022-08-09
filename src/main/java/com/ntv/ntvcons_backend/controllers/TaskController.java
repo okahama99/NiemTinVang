@@ -394,7 +394,7 @@ public class TaskController {
 
             if (taskDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Task found with Id: '" + taskId + "' to add file.");
+                        .body("No Task found with Id: '" + taskId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = taskDTO.getFileList();
             if (fileDTOList == null) {
@@ -465,7 +465,7 @@ public class TaskController {
 
             if (taskDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Task found with Id: '" + taskId + "' to add file.");
+                        .body("No Task found with Id: '" + taskId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = taskDTO.getFileList();
             if (fileDTOList == null) {
@@ -521,7 +521,7 @@ public class TaskController {
 
             if (taskDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Task found with Id: '" + taskId + "' to add file.");
+                        .body("No Task found with Id: '" + taskId + "' to delete file.");
 
             List<ExternalFileReadDTO> fileDTOList = taskDTO.getFileList();
             if (fileDTOList == null) {
@@ -579,7 +579,7 @@ public class TaskController {
 
             if (taskDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Task found with Id: '" + taskId + "' to add file.");
+                        .body("No Task found with Id: '" + taskId + "' to delete file.");
 
             List<ExternalFileReadDTO> fileDTOList = taskDTO.getFileList();
             if (fileDTOList == null) {

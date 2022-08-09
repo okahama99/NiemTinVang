@@ -572,7 +572,7 @@ public class RequestController {
 
             if (requestDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Request found with Id: '" + requestId + "' to add file.");
+                        .body("No Request found with Id: '" + requestId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = requestDTO.getFileList();
             if (fileDTOList == null) {
@@ -643,7 +643,7 @@ public class RequestController {
 
             if (requestDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Request found with Id: '" + requestId + "' to add file.");
+                        .body("No Request found with Id: '" + requestId + "' to replace file.");
 
             List<ExternalFileReadDTO> fileDTOList = requestDTO.getFileList();
             if (fileDTOList == null) {
@@ -724,7 +724,7 @@ public class RequestController {
 
             if (requestDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Request found with Id: '" + requestId + "' to add file.");
+                        .body("No Request found with Id: '" + requestId + "' to delete file.");
 
             List<ExternalFileReadDTO> fileDTOList = requestDTO.getFileList();
             if (fileDTOList == null) {
@@ -782,7 +782,7 @@ public class RequestController {
 
             if (requestDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("No Request found with Id: '" + requestId + "' to add file.");
+                        .body("No Request found with Id: '" + requestId + "' to delete file.");
 
             List<ExternalFileReadDTO> fileDTOList = requestDTO.getFileList();
             if (fileDTOList == null) {
