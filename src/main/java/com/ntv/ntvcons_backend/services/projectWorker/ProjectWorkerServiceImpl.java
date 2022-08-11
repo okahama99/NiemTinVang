@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -309,6 +310,35 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
 
         return fillAllDTO(projectWorkerList, null);
     }
+    @Override
+    public Map<Long, List<ProjectWorker>> mapWorkerIdProjectWorkerListByWorkerIdIn(Collection<Long> workerIdCollection) throws Exception {
+        List<ProjectWorker> projectWorkerList = getAllByWorkerIdIn(workerIdCollection);
+
+        if (projectWorkerList == null)
+            return new HashMap<>();
+
+        Map<Long, List<ProjectWorker>> workerIdProjectWorkerListMap = new HashMap<>();
+
+        long workerId;
+        List<ProjectWorker> tmpProjectWorkerList;
+
+        for (ProjectWorker projectWorker : projectWorkerList) {
+            workerId = projectWorker.getWorkerId();
+            tmpProjectWorkerList = workerIdProjectWorkerListMap.get(workerId);
+
+            if (tmpProjectWorkerList == null) {
+                workerIdProjectWorkerListMap
+                        .put(workerId, new ArrayList<>(Collections.singletonList(projectWorker)));
+            } else {
+                tmpProjectWorkerList.add(projectWorker);
+
+                workerIdProjectWorkerListMap.put(workerId, tmpProjectWorkerList);
+            }
+        }
+
+        return workerIdProjectWorkerListMap;
+    }
+
     @Override
     public Page<ProjectWorker> getPageAllByWorkerIdIn(Pageable paging, Collection<Long> workerIdCollection) throws Exception {
         Page<ProjectWorker> projectWorkerPage =

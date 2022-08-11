@@ -36,6 +36,7 @@ public interface ProjectWorkerService {
 
     List<ProjectWorker> getAllByWorkerIdIn(Collection<Long> workerIdCollection) throws Exception;
     List<ProjectWorkerReadDTO> getAllDTOByWorkerIdIn(Collection<Long> workerIdCollection) throws Exception;
+    Map<Long, List<ProjectWorker>> mapWorkerIdProjectWorkerListByWorkerIdIn(Collection<Long> workerIdCollection) throws Exception;
     Page<ProjectWorker> getPageAllByWorkerIdIn(Pageable paging, Collection<Long> workerIdCollection) throws Exception;
     List<ProjectWorkerReadDTO> getAllDTOInPagingByWorkerIdIn(Pageable paging, Collection<Long> workerIdCollection) throws Exception;
 

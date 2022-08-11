@@ -8,6 +8,8 @@ import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Project;
+import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.entities.Worker;
 import com.ntv.ntvcons_backend.repositories.WorkerRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
@@ -474,6 +476,8 @@ public class WorkerServiceImpl implements WorkerService {
 
     /* Utils */
     private WorkerReadDTO fillDTO(Worker worker) throws Exception {
+        long workerId = worker.getWorkerId();
+
         WorkerReadDTO workerDTO = modelMapper.map(worker, WorkerReadDTO.class);
 
         /* Get associated Location */
@@ -482,7 +486,10 @@ public class WorkerServiceImpl implements WorkerService {
         /* Get associated ExternalFile */
         workerDTO.setFileList(
                 eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(worker.getWorkerId(), ENTITY_TYPE));
+                        .getAllExternalFileDTOByEntityIdAndEntityType(workerId, ENTITY_TYPE));
+
+        /* Đang bận làm / rảnh */
+        workerDTO.setIsAvailable(projectWorkerService.getAllByWorkerId(workerId) == null);
 
         return workerDTO;
     }
@@ -504,19 +511,27 @@ public class WorkerServiceImpl implements WorkerService {
                 eFEWPairingService
                         .mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(workerIdSet, ENTITY_TYPE);
 
+        Map<Long, List<ProjectWorker>> workerIdProjectWorkerMap =
+                projectWorkerService.mapWorkerIdProjectWorkerListByWorkerIdIn(workerIdSet);
+
         return workerCollection.stream()
                 .map(worker -> {
-                    WorkerReadDTO workerReadDTO =
+                    WorkerReadDTO workerDTO =
                             modelMapper.map(worker, WorkerReadDTO.class);
 
-                    workerReadDTO.setAddress(locationIdLocationDTOMap.get(worker.getAddressId()));
+                    long workerId = worker.getWorkerId();
 
-                    workerReadDTO.setFileList(
-                            workerIdExternalFileDTOListMap.get(worker.getWorkerId()));
+                    workerDTO.setAddress(locationIdLocationDTOMap.get(worker.getAddressId()));
 
-                    workerReadDTO.setTotalPage(totalPage);
+                    workerDTO.setFileList(
+                            workerIdExternalFileDTOListMap.get(workerId));
 
-                    return workerReadDTO;})
+                    /* Đang bận làm / rảnh */
+                    workerDTO.setIsAvailable(workerIdProjectWorkerMap.get(workerId) == null);
+
+                    workerDTO.setTotalPage(totalPage);
+
+                    return workerDTO;})
                 .collect(Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.worker;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.ntv.ntvcons_backend.dtos.BaseReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import lombok.AllArgsConstructor;
@@ -15,4 +16,7 @@ public class WorkerReadDTO extends BaseReadDTO {
     private String citizenId;
     private String socialSecurityCode;
     private LocationReadDTO address;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL) /* if null => no return JSON */
+    private Boolean isAvailable;
 }
