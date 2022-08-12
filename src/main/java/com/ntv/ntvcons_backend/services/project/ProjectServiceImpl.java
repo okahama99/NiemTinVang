@@ -52,6 +52,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -196,6 +197,11 @@ public class ProjectServiceImpl implements ProjectService {
 
             if (newProject.getPlanEndDate().isBefore(newProject.getPlanEndDate())) {
                 throw new IllegalArgumentException("planEndDate is before planStartDate");
+            }
+
+            long diff = ChronoUnit.DAYS.between(newProject.getPlanStartDate(), newProject.getPlanEndDate());
+            if (diff < 30L) {
+                throw new IllegalArgumentException("planEndDate need to be at least 30 days after planStartDate");
             }
         }
 
@@ -850,6 +856,11 @@ public class ProjectServiceImpl implements ProjectService {
             if (updatedProject.getPlanEndDate().isBefore(updatedProject.getPlanStartDate())) {
                 throw new IllegalArgumentException("planEndDate is before planStartDate");
             }
+
+            long diff = ChronoUnit.DAYS.between(updatedProject.getPlanStartDate(), updatedProject.getPlanEndDate());
+            if (diff < 30L) {
+                throw new IllegalArgumentException("planEndDate need to be at least 30 days after planStartDate");
+            }
         }
 
         boolean hasActualStartDate = false;
@@ -867,6 +878,11 @@ public class ProjectServiceImpl implements ProjectService {
             if (hasActualStartDate)
                 if (updatedProject.getActualEndDate().isBefore(updatedProject.getActualStartDate()))
                     throw new IllegalArgumentException("actualEndDate is before actualStartDate");
+
+            long diff = ChronoUnit.DAYS.between(updatedProject.getActualStartDate(), updatedProject.getActualEndDate());
+            if (diff < 30L) {
+                throw new IllegalArgumentException("actualEndDate need to be at least 30 days after actualStartDate");
+            }
         }
 
         /* TODO: reuse later */

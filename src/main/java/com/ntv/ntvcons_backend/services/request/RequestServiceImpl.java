@@ -854,17 +854,19 @@ public class RequestServiceImpl implements RequestService {
                         + "'. Which violate constraint: FK_Request_User_RequesterId. ";
             }
         }
-        if (oldRequest.getVerifierId() != null) {
-            if (!oldRequest.getVerifierId().equals(updatedRequest.getVerifierId())) {
+        if (updatedRequest.getVerifierId() != null) {
+            if (oldRequest.getVerifierId() != null) {
+                if (!oldRequest.getVerifierId().equals(updatedRequest.getVerifierId())) {
+                    if (!userService.existsById(updatedRequest.getVerifierId())) {
+                        errorMsg += "No User (Verifier) found with Id: '" + updatedRequest.getVerifierId()
+                                + "'. Which violate constraint: FK_Request_User_VerifierId. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedRequest.getVerifierId())) {
                     errorMsg += "No User (Verifier) found with Id: '" + updatedRequest.getVerifierId()
                             + "'. Which violate constraint: FK_Request_User_VerifierId. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedRequest.getVerifierId())) {
-                errorMsg += "No User (Verifier) found with Id: '" + updatedRequest.getVerifierId()
-                        + "'. Which violate constraint: FK_Request_User_VerifierId. ";
             }
         }
         if (oldRequest.getUpdatedBy() != null) {

@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -113,6 +114,11 @@ public class TaskServiceImpl implements TaskService {
 
             if (newTask.getPlanEndDate().isBefore(newTask.getPlanStartDate())) {
                 throw new IllegalArgumentException("planEndDate is before planStartDate");
+            }
+
+            long diff = ChronoUnit.DAYS.between(newTask.getPlanStartDate(), newTask.getPlanEndDate());
+            if (diff < 1L) {
+                throw new IllegalArgumentException("planEndDate need to be at least 1 days after planStartDate");
             }
         }
 
@@ -685,6 +691,11 @@ public class TaskServiceImpl implements TaskService {
 
             if (updatedTask.getPlanEndDate().isBefore(updatedTask.getPlanStartDate()))
                 throw new IllegalArgumentException("planEndDate is before planStartDate");
+
+            long diff = ChronoUnit.DAYS.between(updatedTask.getPlanStartDate(), updatedTask.getPlanEndDate());
+            if (diff < 1L) {
+                throw new IllegalArgumentException("planEndDate need to be at least 1 days after planStartDate");
+            }
         }
 
         boolean hasActualStartDate = false;
@@ -710,6 +721,11 @@ public class TaskServiceImpl implements TaskService {
             if (hasActualStartDate)
                 if (updatedTask.getActualEndDate().isBefore(updatedTask.getActualStartDate()))
                     throw new IllegalArgumentException("actualEndDate is before actualStartDate");
+
+            long diff = ChronoUnit.DAYS.between(updatedTask.getActualStartDate(), updatedTask.getActualEndDate());
+            if (diff < 30L) {
+                throw new IllegalArgumentException("actualEndDate need to be at least 1 days after actualStartDate");
+            }
         }
 
         updatedTask = updateTask(updatedTask);
