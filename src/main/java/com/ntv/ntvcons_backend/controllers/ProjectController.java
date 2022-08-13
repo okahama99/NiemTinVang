@@ -122,12 +122,12 @@ public class ProjectController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     ProjectCreateDTO projectDTO,
-            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
-            @RequestPart(required = false) MultipartFile blueprintDoc,
+            @RequestPart/*(required = false)*/ @Size(min = 1) List<MultipartFile> projectDocList,
+            /*@RequestPart(required = false) MultipartFile blueprintDoc,*/
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-            if (projectDTO.getBlueprint() == null && blueprintDoc != null)
-                throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
+//            if (projectDTO.getBlueprint() == null && blueprintDoc != null)
+//                throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
 
             String jwt = jwtUtil.getAndValidateJwt(token);
             Long userId = jwtUtil.getUserIdFromJWT(jwt);
@@ -142,22 +142,22 @@ public class ProjectController {
 
             boolean addedFile = false;
 
-            if (projectDocList != null) {
+//            if (projectDocList != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
                         projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
 
                 addedFile = true;
-            }
+//            }
 
-            if (blueprintDoc != null) {
-                BlueprintReadDTO blueprintDTO = newProjectDTO.getBlueprint();
-                long blueprintId = blueprintDTO.getBlueprintId();
-
-                fileCombineService.saveFileInDBAndFirebase(
-                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
-
-                addedFile = true;
-            }
+//            if (blueprintDoc != null) {
+//                BlueprintReadDTO blueprintDTO = newProjectDTO.getBlueprint();
+//                long blueprintId = blueprintDTO.getBlueprintId();
+//
+//                fileCombineService.saveFileInDBAndFirebase(
+//                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
+//
+//                addedFile = true;
+//            }
 
             /* Get again after file created & save */
             if (addedFile)
@@ -502,8 +502,8 @@ public class ProjectController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     ProjectUpdateDTO projectDTO,
-            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
-            @RequestPart(required = false) MultipartFile blueprintDoc,
+            @RequestPart/*(required = false)*/ @Size(min = 1) List<MultipartFile> projectDocList,
+            /*@RequestPart(required = false) MultipartFile blueprintDoc,*/
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);
@@ -524,7 +524,7 @@ public class ProjectController {
 
             boolean addedFile = false;
 
-            if (projectDocList != null) {
+//            if (projectDocList != null) {
                 /* Deleted old project file */
                 List<ExternalFileReadDTO> fileDTOList = updatedProjectDTO.getFileList();
                 if (fileDTOList != null)
@@ -534,26 +534,26 @@ public class ProjectController {
                         projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
 
                 addedFile = true;
-            }
+//            }
 
-            if (blueprintDoc != null) {
-                BlueprintReadDTO blueprintDTO = updatedProjectDTO.getBlueprint();
-
-                if (blueprintDTO == null)
-                    throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
-
-                long blueprintId = blueprintDTO.getBlueprintId();
-
-                /* Deleted old blueprint file */
-                ExternalFileReadDTO fileDTO = blueprintDTO.getFile();
-                if (fileDTO != null)
-                    fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
-
-                fileCombineService.saveFileInDBAndFirebase(
-                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
-
-                addedFile = true;
-            }
+//            if (blueprintDoc != null) {
+//                BlueprintReadDTO blueprintDTO = updatedProjectDTO.getBlueprint();
+//
+//                if (blueprintDTO == null)
+//                    throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
+//
+//                long blueprintId = blueprintDTO.getBlueprintId();
+//
+//                /* Deleted old blueprint file */
+//                ExternalFileReadDTO fileDTO = blueprintDTO.getFile();
+//                if (fileDTO != null)
+//                    fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
+//
+//                fileCombineService.saveFileInDBAndFirebase(
+//                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
+//
+//                addedFile = true;
+//            }
 
             /* Get again after file created & save */
             if (addedFile)
