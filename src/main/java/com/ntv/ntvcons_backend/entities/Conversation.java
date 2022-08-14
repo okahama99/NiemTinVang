@@ -19,7 +19,7 @@ public class Conversation extends BaseEntity{
     @Column(name = "conversationId", nullable = false)
     private Long conversationId;
 
-    @Column(name = "user1Id", nullable = false)
+    @Column(name = "user1Id")
     private Long user1Id;
 
     @Column(name = "user2Id")
