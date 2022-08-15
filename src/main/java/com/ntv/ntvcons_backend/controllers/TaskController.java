@@ -87,13 +87,15 @@ public class TaskController {
 
             TaskReadDTO newTaskDTO = taskService.createTaskByDTO(taskDTO);
 
-            long taskId = newTaskDTO.getTaskId();
+            if (taskDocList != null) {
+                long taskId = newTaskDTO.getTaskId();
 
-            fileCombineService.saveAllFileInDBAndFirebase(
-                    taskDocList, FileType.TASK_DOC, taskId, EntityType.TASK_ENTITY, userId);
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        taskDocList, FileType.TASK_DOC, taskId, EntityType.TASK_ENTITY, userId);
 
-            /* Get again after file created & save */
-            newTaskDTO = taskService.getDTOById(taskId);
+                /* Get again after file created & save */
+                newTaskDTO = taskService.getDTOById(taskId);
+            }
 
             return ResponseEntity.ok().body(newTaskDTO);
         } catch (IllegalArgumentException iAE) {
@@ -351,18 +353,20 @@ public class TaskController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No Task found with Id: '" + taskDTO.getTaskId() + "'. ");
 
-            long taskId = updatedTaskDTO.getTaskId();
+            if (taskDocList != null) {
+                long taskId = updatedTaskDTO.getTaskId();
 
-            /* Deleted old task file */
-            List<ExternalFileReadDTO> fileDTOList = updatedTaskDTO.getFileList();
-            if (fileDTOList != null)
-                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+                /* Deleted old task file */
+                List<ExternalFileReadDTO> fileDTOList = updatedTaskDTO.getFileList();
+                if (fileDTOList != null)
+                    fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
 
-            fileCombineService.saveAllFileInDBAndFirebase(
-                    taskDocList, FileType.TASK_DOC, taskId, EntityType.TASK_ENTITY, userId);
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        taskDocList, FileType.TASK_DOC, taskId, EntityType.TASK_ENTITY, userId);
 
-            /* Get again after file created & save */
-            updatedTaskDTO = taskService.getDTOById(taskId);
+                /* Get again after file created & save */
+                updatedTaskDTO = taskService.getDTOById(taskId);
+            }
 
             return ResponseEntity.ok().body(updatedTaskDTO);
         } catch (IllegalArgumentException iAE) {
