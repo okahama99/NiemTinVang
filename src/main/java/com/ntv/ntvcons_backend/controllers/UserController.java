@@ -60,30 +60,32 @@ public class UserController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     UserCreateDTO userDTO,
-            @RequestPart MultipartFile userAvatar) {
+            @RequestPart(required = false) MultipartFile userAvatar) {
         try {
             /* Create to get Id */
             UserReadDTO newUserDTO =
                     userService.createUserByDTO(userDTO);
 
-            long userId = newUserDTO.getUserId();
+            if (userAvatar != null) {
+                long userId = newUserDTO.getUserId();
 
-            String fileName = userAvatar.getOriginalFilename();
-            if (fileName == null || fileName.isEmpty())
-                throw new IllegalArgumentException(
-                        "Invalid file name, could not assert file type from the file name given. ");
+                String fileName = userAvatar.getOriginalFilename();
+                if (fileName == null || fileName.isEmpty())
+                    throw new IllegalArgumentException(
+                            "Invalid file name, could not assert file type from the file name given. ");
 
-            String extension = miscUtil.getExtension(fileName);
-            String type = new MimetypesFileTypeMap().getContentType(fileName)
-                    .split("/")[0];
-            if (extension.isEmpty() || !type.equals("image"))
-                throw new IllegalArgumentException("Invalid file type for user avatar. ");
+                String extension = miscUtil.getExtension(fileName);
+                String type = new MimetypesFileTypeMap().getContentType(fileName)
+                        .split("/")[0];
+                if (extension.isEmpty() || !type.equals("image"))
+                    throw new IllegalArgumentException("Invalid file type for user avatar. ");
 
-            fileCombineService.saveFileInDBAndFirebase(
-                    userAvatar, FileType.USER_AVATAR, userId, EntityType.USER_ENTITY, userId);
+                fileCombineService.saveFileInDBAndFirebase(
+                        userAvatar, FileType.USER_AVATAR, userId, EntityType.USER_ENTITY, userId);
 
-            /* Get again after file created & save */
-            newUserDTO = userService.getDTOById(userId);
+                /* Get again after file created & save */
+                newUserDTO = userService.getDTOById(userId);
+            }
 
             return ResponseEntity.ok().body(newUserDTO);
         } catch (IllegalArgumentException iAE) {
@@ -380,7 +382,7 @@ public class UserController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     UserUpdateDTO userDTO,
-            @RequestPart MultipartFile userAvatar) {
+            @RequestPart(required = false) MultipartFile userAvatar) {
         try {
             UserReadDTO updatedUserDTO = userService.updateUserByDTO(userDTO);
 
@@ -388,29 +390,31 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No User found with Id: '" + userDTO.getUserId() + "'. ");
 
-            long userId = updatedUserDTO.getUserId();
+            if (userAvatar != null) {
+                long userId = updatedUserDTO.getUserId();
 
-            String fileName = userAvatar.getOriginalFilename();
-            if (fileName == null || fileName.isEmpty())
-                throw new IllegalArgumentException(
-                        "Invalid file name, could not assert file type from the file name given. ");
+                String fileName = userAvatar.getOriginalFilename();
+                if (fileName == null || fileName.isEmpty())
+                    throw new IllegalArgumentException(
+                            "Invalid file name, could not assert file type from the file name given. ");
 
-            String extension = miscUtil.getExtension(fileName);
-            String type = new MimetypesFileTypeMap().getContentType(fileName)
-                    .split("/")[0];
-            if (extension.isEmpty() || !type.equals("image"))
-                throw new IllegalArgumentException("Invalid file type for user avatar. ");
+                String extension = miscUtil.getExtension(fileName);
+                String type = new MimetypesFileTypeMap().getContentType(fileName)
+                        .split("/")[0];
+                if (extension.isEmpty() || !type.equals("image"))
+                    throw new IllegalArgumentException("Invalid file type for user avatar. ");
 
-            ExternalFileReadDTO fileDTO = updatedUserDTO.getFile();
-            if (fileDTO != null) {
-                fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
+                ExternalFileReadDTO fileDTO = updatedUserDTO.getFile();
+                if (fileDTO != null) {
+                    fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
+                }
+
+                fileCombineService.saveFileInDBAndFirebase(
+                        userAvatar, FileType.USER_AVATAR, userId, EntityType.USER_ENTITY, userId);
+
+                /* Get again after file created & save */
+                updatedUserDTO = userService.getDTOById(userId);
             }
-
-            fileCombineService.saveFileInDBAndFirebase(
-                    userAvatar, FileType.USER_AVATAR, userId, EntityType.USER_ENTITY, userId);
-
-            /* Get again after file created & save */
-            updatedUserDTO = userService.getDTOById(userId);
 
             return ResponseEntity.ok().body(updatedUserDTO);
         } catch (IllegalArgumentException iAE) {
