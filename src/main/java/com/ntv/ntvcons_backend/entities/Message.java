@@ -38,4 +38,14 @@ public class Message extends BaseEntity{
 
     @Column(name = "seen", nullable = false)
     private Boolean seen = false;
+
+    @Column(name = "fileName", length = 100)
+    private String fileName;
+
+    @Column(name = "fileType", length = 200)
+    private String fileType;
+
+    @Column(name = "data", length = 1024)
+    private byte[] data;
+
 }

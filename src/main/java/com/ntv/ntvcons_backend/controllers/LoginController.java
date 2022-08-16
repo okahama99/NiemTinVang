@@ -2,6 +2,7 @@ package com.ntv.ntvcons_backend.controllers;
 
 
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.entities.UserModels.RegisterUserModel;
 import com.ntv.ntvcons_backend.entities.UserModels.UserLoginModel;
@@ -11,7 +12,10 @@ import com.ntv.ntvcons_backend.services.OTPPhone.OTPService;
 import com.ntv.ntvcons_backend.services.OTPPhone.SmsRequest;
 import com.ntv.ntvcons_backend.services.user.UserService;
 import com.ntv.ntvcons_backend.utils.JwtUtil;
+import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +31,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -48,6 +53,9 @@ public class LoginController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private MiscUtil miscUtil;
 
     @PostMapping(value = "/login", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> login(@RequestBody @Valid UserLoginModel user) {
@@ -75,7 +83,7 @@ public class LoginController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @RequestMapping(value="/logout", method= RequestMethod.GET, produces = "application/json;charset=UTF-8")
+    @RequestMapping(value = "/logout", method = RequestMethod.GET, produces = "application/json;charset=UTF-8")
     public String logoutPage(HttpServletRequest request, HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
@@ -92,8 +100,7 @@ public class LoginController {
 
         // generate OTP.
         Boolean isGenerated = otpService.generateOTPForResetPassword(email);
-        if (!isGenerated)
-        {
+        if (!isGenerated) {
             response.put("status", "error");
             response.put("message", "Không thể khởi tạo OTP.");
 
@@ -113,8 +120,7 @@ public class LoginController {
 
         // generate OTP.
         Boolean isGenerated = otpService.generateVerificationOTP(email);
-        if (!isGenerated)
-        {
+        if (!isGenerated) {
             response.put("status", "error");
             response.put("message", "Không thể khởi tạo OTP.");
 
@@ -128,19 +134,17 @@ public class LoginController {
     }
 
     @PostMapping(value = "/resetPassword", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> resetPassword(@RequestBody UserResetPasswordModel userResetPasswordModel)
-    {
+    public ResponseEntity<Object> resetPassword(@RequestBody UserResetPasswordModel userResetPasswordModel) {
         userService.resetPasswordUser(userResetPasswordModel.getEmail(), passwordEncoder.encode(userResetPasswordModel.getPassword()));
         return new ResponseEntity<>("Đổi mật khẩu thành công", HttpStatus.OK);
     }
+
     @PostMapping(value = "/validateOTP", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> validateOTP(@RequestParam String email,
-                                              @RequestParam Integer otp)
-    {
+                                              @RequestParam Integer otp) {
         // validate provided OTP.
         Boolean isValid = otpService.validateOTP(email, otp);
-        if (!isValid)
-        {
+        if (!isValid) {
             return new ResponseEntity<>("OTP không chính xác", HttpStatus.BAD_REQUEST);
         }
 
@@ -153,7 +157,7 @@ public class LoginController {
             User user = userService.register(registerUserModel);
 
             return ResponseEntity.ok().body(user);
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
 
             return ResponseEntity.internalServerError().body(
@@ -169,5 +173,42 @@ public class LoginController {
     @PostMapping(value = "/phoneOTPVerification", produces = "application/json;charset=UTF-8")
     public void smsSender(@RequestBody @Valid SmsRequest smsRequest) {
         serviceOTP.smsSender(smsRequest);
+    }
+
+    @GetMapping(value = "/v1/searchUserByRole", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> searchUserByRole(@RequestParam String searchParam,
+                                                   @RequestParam int pageNo,
+                                                   @RequestParam int pageSize,
+                                                   @RequestParam String sortBy,
+                                                   @RequestParam boolean sortTypeAsc) {
+        try {
+            Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
+
+            List<UserReadDTO> userDTOList;
+
+            userDTOList =
+                    userService.getAllDTOInPagingByRoleId(paging, Long.parseLong(searchParam));
+
+            if (userDTOList == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No User found with roleId: '" + searchParam + "'. ");
+            }
+
+            return ResponseEntity.ok().body(userDTOList);
+        } catch (NumberFormatException nFE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse(
+                            "Invalid parameter type for searchParam: '" + searchParam
+                                    + "'. Expecting parameter of type: Long",
+                            nFE.getMessage()));
+        } catch (PropertyReferenceException | IllegalArgumentException pROrIAE) {
+            /* Catch invalid sortBy/searchType */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
+        } catch (Exception e) {
+            String errorMsg = "Error searching for User with roleId: '" + searchParam + "'. ";
+
+            return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
+        }
     }
 }
