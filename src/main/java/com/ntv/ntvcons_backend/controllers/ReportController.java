@@ -80,13 +80,15 @@ public class ReportController {
 
             ReportReadDTO newReportDTO = reportService.createReportByDTO(reportDTO);
 
-            long reportId = newReportDTO.getReportId();
+            if (reportDocList != null) {
+                long reportId = newReportDTO.getReportId();
 
-            fileCombineService.saveAllFileInDBAndFirebase(
-                    reportDocList, FileType.REPORT_DOC, reportId, EntityType.REPORT_ENTITY, userId);
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        reportDocList, FileType.REPORT_DOC, reportId, EntityType.REPORT_ENTITY, userId);
 
-            /* Get again after file created & save */
-            newReportDTO = reportService.getDTOById(reportId);
+                /* Get again after file created & save */
+                newReportDTO = reportService.getDTOById(reportId);
+            }
 
             return ResponseEntity.ok().body(newReportDTO);
         } catch (IllegalArgumentException iAE) {
@@ -364,18 +366,20 @@ public class ReportController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No Report found with Id: '" + reportDTO.getReportId() + "'. ");
 
-            long reportId = updatedReportDTO.getReportId();
+            if (reportDocList != null) {
+                long reportId = updatedReportDTO.getReportId();
 
-            /* Deleted old report file */
-            List<ExternalFileReadDTO> fileDTOList = updatedReportDTO.getFileList();
-            if (fileDTOList != null)
-                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+                /* Deleted old report file */
+                List<ExternalFileReadDTO> fileDTOList = updatedReportDTO.getFileList();
+                if (fileDTOList != null)
+                    fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
 
-            fileCombineService.saveAllFileInDBAndFirebase(
-                    reportDocList, FileType.REPORT_DOC, reportId, EntityType.REPORT_ENTITY, userId);
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        reportDocList, FileType.REPORT_DOC, reportId, EntityType.REPORT_ENTITY, userId);
 
-            /* Get again after file created & save */
-            updatedReportDTO = reportService.getDTOById(reportId);
+                /* Get again after file created & save */
+                updatedReportDTO = reportService.getDTOById(reportId);
+            }
 
             return ResponseEntity.ok().body(updatedReportDTO);
         } catch (IllegalArgumentException iAE) {

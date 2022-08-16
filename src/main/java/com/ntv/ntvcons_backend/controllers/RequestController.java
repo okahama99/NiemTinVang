@@ -126,13 +126,15 @@ public class RequestController {
 
             RequestReadDTO newRequestDTO = requestService.createRequestByDTO(requestDTO);
 
-            long requestId = newRequestDTO.getRequestId();
+            if (requestDocList != null) {
+                long requestId = newRequestDTO.getRequestId();
 
-            fileCombineService.saveAllFileInDBAndFirebase(
-                    requestDocList, FileType.REQUEST_DOC, requestId, EntityType.REQUEST_ENTITY, userId);
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        requestDocList, FileType.REQUEST_DOC, requestId, EntityType.REQUEST_ENTITY, userId);
 
-            /* Get again after file created & save */
-            newRequestDTO = requestService.getDTOById(requestId);
+                /* Get again after file created & save */
+                newRequestDTO = requestService.getDTOById(requestId);
+            }
 
             return ResponseEntity.ok().body(newRequestDTO);
         } catch (IllegalArgumentException iAE) {
@@ -529,18 +531,20 @@ public class RequestController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No Request found with Id: '" + requestDTO.getRequestId() + "'. ");
 
-            long requestId = updatedRequestDTO.getRequestId();
+            if (requestDocList != null) {
+                long requestId = updatedRequestDTO.getRequestId();
 
-            /* Deleted old request file */
-            List<ExternalFileReadDTO> fileDTOList = updatedRequestDTO.getFileList();
-            if (fileDTOList != null)
-                fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+                /* Deleted old request file */
+                List<ExternalFileReadDTO> fileDTOList = updatedRequestDTO.getFileList();
+                if (fileDTOList != null)
+                    fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
 
-            fileCombineService.saveAllFileInDBAndFirebase(
-                    requestDocList, FileType.REQUEST_DOC, requestId, EntityType.REQUEST_ENTITY, userId);
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        requestDocList, FileType.REQUEST_DOC, requestId, EntityType.REQUEST_ENTITY, userId);
 
-            /* Get again after file created & save */
-            updatedRequestDTO = requestService.getDTOById(requestId);
+                /* Get again after file created & save */
+                updatedRequestDTO = requestService.getDTOById(requestId);
+            }
 
             return ResponseEntity.ok().body(updatedRequestDTO);
         } catch (IllegalArgumentException iAE) {
