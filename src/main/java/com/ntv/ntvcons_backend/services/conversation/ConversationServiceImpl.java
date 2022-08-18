@@ -71,7 +71,7 @@ public class ConversationServiceImpl implements ConversationService {
             model.setName(conversation.getClientName());
             model.setAvatar(null); // khi FE nhận null sẽ set avatar mặc định
 
-            Message message = messageRepository.findTopByConversationIdDesc(conversation.getConversationId());
+            Message message = messageRepository.findTopByOrderByConversationIdDesc();
             model.setLastMessage(message.getMessage());
             model.setLastMessageTime(message.getSendTime());
             return model;
@@ -80,9 +80,9 @@ public class ConversationServiceImpl implements ConversationService {
 
             User user = userRepository.findByUserIdAndStatusNotIn(userId, N_D_S_STATUS_LIST).orElse(null);
             model.setName(user.getFullName());
-            model.setAvatar(user.getAvatar());
+//            model.setAvatar(user.getAvatar()); //TODO : thêm avatar
 
-            Message message = messageRepository.findTopByConversationIdDesc(conversation.getConversationId());
+            Message message = messageRepository.findTopByOrderByConversationIdDesc();
             model.setLastMessage(message.getMessage());
             model.setLastMessageTime(message.getSendTime());
             return model;

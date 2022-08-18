@@ -83,13 +83,29 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean sendMessage(Long userId, Long conversationId, String message, MultipartFile file) throws IOException {
+    public boolean sendMessageAuthenticated(Long userId, Long conversationId, String message, MultipartFile file) throws IOException {
         Message messageEntity = new Message();
         messageEntity.setConversationId(conversationId);
         messageEntity.setSenderId(userId);
         messageEntity.setMessage(message);
         messageEntity.setCreatedAt(LocalDateTime.now());
         messageEntity.setCreatedBy(userId);
+        if (file != null) {
+            messageEntity.setFileName(file.getName());
+            messageEntity.setFileType(file.getContentType());
+            messageEntity.setData(file.getBytes());
+        }
+        messageRepository.saveAndFlush(messageEntity);
+        return true;
+    }
+
+    @Override
+    public boolean sendMessageUnauthenticated(String ipAddress, Long conversationId, String message, MultipartFile file) throws IOException {
+        Message messageEntity = new Message();
+        messageEntity.setConversationId(conversationId);
+        messageEntity.setSenderIp(ipAddress);
+        messageEntity.setMessage(message);
+        messageEntity.setCreatedAt(LocalDateTime.now());
         if (file != null) {
             messageEntity.setFileName(file.getName());
             messageEntity.setFileType(file.getContentType());

@@ -12,7 +12,9 @@ public interface MessageService {
 
     List<ShowMessageModel> getByConversationIdUnauthenticated(String ipAddress, Long conversationId, Pageable paging);
 
-    boolean sendMessage(Long userId, Long conversationId, String message, MultipartFile file) throws IOException;
+    boolean sendMessageAuthenticated(Long userId, Long conversationId, String message, MultipartFile file) throws IOException;
+
+    boolean sendMessageUnauthenticated(String ipAddress, Long conversationId, String message, MultipartFile file) throws IOException;
 
     boolean seenMessageAuthenticated(Long userId, Long conversationId);
 

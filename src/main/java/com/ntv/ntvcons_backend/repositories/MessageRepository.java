@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    Message findTopByConversationIdDesc(Long conversationId);
+    Message findTopByOrderByConversationIdDesc();
 
     Page<Message> findAllByConversationId(Long conversationId, Pageable pageable);
 

@@ -676,7 +676,7 @@ public class RequestController {
         }
     }
     
-    @PreAuthorize("hasAnyAuthority('44','4','34','14','24')")
+    @PreAuthorize("hasAnyAuthority('44','34','14','24')")
     @PutMapping(value = "/v1/updateVerifier", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateVerifier(@RequestBody UpdateRequestVerifierModel updateRequestVerifierModel) {
         boolean result = requestService.updateVerifier(updateRequestVerifierModel);
