@@ -39,9 +39,9 @@ public class ProjectCreateDTO extends BaseCreateDTO {
 //    @Size(max = 100, message = "coordinate max length: 100 characters")
 //    private String coordinate;
 
-    @Schema(description = /*"NOT NULL"*/"Nullable") /* Hint for Swagger */
+//    @Schema(description = /*"NOT NULL"*/"Nullable") /* Hint for Swagger */
 //    @NotNull(message = "blueprint REQUIRED for Create")
-    private BlueprintCreateDTO blueprint;
+//    private BlueprintCreateDTO blueprint;
 
     @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
     @Size(min = 1, message = "Need at least 1 for Create")

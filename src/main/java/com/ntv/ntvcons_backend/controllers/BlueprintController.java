@@ -89,13 +89,15 @@ public class BlueprintController {
             BlueprintReadDTO newBlueprintDTO =
                     blueprintService.createBlueprintByDTO(blueprintDTO);
 
-            long blueprintId = newBlueprintDTO.getBlueprintId();
+            if (blueprintDoc != null) {
+                long blueprintId = newBlueprintDTO.getBlueprintId();
 
-            fileCombineService.saveFileInDBAndFirebase(
-                    blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
+                fileCombineService.saveFileInDBAndFirebase(
+                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
 
-            /* Get again after file created & save */
-            newBlueprintDTO = blueprintService.getDTOById(blueprintId);
+                /* Get again after file created & save */
+                newBlueprintDTO = blueprintService.getDTOById(blueprintId);
+            }
 
             return ResponseEntity.ok().body(newBlueprintDTO);
         } catch (IllegalArgumentException iAE) {
@@ -415,20 +417,22 @@ public class BlueprintController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No Blueprint found with Id: '" + blueprintDTO.getBlueprintId() + "'. ");
 
-            long blueprintId = updatedBlueprintDTO.getBlueprintId();
+            if (blueprintDoc != null) {
+                long blueprintId = updatedBlueprintDTO.getBlueprintId();
 
-            /* Delete old file */
-            ExternalFileReadDTO fileDTO =
-                    updatedBlueprintDTO.getFile();
-            if (fileDTO != null) {
-                fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
+                /* Delete old file */
+                ExternalFileReadDTO fileDTO =
+                        updatedBlueprintDTO.getFile();
+                if (fileDTO != null) {
+                    fileCombineService.deleteFileInDBAndFirebaseByFileDTO(fileDTO);
+                }
+
+                fileCombineService.saveFileInDBAndFirebase(
+                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
+
+                /* Get again after file created & save */
+                updatedBlueprintDTO = blueprintService.getDTOById(blueprintId);
             }
-
-            fileCombineService.saveFileInDBAndFirebase(
-                    blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
-
-            /* Get again after file created & save */
-            updatedBlueprintDTO = blueprintService.getDTOById(blueprintId);
 
             return ResponseEntity.ok().body(updatedBlueprintDTO);
         } catch (IllegalArgumentException iAE) {

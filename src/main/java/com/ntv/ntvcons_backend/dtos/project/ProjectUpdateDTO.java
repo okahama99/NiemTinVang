@@ -42,8 +42,8 @@ public class ProjectUpdateDTO extends BaseUpdateDTO {
 //    @Size(max = 100, message = "coordinate max length: 100 characters")
 //    private String coordinate;
 
-    @Schema(description = "Nullable") /* Hint for Swagger */
-    private BlueprintUpdateDTO blueprint;
+//    @Schema(description = "Nullable") /* Hint for Swagger */
+//    private BlueprintUpdateDTO blueprint;
 
     @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
     @Size(min = 1, message = "Need at least 1 for Update")

@@ -140,14 +140,13 @@ public class ProjectController {
 
             long projectId = newProjectDTO.getProjectId();
 
-            boolean addedFile = false;
-
-//            if (projectDocList != null) {
+            if (projectDocList != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
                         projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
 
-                addedFile = true;
-//            }
+                /* Get again after file created & save */
+                newProjectDTO = projectService.getDTOById(projectId);
+            }
 
 //            if (blueprintDoc != null) {
 //                BlueprintReadDTO blueprintDTO = newProjectDTO.getBlueprint();
@@ -159,9 +158,6 @@ public class ProjectController {
 //                addedFile = true;
 //            }
 
-            /* Get again after file created & save */
-            if (addedFile)
-                newProjectDTO = projectService.getDTOById(projectId);
 
             return ResponseEntity.ok().body(newProjectDTO);
         } catch (IllegalArgumentException iAE) {
@@ -522,9 +518,7 @@ public class ProjectController {
 
             long projectId = updatedProjectDTO.getProjectId();
 
-            boolean addedFile = false;
-
-//            if (projectDocList != null) {
+            if (projectDocList != null) {
                 /* Deleted old project file */
                 List<ExternalFileReadDTO> fileDTOList = updatedProjectDTO.getFileList();
                 if (fileDTOList != null)
@@ -533,8 +527,9 @@ public class ProjectController {
                 fileCombineService.saveAllFileInDBAndFirebase(
                         projectDocList, FileType.PROJECT_DOC, projectId, EntityType.PROJECT_ENTITY, userId);
 
-                addedFile = true;
-//            }
+                /* Get again after file created & save */
+                updatedProjectDTO = projectService.getDTOById(projectId);
+            }
 
 //            if (blueprintDoc != null) {
 //                BlueprintReadDTO blueprintDTO = updatedProjectDTO.getBlueprint();
@@ -554,10 +549,6 @@ public class ProjectController {
 //
 //                addedFile = true;
 //            }
-
-            /* Get again after file created & save */
-            if (addedFile)
-                updatedProjectDTO = projectService.getDTOById(projectId);
 
             return ResponseEntity.ok().body(updatedProjectDTO);
         } catch (IllegalArgumentException iAE) {
