@@ -79,7 +79,6 @@ public class WorkerController {
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     WorkerCreateDTO workerDTO,
             @RequestPart(required = false) MultipartFile workerAvatar,
-            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> workerDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);
@@ -94,8 +93,6 @@ public class WorkerController {
                     workerService.createWorkerByDTO(workerDTO);
 
             long workerId = newWorkerDTO.getWorkerId();
-
-            boolean addedFile = false;
 
             if (workerAvatar != null) {
                 String fileName = workerAvatar.getOriginalFilename();
@@ -112,19 +109,9 @@ public class WorkerController {
                 fileCombineService.saveFileInDBAndFirebase(
                         workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
 
-                addedFile = true;
-            }
-
-            if (workerDocList != null) {
-                fileCombineService.saveAllFileInDBAndFirebase(
-                        workerDocList, FileType.WORKER_DOC, workerId, EntityType.WORKER_ENTITY, userId);
-
-                addedFile = true;
-            }
-
-            /* Get again after file created & save */
-            if (addedFile)
+                /* Get again after file created & save */
                 newWorkerDTO = workerService.getDTOById(workerId);
+            }
 
             return ResponseEntity.ok().body(newWorkerDTO);
         } catch (IllegalArgumentException iAE) {
@@ -143,7 +130,6 @@ public class WorkerController {
     public ResponseEntity<Object> addFileToWorkerById(
             @PathVariable long workerId,
             @RequestPart(required = false) MultipartFile workerAvatar,
-            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> workerDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);
@@ -157,8 +143,6 @@ public class WorkerController {
             if (workerDTO == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body("No Worker found with Id: '" + workerId + "' to add file.");
-
-            boolean addedFile = false;
 
             if (workerAvatar != null) {
                 String fileName = workerAvatar.getOriginalFilename();
@@ -175,19 +159,9 @@ public class WorkerController {
                 fileCombineService.saveFileInDBAndFirebase(
                         workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
 
-                addedFile = true;
-            }
-
-            if (workerDocList != null) {
-                fileCombineService.saveAllFileInDBAndFirebase(
-                        workerDocList, FileType.WORKER_DOC, workerId, EntityType.WORKER_ENTITY, userId);
-
-                addedFile = true;
-            }
-
-            /* Get again after file created & save */
-            if (addedFile)
+                /* Get again after file created & save */
                 workerDTO = workerService.getDTOById(workerId);
+            }
 
             return ResponseEntity.ok().body(workerDTO);
         } catch (IllegalArgumentException iAE) {
@@ -429,8 +403,6 @@ public class WorkerController {
 
             long workerId = updatedWorkerDTO.getWorkerId();
 
-            boolean addedFile = false;
-
             if (workerAvatar != null) {
                 String fileName = workerAvatar.getOriginalFilename();
                 if (fileName == null || fileName.isEmpty())
@@ -446,19 +418,9 @@ public class WorkerController {
                 fileCombineService.saveFileInDBAndFirebase(
                         workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
 
-                addedFile = true;
-            }
-
-            if (workerDocList != null) {
-                fileCombineService.saveAllFileInDBAndFirebase(
-                        workerDocList, FileType.WORKER_DOC, workerId, EntityType.WORKER_ENTITY, userId);
-
-                addedFile = true;
-            }
-
-            /* Get again after file created & save */
-            if (addedFile)
+                /* Get again after file created & save */
                 updatedWorkerDTO = workerService.getDTOById(workerId);
+            }
 
             return ResponseEntity.ok().body(updatedWorkerDTO);
         } catch (IllegalArgumentException iAE) {
@@ -479,7 +441,6 @@ public class WorkerController {
             @PathVariable long workerId,
             @RequestPart MultipartFile workerAvatar,
             @RequestParam @Size(min = 1) List<Long> removeFileIdList,
-            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> workerDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);
@@ -528,8 +489,6 @@ public class WorkerController {
                 fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(removeFileDTOList);
             }
 
-            boolean addedFile = false;
-
             if (workerAvatar != null) {
                 String fileName = workerAvatar.getOriginalFilename();
                 if (fileName == null || fileName.isEmpty())
@@ -545,19 +504,9 @@ public class WorkerController {
                 fileCombineService.saveFileInDBAndFirebase(
                         workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
 
-                addedFile = true;
-            }
-
-            if (workerDocList != null) {
-                fileCombineService.saveAllFileInDBAndFirebase(
-                        workerDocList, FileType.WORKER_DOC, workerId, EntityType.WORKER_ENTITY, userId);
-
-                addedFile = true;
-            }
-
-            /* Get again after file created & save */
-            if (addedFile)
+                /* Get again after file created & save */
                 workerDTO = workerService.getDTOById(workerId);
+            }
 
             return ResponseEntity.ok().body(workerDTO);
         } catch (IllegalArgumentException iAE) {
@@ -577,7 +526,6 @@ public class WorkerController {
     public ResponseEntity<Object> replaceAllFileOfWorkerById(
             @PathVariable long workerId,
             @RequestPart MultipartFile workerAvatar,
-            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> workerDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);
@@ -601,8 +549,6 @@ public class WorkerController {
                 fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
             }
 
-            boolean addedFile = false;
-
             if (workerAvatar != null) {
                 String fileName = workerAvatar.getOriginalFilename();
                 if (fileName == null || fileName.isEmpty())
@@ -618,19 +564,9 @@ public class WorkerController {
                 fileCombineService.saveFileInDBAndFirebase(
                         workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
 
-                addedFile = true;
-            }
-
-            if (workerDocList != null) {
-                fileCombineService.saveAllFileInDBAndFirebase(
-                        workerDocList, FileType.WORKER_DOC, workerId, EntityType.WORKER_ENTITY, userId);
-
-                addedFile = true;
-            }
-
-            /* Get again after file created & save */
-            if (addedFile)
+                /* Get again after file created & save */
                 workerDTO = workerService.getDTOById(workerId);
+            }
 
             return ResponseEntity.ok().body(workerDTO);
         } catch (IllegalArgumentException iAE) {
