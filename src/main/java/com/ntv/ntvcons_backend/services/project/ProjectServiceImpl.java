@@ -96,6 +96,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* READ */
+    @Deprecated
     @Override
     public boolean createProject(CreateProjectModel createProjectModel) throws Exception {
                 CreateLocationModel locationModel = new CreateLocationModel();
@@ -260,14 +261,14 @@ public class ProjectServiceImpl implements ProjectService {
         entityWrapperService
                 .createEntityWrapper(newProjectId, ENTITY_TYPE, createdBy);
 
-        /* Set REQUIRED FK projectId to blueprint after create Project */
-        BlueprintCreateDTO blueprintDTO = newProjectDTO.getBlueprint();
-        if (blueprintDTO != null) {
-            blueprintDTO.setProjectId(newProjectId);
-            blueprintDTO.setCreatedBy(createdBy);
-            /* Create associated Blueprint */
-            blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
-        }
+//        /* Set REQUIRED FK projectId to blueprint after create Project */
+//        BlueprintCreateDTO blueprintDTO = newProjectDTO.getBlueprint();
+//        if (blueprintDTO != null) {
+//            blueprintDTO.setProjectId(newProjectId);
+//            blueprintDTO.setCreatedBy(createdBy);
+//            /* Create associated Blueprint */
+//            blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
+//        }
 
         /* Create associated ProjectManager (if present) */
         List<Long> managerIdList = newProjectDTO.getManagerIdList();
@@ -311,6 +312,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     /* READ */
+    @Deprecated
     @Override
     public List<ProjectModel> getAll(int pageNo, int pageSize, String sortBy, boolean sortType) {
         Pageable paging;
@@ -966,15 +968,15 @@ public class ProjectServiceImpl implements ProjectService {
 
         long updatedProjectId = updatedProject.getProjectId();
 
-        /* Update associated Blueprint if changed */
-        BlueprintUpdateDTO updateBlueprintDTO = updatedProjectDTO.getBlueprint();
-        if (updateBlueprintDTO != null) {
-            /* Just in case */
-            updateBlueprintDTO.setProjectId(updatedProjectId);
-            updateBlueprintDTO.setUpdatedBy(updatedBy);
-
-            blueprintService.updateBlueprintByDTO(updateBlueprintDTO);
-        }
+//        /* Update associated Blueprint if changed */
+//        BlueprintUpdateDTO updateBlueprintDTO = updatedProjectDTO.getBlueprint();
+//        if (updateBlueprintDTO != null) {
+//            /* Just in case */
+//            updateBlueprintDTO.setProjectId(updatedProjectId);
+//            updateBlueprintDTO.setUpdatedBy(updatedBy);
+//
+//            blueprintService.updateBlueprintByDTO(updateBlueprintDTO);
+//        }
 
         /* Update associated ProjectManager if changed */
         List<Long> managerIdList = updatedProjectDTO.getManagerIdList();
