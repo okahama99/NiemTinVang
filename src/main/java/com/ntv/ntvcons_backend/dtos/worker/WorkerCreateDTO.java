@@ -30,11 +30,10 @@ public class WorkerCreateDTO extends BaseCreateDTO {
     private String citizenId;
 
     @Schema(example = "UNKNOWN") /* Hint for Swagger */
-    @Size(max = 20, message = "gender max length: 20 characters")
     private Gender gender = Gender.UNKNOWN; /* Default */
 
     /** yyyy-MM-dd HH:mm */
-    @Schema(example = "yyyy-MM-dd ") /* Hint for Swagger */
+    @Schema(example = "yyyy-MM-dd") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATE_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd'")
     private String birthday;
 

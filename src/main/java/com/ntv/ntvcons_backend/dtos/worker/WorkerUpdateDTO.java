@@ -28,7 +28,6 @@ public class WorkerUpdateDTO extends BaseUpdateDTO {
     private String fullName;
 
     @Schema(example = "xxxxxxxxx") /* Hint for Swagger */
-    @Size(max = 20, message = "citizenId max length: 20 characters")
     @NotNull(message = "citizenId REQUIRED for Update")
     private String citizenId;
 
@@ -37,7 +36,7 @@ public class WorkerUpdateDTO extends BaseUpdateDTO {
     private Gender gender = Gender.UNKNOWN; /* Default */
 
     /** yyyy-MM-dd HH:mm */
-    @Schema(example = "yyyy-MM-dd ") /* Hint for Swagger */
+    @Schema(example = "yyyy-MM-dd") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATE_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd'")
     private String birthday;
 
