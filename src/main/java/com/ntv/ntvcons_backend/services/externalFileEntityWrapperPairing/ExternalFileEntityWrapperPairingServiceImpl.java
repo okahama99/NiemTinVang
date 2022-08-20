@@ -38,7 +38,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
 
     /* CREATE */
     @Override
-    public ExternalFileEntityWrapperPairing createPairing(long entityId, EntityType type, long fileId, long createdBy) throws Exception {
+    public ExternalFileEntityWrapperPairing createPairing(long entityId, EntityType type, long fileId, Long createdBy) throws Exception {
         String errorMsg = "";
 
         EntityWrapper entityWrapper = entityWrapperService.getByEntityIdAndEntityType(entityId, type);
@@ -55,9 +55,11 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
             errorMsg += "No ExternalFile found with Id: '" + fileId
                     + "'. Which violate constraint: FK_EFEWP_ExternalFile. ";
         }
-        if (!userService.existsById(createdBy)) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + createdBy
-                    + "'. Which violate constraint: FK_EFEWP_User_CreatedBy. ";
+        if (createdBy != null) {
+            if (!userService.existsById(createdBy)) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + createdBy
+                        + "'. Which violate constraint: FK_EFEWP_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -85,7 +87,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
 
     @Override
     public List<ExternalFileEntityWrapperPairing> createBulkPairingByEntityIdAndEntityType(
-            long entityId, EntityType type, Collection<Long> fileIdCollection, long createdBy) throws Exception {
+            long entityId, EntityType type, Collection<Long> fileIdCollection, Long createdBy) throws Exception {
         StringBuilder errorMsg = new StringBuilder();
 
         EntityWrapper entityWrapper = entityWrapperService.getByEntityIdAndEntityType(entityId, type);
@@ -103,10 +105,12 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
             errorMsg.append("1 or more file not found with Id. ")
                     .append("Which violate constraint: FK_EFEWP_File. ");
         }
-        if (!userService.existsById(createdBy)) {
-            errorMsg.append("No User (CreatedBy) found with Id: '")
-                    .append(createdBy)
-                    .append("'. Which violate constraint: FK_EFEWP_User_CreatedBy. ");
+        if (createdBy != null) {
+            if (!userService.existsById(createdBy)) {
+                errorMsg.append("No User (CreatedBy) found with Id: '")
+                        .append(createdBy)
+                        .append("'. Which violate constraint: FK_EFEWP_User_CreatedBy. ");
+            }
         }
 
         /* Check duplicate */
@@ -335,17 +339,19 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
                         + "'. Which violate constraint: FK_EFEWP_ExternalFile. ";
             }
         }
-        if (oldPairing.getUpdatedBy() != null) {
-            if (oldPairing.getUpdatedBy().equals(updatedPairing.getUpdatedBy())) {
+        if (updatedPairing.getUpdatedBy() != null) {
+            if (oldPairing.getUpdatedBy() != null) {
+                if (oldPairing.getUpdatedBy().equals(updatedPairing.getUpdatedBy())) {
+                    if (userService.existsById(updatedPairing.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedPairing.getUpdatedBy()
+                                + "'. Which violate constraint: FK_EFEWP_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (userService.existsById(updatedPairing.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedPairing.getUpdatedBy()
                             + "'. Which violate constraint: FK_EFEWP_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (userService.existsById(updatedPairing.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedPairing.getUpdatedBy()
-                        + "'. Which violate constraint: FK_EFEWP_User_UpdatedBy. ";
             }
         }
 

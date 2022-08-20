@@ -14,8 +14,7 @@ public enum Status {
     DONE("DONE"),
     APPROVED("APPROVED"),
     DENIED("DENIED"),
-    /* Other avoid query status must start with 'DELETED_'
-     * to call query: findBy...AndStatusNotContains('DELETED')  */
+    /* Non default search statuses */
     DELETED("DELETED"),
     REMOVED("REMOVED");
 

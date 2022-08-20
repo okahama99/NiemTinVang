@@ -75,9 +75,11 @@ public class BlueprintServiceImpl implements BlueprintService {
             errorMsg += "No Project found with Id: '" + newBlueprint.getProjectId()
                     + "'. Which violate constraint: FK_Blueprint_Project. ";
         }
-        if (!userService.existsById(newBlueprint.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newBlueprint.getCreatedBy()
-                    + "'. Which violate constraint: FK_Blueprint_User_CreatedBy. ";
+        if (newBlueprint.getCreatedBy() != null) {
+            if (!userService.existsById(newBlueprint.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newBlueprint.getCreatedBy()
+                        + "'. Which violate constraint: FK_Blueprint_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -482,17 +484,19 @@ public class BlueprintServiceImpl implements BlueprintService {
                         + "'. Which violate constraint: FK_Blueprint_Project. ";
             }
         }
-        if (oldBlueprint.getUpdatedBy() != null) {
-            if (!oldBlueprint.getUpdatedBy().equals(updatedBlueprint.getUpdatedBy())) {
+        if (updatedBlueprint.getUpdatedBy() != null) {
+            if (oldBlueprint.getUpdatedBy() != null) {
+                if (!oldBlueprint.getUpdatedBy().equals(updatedBlueprint.getUpdatedBy())) {
+                    if (!userService.existsById(updatedBlueprint.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedBlueprint.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Blueprint_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedBlueprint.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedBlueprint.getUpdatedBy()
                             + "'. Which violate constraint: FK_Blueprint_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedBlueprint.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedBlueprint.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Blueprint_User_UpdatedBy. ";
             }
         }
 

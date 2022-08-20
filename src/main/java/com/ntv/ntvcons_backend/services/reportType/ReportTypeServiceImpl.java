@@ -39,9 +39,11 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         String errorMsg = "";
 
         /* Check FK */
-        if (!userService.existsById(newReportType.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newReportType.getCreatedBy()
-                    + "'. Which violate constraint: FK_ReportType_User_CreatedBy. ";
+        if (newReportType.getCreatedBy() != null) {
+            if (!userService.existsById(newReportType.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newReportType.getCreatedBy()
+                        + "'. Which violate constraint: FK_ReportType_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -221,17 +223,19 @@ public class ReportTypeServiceImpl implements ReportTypeService {
         String errorMsg = "";
 
         /* Check FK */
-        if (oldReportType.getUpdatedBy() != null) {
-            if (!oldReportType.getUpdatedBy().equals(updatedReportType.getUpdatedBy())) {
+        if (updatedReportType.getUpdatedBy() != null) {
+            if (oldReportType.getUpdatedBy() != null) {
+                if (!oldReportType.getUpdatedBy().equals(updatedReportType.getUpdatedBy())) {
+                    if (!userService.existsById(updatedReportType.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReportType.getUpdatedBy()
+                                + "'. Which violate constraint: FK_ReportType_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedReportType.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReportType.getUpdatedBy()
                             + "'. Which violate constraint: FK_ReportType_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedReportType.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReportType.getUpdatedBy()
-                        + "'. Which violate constraint: FK_ReportType_User_UpdatedBy. ";
             }
         }
 

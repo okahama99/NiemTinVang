@@ -3,12 +3,12 @@ package com.ntv.ntvcons_backend.services.worker;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
-import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.entities.Worker;
 import com.ntv.ntvcons_backend.repositories.WorkerRepository;
@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -86,9 +87,43 @@ public class WorkerServiceImpl implements WorkerService {
     }
     @Override
     public WorkerReadDTO createWorkerByDTO(WorkerCreateDTO newWorkerDTO) throws Exception {
+        modelMapper.typeMap(WorkerCreateDTO.class, Worker.class)
+            .addMappings(mapper -> {
+                mapper.skip(Worker::setBirthday);});
+
         Worker newWorker = modelMapper.map(newWorkerDTO, Worker.class);
 
-        LocationReadDTO locationDTO = locationService.createLocationByDTO(newWorkerDTO.getAddress());
+        /* Check input */
+        if (newWorkerDTO.getBirthday() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            newWorker.setBirthday(new java.sql.Date(
+                    sdf.parse(newWorkerDTO.getBirthday()).getTime()));
+
+            /* Now */
+            Calendar calendar = Calendar.getInstance();
+            /* Tuổi tối thiểu lao động TODO:(18 hay 16?) */
+            /* Perform addition/subtraction (số dương +, số âm -) */
+            calendar.add(Calendar.YEAR, -18);
+
+            /* Convert calendar to Date */
+            Date minLegalAgeBirthday = calendar.getTime();
+
+            if (newWorker.getBirthday().after(minLegalAgeBirthday)) {
+                throw new IllegalArgumentException(
+                        "This worker birthday: '" + newWorker.getBirthday()
+                                + "' mean they are younger than 18. Which violate labour law. "
+                                + " Valid birthday must be before: '" + sdf.format(minLegalAgeBirthday) + "'. ");
+            }
+        }
+
+        /* Get/Create address (Location) */
+        LocationCreateDTO locationCreateDTO = newWorkerDTO.getAddress();
+        LocationReadDTO locationDTO = locationService.getDTOByCoordinate(locationCreateDTO.getCoordinate());
+
+        if (locationDTO == null) {
+            locationDTO = locationService.createLocationByDTO(locationCreateDTO);
+        }
 
         newWorker.setAddressId(locationDTO.getLocationId());
 
@@ -389,17 +424,19 @@ public class WorkerServiceImpl implements WorkerService {
                         + "'. Which violate constraint: FK_Worker_Location. ";
             }
         }
-        if (oldWorker.getUpdatedBy() != null) {
-            if (!oldWorker.getUpdatedBy().equals(updatedWorker.getUpdatedBy())) {
+        if (updatedWorker.getUpdatedBy() != null) {
+            if (oldWorker.getUpdatedBy() != null) {
+                if (!oldWorker.getUpdatedBy().equals(updatedWorker.getUpdatedBy())) {
+                    if (!userService.existsById(updatedWorker.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedWorker.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Worker_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedWorker.getUpdatedBy())) {
-                    errorMsg += "No Worker (UpdatedBy) found with Id: '" + updatedWorker.getUpdatedBy()
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedWorker.getUpdatedBy()
                             + "'. Which violate constraint: FK_Worker_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedWorker.getUpdatedBy())) {
-                errorMsg += "No Worker (UpdatedBy) found with Id: '" + updatedWorker.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Worker_User_UpdatedBy. ";
             }
         }
 
@@ -423,7 +460,34 @@ public class WorkerServiceImpl implements WorkerService {
     }
     @Override
     public WorkerReadDTO updateWorkerByDTO(WorkerUpdateDTO updatedWorkerDTO) throws Exception {
+        modelMapper.typeMap(WorkerUpdateDTO.class, Worker.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Worker::setBirthday);});
+
         Worker updatedWorker = modelMapper.map(updatedWorkerDTO, Worker.class);
+
+        if (updatedWorkerDTO.getBirthday() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            updatedWorker.setBirthday(new java.sql.Date(
+                    sdf.parse(updatedWorkerDTO.getBirthday()).getTime()));
+
+            /* Now */
+            Calendar calendar = Calendar.getInstance();
+            /* Tuổi tối thiểu lao động TODO:(18 hay 16?) */
+            /* Perform addition/subtraction (số dương +, số âm -) */
+            calendar.add(Calendar.YEAR, -18);
+
+            /* Convert calendar to Date */
+            Date minLegalAgeBirthday = calendar.getTime();
+
+            if (updatedWorker.getBirthday().after(minLegalAgeBirthday)) {
+                throw new IllegalArgumentException(
+                        "This worker birthday: '" + updatedWorker.getBirthday()
+                                + "' mean they are younger than 18. Which violate labour law. "
+                                + " Valid birthday must be before: '" + sdf.format(minLegalAgeBirthday) + "'. ");
+            }
+        }
 
         /* Update associated Location if changed */
         LocationUpdateDTO address = updatedWorkerDTO.getAddress();

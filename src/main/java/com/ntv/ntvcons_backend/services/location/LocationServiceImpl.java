@@ -58,9 +58,11 @@ public class LocationServiceImpl implements LocationService {
         String errorMsg = "";
 
         /* Check FK */
-        if (!userService.existsById(newLocation.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newLocation.getCreatedBy()
-                    + "'. Which violate constraint: FK_Location_User_CreatedBy. ";
+        if (newLocation.getCreatedBy() != null) {
+            if (!userService.existsById(newLocation.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newLocation.getCreatedBy()
+                        + "'. Which violate constraint: FK_Location_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -297,17 +299,19 @@ public class LocationServiceImpl implements LocationService {
         String errorMsg = "";
 
         /* Check FK */
-        if (oldLocation.getUpdatedBy() != null) {
-            if (!oldLocation.getUpdatedBy().equals(updatedLocation.getUpdatedBy())) {
+        if (updatedLocation.getUpdatedBy() != null) {
+            if (oldLocation.getUpdatedBy() != null) {
+                if (!oldLocation.getUpdatedBy().equals(updatedLocation.getUpdatedBy())) {
+                    if (!userService.existsById(updatedLocation.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedLocation.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Location_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedLocation.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedLocation.getUpdatedBy()
                             + "'. Which violate constraint: FK_Location_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedLocation.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedLocation.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Location_User_UpdatedBy. ";
             }
         }
 

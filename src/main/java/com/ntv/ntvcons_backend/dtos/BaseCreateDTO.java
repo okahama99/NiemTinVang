@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public abstract class BaseCreateDTO implements Serializable {
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */
-    private Long createdBy = 134L; /* accAdmin */
+    private Long createdBy = null; /* accAdmin */
 
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */

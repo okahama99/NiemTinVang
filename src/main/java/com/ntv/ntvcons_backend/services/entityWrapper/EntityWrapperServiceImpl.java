@@ -52,14 +52,17 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
 
     /* CREATE */
     @Override
-    public EntityWrapper createEntityWrapper(long entityId, EntityType type, long createdBy) throws Exception {
+    public EntityWrapper createEntityWrapper(long entityId, EntityType type, Long createdBy) throws Exception {
         String errorMsg = "";
 
         /* Check FK */
-        if (!userService.existsById(createdBy)) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + createdBy
-                    + "'. Which violate constraint: FK_EntityWrapper_User_CreatedBy. ";
+        if (createdBy != null) {
+            if (!userService.existsById(createdBy)) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + createdBy
+                        + "'. Which violate constraint: FK_EntityWrapper_User_CreatedBy. ";
+            }
         }
+
         boolean isNotExists = false;
         /* Check duplicate */
         boolean isDuplicated = false;

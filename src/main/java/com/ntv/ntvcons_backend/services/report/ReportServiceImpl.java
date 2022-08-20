@@ -85,9 +85,11 @@ public class ReportServiceImpl implements ReportService {
             errorMsg += "No User (Reporter) found with Id: '" + newReport.getReporterId()
                     + "'. Which violate constraint: FK_Report_User_ReporterId. ";
         }
-        if (!userService.existsById(newReport.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newReport.getCreatedBy()
-                    + "'. Which violate constraint: FK_Report_User_CreatedBy. ";
+        if (newReport.getCreatedBy() != null) {
+            if (!userService.existsById(newReport.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newReport.getCreatedBy()
+                        + "'. Which violate constraint: FK_Report_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -578,17 +580,19 @@ public class ReportServiceImpl implements ReportService {
                         + "'. Which violate constraint: FK_Report_User_ReporterId. ";
             }
         }
-        if (oldReport.getUpdatedBy() != null) {
-            if (!oldReport.getUpdatedBy().equals(updatedReport.getUpdatedBy())) {
+        if (updatedReport.getUpdatedBy() != null) {
+            if (oldReport.getUpdatedBy() != null) {
+                if (!oldReport.getUpdatedBy().equals(updatedReport.getUpdatedBy())) {
+                    if (!userService.existsById(updatedReport.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReport.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Report_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedReport.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReport.getUpdatedBy()
                             + "'. Which violate constraint: FK_Report_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedReport.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedReport.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Report_User_UpdatedBy. ";
             }
         }
 

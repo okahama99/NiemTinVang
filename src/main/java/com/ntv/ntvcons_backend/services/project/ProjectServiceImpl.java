@@ -153,9 +153,11 @@ public class ProjectServiceImpl implements ProjectService {
         String errorMsg = "";
 
         /* Check FK */
-        if (!userService.existsById(newProject.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newProject.getCreatedBy()
-                    + "'. Which violate constraint: FK_Project_User_CreatedBy. ";
+        if (newProject.getCreatedBy() != null) {
+            if (!userService.existsById(newProject.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newProject.getCreatedBy()
+                        + "'. Which violate constraint: FK_Project_User_CreatedBy. ";
+            }
         }
         if (!locationService.existsById(newProject.getLocationId())) {
             /* Should not happen, Location are 1st created in createProjectByDTO before this are executed */
@@ -792,17 +794,19 @@ public class ProjectServiceImpl implements ProjectService {
         String errorMsg = "";
 
         /* Check FK (if changed) */
-        if (oldProject.getUpdatedBy() != null) {
-            if (!oldProject.getUpdatedBy().equals(updatedProject.getUpdatedBy())) {
+        if (updatedProject.getUpdatedBy() != null) {
+            if (oldProject.getUpdatedBy() != null) {
+                if (!oldProject.getUpdatedBy().equals(updatedProject.getUpdatedBy())) {
+                    if (!userService.existsById(updatedProject.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProject.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Project_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedProject.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProject.getUpdatedBy()
                             + "'. Which violate constraint: FK_Project_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedProject.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProject.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Project_User_UpdatedBy. ";
             }
         }
         if (updatedProject.getLocationId() != null) {

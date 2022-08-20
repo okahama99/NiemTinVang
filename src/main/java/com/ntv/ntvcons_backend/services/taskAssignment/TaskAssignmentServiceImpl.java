@@ -57,9 +57,11 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
             errorMsg += "No User (Assignee) found with Id: '" + newTaskAssignment.getAssigneeId()
                     + "'. Which violate constraint: FK_TaskAssignment_User_AssigneeId. ";
         }
-        if (!userService.existsById(newTaskAssignment.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newTaskAssignment.getAssigneeId()
-                    + "'. Which violate constraint: FK_TaskAssignment_User_CreatedBy. ";
+        if (newTaskAssignment.getCreatedBy() != null) {
+            if (!userService.existsById(newTaskAssignment.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newTaskAssignment.getAssigneeId()
+                        + "'. Which violate constraint: FK_TaskAssignment_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -351,17 +353,19 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
                         + "'. Which violate constraint: FK_TaskAssignment_User_AssigneeId. ";
             }
         }
-        if (oldTaskAssignment.getUpdatedBy() != null) {
-            if (!oldTaskAssignment.getUpdatedBy().equals(updatedTaskAssignment.getUpdatedBy())) {
+        if (updatedTaskAssignment.getUpdatedBy() != null) {
+            if (oldTaskAssignment.getUpdatedBy() != null) {
+                if (!oldTaskAssignment.getUpdatedBy().equals(updatedTaskAssignment.getUpdatedBy())) {
+                    if (!userService.existsById(updatedTaskAssignment.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTaskAssignment.getUpdatedBy()
+                                + "'. Which violate constraint: FK_TaskAssignment_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedTaskAssignment.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTaskAssignment.getUpdatedBy()
                             + "'. Which violate constraint: FK_TaskAssignment_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedTaskAssignment.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTaskAssignment.getUpdatedBy()
-                        + "'. Which violate constraint: FK_TaskAssignment_User_UpdatedBy. ";
             }
         }
 
