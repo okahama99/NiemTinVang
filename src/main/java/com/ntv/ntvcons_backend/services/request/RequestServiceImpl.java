@@ -125,9 +125,11 @@ public class RequestServiceImpl implements RequestService {
             errorMsg += "No User (Requester) found with Id: '" + newRequest.getRequesterId()
                     + "'. Which violate constraint: FK_Request_User_RequesterId. ";
         }
-        if (!userService.existsById(newRequest.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newRequest.getCreatedBy()
-                    + "'. Which violate constraint: FK_Request_User_CreatedBy. ";
+        if (newRequest.getCreatedBy() != null) {
+            if (!userService.existsById(newRequest.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newRequest.getCreatedBy()
+                        + "'. Which violate constraint: FK_Request_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -869,17 +871,19 @@ public class RequestServiceImpl implements RequestService {
                 }
             }
         }
-        if (oldRequest.getUpdatedBy() != null) {
-            if (!oldRequest.getUpdatedBy().equals(updatedRequest.getUpdatedBy())) {
+        if (updatedRequest.getUpdatedBy() != null) {
+            if (oldRequest.getUpdatedBy() != null) {
+                if (!oldRequest.getUpdatedBy().equals(updatedRequest.getUpdatedBy())) {
+                    if (!userService.existsById(updatedRequest.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequest.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Request_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedRequest.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequest.getUpdatedBy()
                             + "'. Which violate constraint: FK_Request_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedRequest.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequest.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Request_User_UpdatedBy. ";
             }
         }
 

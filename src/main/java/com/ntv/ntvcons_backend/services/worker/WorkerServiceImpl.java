@@ -58,6 +58,25 @@ public class WorkerServiceImpl implements WorkerService {
     public Worker createWorker(Worker newWorker) throws Exception {
         String errorMsg = "";
 
+        /* Check input */
+        if (newWorker.getBirthday() != null) {
+            /* Now */
+            Calendar calendar = Calendar.getInstance();
+
+            /* Tuổi tối thiểu lao động TODO:(18 hay 16?) */
+            /* Perform addition/subtraction (số dương +, số âm -) */
+            calendar.add(Calendar.YEAR, -18);
+
+            /* Convert calendar to Date */
+            Date minLegalAgeBirthday = calendar.getTime();
+
+            if (newWorker.getBirthday().after(minLegalAgeBirthday)) {
+                errorMsg += "This worker birthday: '" + newWorker.getBirthday() +
+                        "' mean they are younger than 18. Which violate labour law. " +
+                        " Valid birthday must be before: '" + minLegalAgeBirthday + "'. ";
+            }
+        }
+
         /* Check FK */
         if (!locationService.existsById(newWorker.getAddressId())) {
             errorMsg += "No Location (Address) found with Id: '" + newWorker.getAddressId()
@@ -382,6 +401,25 @@ public class WorkerServiceImpl implements WorkerService {
 
         String errorMsg = "";
 
+        /* Check input */
+        if (updatedWorker.getBirthday() != null) {
+            /* Now */
+            Calendar calendar = Calendar.getInstance();
+
+            /* Tuổi tối thiểu lao động TODO:(18 hay 16?) */
+            /* Perform addition/subtraction (số dương +, số âm -) */
+            calendar.add(Calendar.YEAR, -18);
+
+            /* Convert calendar to Date */
+            Date minLegalAgeBirthday = calendar.getTime();
+
+            if (updatedWorker.getBirthday().after(minLegalAgeBirthday)) {
+                errorMsg += "This worker birthday: '" + updatedWorker.getBirthday() +
+                        "' mean they are younger than 18. Which violate labour law. " +
+                        " Valid birthday must be before: '" + minLegalAgeBirthday + "'. ";
+            }
+        }
+
         /* Check FK (if changed) */
         if (!oldWorker.getAddressId().equals(updatedWorker.getAddressId())) {
             if (!locationService.existsById(updatedWorker.getAddressId())) {
@@ -389,17 +427,19 @@ public class WorkerServiceImpl implements WorkerService {
                         + "'. Which violate constraint: FK_Worker_Location. ";
             }
         }
-        if (oldWorker.getUpdatedBy() != null) {
-            if (!oldWorker.getUpdatedBy().equals(updatedWorker.getUpdatedBy())) {
+        if (updatedWorker.getUpdatedBy() != null) {
+            if (oldWorker.getUpdatedBy() != null) {
+                if (!oldWorker.getUpdatedBy().equals(updatedWorker.getUpdatedBy())) {
+                    if (!userService.existsById(updatedWorker.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedWorker.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Worker_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedWorker.getUpdatedBy())) {
-                    errorMsg += "No Worker (UpdatedBy) found with Id: '" + updatedWorker.getUpdatedBy()
+                    errorMsg += "No User (UpdatedBy) found with Id: '" + updatedWorker.getUpdatedBy()
                             + "'. Which violate constraint: FK_Worker_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedWorker.getUpdatedBy())) {
-                errorMsg += "No Worker (UpdatedBy) found with Id: '" + updatedWorker.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Worker_User_UpdatedBy. ";
             }
         }
 

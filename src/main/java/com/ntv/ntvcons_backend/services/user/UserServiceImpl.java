@@ -476,17 +476,19 @@ public class UserServiceImpl implements UserService {
                         + "'. Which violate constraint: FK_User_Role. ";
             }
         }
-        if (oldUser.getUpdatedBy() != null) {
-            if (!oldUser.getUpdatedBy().equals(updatedUser.getUpdatedBy())) {
+        if (updatedUser.getUpdatedBy() != null) {
+            if (oldUser.getUpdatedBy() != null) {
+                if (!oldUser.getUpdatedBy().equals(updatedUser.getUpdatedBy())) {
+                    if (!existsById(updatedUser.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedUser.getUpdatedBy()
+                                + "'. Which violate constraint: FK_User_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!existsById(updatedUser.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedUser.getUpdatedBy()
                             + "'. Which violate constraint: FK_User_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!existsById(updatedUser.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedUser.getUpdatedBy()
-                        + "'. Which violate constraint: FK_User_User_UpdatedBy. ";
             }
         }
 

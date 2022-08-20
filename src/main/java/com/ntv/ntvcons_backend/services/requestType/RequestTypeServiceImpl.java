@@ -39,9 +39,11 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         String errorMsg = "";
 
         /* Check FK */
-        if (!userService.existsById(newRequestType.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newRequestType.getCreatedBy()
-                    + "'. Which violate constraint: FK_RequestType_User_CreatedBy. ";
+        if (newRequestType.getCreatedBy() != null) {
+            if (!userService.existsById(newRequestType.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newRequestType.getCreatedBy()
+                        + "'. Which violate constraint: FK_RequestType_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -216,17 +218,19 @@ public class RequestTypeServiceImpl implements RequestTypeService {
         String errorMsg = "";
 
         /* Check FK */
-        if (oldRequestType.getUpdatedBy() != null) {
-            if (!oldRequestType.getUpdatedBy().equals(updatedRequestType.getUpdatedBy())) {
+        if (updatedRequestType.getUpdatedBy() != null) {
+            if (oldRequestType.getUpdatedBy() != null) {
+                if (!oldRequestType.getUpdatedBy().equals(updatedRequestType.getUpdatedBy())) {
+                    if (!userService.existsById(updatedRequestType.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequestType.getUpdatedBy()
+                                + "'. Which violate constraint: FK_RequestType_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedRequestType.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequestType.getUpdatedBy()
                             + "'. Which violate constraint: FK_RequestType_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedRequestType.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRequestType.getUpdatedBy()
-                        + "'. Which violate constraint: FK_RequestType_User_UpdatedBy. ";
             }
         }
 

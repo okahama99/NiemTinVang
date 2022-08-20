@@ -52,9 +52,11 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             errorMsg += "No User (Manager) found with Id: '" + newProjectManager.getManagerId()
                     + "'. Which violate constraint: FK_ProjectManager_User_ManagerId. ";
         }
-        if (!userService.existsById(newProjectManager.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newProjectManager.getCreatedBy()
-                    + "'. Which violate constraint: FK_ProjectManager_User_CreatedBy. ";
+        if (newProjectManager.getCreatedBy() != null) {
+            if (!userService.existsById(newProjectManager.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newProjectManager.getCreatedBy()
+                        + "'. Which violate constraint: FK_ProjectManager_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -477,17 +479,19 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                         + "'. Which violate constraint: FK_ProjectManager_User_ManagerId. ";
             }
         }
-        if (oldProjectManager.getUpdatedBy() != null) {
-            if (!oldProjectManager.getUpdatedBy().equals(updatedProjectManager.getUpdatedBy())) {
+        if (updatedProjectManager.getUpdatedBy() != null) {
+            if (oldProjectManager.getUpdatedBy() != null) {
+                if (!oldProjectManager.getUpdatedBy().equals(updatedProjectManager.getUpdatedBy())) {
+                    if (!userService.existsById(updatedProjectManager.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProjectManager.getUpdatedBy()
+                                + "'. Which violate constraint: FK_ProjectManager_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedProjectManager.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedProjectManager.getUpdatedBy()
                             + "'. Which violate constraint: FK_ProjectManager_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedProjectManager.getUpdatedBy())) {
-                errorMsg += "No User found with Id: '" + updatedProjectManager.getUpdatedBy()
-                        + "'. Which violate constraint: FK_ProjectManager_User_UpdatedBy. ";
             }
         }
 

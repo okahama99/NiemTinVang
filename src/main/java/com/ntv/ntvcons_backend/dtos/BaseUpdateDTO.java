@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public abstract class BaseUpdateDTO implements Serializable {
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */
-    private Long updatedBy = 134L; /* accAdmin */
+    private Long updatedBy = null; /* accAdmin */
 
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */

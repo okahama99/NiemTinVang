@@ -61,9 +61,11 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         }
 
         /* Check FK */
-        if (!userService.existsById(newFile.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newFile.getCreatedBy()
-                    + "'. Which violate constraint: FK_ExternalFile_User_CreatedBy. ";
+        if (newFile.getCreatedBy() != null) {
+            if (!userService.existsById(newFile.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newFile.getCreatedBy()
+                        + "'. Which violate constraint: FK_ExternalFile_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -476,17 +478,19 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         }
 
         /* Check FK */
-        if (oldFile.getUpdatedBy() != null) {
-            if (!oldFile.getUpdatedBy().equals(updatedFile.getUpdatedBy())) {
+        if (updatedFile.getUpdatedBy() != null) {
+            if (oldFile.getUpdatedBy() != null) {
+                if (!oldFile.getUpdatedBy().equals(updatedFile.getUpdatedBy())) {
+                    if (!userService.existsById(updatedFile.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedFile.getUpdatedBy()
+                                + "'. Which violate constraint: FK_ExternalFile_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedFile.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedFile.getUpdatedBy()
                             + "'. Which violate constraint: FK_ExternalFile_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedFile.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedFile.getUpdatedBy()
-                        + "'. Which violate constraint: FK_ExternalFile_User_UpdatedBy. ";
             }
         }
 

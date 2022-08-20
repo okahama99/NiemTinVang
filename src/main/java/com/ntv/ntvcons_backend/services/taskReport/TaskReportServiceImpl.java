@@ -51,9 +51,11 @@ public class TaskReportServiceImpl implements TaskReportService {
             errorMsg += "No Task found with Id: '" + newTaskReport.getTaskId()
                     + "'. Which violate constraint: FK_TaskReport_Task. ";
         }
-        if (!userService.existsById(newTaskReport.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newTaskReport.getCreatedBy()
-                    + "'. Which violate constraint: FK_TaskReport_User_CreatedBy. ";
+        if (newTaskReport.getCreatedBy() != null) {
+            if (!userService.existsById(newTaskReport.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newTaskReport.getCreatedBy()
+                        + "'. Which violate constraint: FK_TaskReport_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -348,17 +350,19 @@ public class TaskReportServiceImpl implements TaskReportService {
                         + "'. Which violate constraint: FK_TaskReport_Task. ";
             }
         }
-        if (oldTaskReport.getUpdatedBy() != null) {
-            if (!oldTaskReport.getUpdatedBy().equals(updatedTaskReport.getUpdatedBy())) {
+        if (updatedTaskReport.getUpdatedBy() != null) {
+            if (oldTaskReport.getUpdatedBy() != null) {
+                if (!oldTaskReport.getUpdatedBy().equals(updatedTaskReport.getUpdatedBy())) {
+                    if (!taskService.existsById(updatedTaskReport.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTaskReport.getUpdatedBy()
+                                + "'. Which violate constraint: FK_TaskReport_User_UpdateBy. ";
+                    }
+                }
+            } else {
                 if (!taskService.existsById(updatedTaskReport.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTaskReport.getUpdatedBy()
                             + "'. Which violate constraint: FK_TaskReport_User_UpdateBy. ";
                 }
-            }
-        } else {
-            if (!taskService.existsById(updatedTaskReport.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTaskReport.getUpdatedBy()
-                        + "'. Which violate constraint: FK_TaskReport_User_UpdateBy. ";
             }
         }
 

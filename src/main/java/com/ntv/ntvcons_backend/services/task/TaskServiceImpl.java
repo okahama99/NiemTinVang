@@ -74,9 +74,11 @@ public class TaskServiceImpl implements TaskService {
             errorMsg += "No Project found with Id: '" + newTask.getProjectId()
                     + "'. Which violate constraint: FK_Task_Project. ";
         }
-        if (!userService.existsById(newTask.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newTask.getCreatedBy()
-                    + "'. Which violate constraint: FK_Task_User_CreatedBy. ";
+        if (newTask.getCreatedBy() != null) {
+            if (!userService.existsById(newTask.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newTask.getCreatedBy()
+                        + "'. Which violate constraint: FK_Task_User_CreatedBy. ";
+            }
         }
 
         /* Check duplicate */
@@ -636,17 +638,19 @@ public class TaskServiceImpl implements TaskService {
                         + "'. Which violate constraint: FK_Task_Project. ";
             }
         }
-        if (oldTask.getUpdatedBy() != null) {
-            if (!oldTask.getUpdatedBy().equals(updatedTask.getUpdatedBy())) {
+        if (updatedTask.getUpdatedBy() != null) {
+            if (oldTask.getUpdatedBy() != null) {
+                if (!oldTask.getUpdatedBy().equals(updatedTask.getUpdatedBy())) {
+                    if (!userService.existsById(updatedTask.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTask.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Task_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedTask.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTask.getUpdatedBy()
                             + "'. Which violate constraint: FK_Task_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedTask.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedTask.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Task_User_UpdatedBy. ";
             }
         }
 

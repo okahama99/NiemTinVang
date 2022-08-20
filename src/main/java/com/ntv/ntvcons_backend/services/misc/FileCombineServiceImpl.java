@@ -32,7 +32,7 @@ public class FileCombineServiceImpl implements FileCombineService {
 
     /* READ */
     public boolean saveFileInDBAndFirebase(
-            MultipartFile multipartFile, FileType fileType, long entityId, EntityType type, long createdBy) throws Exception {
+            MultipartFile multipartFile, FileType fileType, long entityId, EntityType type, Long createdBy) throws Exception {
         /* Save File to Firebase (get name & link) */
         ExternalFileCreateDTO fileCreateDTO =
                 firebaseService.uploadToFirebase(multipartFile);
@@ -51,7 +51,7 @@ public class FileCombineServiceImpl implements FileCombineService {
     }
 
     public boolean saveAllFileInDBAndFirebase(
-            List<MultipartFile> multipartFileList, FileType fileType, long entityId, EntityType type, long createdBy) throws Exception {
+            List<MultipartFile> multipartFileList, FileType fileType, long entityId, EntityType type, Long createdBy) throws Exception {
         List<ExternalFileCreateDTO> fileCreateDTOList =
                 firebaseService.uploadAllToFirebase(multipartFileList);
         fileCreateDTOList = fileCreateDTOList.stream()

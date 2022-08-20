@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface EntityWrapperService {
     /* CREATE */
-    EntityWrapper createEntityWrapper(long entityId, EntityType type, long createdBy) throws Exception;
+    EntityWrapper createEntityWrapper(long entityId, EntityType type, Long createdBy) throws Exception;
 
     /* READ */
     List<EntityWrapper> getAll() throws Exception;

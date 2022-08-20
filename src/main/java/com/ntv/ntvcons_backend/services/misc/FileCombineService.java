@@ -12,11 +12,11 @@ public interface FileCombineService {
     /* CREATE */
     boolean saveFileInDBAndFirebase(
             MultipartFile multipartFile, FileType fileType,
-            long entityId, EntityType type, long createdBy) throws Exception;
+            long entityId, EntityType type, Long createdBy) throws Exception;
 
     boolean saveAllFileInDBAndFirebase(
             List<MultipartFile> multipartFileList, FileType fileType,
-            long entityId, EntityType type, long createdBy) throws Exception;
+            long entityId, EntityType type, Long createdBy) throws Exception;
 
     /* READ */
 

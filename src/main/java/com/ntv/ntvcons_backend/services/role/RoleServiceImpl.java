@@ -39,9 +39,11 @@ public class RoleServiceImpl implements RoleService {
         String errorMsg = "";
 
         /* Check FK */
-        if (!userService.existsById(newRole.getCreatedBy())) {
-            errorMsg += "No User (CreatedBy) found with Id: '" + newRole.getCreatedBy()
-                    + "'. Which violate constraint: FK_Role_User_CreatedBy. ";
+        if (newRole.getCreatedBy() != null) {
+            if (!userService.existsById(newRole.getCreatedBy())) {
+                errorMsg += "No User (CreatedBy) found with Id: '" + newRole.getCreatedBy()
+                        + "'. Which violate constraint: FK_Role_User_CreatedBy. ";
+            }
         }
         
         /* Check duplicate */
@@ -216,17 +218,19 @@ public class RoleServiceImpl implements RoleService {
         String errorMsg = "";
 
         /* Check FK */
-        if (oldRole.getUpdatedBy() != null)  {
-            if (!oldRole.getUpdatedBy().equals(updatedRole.getUpdatedBy())) {
+        if (updatedRole.getUpdatedBy() != null) {
+            if (oldRole.getUpdatedBy() != null) {
+                if (!oldRole.getUpdatedBy().equals(updatedRole.getUpdatedBy())) {
+                    if (!userService.existsById(updatedRole.getUpdatedBy())) {
+                        errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRole.getUpdatedBy()
+                                + "'. Which violate constraint: FK_Role_User_UpdatedBy. ";
+                    }
+                }
+            } else {
                 if (!userService.existsById(updatedRole.getUpdatedBy())) {
                     errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRole.getUpdatedBy()
                             + "'. Which violate constraint: FK_Role_User_UpdatedBy. ";
                 }
-            }
-        } else {
-            if (!userService.existsById(updatedRole.getUpdatedBy())) {
-                errorMsg += "No User (UpdatedBy) found with Id: '" + updatedRole.getUpdatedBy()
-                        + "'. Which violate constraint: FK_Role_User_UpdatedBy. ";
             }
         }
 
