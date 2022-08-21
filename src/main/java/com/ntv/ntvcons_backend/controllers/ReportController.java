@@ -46,8 +46,18 @@ public class ReportController {
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('44')")
     @PostMapping(value = "/v1/createReport", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> createReport(@RequestBody @Valid ReportCreateDTO reportDTO) {
+    public ResponseEntity<Object> createReport(
+            @RequestBody @Valid ReportCreateDTO reportDTO,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            reportDTO.setReporterId(userId);
+            reportDTO.setCreatedBy(userId);
+
             ReportReadDTO newReportDTO = reportService.createReportByDTO(reportDTO);
 
             return ResponseEntity.ok().body(newReportDTO);
@@ -76,6 +86,7 @@ public class ReportController {
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
+            reportDTO.setReporterId(userId);
             reportDTO.setCreatedBy(userId);
 
             ReportReadDTO newReportDTO = reportService.createReportByDTO(reportDTO);
@@ -322,8 +333,17 @@ public class ReportController {
     /* UPDATE */
     @PreAuthorize("hasAnyAuthority('44')")
     @PutMapping(value = "/v1/updateReport", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> updateReport(@RequestBody @Valid ReportUpdateDTO reportDTO) {
+    public ResponseEntity<Object> updateReport(
+            @RequestBody @Valid ReportUpdateDTO reportDTO,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            reportDTO.setUpdatedBy(userId);
+
             ReportReadDTO updatedReportDTO = reportService.updateReportByDTO(reportDTO);
 
             if (updatedReportDTO == null) {

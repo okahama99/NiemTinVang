@@ -2,9 +2,11 @@ package com.ntv.ntvcons_backend.services.location;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
+import com.ntv.ntvcons_backend.entities.ExternalFile;
 import com.ntv.ntvcons_backend.entities.Location;
 import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.ShowLocationModel;
@@ -21,6 +23,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,6 +32,8 @@ import java.util.stream.Collectors;
 public class LocationServiceImpl implements LocationService {
     @Autowired
     private LocationRepository locationRepository;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Autowired
     private ModelMapper modelMapper;
     @Lazy /* To avoid circular injection Exception */
@@ -91,7 +96,7 @@ public class LocationServiceImpl implements LocationService {
         return locationRepository.saveAndFlush(newLocation);
     }
     @Override
-    public LocationReadDTO createLocationByDTO(LocationCreateDTO newLocationDTO) throws Exception{
+    public LocationReadDTO createLocationByDTO(LocationCreateDTO newLocationDTO) throws Exception {
         Location newLocation = modelMapper.map(newLocationDTO, Location.class);
 
         newLocation = createLocation(newLocation);
@@ -375,14 +380,36 @@ public class LocationServiceImpl implements LocationService {
 
     /* Utils */
     private LocationReadDTO fillDTO(Location location) throws Exception {
-        return modelMapper.map(location, LocationReadDTO.class);
+        modelMapper.typeMap(Location.class, LocationReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(LocationReadDTO::setCreatedAt);
+                    mapper.skip(LocationReadDTO::setUpdatedAt);});
+
+        LocationReadDTO locationDTO = modelMapper.map(location, LocationReadDTO.class);
+
+        if (location.getCreatedAt() != null)
+            locationDTO.setCreatedAt(location.getCreatedAt().format(dateTimeFormatter));
+        if (location.getUpdatedAt() != null)
+            locationDTO.setUpdatedAt(location.getUpdatedAt().format(dateTimeFormatter));
+
+        return locationDTO;
     }
 
     private List<LocationReadDTO> fillAllDTO(Collection<Location> locationCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(Location.class, LocationReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(LocationReadDTO::setCreatedAt);
+                    mapper.skip(LocationReadDTO::setUpdatedAt);});
+
         return locationCollection.stream()
                 .map(location -> {
                     LocationReadDTO locationDTO =
                             modelMapper.map(location, LocationReadDTO.class);
+
+                    if (location.getCreatedAt() != null)
+                        locationDTO.setCreatedAt(location.getCreatedAt().format(dateTimeFormatter));
+                    if (location.getUpdatedAt() != null)
+                        locationDTO.setUpdatedAt(location.getUpdatedAt().format(dateTimeFormatter));
 
                     locationDTO.setTotalPage(totalPage);
 

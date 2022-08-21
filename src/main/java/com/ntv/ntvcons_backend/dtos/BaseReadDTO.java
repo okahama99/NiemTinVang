@@ -16,10 +16,10 @@ public abstract class BaseReadDTO implements Serializable {
     private Status status;
 
     private Long createdBy;
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     private Long updatedBy;
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     @JsonInclude(Include.NON_NULL) /* if null => no return JSON */
     private List<ExternalFileReadDTO> fileList;

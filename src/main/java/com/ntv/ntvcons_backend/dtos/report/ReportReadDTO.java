@@ -21,7 +21,7 @@ public class ReportReadDTO extends BaseReadDTO {
     private Long reporterId;
     private String reportName;
     private String reportDesc;
-    private LocalDateTime reportDate;
+    private String reportDate;
 
     private List<ReportDetailReadDTO> reportDetailList;
     private List<TaskReportReadDTO> taskReportList;

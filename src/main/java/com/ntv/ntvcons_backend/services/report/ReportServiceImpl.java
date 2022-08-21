@@ -4,6 +4,7 @@ import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.SearchOption;
 import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
@@ -14,6 +15,7 @@ import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
+import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.Report;
 import com.ntv.ntvcons_backend.repositories.ReportRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
@@ -126,6 +128,7 @@ public class ReportServiceImpl implements ReportService {
         newReport = createReport(newReport);
 
         long newReportId = newReport.getReportId();
+        Long createdBy = newReport.getCreatedBy();
 
         /* Create associated EntityWrapper */
         entityWrapperService
@@ -135,7 +138,9 @@ public class ReportServiceImpl implements ReportService {
         List<ReportDetailCreateDTO> newReportDetailDTOList = newReportDTO.getReportDetailList();
         if (newReportDetailDTOList != null) {
             newReportDetailDTOList = newReportDetailDTOList.stream()
-                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(newReportId))
+                    .peek(newReportDetailDTO -> {
+                        newReportDetailDTO.setReportId(newReportId);
+                        newReportDetailDTO.setCreatedBy(createdBy);})
                     .collect(Collectors.toList());
 
             reportDetailService.createBulkReportDetailByDTOList(newReportDetailDTOList);
@@ -145,7 +150,9 @@ public class ReportServiceImpl implements ReportService {
         List<TaskReportCreateDTO> newTaskReportDTOList = newReportDTO.getTaskReportList();
         if (newTaskReportDTOList != null) {
             newTaskReportDTOList = newTaskReportDTOList.stream()
-                    .peek(newReportDetailDTO -> newReportDetailDTO.setReportId(newReportId))
+                    .peek(newReportDetailDTO -> {
+                        newReportDetailDTO.setReportId(newReportId);
+                        newReportDetailDTO.setCreatedBy(createdBy);})
                     .collect(Collectors.toList());
 
             taskReportService.createBulkTaskReportByDTOList(newTaskReportDTOList);
@@ -635,20 +642,23 @@ public class ReportServiceImpl implements ReportService {
 
         if (updatedReport == null) 
             return null;
+
         long updatedReportId = updatedReport.getReportId();
+        Long updatedBy = updatedReport.getUpdatedBy();
 
         /* (If change) Update/Create associated ReportDetail; Set required FK reportId */
         List<ReportDetailUpdateDTO> reportDetailDTOList = updatedReportDTO.getReportDetailList();
         if (reportDetailDTOList != null) {
             reportDetailDTOList =
                     reportDetailDTOList.stream()
-                            .peek(reportDetailDTO -> reportDetailDTO.setReportId(updatedReportId))
+                            .peek(reportDetailDTO -> {
+                                reportDetailDTO.setReportId(updatedReportId);
+                                reportDetailDTO.setUpdatedBy(updatedBy);})
                             .collect(Collectors.toList());
 
-            /* TODO: to use later when login done
             modelMapper.typeMap(ReportDetailUpdateDTO.class, ReportDetailCreateDTO.class)
                     .addMappings(mapper -> {
-                        mapper.map(ReportDetailUpdateDTO::getUpdatedBy, ReportDetailCreateDTO::setCreatedBy);});*/
+                        mapper.map(ReportDetailUpdateDTO::getUpdatedBy, ReportDetailCreateDTO::setCreatedBy);});
 
             List<ReportDetailCreateDTO> newReportDetailDTOList = new ArrayList<>();
             List<ReportDetailUpdateDTO> updatedReportDetailDTOList = new ArrayList<>();
@@ -678,13 +688,14 @@ public class ReportServiceImpl implements ReportService {
         if (taskReportDTOList != null) {
             taskReportDTOList =
                     taskReportDTOList.stream()
-                            .peek(taskReportDTO -> taskReportDTO.setReportId(updatedReportId))
+                            .peek(taskReportDTO -> {
+                                taskReportDTO.setReportId(updatedReportId);
+                                taskReportDTO.setUpdatedBy(updatedBy);})
                             .collect(Collectors.toList());
 
-            /* TODO: to use later when login done
             modelMapper.typeMap(TaskReportUpdateDTO.class, TaskReportCreateDTO.class)
                     .addMappings(mapper -> {
-                        mapper.map(TaskReportUpdateDTO::getUpdatedBy, TaskReportCreateDTO::setCreatedBy);});*/
+                        mapper.map(TaskReportUpdateDTO::getUpdatedBy, TaskReportCreateDTO::setCreatedBy);});
 
             List<TaskReportCreateDTO> newTaskReportDTOList = new ArrayList<>();
             List<TaskReportUpdateDTO> updatedTaskReportDTOList = new ArrayList<>();
@@ -791,9 +802,22 @@ public class ReportServiceImpl implements ReportService {
 
     /* Utils */
     private ReportReadDTO fillDTO(Report report) throws Exception {
+        modelMapper.typeMap(Report.class, ReportReadDTO.class)
+            .addMappings(mapper -> {
+                mapper.skip(ReportReadDTO::setReportDate);
+                mapper.skip(ReportReadDTO::setCreatedAt);
+                mapper.skip(ReportReadDTO::setUpdatedAt);});
+
         long reportId = report.getReportId();
 
         ReportReadDTO reportDTO = modelMapper.map(report, ReportReadDTO.class);
+
+        if (report.getReportDate() != null)
+            reportDTO.setUpdatedAt(report.getReportDate().format(dateTimeFormatter));
+        if (report.getCreatedAt() != null)
+            reportDTO.setCreatedAt(report.getCreatedAt().format(dateTimeFormatter));
+        if (report.getUpdatedAt() != null)
+            reportDTO.setUpdatedAt(report.getUpdatedAt().format(dateTimeFormatter));
 
         /* NOT NULL */
         /* Get associated ReportType */
@@ -813,6 +837,12 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private List<ReportReadDTO> fillAllDTO(Collection<Report> reportCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(Report.class, ReportReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ReportReadDTO::setReportDate);
+                    mapper.skip(ReportReadDTO::setCreatedAt);
+                    mapper.skip(ReportReadDTO::setUpdatedAt);});
+
         Set<Long> reportIdSet = new HashSet<>();
         Set<Long> reportTypeIdSet = new HashSet<>();
 
@@ -840,6 +870,13 @@ public class ReportServiceImpl implements ReportService {
                 .map(report -> {
                     ReportReadDTO reportDTO =
                             modelMapper.map(report, ReportReadDTO.class);
+
+                    if (report.getReportDate() != null)
+                        reportDTO.setUpdatedAt(report.getReportDate().format(dateTimeFormatter));
+                    if (report.getCreatedAt() != null)
+                        reportDTO.setCreatedAt(report.getCreatedAt().format(dateTimeFormatter));
+                    if (report.getUpdatedAt() != null)
+                        reportDTO.setUpdatedAt(report.getUpdatedAt().format(dateTimeFormatter));
 
                     long tmpReportId = report.getReportId();
 

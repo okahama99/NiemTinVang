@@ -1,10 +1,12 @@
 package com.ntv.ntvcons_backend.services.projectWorker;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
+import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.repositories.ProjectWorkerRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
@@ -109,7 +111,8 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
         for (ProjectWorker newProjectWorker : newProjectWorkerList) {
             projectIdSet.add(newProjectWorker.getProjectId());
             workerIdSet.add(newProjectWorker.getWorkerId());
-            createdBySet.add(newProjectWorker.getCreatedBy());
+            if (newProjectWorker.getCreatedBy() != null)
+                createdBySet.add(newProjectWorker.getCreatedBy());
 
             /* Check duplicate 1 (within input) */
             tmpWorkerIdList = projectIdWorkerIdListMap.get(newProjectWorker.getProjectId());
@@ -605,7 +608,8 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
             projectWorkerIdSet.add(updatedProjectWorker.getProjectWorkerId());
             updatedProjectIdSet.add(updatedProjectWorker.getProjectId());
             updatedWorkerIdSet.add(updatedProjectWorker.getWorkerId());
-            updatedUpdatedBySet.add(updatedProjectWorker.getWorkerId());
+            if (updatedProjectWorker.getWorkerId() != null)
+                updatedUpdatedBySet.add(updatedProjectWorker.getWorkerId());
 
             projectWorkerIdUpdatedProjectWorkerMap
                     .put(updatedProjectWorker.getProjectWorkerId(), updatedProjectWorker);
@@ -646,9 +650,8 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
         for (ProjectWorker oldProjectWorker : oldProjectWorkerList) {
             oldProjectIdSet.add(oldProjectWorker.getProjectId());
             oldWorkerIdSet.add(oldProjectWorker.getWorkerId());
-            if (oldProjectWorker.getUpdatedBy() != null) {
+            if (oldProjectWorker.getUpdatedBy() != null)
                 oldUpdatedBySet.add(oldProjectWorker.getWorkerId());
-            }
 
             projectWorkerIdCreatedByMap.put(oldProjectWorker.getProjectWorkerId(), oldProjectWorker.getCreatedBy());
             projectWorkerIdCreatedAtMap.put(oldProjectWorker.getProjectWorkerId(), oldProjectWorker.getCreatedAt());
@@ -917,8 +920,24 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
 
     /* Utils */
     private ProjectWorkerReadDTO fillDTO(ProjectWorker projectWorker) throws Exception {
+        modelMapper.typeMap(ProjectWorker.class, ProjectWorkerReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ProjectWorkerReadDTO::setAssignDate);
+                    mapper.skip(ProjectWorkerReadDTO::setRemoveDate);
+                    mapper.skip(ProjectWorkerReadDTO::setCreatedAt);
+                    mapper.skip(ProjectWorkerReadDTO::setUpdatedAt);});
+
         ProjectWorkerReadDTO projectWorkerDTO =
                 modelMapper.map(projectWorker, ProjectWorkerReadDTO.class);
+
+        if (projectWorker.getAssignDate() != null)
+            projectWorkerDTO.setAssignDate(projectWorker.getAssignDate().format(dateTimeFormatter));
+        if (projectWorker.getRemoveDate() != null)
+            projectWorkerDTO.setRemoveDate(projectWorker.getRemoveDate().format(dateTimeFormatter));
+        if (projectWorker.getCreatedAt() != null)
+            projectWorkerDTO.setCreatedAt(projectWorker.getCreatedAt().format(dateTimeFormatter));
+        if (projectWorker.getUpdatedAt() != null)
+            projectWorkerDTO.setUpdatedAt(projectWorker.getUpdatedAt().format(dateTimeFormatter));
 
         /* Get associated Worker (Worker) */
         projectWorkerDTO.setWorker(workerService.getDTOById(projectWorker.getWorkerId()));
@@ -927,6 +946,13 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
     }
 
     private List<ProjectWorkerReadDTO> fillAllDTO(Collection<ProjectWorker> projectWorkerCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(ProjectWorker.class, ProjectWorkerReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ProjectWorkerReadDTO::setAssignDate);
+                    mapper.skip(ProjectWorkerReadDTO::setRemoveDate);
+                    mapper.skip(ProjectWorkerReadDTO::setCreatedAt);
+                    mapper.skip(ProjectWorkerReadDTO::setUpdatedAt);});
+
         Set<Long> workerIdSet =
                 projectWorkerCollection.stream()
                         .map(ProjectWorker::getWorkerId)
@@ -939,6 +965,15 @@ public class ProjectWorkerServiceImpl implements ProjectWorkerService {
                 .map(projectWorker -> {
                     ProjectWorkerReadDTO projectWorkerDTO =
                             modelMapper.map(projectWorker, ProjectWorkerReadDTO.class);
+
+                    if (projectWorker.getAssignDate() != null)
+                        projectWorkerDTO.setAssignDate(projectWorker.getAssignDate().format(dateTimeFormatter));
+                    if (projectWorker.getRemoveDate() != null)
+                        projectWorkerDTO.setRemoveDate(projectWorker.getRemoveDate().format(dateTimeFormatter));
+                    if (projectWorker.getCreatedAt() != null)
+                        projectWorkerDTO.setCreatedAt(projectWorker.getCreatedAt().format(dateTimeFormatter));
+                    if (projectWorker.getUpdatedAt() != null)
+                        projectWorkerDTO.setUpdatedAt(projectWorker.getUpdatedAt().format(dateTimeFormatter));
 
                     projectWorkerDTO.setWorker(workerIdWorkerDTOMap.get(projectWorker.getWorkerId()));
 

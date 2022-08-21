@@ -2,9 +2,11 @@ package com.ntv.ntvcons_backend.services.externalFile;
 
 import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileCreateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.ExternalFile;
 import com.ntv.ntvcons_backend.repositories.ExternalFileRepository;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
@@ -21,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -29,6 +32,8 @@ import java.util.stream.Collectors;
 public class ExternalFileServiceImpl implements ExternalFileService {
     @Autowired
     private ExternalFileRepository externalFileRepository;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Autowired
     private ModelMapper modelMapper;
     @Lazy /* To avoid circular injection Exception */
@@ -106,7 +111,8 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         /* Check duplicate 1 (at input) */
         for (ExternalFile newFile : newFileList) {
-            createdBySet.add(newFile.getCreatedBy());
+            if (newFile.getCreatedBy() != null)
+                createdBySet.add(newFile.getCreatedBy());
 
             tmpString = newFile.getFileName();
 
@@ -543,7 +549,8 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         /* Check duplicate 1 (at input) */
         for (ExternalFile updatedFile : updatedFileList) {
             fileIdSet.add(updatedFile.getFileId());
-            updatedUpdatedBySet.add(updatedFile.getUpdatedBy());
+            if (updatedFile.getUpdatedBy() != null)
+                updatedUpdatedBySet.add(updatedFile.getUpdatedBy());
 
             tmpString = updatedFile.getFileName();
 
@@ -699,14 +706,36 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
     /* Utils */
     private ExternalFileReadDTO fillDTO(ExternalFile file) throws Exception {
-        return modelMapper.map(file, ExternalFileReadDTO.class);
+        modelMapper.typeMap(ExternalFile.class, ExternalFileReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ExternalFileReadDTO::setCreatedAt);
+                    mapper.skip(ExternalFileReadDTO::setUpdatedAt);});
+
+        ExternalFileReadDTO fileDTO = modelMapper.map(file, ExternalFileReadDTO.class);
+
+        if (file.getCreatedAt() != null)
+            fileDTO.setCreatedAt(file.getCreatedAt().format(dateTimeFormatter));
+        if (file.getUpdatedAt() != null)
+            fileDTO.setUpdatedAt(file.getUpdatedAt().format(dateTimeFormatter));
+
+        return fileDTO;
     }
 
     private List<ExternalFileReadDTO> fillAllDTO(Collection<ExternalFile> fileCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(ExternalFile.class, ExternalFileReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ExternalFileReadDTO::setCreatedAt);
+                    mapper.skip(ExternalFileReadDTO::setUpdatedAt);});
+
         return fileCollection.stream()
                 .map(file -> {
                     ExternalFileReadDTO fileDTO =
                             modelMapper.map(file, ExternalFileReadDTO.class);
+
+                    if (file.getCreatedAt() != null)
+                        fileDTO.setCreatedAt(file.getCreatedAt().format(dateTimeFormatter));
+                    if (file.getUpdatedAt() != null)
+                        fileDTO.setUpdatedAt(file.getUpdatedAt().format(dateTimeFormatter));
 
                     fileDTO.setTotalPage(totalPage);
 

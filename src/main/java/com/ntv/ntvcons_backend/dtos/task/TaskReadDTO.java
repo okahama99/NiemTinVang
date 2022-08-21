@@ -20,11 +20,11 @@ public class TaskReadDTO extends BaseReadDTO {
     private String taskName;
     private String taskDesc;
 
-    private LocalDateTime planStartDate;
-    private LocalDateTime planEndDate;
+    private String planStartDate;
+    private String planEndDate;
 
-    private LocalDateTime actualStartDate;
-    private LocalDateTime actualEndDate;
+    private String actualStartDate;
+    private String actualEndDate;
 
     private TaskAssignmentReadDTO taskAssignment;
     private List<TaskReportReadDTO> taskReportList;

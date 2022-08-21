@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -29,9 +30,11 @@ public class ReportCreateDTO extends BaseCreateDTO {
     @NotNull(message = "reportTypeId REQUIRED for Create")
     private Long reportTypeId;
 
-    @Schema(description = "NOT NULL; Id > 0") /* Hint for Swagger */
-    @Positive
-    @NotNull(message = "reporterId REQUIRED for Create")
+//    @Schema(description = "NOT NULL; Id > 0") /* Hint for Swagger */
+//    @Positive
+//    @NotNull(message = "reporterId REQUIRED for Create")
+    @JsonIgnore /* No serialize/deserialize */
+    @Schema(hidden = true) /* No show on swagger */
     private Long reporterId;
 
     @Schema(example = "Báo cáo xxx", 

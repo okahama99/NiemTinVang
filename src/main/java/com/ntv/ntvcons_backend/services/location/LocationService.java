@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface LocationService { /* TODO: throws Exception for controller to handle */
+public interface LocationService {
     /* CREATE */
     void createLocation(CreateLocationModel createLocationModel);
 

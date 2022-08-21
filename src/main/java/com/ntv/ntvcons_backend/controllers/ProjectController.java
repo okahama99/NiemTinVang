@@ -60,6 +60,7 @@ public class ProjectController {
     
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PostMapping(value = "/v1/createProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createProject(@RequestBody CreateProjectModel createProjectModel) {
@@ -208,6 +209,7 @@ public class ProjectController {
     }
 
     /* READ */
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
@@ -426,6 +428,7 @@ public class ProjectController {
         }
     }
 
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('54','24','14','44')")
     @GetMapping(value = "/v1/getAllById", produces = "application/json;charset=UTF-8")
     public @ResponseBody
@@ -447,6 +450,7 @@ public class ProjectController {
     }
 
     /* UPDATE */
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateProject", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateProject(@RequestBody UpdateProjectModel updateProjectModel) {

@@ -3,6 +3,7 @@ package com.ntv.ntvcons_backend.services.request;
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
 import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
@@ -165,6 +166,7 @@ public class RequestServiceImpl implements RequestService {
         newRequest = createRequest(newRequest);
 
         long newRequestId = newRequest.getRequestId();
+        Long createdBy = newRequest.getCreatedBy();
 
         /* Create associated EntityWrapper */
         entityWrapperService
@@ -175,7 +177,9 @@ public class RequestServiceImpl implements RequestService {
         List<RequestDetailCreateDTO> newRequestDetailDTOList = newRequestDTO.getRequestDetailList();
 
         newRequestDetailDTOList = newRequestDetailDTOList.stream()
-                .peek(newRequestDetailDTO -> newRequestDetailDTO.setRequestId(newRequestId))
+                .peek(newRequestDetailDTO -> {
+                    newRequestDetailDTO.setRequestId(newRequestId);
+                    newRequestDetailDTO.setCreatedBy(createdBy);})
                 .collect(Collectors.toList());
 
         requestDetailService.createBulkRequestDetailByDTOList(newRequestDetailDTOList);
@@ -939,19 +943,21 @@ public class RequestServiceImpl implements RequestService {
             return null;
 
         long updatedRequestId = updatedRequest.getRequestId();
+        Long updatedBy = updatedRequest.getUpdatedBy();
 
         /* (If change) Update/Create associated RequestDetail; Set required FK requestId */
         List<RequestDetailUpdateDTO> requestDetailDTOList = updatedRequestDTO.getRequestDetailList();
         if (requestDetailDTOList != null) {
             requestDetailDTOList =
                     requestDetailDTOList.stream()
-                            .peek(requestDetailDTO -> requestDetailDTO.setRequestId(updatedRequestId))
+                            .peek(requestDetailDTO -> {
+                                requestDetailDTO.setRequestId(updatedRequestId);
+                                requestDetailDTO.setUpdatedBy(updatedBy);})
                             .collect(Collectors.toList());
 
-            /* TODO: to use later when login done
             modelMapper.typeMap(RequestDetailUpdateDTO.class, RequestDetailCreateDTO.class)
                     .addMappings(mapper -> {
-                        mapper.map(RequestDetailUpdateDTO::getUpdatedBy, RequestDetailCreateDTO::setCreatedBy);});*/
+                        mapper.map(RequestDetailUpdateDTO::getUpdatedBy, RequestDetailCreateDTO::setCreatedBy);});
 
             List<RequestDetailCreateDTO> newRequestDetailDTOList = new ArrayList<>();
             List<RequestDetailUpdateDTO> updatedRequestDetailDTOList = new ArrayList<>();
@@ -1219,10 +1225,26 @@ public class RequestServiceImpl implements RequestService {
     }
 
     /* Utils */
-    private RequestReadDTO fillDTO(Request request) throws Exception{
+    private RequestReadDTO fillDTO(Request request) throws Exception {
+        modelMapper.typeMap(Request.class, RequestReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(RequestReadDTO::setRequestDate);
+                    mapper.skip(RequestReadDTO::setVerifyDate);
+                    mapper.skip(RequestReadDTO::setCreatedAt);
+                    mapper.skip(RequestReadDTO::setUpdatedAt);});
+        
         long requestId = request.getRequestId();
 
         RequestReadDTO requestDTO = modelMapper.map(request, RequestReadDTO.class);
+
+        if (request.getRequestDate() != null)
+            requestDTO.setRequestDate(request.getRequestDate().format(dateTimeFormatter));
+        if (request.getVerifyDate() != null)
+            requestDTO.setVerifyDate(request.getVerifyDate().format(dateTimeFormatter));
+        if (request.getCreatedAt() != null)
+            requestDTO.setCreatedAt(request.getCreatedAt().format(dateTimeFormatter));
+        if (request.getUpdatedAt() != null)
+            requestDTO.setUpdatedAt(request.getUpdatedAt().format(dateTimeFormatter));
 
         /* Get associated RequestType */
         requestDTO.setRequestType(
@@ -1249,7 +1271,14 @@ public class RequestServiceImpl implements RequestService {
         return requestDTO;
     }
 
-    private List<RequestReadDTO> fillAllDTO(Collection<Request> requestCollection, Integer totalPage) throws Exception{
+    private List<RequestReadDTO> fillAllDTO(Collection<Request> requestCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(Request.class, RequestReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(RequestReadDTO::setRequestDate);
+                    mapper.skip(RequestReadDTO::setVerifyDate);
+                    mapper.skip(RequestReadDTO::setCreatedAt);
+                    mapper.skip(RequestReadDTO::setUpdatedAt);});
+
         Set<Long> requestTypeIdSet = new HashSet<>();
         Set<Long> userIdSet = new HashSet<>();
         Set<Long> requestIdSet = new HashSet<>();
@@ -1283,6 +1312,15 @@ public class RequestServiceImpl implements RequestService {
                 .map(request -> {
                     RequestReadDTO requestDTO =
                             modelMapper.map(request, RequestReadDTO.class);
+
+                    if (request.getRequestDate() != null)
+                        requestDTO.setRequestDate(request.getRequestDate().format(dateTimeFormatter));
+                    if (request.getVerifyDate() != null)
+                        requestDTO.setVerifyDate(request.getVerifyDate().format(dateTimeFormatter));
+                    if (request.getCreatedAt() != null)
+                        requestDTO.setCreatedAt(request.getCreatedAt().format(dateTimeFormatter));
+                    if (request.getUpdatedAt() != null)
+                        requestDTO.setUpdatedAt(request.getUpdatedAt().format(dateTimeFormatter));
 
                     long tmpRequestId = request.getRequestId();
 

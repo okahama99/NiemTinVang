@@ -2,9 +2,11 @@ package com.ntv.ntvcons_backend.services.requestDetail;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.Request;
 import com.ntv.ntvcons_backend.entities.RequestDetail;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
@@ -24,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +44,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
     private UserService userService;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
 
     private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
@@ -130,7 +135,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
             tmpItemPrice = newRequestDetail.getItemPrice();
 
             requestIdSet.add(tmpRequestId);
-            createdBySet.add(newRequestDetail.getCreatedBy());
+            if (newRequestDetail.getCreatedBy() != null)
+                createdBySet.add(newRequestDetail.getCreatedBy());
 
             tmpItemDescItemPriceListMap = requestIdItemDescItemPriceListMapMap.get(tmpRequestId);
 
@@ -559,7 +565,8 @@ public class RequestDetailServiceImpl implements RequestDetailService {
 
             requestDetailIdSet.add(updatedRequestDetail.getRequestDetailId());
             updatedRequestIdSet.add(tmpRequestId);
-            updatedUpdatedBySet.add(updatedRequestDetail.getUpdatedBy());
+            if (updatedRequestDetail.getUpdatedBy() != null)
+                updatedUpdatedBySet.add(updatedRequestDetail.getUpdatedBy());
 
             tmpItemDescItemPriceListMap = requestIdItemDescItemPriceListMapMap.get(tmpRequestId);
 
@@ -721,14 +728,37 @@ public class RequestDetailServiceImpl implements RequestDetailService {
 
     /* Utils */
     private RequestDetailReadDTO fillDTO(RequestDetail requestDetail) throws Exception {
-        return modelMapper.map(requestDetail, RequestDetailReadDTO.class);
+        modelMapper.typeMap(RequestDetail.class, RequestDetailReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(RequestDetailReadDTO::setCreatedAt);
+                    mapper.skip(RequestDetailReadDTO::setUpdatedAt);});
+
+        RequestDetailReadDTO requestDetailDTO =
+                modelMapper.map(requestDetail, RequestDetailReadDTO.class);
+
+        if (requestDetail.getCreatedAt() != null)
+            requestDetailDTO.setCreatedAt(requestDetail.getCreatedAt().format(dateTimeFormatter));
+        if (requestDetail.getUpdatedAt() != null)
+            requestDetailDTO.setUpdatedAt(requestDetail.getUpdatedAt().format(dateTimeFormatter));
+
+        return requestDetailDTO;
     }
 
     private List<RequestDetailReadDTO> fillAllDTO(Collection<RequestDetail> requestDetailCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(RequestDetail.class, RequestDetailReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(RequestDetailReadDTO::setCreatedAt);
+                    mapper.skip(RequestDetailReadDTO::setUpdatedAt);});
+
         return requestDetailCollection.stream()
                 .map(requestDetail -> {
                     RequestDetailReadDTO requestDetailDTO =
                             modelMapper.map(requestDetail, RequestDetailReadDTO.class);
+
+                    if (requestDetail.getCreatedAt() != null)
+                        requestDetailDTO.setCreatedAt(requestDetail.getCreatedAt().format(dateTimeFormatter));
+                    if (requestDetail.getUpdatedAt() != null)
+                        requestDetailDTO.setUpdatedAt(requestDetail.getUpdatedAt().format(dateTimeFormatter));
 
                     requestDetailDTO.setTotalPage(totalPage);
 
