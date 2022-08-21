@@ -188,7 +188,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project newProject = modelMapper.map(newProjectDTO, Project.class);
 
-        long createdBy = newProject.getCreatedBy();
+        Long createdBy = newProject.getCreatedBy();
 
         /* Already check NOT NULL */
         newProject.setPlanStartDate(
@@ -1123,9 +1123,31 @@ public class ProjectServiceImpl implements ProjectService {
 
     /* Utils */
     private ProjectReadDTO fillDTO(Project project) throws Exception {
+        modelMapper.typeMap(Project.class, ProjectReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ProjectReadDTO::setPlanStartDate);
+                    mapper.skip(ProjectReadDTO::setPlanEndDate);
+                    mapper.skip(ProjectReadDTO::setActualStartDate);
+                    mapper.skip(ProjectReadDTO::setActualEndDate);
+                    mapper.skip(ProjectReadDTO::setCreatedAt);
+                    mapper.skip(ProjectReadDTO::setUpdatedAt);});
+
         long projectId = project.getProjectId();
 
         ProjectReadDTO projectDTO = modelMapper.map(project, ProjectReadDTO.class);
+
+        if (project.getPlanStartDate() != null)
+            projectDTO.setPlanStartDate(project.getPlanStartDate().format(dateTimeFormatter));
+        if (project.getPlanEndDate() != null)
+            projectDTO.setPlanEndDate(project.getPlanEndDate().format(dateTimeFormatter));
+        if (project.getActualStartDate() != null)
+            projectDTO.setActualStartDate(project.getActualStartDate().format(dateTimeFormatter));
+        if (project.getActualEndDate() != null)
+            projectDTO.setActualEndDate(project.getActualEndDate().format(dateTimeFormatter));
+        if (project.getCreatedAt() != null)
+            projectDTO.setCreatedAt(project.getCreatedAt().format(dateTimeFormatter));
+        if (project.getUpdatedAt() != null)
+            projectDTO.setUpdatedAt(project.getUpdatedAt().format(dateTimeFormatter));
 
         /* NOT NULL */
         projectDTO.setLocation(locationService.getDTOById(project.getLocationId()));
@@ -1145,6 +1167,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private List<ProjectReadDTO> fillAllDTO(Collection<Project> projectCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(Project.class, ProjectReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ProjectReadDTO::setPlanStartDate);
+                    mapper.skip(ProjectReadDTO::setPlanEndDate);
+                    mapper.skip(ProjectReadDTO::setActualStartDate);
+                    mapper.skip(ProjectReadDTO::setActualEndDate);
+                    mapper.skip(ProjectReadDTO::setCreatedAt);
+                    mapper.skip(ProjectReadDTO::setUpdatedAt);});
+
         Set<Long> locationIdSet = new HashSet<>();
         Set<Long> projectIdSet = new HashSet<>();
 
@@ -1184,6 +1215,19 @@ public class ProjectServiceImpl implements ProjectService {
                 .map(project -> {
                     ProjectReadDTO projectDTO =
                             modelMapper.map(project, ProjectReadDTO.class);
+
+                    if (project.getPlanStartDate() != null)
+                        projectDTO.setPlanStartDate(project.getPlanStartDate().format(dateTimeFormatter));
+                    if (project.getPlanEndDate() != null)
+                        projectDTO.setPlanEndDate(project.getPlanEndDate().format(dateTimeFormatter));
+                    if (project.getActualStartDate() != null)
+                        projectDTO.setActualStartDate(project.getActualStartDate().format(dateTimeFormatter));
+                    if (project.getActualEndDate() != null)
+                        projectDTO.setActualEndDate(project.getActualEndDate().format(dateTimeFormatter));
+                    if (project.getCreatedAt() != null)
+                        projectDTO.setCreatedAt(project.getCreatedAt().format(dateTimeFormatter));
+                    if (project.getUpdatedAt() != null)
+                        projectDTO.setUpdatedAt(project.getUpdatedAt().format(dateTimeFormatter));
 
                     long tmpProjectId = project.getProjectId();
 

@@ -1,10 +1,12 @@
 package com.ntv.ntvcons_backend.services.taskAssignment;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.TaskAssignment;
 import com.ntv.ntvcons_backend.repositories.TaskAssignmentRepository;
 import com.ntv.ntvcons_backend.services.task.TaskService;
@@ -548,7 +550,24 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     
     /* Utils */
     private TaskAssignmentReadDTO fillDTO(TaskAssignment taskAssignment) throws Exception {
-        TaskAssignmentReadDTO taskAssignmentDTO = modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
+        modelMapper.typeMap(TaskAssignment.class, TaskAssignmentReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(TaskAssignmentReadDTO::setAssignDate);
+                    mapper.skip(TaskAssignmentReadDTO::setRemoveDate);
+                    mapper.skip(TaskAssignmentReadDTO::setCreatedAt);
+                    mapper.skip(TaskAssignmentReadDTO::setUpdatedAt);});
+
+        TaskAssignmentReadDTO taskAssignmentDTO =
+                modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
+
+        if (taskAssignment.getAssignDate() != null)
+            taskAssignmentDTO.setAssignDate(taskAssignment.getAssignDate().format(dateTimeFormatter));
+        if (taskAssignment.getRemoveDate() != null)
+            taskAssignmentDTO.setRemoveDate(taskAssignment.getRemoveDate().format(dateTimeFormatter));
+        if (taskAssignment.getCreatedAt() != null)
+            taskAssignmentDTO.setCreatedAt(taskAssignment.getCreatedAt().format(dateTimeFormatter));
+        if (taskAssignment.getUpdatedAt() != null)
+            taskAssignmentDTO.setUpdatedAt(taskAssignment.getUpdatedAt().format(dateTimeFormatter));
 
         Set<Long> userIdSet = new HashSet<>();
 
@@ -571,6 +590,13 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
     }
     
     private List<TaskAssignmentReadDTO> fillAllDTO(Collection<TaskAssignment> taskAssignmentCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(TaskAssignment.class, TaskAssignmentReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(TaskAssignmentReadDTO::setAssignDate);
+                    mapper.skip(TaskAssignmentReadDTO::setRemoveDate);
+                    mapper.skip(TaskAssignmentReadDTO::setCreatedAt);
+                    mapper.skip(TaskAssignmentReadDTO::setUpdatedAt);});
+
         Set<Long> userIdSet = new HashSet<>();
 
         for (TaskAssignment taskAssignment : taskAssignmentCollection) {
@@ -584,15 +610,24 @@ public class TaskAssignmentServiceImpl implements TaskAssignmentService {
 
         return taskAssignmentCollection.stream()
                 .map(taskAssignment -> {
-                    TaskAssignmentReadDTO TaskAssignmentDTO =
+                    TaskAssignmentReadDTO taskAssignmentDTO =
                             modelMapper.map(taskAssignment, TaskAssignmentReadDTO.class);
 
-                    TaskAssignmentDTO.setAssigner(userIdUserDTOMap.get(taskAssignment.getAssignerId()));
-                    TaskAssignmentDTO.setAssignee(userIdUserDTOMap.get(taskAssignment.getAssigneeId()));
-                    
-                    TaskAssignmentDTO.setTotalPage(totalPage);
+                    if (taskAssignment.getAssignDate() != null)
+                        taskAssignmentDTO.setAssignDate(taskAssignment.getAssignDate().format(dateTimeFormatter));
+                    if (taskAssignment.getRemoveDate() != null)
+                        taskAssignmentDTO.setRemoveDate(taskAssignment.getRemoveDate().format(dateTimeFormatter));
+                    if (taskAssignment.getCreatedAt() != null)
+                        taskAssignmentDTO.setCreatedAt(taskAssignment.getCreatedAt().format(dateTimeFormatter));
+                    if (taskAssignment.getUpdatedAt() != null)
+                        taskAssignmentDTO.setUpdatedAt(taskAssignment.getUpdatedAt().format(dateTimeFormatter));
 
-                    return TaskAssignmentDTO;})
+                    taskAssignmentDTO.setAssigner(userIdUserDTOMap.get(taskAssignment.getAssignerId()));
+                    taskAssignmentDTO.setAssignee(userIdUserDTOMap.get(taskAssignment.getAssigneeId()));
+                    
+                    taskAssignmentDTO.setTotalPage(totalPage);
+
+                    return taskAssignmentDTO;})
                 .collect(Collectors.toList());
     }
 }

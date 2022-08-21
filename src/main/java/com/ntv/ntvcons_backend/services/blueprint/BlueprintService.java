@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface BlueprintService { /* TODO: throws Exception for controller to handle */
+public interface BlueprintService {
     /* CREATE */
     void createProjectBlueprint(CreateBlueprintModel createBluePrintModel);
 

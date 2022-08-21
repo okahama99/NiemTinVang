@@ -2,11 +2,13 @@ package com.ntv.ntvcons_backend.services.user;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.entities.UserModels.RegisterUserModel;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
@@ -24,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Autowired
     private RoleService roleService;
     @Autowired
@@ -122,7 +127,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User register(RegisterUserModel registerUserModel) throws Exception{
+    public User register(RegisterUserModel registerUserModel) throws Exception {
         String errorMsg = "";
         User user = new User();
         if (registerUserModel.getEmail() != null) {
@@ -578,9 +583,19 @@ public class UserServiceImpl implements UserService {
 
     /* Utils */
     private UserReadDTO fillDTO(User user) throws Exception {
-        long userId = user.getUserId();;
+        modelMapper.typeMap(User.class, UserReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(UserReadDTO::setCreatedAt);
+                    mapper.skip(UserReadDTO::setUpdatedAt);});
+
+        long userId = user.getUserId();
 
         UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
+
+        if (user.getCreatedAt() != null)
+            userDTO.setCreatedAt(user.getCreatedAt().format(dateTimeFormatter));
+        if (user.getUpdatedAt() != null)
+            userDTO.setUpdatedAt(user.getUpdatedAt().format(dateTimeFormatter));
 
         /* Get associated Role */
         userDTO.setRole(
@@ -600,6 +615,11 @@ public class UserServiceImpl implements UserService {
     }
 
     private List<UserReadDTO> fillAllDTO(Collection<User> userCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(User.class, UserReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(UserReadDTO::setCreatedAt);
+                    mapper.skip(UserReadDTO::setUpdatedAt);});
+
         Set<Long> roleIdSet = new HashSet<>();
         Set<Long> userIdSet = new HashSet<>();
 
@@ -620,6 +640,11 @@ public class UserServiceImpl implements UserService {
                 .map(user -> {
                     UserReadDTO userDTO =
                             modelMapper.map(user, UserReadDTO.class);
+
+                    if (user.getCreatedAt() != null)
+                        userDTO.setCreatedAt(user.getCreatedAt().format(dateTimeFormatter));
+                    if (user.getUpdatedAt() != null)
+                        userDTO.setUpdatedAt(user.getUpdatedAt().format(dateTimeFormatter));
 
                     userDTO.setRole(roleIdRoleDTOMap.get(user.getRoleId()));
 

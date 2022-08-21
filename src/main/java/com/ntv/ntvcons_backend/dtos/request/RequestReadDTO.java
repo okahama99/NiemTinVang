@@ -20,14 +20,14 @@ public class RequestReadDTO extends BaseReadDTO {
     private RequestTypeReadDTO requestType;
     private UserReadDTO Requester;
     private String requestName;
-    private LocalDateTime requestDate;
+    private String requestDate;
     private String requestDesc;
 
     private List<RequestDetailReadDTO> requestDetailList;
 
     private UserReadDTO verifier;
     private Boolean isVerified;
-    private LocalDateTime verifyDate;
+    private String verifyDate;
     private String verifyNote;
     private Boolean isApproved;
 }

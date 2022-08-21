@@ -58,6 +58,7 @@ public class RequestController {
 
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('44')")
     @PostMapping(value = "/v1/createRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createRequest(@RequestBody CreateRequestModel createRequestModel) {
@@ -88,6 +89,7 @@ public class RequestController {
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
+            requestDTO.setRequesterId(userId);
             requestDTO.setCreatedBy(userId);
 
             RequestReadDTO newRequestDTO = requestService.createRequestByDTO(requestDTO);
@@ -122,6 +124,7 @@ public class RequestController {
             if (userId == null)
                 throw new IllegalArgumentException("Invalid jwt.");
 
+            requestDTO.setRequesterId(userId);
             requestDTO.setCreatedBy(userId);
 
             RequestReadDTO newRequestDTO = requestService.createRequestByDTO(requestDTO);
@@ -195,6 +198,7 @@ public class RequestController {
     }
 
     /* READ */
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('44','54','24','14')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
@@ -464,6 +468,7 @@ public class RequestController {
     }
 
     /* UPDATE */
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('44')")
     @PutMapping(value = "/v1/updateRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequest(@RequestBody UpdateRequestModel updateRequestModel) {

@@ -3,7 +3,9 @@ package com.ntv.ntvcons_backend.services.task;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.SearchOption;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskCreateDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.dtos.task.TaskUpdateDTO;
@@ -11,6 +13,7 @@ import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskAssignment.TaskAssignmentUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.Task;
 import com.ntv.ntvcons_backend.entities.TaskAssignment;
 import com.ntv.ntvcons_backend.repositories.TaskRepository;
@@ -104,7 +107,8 @@ public class TaskServiceImpl implements TaskService {
                     mapper.skip(Task::setPlanEndDate);});
 
         Task newTask = modelMapper.map(newTaskDTO, Task.class);
-        long createdBy = newTask.getCreatedBy();
+
+        Long createdBy = newTask.getCreatedBy();
 
         /* Already check NOT NULL */
         newTask.setPlanStartDate(
@@ -859,9 +863,31 @@ public class TaskServiceImpl implements TaskService {
 
     /* Utils */
     private TaskReadDTO fillDTO(Task task) throws Exception {
+        modelMapper.typeMap(Task.class, TaskReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(TaskReadDTO::setPlanStartDate);
+                    mapper.skip(TaskReadDTO::setPlanEndDate);
+                    mapper.skip(TaskReadDTO::setActualStartDate);
+                    mapper.skip(TaskReadDTO::setActualEndDate);
+                    mapper.skip(TaskReadDTO::setCreatedAt);
+                    mapper.skip(TaskReadDTO::setUpdatedAt);});
+
         long taskId = task.getTaskId();
 
         TaskReadDTO taskDTO = modelMapper.map(task, TaskReadDTO.class);
+
+        if (task.getPlanStartDate() != null)
+            taskDTO.setPlanStartDate(task.getPlanStartDate().format(dateTimeFormatter));
+        if (task.getPlanEndDate() != null)
+            taskDTO.setPlanEndDate(task.getPlanEndDate().format(dateTimeFormatter));
+        if (task.getActualStartDate() != null)
+            taskDTO.setActualStartDate(task.getActualStartDate().format(dateTimeFormatter));
+        if (task.getActualEndDate() != null)
+            taskDTO.setActualEndDate(task.getActualEndDate().format(dateTimeFormatter));
+        if (task.getCreatedAt() != null)
+            taskDTO.setCreatedAt(task.getCreatedAt().format(dateTimeFormatter));
+        if (task.getUpdatedAt() != null)
+            taskDTO.setUpdatedAt(task.getUpdatedAt().format(dateTimeFormatter));
 
         /* Get associated taskAssignment */
         taskDTO.setTaskAssignment(
@@ -878,6 +904,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private List<TaskReadDTO> fillAllDTO(Collection<Task> taskCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(Task.class, TaskReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(TaskReadDTO::setPlanStartDate);
+                    mapper.skip(TaskReadDTO::setPlanEndDate);
+                    mapper.skip(TaskReadDTO::setActualStartDate);
+                    mapper.skip(TaskReadDTO::setActualEndDate);
+                    mapper.skip(TaskReadDTO::setCreatedAt);
+                    mapper.skip(TaskReadDTO::setUpdatedAt);});
+
         Set<Long> taskIdSet = new HashSet<>();
 
         for (Task task : taskCollection) {
@@ -898,19 +933,32 @@ public class TaskServiceImpl implements TaskService {
 
         return taskCollection.stream()
                 .map(task -> {
-                    TaskReadDTO taskReadDTO =
+                    TaskReadDTO taskDTO =
                             modelMapper.map(task, TaskReadDTO.class);
+
+                    if (task.getPlanStartDate() != null)
+                        taskDTO.setPlanStartDate(task.getPlanStartDate().format(dateTimeFormatter));
+                    if (task.getPlanEndDate() != null)
+                        taskDTO.setPlanEndDate(task.getPlanEndDate().format(dateTimeFormatter));
+                    if (task.getActualStartDate() != null)
+                        taskDTO.setActualStartDate(task.getActualStartDate().format(dateTimeFormatter));
+                    if (task.getActualEndDate() != null)
+                        taskDTO.setActualEndDate(task.getActualEndDate().format(dateTimeFormatter));
+                    if (task.getCreatedAt() != null)
+                        taskDTO.setCreatedAt(task.getCreatedAt().format(dateTimeFormatter));
+                    if (task.getUpdatedAt() != null)
+                        taskDTO.setUpdatedAt(task.getUpdatedAt().format(dateTimeFormatter));
 
                     long tmpTaskID = task.getTaskId();
 
-                    taskReadDTO.setTaskAssignment(taskIdTaskAssignmentDTOMap.get(tmpTaskID));
-                    taskReadDTO.setTaskReportList(taskIdTaskReportDTOListMap.get(tmpTaskID));
-                    taskReadDTO.setFileList(
+                    taskDTO.setTaskAssignment(taskIdTaskAssignmentDTOMap.get(tmpTaskID));
+                    taskDTO.setTaskReportList(taskIdTaskReportDTOListMap.get(tmpTaskID));
+                    taskDTO.setFileList(
                             taskIdExternalFileDTOListMap.get(tmpTaskID));
 
-                    taskReadDTO.setTotalPage(totalPage);
+                    taskDTO.setTotalPage(totalPage);
 
-                    return taskReadDTO;})
+                    return taskDTO;})
                 .collect(Collectors.toList());
     }
 }

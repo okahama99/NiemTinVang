@@ -1,9 +1,11 @@
 package com.ntv.ntvcons_backend.services.taskReport;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.TaskReport;
 import com.ntv.ntvcons_backend.repositories.TaskReportRepository;
 import com.ntv.ntvcons_backend.services.report.ReportService;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,8 @@ public class TaskReportServiceImpl implements TaskReportService {
     private TaskReportRepository taskReportRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
@@ -546,18 +551,41 @@ public class TaskReportServiceImpl implements TaskReportService {
 
     /* Utils */
     private TaskReportReadDTO fillDTO(TaskReport taskReport) throws Exception {
-        return modelMapper.map(taskReport, TaskReportReadDTO.class);
+        modelMapper.typeMap(TaskReport.class, TaskReportReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(TaskReportReadDTO::setCreatedAt);
+                    mapper.skip(TaskReportReadDTO::setUpdatedAt);});
+
+        TaskReportReadDTO taskReportDTO =
+                modelMapper.map(taskReport, TaskReportReadDTO.class);
+
+        if (taskReport.getCreatedAt() != null)
+            taskReportDTO.setCreatedAt(taskReport.getCreatedAt().format(dateTimeFormatter));
+        if (taskReport.getUpdatedAt() != null)
+            taskReportDTO.setUpdatedAt(taskReport.getUpdatedAt().format(dateTimeFormatter));
+
+        return taskReportDTO;
     }
 
     private List<TaskReportReadDTO> fillAllDTO(Collection<TaskReport> taskReportCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(TaskReport.class, TaskReportReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(TaskReportReadDTO::setCreatedAt);
+                    mapper.skip(TaskReportReadDTO::setUpdatedAt);});
+
         return taskReportCollection.stream()
                 .map(taskReport -> {
-                    TaskReportReadDTO taskReportReadDTO =
+                    TaskReportReadDTO taskReportDTO =
                             modelMapper.map(taskReport, TaskReportReadDTO.class);
 
-                    taskReportReadDTO.setTotalPage(totalPage);
+                    if (taskReport.getCreatedAt() != null)
+                        taskReportDTO.setCreatedAt(taskReport.getCreatedAt().format(dateTimeFormatter));
+                    if (taskReport.getUpdatedAt() != null)
+                        taskReportDTO.setUpdatedAt(taskReport.getUpdatedAt().format(dateTimeFormatter));
 
-                    return taskReportReadDTO;})
+                    taskReportDTO.setTotalPage(totalPage);
+
+                    return taskReportDTO;})
                 .collect(Collectors.toList());
     }
 }

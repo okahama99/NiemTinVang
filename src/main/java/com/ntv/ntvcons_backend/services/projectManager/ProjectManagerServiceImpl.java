@@ -1,10 +1,12 @@
 package com.ntv.ntvcons_backend.services.projectManager;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.repositories.ProjectManagerRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
@@ -104,7 +106,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         for (ProjectManager newProjectManager : newProjectManagerList) {
             projectIdSet.add(newProjectManager.getProjectId());
             managerIdSet.add(newProjectManager.getManagerId());
-            createdBySet.add(newProjectManager.getCreatedBy());
+            if (newProjectManager.getCreatedBy() != null)
+                createdBySet.add(newProjectManager.getCreatedBy());
 
             /* Check duplicate 1 (within input) */
             tmpManagerIdList = projectIdManagerIdListMap.get(newProjectManager.getProjectId());
@@ -570,7 +573,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
             projectManagerIdSet.add(updatedProjectManager.getProjectManagerId());
             updatedProjectIdSet.add(updatedProjectManager.getProjectId());
             updatedManagerIdSet.add(updatedProjectManager.getManagerId());
-            updatedUpdatedBySet.add(updatedProjectManager.getManagerId());
+            if (updatedProjectManager.getManagerId() != null)
+                updatedUpdatedBySet.add(updatedProjectManager.getManagerId());
 
             projectManagerIdUpdatedProjectManagerMap
                     .put(updatedProjectManager.getProjectManagerId(), updatedProjectManager);
@@ -610,9 +614,8 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
         for (ProjectManager oldProjectManager : oldProjectManagerList) {
             oldProjectIdSet.add(oldProjectManager.getProjectId());
             oldManagerIdSet.add(oldProjectManager.getManagerId());
-            if (oldProjectManager.getUpdatedBy() != null) {
+            if (oldProjectManager.getUpdatedBy() != null)
                 oldUpdatedBySet.add(oldProjectManager.getManagerId());
-            }
 
             projectManagerIdCreatedByMap.put(oldProjectManager.getProjectManagerId(), oldProjectManager.getCreatedBy());
             projectManagerIdCreatedAtMap.put(oldProjectManager.getProjectManagerId(), oldProjectManager.getCreatedAt());
@@ -880,8 +883,24 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
 
     /* Utils */
     private ProjectManagerReadDTO fillDTO(ProjectManager projectManager) throws Exception {
+        modelMapper.typeMap(ProjectManager.class, ProjectManagerReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ProjectManagerReadDTO::setAssignDate);
+                    mapper.skip(ProjectManagerReadDTO::setRemoveDate);
+                    mapper.skip(ProjectManagerReadDTO::setCreatedAt);
+                    mapper.skip(ProjectManagerReadDTO::setUpdatedAt);});
+
         ProjectManagerReadDTO projectManagerDTO =
                 modelMapper.map(projectManager, ProjectManagerReadDTO.class);
+
+        if (projectManager.getAssignDate() != null)
+            projectManagerDTO.setAssignDate(projectManager.getAssignDate().format(dateTimeFormatter));
+        if (projectManager.getRemoveDate() != null)
+            projectManagerDTO.setRemoveDate(projectManager.getRemoveDate().format(dateTimeFormatter));
+        if (projectManager.getCreatedAt() != null)
+            projectManagerDTO.setCreatedAt(projectManager.getCreatedAt().format(dateTimeFormatter));
+        if (projectManager.getUpdatedAt() != null)
+            projectManagerDTO.setUpdatedAt(projectManager.getUpdatedAt().format(dateTimeFormatter));
 
         /* Get associated User (Manager) */
         projectManagerDTO.setManager(userService.getDTOById(projectManager.getManagerId()));
@@ -890,6 +909,13 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
     }
 
     private List<ProjectManagerReadDTO> fillAllDTO(Collection<ProjectManager> projectManagerCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(ProjectManager.class, ProjectManagerReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ProjectManagerReadDTO::setAssignDate);
+                    mapper.skip(ProjectManagerReadDTO::setRemoveDate);
+                    mapper.skip(ProjectManagerReadDTO::setCreatedAt);
+                    mapper.skip(ProjectManagerReadDTO::setUpdatedAt);});
+
         Set<Long> managerIdSet =
                 projectManagerCollection.stream()
                         .map(ProjectManager::getManagerId)
@@ -902,6 +928,15 @@ public class ProjectManagerServiceImpl implements ProjectManagerService {
                 .map(projectManager -> {
                     ProjectManagerReadDTO projectManagerDTO =
                             modelMapper.map(projectManager, ProjectManagerReadDTO.class);
+
+                    if (projectManager.getAssignDate() != null)
+                        projectManagerDTO.setAssignDate(projectManager.getAssignDate().format(dateTimeFormatter));
+                    if (projectManager.getRemoveDate() != null)
+                        projectManagerDTO.setRemoveDate(projectManager.getRemoveDate().format(dateTimeFormatter));
+                    if (projectManager.getCreatedAt() != null)
+                        projectManagerDTO.setCreatedAt(projectManager.getCreatedAt().format(dateTimeFormatter));
+                    if (projectManager.getUpdatedAt() != null)
+                        projectManagerDTO.setUpdatedAt(projectManager.getUpdatedAt().format(dateTimeFormatter));
 
                     projectManagerDTO.setManager(userIdUserDTOMap.get(projectManager.getManagerId()));
 

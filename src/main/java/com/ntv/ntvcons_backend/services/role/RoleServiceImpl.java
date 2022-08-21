@@ -1,9 +1,11 @@
 package com.ntv.ntvcons_backend.services.role;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleCreateDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,8 @@ public class RoleServiceImpl implements RoleService {
     private RoleRepository roleRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
@@ -281,14 +286,36 @@ public class RoleServiceImpl implements RoleService {
 
     /* Utils */
     private RoleReadDTO fillDTO(Role role) throws Exception {
-        return modelMapper.map(role, RoleReadDTO.class);
+        modelMapper.typeMap(Role.class, RoleReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(RoleReadDTO::setCreatedAt);
+                    mapper.skip(RoleReadDTO::setUpdatedAt);});
+
+        RoleReadDTO roleDTO = modelMapper.map(role, RoleReadDTO.class);
+
+        if (role.getCreatedAt() != null)
+            roleDTO.setCreatedAt(role.getCreatedAt().format(dateTimeFormatter));
+        if (role.getUpdatedAt() != null)
+            roleDTO.setUpdatedAt(role.getUpdatedAt().format(dateTimeFormatter));
+
+        return roleDTO;
     }
 
     private List<RoleReadDTO> fillAllDTO(Collection<Role> roleCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(Role.class, RoleReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(RoleReadDTO::setCreatedAt);
+                    mapper.skip(RoleReadDTO::setUpdatedAt);});
+
         return roleCollection.stream()
                 .map(role -> {
                     RoleReadDTO roleDTO =
                             modelMapper.map(role, RoleReadDTO.class);
+
+                    if (role.getCreatedAt() != null)
+                        roleDTO.setCreatedAt(role.getCreatedAt().format(dateTimeFormatter));
+                    if (role.getUpdatedAt() != null)
+                        roleDTO.setUpdatedAt(role.getUpdatedAt().format(dateTimeFormatter));
 
                     roleDTO.setTotalPage(totalPage);
 

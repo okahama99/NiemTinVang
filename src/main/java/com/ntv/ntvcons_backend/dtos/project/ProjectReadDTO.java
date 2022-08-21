@@ -28,12 +28,12 @@ public class ProjectReadDTO extends BaseReadDTO {
     private List<ProjectManagerReadDTO> projectManagerList;
     private List<ProjectWorkerReadDTO> projectWorkerList;
 
-    private LocalDateTime planStartDate;
-    private LocalDateTime planEndDate;
+    private String planStartDate;
+    private String planEndDate;
     private Double estimatedCost;
 
-    private LocalDateTime actualStartDate;
-    private LocalDateTime actualEndDate;
+    private String actualStartDate;
+    private String actualEndDate;
     private Double actualCost;
 
     private List<TaskReadDTO> taskList;

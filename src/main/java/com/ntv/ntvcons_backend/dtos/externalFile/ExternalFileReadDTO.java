@@ -23,10 +23,10 @@ public class ExternalFileReadDTO {
     private Status status;
 
     private Long createdBy;
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     private Long updatedBy;
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     @JsonInclude(JsonInclude.Include.NON_NULL) /* if null => no return JSON */
     private Integer totalPage;

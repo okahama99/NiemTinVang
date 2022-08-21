@@ -15,6 +15,6 @@ public class ProjectManagerReadDTO extends BaseReadDTO {
     private Long projectManagerId;
     private Long projectId;
     private UserReadDTO manager;
-    private LocalDateTime assignDate;
-    private LocalDateTime removeDate;
+    private String assignDate;
+    private String removeDate;
 }

@@ -16,6 +16,6 @@ public class TaskAssignmentReadDTO extends BaseReadDTO {
     private Long taskId;
     private UserReadDTO assigner;
     private UserReadDTO assignee;
-    private LocalDateTime assignDate;
-    private LocalDateTime removeDate;
+    private String assignDate;
+    private String removeDate;
 }

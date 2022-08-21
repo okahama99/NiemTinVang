@@ -1,9 +1,11 @@
 package com.ntv.ntvcons_backend.services.reportDetail;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailUpdateDTO;
+import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.ReportDetail;
 import com.ntv.ntvcons_backend.repositories.ReportDetailRepository;
 import com.ntv.ntvcons_backend.services.report.ReportService;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,6 +28,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
     private ReportDetailRepository reportDetailRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private ReportService reportService;
@@ -101,7 +106,8 @@ public class ReportDetailServiceImpl implements ReportDetailService {
             tmpItemPrice = newReportDetail.getItemPrice();
 
             reportIdSet.add(tmpReportId);
-            createdBySet.add(newReportDetail.getCreatedBy());
+            if (newReportDetail.getCreatedBy() != null)
+                createdBySet.add(newReportDetail.getCreatedBy());
 
             tmpItemDescItemPriceListMap = reportIdItemDescItemPriceListMapMap.get(tmpReportId);
 
@@ -629,14 +635,37 @@ public class ReportDetailServiceImpl implements ReportDetailService {
 
     /* Utils */
     private ReportDetailReadDTO fillDTO(ReportDetail reportDetail) throws Exception {
-        return modelMapper.map(reportDetail, ReportDetailReadDTO.class);
+        modelMapper.typeMap(ReportDetail.class, ReportDetailReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ReportDetailReadDTO::setCreatedAt);
+                    mapper.skip(ReportDetailReadDTO::setUpdatedAt);});
+
+        ReportDetailReadDTO reportDetailDTO =
+                modelMapper.map(reportDetail, ReportDetailReadDTO.class);
+
+        if (reportDetail.getCreatedAt() != null)
+            reportDetailDTO.setCreatedAt(reportDetail.getCreatedAt().format(dateTimeFormatter));
+        if (reportDetail.getUpdatedAt() != null)
+            reportDetailDTO.setUpdatedAt(reportDetail.getUpdatedAt().format(dateTimeFormatter));
+
+        return reportDetailDTO;
     }
 
     private List<ReportDetailReadDTO> fillAllDTO(Collection<ReportDetail> reportDetailCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(ReportDetail.class, ReportDetailReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ReportDetailReadDTO::setCreatedAt);
+                    mapper.skip(ReportDetailReadDTO::setUpdatedAt);});
+
         return reportDetailCollection.stream()
                 .map(reportDetail -> {
                     ReportDetailReadDTO reportDetailDTO =
                             modelMapper.map(reportDetail, ReportDetailReadDTO.class);
+
+                    if (reportDetail.getCreatedAt() != null)
+                        reportDetailDTO.setCreatedAt(reportDetail.getCreatedAt().format(dateTimeFormatter));
+                    if (reportDetail.getUpdatedAt() != null)
+                        reportDetailDTO.setUpdatedAt(reportDetail.getUpdatedAt().format(dateTimeFormatter));
 
                     reportDetailDTO.setTotalPage(totalPage);
 

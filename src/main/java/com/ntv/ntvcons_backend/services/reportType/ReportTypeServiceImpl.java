@@ -1,9 +1,11 @@
 package com.ntv.ntvcons_backend.services.reportType;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.ReportType;
 import com.ntv.ntvcons_backend.repositories.ReportTypeRepository;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,8 @@ public class ReportTypeServiceImpl implements ReportTypeService {
     private ReportTypeRepository reportTypeRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
@@ -287,14 +292,37 @@ public class ReportTypeServiceImpl implements ReportTypeService {
 
     /* Utils */
     private ReportTypeReadDTO fillDTO(ReportType reportType) throws Exception {
-        return modelMapper.map(reportType, ReportTypeReadDTO.class);
+        modelMapper.typeMap(ReportType.class, ReportTypeReadDTO.class)
+            .addMappings(mapper -> {
+                mapper.skip(ReportTypeReadDTO::setCreatedAt);
+                mapper.skip(ReportTypeReadDTO::setUpdatedAt);});
+
+        ReportTypeReadDTO reportTypeDTO =
+                modelMapper.map(reportType, ReportTypeReadDTO.class);
+
+        if (reportType.getCreatedAt() != null)
+            reportTypeDTO.setCreatedAt(reportType.getCreatedAt().format(dateTimeFormatter));
+        if (reportType.getUpdatedAt() != null)
+            reportTypeDTO.setUpdatedAt(reportType.getUpdatedAt().format(dateTimeFormatter));
+
+        return reportTypeDTO;
     }
 
     private List<ReportTypeReadDTO> fillAllDTO(Collection<ReportType> reportTypeCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(ReportType.class, ReportTypeReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(ReportTypeReadDTO::setCreatedAt);
+                    mapper.skip(ReportTypeReadDTO::setUpdatedAt);});
+
         return reportTypeCollection.stream()
                 .map(reportType -> {
                     ReportTypeReadDTO reportTypeDTO =
                             modelMapper.map(reportType, ReportTypeReadDTO.class);
+
+                    if (reportType.getCreatedAt() != null)
+                        reportTypeDTO.setCreatedAt(reportType.getCreatedAt().format(dateTimeFormatter));
+                    if (reportType.getUpdatedAt() != null)
+                        reportTypeDTO.setUpdatedAt(reportType.getUpdatedAt().format(dateTimeFormatter));
 
                     reportTypeDTO.setTotalPage(totalPage);
 

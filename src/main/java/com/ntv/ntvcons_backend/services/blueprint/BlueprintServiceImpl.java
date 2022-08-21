@@ -7,10 +7,12 @@ import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintCreateDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
+import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.CreateBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.ShowBlueprintModel;
 import com.ntv.ntvcons_backend.entities.BlueprintModels.UpdateBlueprintModel;
+import com.ntv.ntvcons_backend.entities.Project;
 import com.ntv.ntvcons_backend.repositories.BlueprintRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
@@ -28,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,6 +39,8 @@ import java.util.stream.Collectors;
 public class BlueprintServiceImpl implements BlueprintService {
     @Autowired
     private BlueprintRepository blueprintRepository;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Autowired
     private ModelMapper modelMapper;
     @Lazy /* To avoid circular injection Exception */
@@ -631,9 +636,19 @@ public class BlueprintServiceImpl implements BlueprintService {
 
     /* Utils */
     private BlueprintReadDTO fillDTO(Blueprint blueprint) throws Exception {
+        modelMapper.typeMap(Blueprint.class, BlueprintReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(BlueprintReadDTO::setCreatedAt);
+                    mapper.skip(BlueprintReadDTO::setUpdatedAt);});
+
         long blueprintId = blueprint.getBlueprintId();
 
         BlueprintReadDTO blueprintDTO = modelMapper.map(blueprint, BlueprintReadDTO.class);
+
+        if (blueprint.getCreatedAt() != null)
+            blueprintDTO.setCreatedAt(blueprint.getCreatedAt().format(dateTimeFormatter));
+        if (blueprint.getUpdatedAt() != null)
+            blueprintDTO.setUpdatedAt(blueprint.getUpdatedAt().format(dateTimeFormatter));
 
         List<ExternalFileReadDTO> fileReadDTOList =
                 eFEWPairingService
@@ -649,6 +664,11 @@ public class BlueprintServiceImpl implements BlueprintService {
     }
 
     private List<BlueprintReadDTO> fillAllDTO(Collection<Blueprint> blueprintCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(Blueprint.class, BlueprintReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(BlueprintReadDTO::setCreatedAt);
+                    mapper.skip(BlueprintReadDTO::setUpdatedAt);});
+
         Set<Long> blueprintIdSet = new HashSet<>();
 
         for (Blueprint blueprint : blueprintCollection) {
@@ -664,6 +684,11 @@ public class BlueprintServiceImpl implements BlueprintService {
                 .map(blueprint -> {
                     BlueprintReadDTO blueprintDTO =
                             modelMapper.map(blueprint, BlueprintReadDTO.class);
+
+                    if (blueprint.getCreatedAt() != null)
+                        blueprintDTO.setCreatedAt(blueprint.getCreatedAt().format(dateTimeFormatter));
+                    if (blueprint.getUpdatedAt() != null)
+                        blueprintDTO.setUpdatedAt(blueprint.getUpdatedAt().format(dateTimeFormatter));
 
                     List<ExternalFileReadDTO> fileReadDTOList =
                             blueprintIdExternalFileDTOListMap.get(blueprint.getBlueprintId());

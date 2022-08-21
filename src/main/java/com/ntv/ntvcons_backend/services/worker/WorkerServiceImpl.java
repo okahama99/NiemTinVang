@@ -2,6 +2,7 @@ package com.ntv.ntvcons_backend.services.worker;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
@@ -9,6 +10,7 @@ import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.entities.Worker;
 import com.ntv.ntvcons_backend.repositories.WorkerRepository;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,6 +39,8 @@ public class WorkerServiceImpl implements WorkerService {
     private WorkerRepository workerRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Lazy /* To avoid circular injection exception */
     @Autowired
     private UserService userService;
@@ -540,9 +545,19 @@ public class WorkerServiceImpl implements WorkerService {
 
     /* Utils */
     private WorkerReadDTO fillDTO(Worker worker) throws Exception {
+        modelMapper.typeMap(Worker.class, WorkerReadDTO.class)
+            .addMappings(mapper -> {
+                mapper.skip(WorkerReadDTO::setCreatedAt);
+                mapper.skip(WorkerReadDTO::setUpdatedAt);});
+
         long workerId = worker.getWorkerId();
 
         WorkerReadDTO workerDTO = modelMapper.map(worker, WorkerReadDTO.class);
+
+        if (worker.getCreatedAt() != null)
+            workerDTO.setCreatedAt(worker.getCreatedAt().format(dateTimeFormatter));
+        if (worker.getUpdatedAt() != null)
+            workerDTO.setUpdatedAt(worker.getUpdatedAt().format(dateTimeFormatter));
 
         /* Get associated Location */
         workerDTO.setAddress(
@@ -559,6 +574,11 @@ public class WorkerServiceImpl implements WorkerService {
     }
 
     private List<WorkerReadDTO> fillAllDTO(Collection<Worker> workerCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(Worker.class, WorkerReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(WorkerReadDTO::setCreatedAt);
+                    mapper.skip(WorkerReadDTO::setUpdatedAt);});
+
         Set<Long> locationIdSet = new HashSet<>();
         Set<Long> workerIdSet = new HashSet<>();
 
@@ -582,6 +602,11 @@ public class WorkerServiceImpl implements WorkerService {
                 .map(worker -> {
                     WorkerReadDTO workerDTO =
                             modelMapper.map(worker, WorkerReadDTO.class);
+
+                    if (worker.getCreatedAt() != null)
+                        workerDTO.setCreatedAt(worker.getCreatedAt().format(dateTimeFormatter));
+                    if (worker.getUpdatedAt() != null)
+                        workerDTO.setUpdatedAt(worker.getUpdatedAt().format(dateTimeFormatter));
 
                     long workerId = worker.getWorkerId();
 

@@ -1,9 +1,11 @@
 package com.ntv.ntvcons_backend.services.requestType;
 
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
+import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.RequestType;
 import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
 import com.ntv.ntvcons_backend.services.user.UserService;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +30,8 @@ public class RequestTypeServiceImpl implements RequestTypeService {
     private RequestTypeRepository requestTypeRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private DateTimeFormatter dateTimeFormatter;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private UserService userService;
@@ -282,15 +287,38 @@ public class RequestTypeServiceImpl implements RequestTypeService {
 
     /* Utils */
     private RequestTypeReadDTO fillDTO(RequestType requestType) throws Exception {
-        return modelMapper.map(requestType, RequestTypeReadDTO.class);
+        modelMapper.typeMap(RequestType.class, RequestTypeReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(RequestTypeReadDTO::setCreatedAt);
+                    mapper.skip(RequestTypeReadDTO::setUpdatedAt);});
+
+        RequestTypeReadDTO requestTypeDTO =
+                modelMapper.map(requestType, RequestTypeReadDTO.class);
+
+        if (requestType.getCreatedAt() != null)
+            requestTypeDTO.setCreatedAt(requestType.getCreatedAt().format(dateTimeFormatter));
+        if (requestType.getUpdatedAt() != null)
+            requestTypeDTO.setUpdatedAt(requestType.getUpdatedAt().format(dateTimeFormatter));
+
+        return requestTypeDTO;
     }
 
     private List<RequestTypeReadDTO> fillAllDTO(Collection<RequestType> requestTypeCollection, Integer totalPage) throws Exception {
+        modelMapper.typeMap(RequestType.class, RequestTypeReadDTO.class)
+                .addMappings(mapper -> {
+                    mapper.skip(RequestTypeReadDTO::setCreatedAt);
+                    mapper.skip(RequestTypeReadDTO::setUpdatedAt);});
+
         return requestTypeCollection.stream()
                 .map(requestType -> {
                     RequestTypeReadDTO requestTypeDTO =
                             modelMapper.map(requestType, RequestTypeReadDTO.class);
 
+                    if (requestType.getCreatedAt() != null)
+                        requestTypeDTO.setCreatedAt(requestType.getCreatedAt().format(dateTimeFormatter));
+                    if (requestType.getUpdatedAt() != null)
+                        requestTypeDTO.setUpdatedAt(requestType.getUpdatedAt().format(dateTimeFormatter));
+                    
                     requestTypeDTO.setTotalPage(totalPage);
 
                     return requestTypeDTO;})
