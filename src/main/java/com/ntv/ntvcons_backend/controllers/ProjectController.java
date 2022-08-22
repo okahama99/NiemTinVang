@@ -122,13 +122,9 @@ public class ProjectController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     ProjectCreateDTO projectDTO,
-            @RequestPart/*(required = false)*/ @Size(min = 1) List<MultipartFile> projectDocList,
-            /*@RequestPart(required = false) MultipartFile blueprintDoc,*/
+            @RequestPart @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
-//            if (projectDTO.getBlueprint() == null && blueprintDoc != null)
-//                throw new IllegalArgumentException("Blueprint needed before adding blueprintDoc");
-
             String jwt = jwtUtil.getAndValidateJwt(token);
             Long userId = jwtUtil.getUserIdFromJWT(jwt);
             if (userId == null)
@@ -147,17 +143,6 @@ public class ProjectController {
                 /* Get again after file created & save */
                 newProjectDTO = projectService.getDTOById(projectId);
             }
-
-//            if (blueprintDoc != null) {
-//                BlueprintReadDTO blueprintDTO = newProjectDTO.getBlueprint();
-//                long blueprintId = blueprintDTO.getBlueprintId();
-//
-//                fileCombineService.saveFileInDBAndFirebase(
-//                        blueprintDoc, FileType.BLUEPRINT_DOC, blueprintId, EntityType.BLUEPRINT_ENTITY, userId);
-//
-//                addedFile = true;
-//            }
-
 
             return ResponseEntity.ok().body(newProjectDTO);
         } catch (IllegalArgumentException iAE) {

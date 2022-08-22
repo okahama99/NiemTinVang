@@ -261,15 +261,6 @@ public class ProjectServiceImpl implements ProjectService {
         entityWrapperService
                 .createEntityWrapper(newProjectId, ENTITY_TYPE, createdBy);
 
-//        /* Set REQUIRED FK projectId to blueprint after create Project */
-//        BlueprintCreateDTO blueprintDTO = newProjectDTO.getBlueprint();
-//        if (blueprintDTO != null) {
-//            blueprintDTO.setProjectId(newProjectId);
-//            blueprintDTO.setCreatedBy(createdBy);
-//            /* Create associated Blueprint */
-//            blueprintService.createBlueprintByDTO(newProjectDTO.getBlueprint());
-//        }
-
         /* Create associated ProjectManager (if present) */
         List<Long> managerIdList = newProjectDTO.getManagerIdList();
         if (managerIdList != null) {
