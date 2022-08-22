@@ -1,11 +1,9 @@
 package com.ntv.ntvcons_backend.services.reportType;
 
 import com.ntv.ntvcons_backend.constants.Status;
-import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeUpdateDTO;
-import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.ReportType;
 import com.ntv.ntvcons_backend.repositories.ReportTypeRepository;
 import com.ntv.ntvcons_backend.services.user.UserService;

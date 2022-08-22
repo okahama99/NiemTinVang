@@ -2,11 +2,9 @@ package com.ntv.ntvcons_backend.services.location;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.Status;
-import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
-import com.ntv.ntvcons_backend.entities.ExternalFile;
 import com.ntv.ntvcons_backend.entities.Location;
 import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.ShowLocationModel;

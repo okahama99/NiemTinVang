@@ -4,7 +4,6 @@ import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.SearchOption;
 import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.report.ReportUpdateDTO;
@@ -15,7 +14,6 @@ import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
-import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.Report;
 import com.ntv.ntvcons_backend.repositories.ReportRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
@@ -813,7 +811,7 @@ public class ReportServiceImpl implements ReportService {
         ReportReadDTO reportDTO = modelMapper.map(report, ReportReadDTO.class);
 
         if (report.getReportDate() != null)
-            reportDTO.setUpdatedAt(report.getReportDate().format(dateTimeFormatter));
+            reportDTO.setReportDate(report.getReportDate().format(dateTimeFormatter));
         if (report.getCreatedAt() != null)
             reportDTO.setCreatedAt(report.getCreatedAt().format(dateTimeFormatter));
         if (report.getUpdatedAt() != null)
@@ -872,7 +870,7 @@ public class ReportServiceImpl implements ReportService {
                             modelMapper.map(report, ReportReadDTO.class);
 
                     if (report.getReportDate() != null)
-                        reportDTO.setUpdatedAt(report.getReportDate().format(dateTimeFormatter));
+                        reportDTO.setReportDate(report.getReportDate().format(dateTimeFormatter));
                     if (report.getCreatedAt() != null)
                         reportDTO.setCreatedAt(report.getCreatedAt().format(dateTimeFormatter));
                     if (report.getUpdatedAt() != null)

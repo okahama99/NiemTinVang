@@ -1,11 +1,9 @@
 package com.ntv.ntvcons_backend.services.reportDetail;
 
 import com.ntv.ntvcons_backend.constants.Status;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailUpdateDTO;
-import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.ReportDetail;
 import com.ntv.ntvcons_backend.repositories.ReportDetailRepository;
 import com.ntv.ntvcons_backend.services.report.ReportService;
