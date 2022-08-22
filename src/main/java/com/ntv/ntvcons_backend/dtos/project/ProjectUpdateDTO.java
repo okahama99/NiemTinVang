@@ -2,7 +2,6 @@ package com.ntv.ntvcons_backend.dtos.project;
 
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseUpdateDTO;
-import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

@@ -2,7 +2,6 @@ package com.ntv.ntvcons_backend.services.worker;
 
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
-import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationCreateDTO;
 import com.ntv.ntvcons_backend.dtos.location.LocationReadDTO;
@@ -10,7 +9,6 @@ import com.ntv.ntvcons_backend.dtos.location.LocationUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
-import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.entities.Worker;
 import com.ntv.ntvcons_backend.repositories.WorkerRepository;

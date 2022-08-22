@@ -1,8 +1,5 @@
 package com.ntv.ntvcons_backend.constants;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /** If change enum please add new enum here,
  * update all old in DB to new enum.
  * Only then deleted old enum here */

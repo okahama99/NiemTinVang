@@ -1,11 +1,9 @@
 package com.ntv.ntvcons_backend.services.requestType;
 
 import com.ntv.ntvcons_backend.constants.Status;
-import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestType.RequestTypeUpdateDTO;
-import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.RequestType;
 import com.ntv.ntvcons_backend.repositories.RequestTypeRepository;
 import com.ntv.ntvcons_backend.services.user.UserService;

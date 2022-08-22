@@ -1,6 +1,5 @@
 package com.ntv.ntvcons_backend.converters;
 
-import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.Gender;
 
 import javax.persistence.AttributeConverter;

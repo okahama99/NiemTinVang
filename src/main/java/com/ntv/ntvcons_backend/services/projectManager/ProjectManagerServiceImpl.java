@@ -1,12 +1,10 @@
 package com.ntv.ntvcons_backend.services.projectManager;
 
 import com.ntv.ntvcons_backend.constants.Status;
-import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
-import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.repositories.ProjectManagerRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;

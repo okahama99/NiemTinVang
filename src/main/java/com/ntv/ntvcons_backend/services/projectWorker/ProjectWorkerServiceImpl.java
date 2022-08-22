@@ -1,12 +1,10 @@
 package com.ntv.ntvcons_backend.services.projectWorker;
 
 import com.ntv.ntvcons_backend.constants.Status;
-import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerUpdateDTO;
 import com.ntv.ntvcons_backend.dtos.worker.WorkerReadDTO;
-import com.ntv.ntvcons_backend.entities.ProjectManager;
 import com.ntv.ntvcons_backend.entities.ProjectWorker;
 import com.ntv.ntvcons_backend.repositories.ProjectWorkerRepository;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service

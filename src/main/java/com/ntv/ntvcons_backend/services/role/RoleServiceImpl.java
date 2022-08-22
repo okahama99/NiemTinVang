@@ -1,11 +1,9 @@
 package com.ntv.ntvcons_backend.services.role;
 
 import com.ntv.ntvcons_backend.constants.Status;
-import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleCreateDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.role.RoleUpdateDTO;
-import com.ntv.ntvcons_backend.entities.Blueprint;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.repositories.RoleRepository;
 import com.ntv.ntvcons_backend.services.user.UserService;

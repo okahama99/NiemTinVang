@@ -4,7 +4,6 @@ import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
-import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectCreateDTO;
 import com.ntv.ntvcons_backend.dtos.project.ProjectReadDTO;
