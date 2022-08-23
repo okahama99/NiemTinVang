@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table(name = "conversation")
-public class Conversation extends BaseEntity{
+public class Conversation /*extends BaseEntity*/{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "conversationId", nullable = false)

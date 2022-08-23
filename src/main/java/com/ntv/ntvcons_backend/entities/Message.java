@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "message")
-public class Message extends BaseEntity{
+public class Message /*extends BaseEntity*/{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "messageId", nullable = false)
