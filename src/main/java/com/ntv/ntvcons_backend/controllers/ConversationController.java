@@ -26,11 +26,11 @@ public class ConversationController {
     }
 
     @PreAuthorize("hasAnyAuthority('24','54','14','34','44','4')")
-    @PostMapping(value = "/v1/createConversationForAuthenticated", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/createConversationForAuthenticated", produces = "application/json;charset=UTF-8",consumes = "multipart/form-data")
     public ResponseEntity<Object> createConversationForAuthenticated(@RequestParam Long currentUserId,
                                                                      @RequestParam Long targetUserId,
                                                                      @RequestParam String message,
-                                                                     @RequestParam MultipartFile file) throws IOException {
+                                                                     @RequestPart MultipartFile file) throws IOException {
         boolean result = conversationService.createConversationForAuthenticated(currentUserId, targetUserId, message, file);
         if (result) {
             return ResponseEntity.ok().body("Tạo thành công.");
@@ -38,11 +38,11 @@ public class ConversationController {
         return ResponseEntity.badRequest().body("Tạo thất bại.");
     }
 
-    @PostMapping(value = "/v1/createConversationForUnauthenticated", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/createConversationForUnauthenticated", produces = "application/json;charset=UTF-8",consumes = "multipart/form-data")
     public ResponseEntity<Object> createConversationForUnauthenticated(@RequestParam String clientIp,
                                                                        @RequestParam String clientName,
                                                                        @RequestParam String message,
-                                                                       @RequestParam MultipartFile file) throws IOException {
+                                                                       @RequestPart MultipartFile file) throws IOException {
         boolean result = conversationService.createConversationForUnauthenticated(clientIp, clientName, message, file);
         if (result) {
             return ResponseEntity.ok().body("Tạo thành công.");
@@ -51,11 +51,11 @@ public class ConversationController {
     }
 
     @PreAuthorize("hasAnyAuthority('34')")
-    @PutMapping(value = "/v1/setConsultantForChat", produces = "application/json;charset=UTF-8")
+    @PutMapping(value = "/v1/setConsultantForChat", produces = "application/json;charset=UTF-8",consumes = "multipart/form-data")
     public ResponseEntity<Object> setConsultantForChat(@RequestParam Long userId,
                                                        @RequestParam Long conversationId,
                                                        @RequestParam String message,
-                                                       @RequestParam MultipartFile file) throws IOException {
+                                                       @RequestPart MultipartFile file) throws IOException {
         boolean result = conversationService.setConsultantForChat(userId, conversationId, message, file);
 
         if (result) {

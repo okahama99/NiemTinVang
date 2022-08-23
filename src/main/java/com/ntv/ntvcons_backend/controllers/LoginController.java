@@ -66,6 +66,8 @@ public class LoginController {
 
             /* TODO: Có cần kiểm tra authentication.isAuthenticated() hay ko? */
 
+            // TODO : ko cần
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             Map<String, String> response = new HashMap<>(2);

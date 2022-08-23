@@ -90,11 +90,11 @@ public class MessageController {
     }
 
     @PreAuthorize("hasAnyAuthority('24','54','14','34','44','4')")
-    @PostMapping(value = "/v1/sendMessageAuthenticated", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/sendMessageAuthenticated", produces = "application/json;charset=UTF-8",consumes = "multipart/form-data")
     public ResponseEntity<Object> sendMessageAuthenticated(@RequestParam Long userId,
                                                            @RequestParam Long conversationId,
                                                            @RequestParam String message,
-                                                           @RequestParam MultipartFile file) throws IOException {
+                                                           @RequestPart MultipartFile file) throws IOException {
         boolean result = messageService.sendMessageAuthenticated(userId, conversationId, message, file);
         if (result) {
             return ResponseEntity.ok().body("Gửi thành công.");
@@ -102,11 +102,11 @@ public class MessageController {
         return ResponseEntity.badRequest().body("Gửi thất bại.");
     }
 
-    @PostMapping(value = "/v1/sendMessageUnauthenticated", produces = "application/json;charset=UTF-8")
+    @PostMapping(value = "/v1/sendMessageUnauthenticated", produces = "application/json;charset=UTF-8",consumes = "multipart/form-data")
     public ResponseEntity<Object> sendMessageUnauthenticated(@RequestParam String ipAddress,
                                                              @RequestParam Long conversationId,
                                                              @RequestParam String message,
-                                                             @RequestParam MultipartFile file) throws IOException {
+                                                             @RequestPart MultipartFile file) throws IOException {
         boolean result = messageService.sendMessageUnauthenticated(ipAddress, conversationId, message, file);
         if (result) {
             return ResponseEntity.ok().body("Gửi thành công.");
