@@ -88,8 +88,8 @@ public class MessageServiceImpl implements MessageService {
         messageEntity.setConversationId(conversationId);
         messageEntity.setSenderId(userId);
         messageEntity.setMessage(message);
-        messageEntity.setCreatedAt(LocalDateTime.now());
-        messageEntity.setCreatedBy(userId);
+//        messageEntity.setCreatedAt(LocalDateTime.now());
+//        messageEntity.setCreatedBy(userId);
         if (file != null) {
             messageEntity.setFileName(file.getName());
             messageEntity.setFileType(file.getContentType());
@@ -105,7 +105,7 @@ public class MessageServiceImpl implements MessageService {
         messageEntity.setConversationId(conversationId);
         messageEntity.setSenderIp(ipAddress);
         messageEntity.setMessage(message);
-        messageEntity.setCreatedAt(LocalDateTime.now());
+//        messageEntity.setCreatedAt(LocalDateTime.now());
         if (file != null) {
             messageEntity.setFileName(file.getName());
             messageEntity.setFileType(file.getContentType());
@@ -121,8 +121,8 @@ public class MessageServiceImpl implements MessageService {
         if(listMessage!=null){
             for (Message message : listMessage) {
                 message.setSeen(true);
-                message.setUpdatedAt(LocalDateTime.now());
-                message.setUpdatedBy(userId);
+//                message.setUpdatedAt(LocalDateTime.now());
+//                message.setUpdatedBy(userId);
                 messageRepository.saveAndFlush(message);
             }
             return true;
@@ -136,7 +136,7 @@ public class MessageServiceImpl implements MessageService {
         if(listMessage!=null){
             for (Message message : listMessage) {
                 message.setSeen(true);
-                message.setUpdatedAt(LocalDateTime.now());
+//                message.setUpdatedAt(LocalDateTime.now());
                 messageRepository.saveAndFlush(message);
             }
             return true;
@@ -165,10 +165,10 @@ public class MessageServiceImpl implements MessageService {
                     model.setData(message.getData());
                     model.setSendTime(message.getSendTime());
 
-                    model.setCreatedAt(message.getCreatedAt());
-                    model.setCreatedBy(message.getCreatedBy());
-                    model.setUpdatedAt(message.getCreatedAt());
-                    model.setUpdatedBy(message.getUpdatedBy());
+//                    model.setCreatedAt(message.getCreatedAt());
+//                    model.setCreatedBy(message.getCreatedBy());
+//                    model.setUpdatedAt(message.getCreatedAt());
+//                    model.setUpdatedBy(message.getUpdatedBy());
                     model.setTotalPage(totalPage);
                     return model;
                 }

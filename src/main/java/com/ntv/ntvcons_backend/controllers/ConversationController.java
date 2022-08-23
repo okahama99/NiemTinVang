@@ -38,15 +38,19 @@ public class ConversationController {
         return ResponseEntity.badRequest().body("Tạo thất bại.");
     }
 
-    @PostMapping(value = "/v1/createConversationForUnauthenticated", produces = "application/json;charset=UTF-8",consumes = "multipart/form-data")
+    @PostMapping(value = "/v1/createConversationForUnauthenticated",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createConversationForUnauthenticated(@RequestParam String clientIp,
                                                                        @RequestParam String clientName,
                                                                        @RequestParam String message,
                                                                        @RequestPart MultipartFile file) throws IOException {
-        boolean result = conversationService.createConversationForUnauthenticated(clientIp, clientName, message, file);
-        if (result) {
+        boolean result =
+                conversationService
+                        .createConversationForUnauthenticated(clientIp, clientName, message, file);
+
+        if (result)
             return ResponseEntity.ok().body("Tạo thành công.");
-        }
+
         return ResponseEntity.badRequest().body("Tạo thất bại.");
     }
 

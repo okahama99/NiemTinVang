@@ -94,8 +94,8 @@ public class ConversationServiceImpl implements ConversationService {
         Conversation conversation = new Conversation();
         conversation.setUser1Id(currentUserId);
         conversation.setUser2Id(targetUserId);
-        conversation.setCreatedAt(LocalDateTime.now());
-        conversation.setCreatedBy(currentUserId);
+//        conversation.setCreatedAt(LocalDateTime.now());
+//        conversation.setCreatedBy(currentUserId);
         Conversation createdConversation = conversationRepository.saveAndFlush(conversation);
 
         if (createdConversation == null) {
@@ -106,8 +106,8 @@ public class ConversationServiceImpl implements ConversationService {
         messageEntity.setConversationId(createdConversation.getConversationId());
         messageEntity.setSenderId(currentUserId);
         messageEntity.setMessage(message);
-        messageEntity.setCreatedAt(LocalDateTime.now());
-        messageEntity.setCreatedBy(currentUserId);
+//        messageEntity.setCreatedAt(LocalDateTime.now());
+//        messageEntity.setCreatedBy(currentUserId);
         if (file != null) {
             messageEntity.setFileName(file.getName());
             messageEntity.setFileType(file.getContentType());
@@ -124,7 +124,7 @@ public class ConversationServiceImpl implements ConversationService {
         conversation.setUser2Id(null);
         conversation.setIpAddress(clientIp);
         conversation.setClientName(clientName);
-        conversation.setCreatedAt(LocalDateTime.now());
+//        conversation.setCreatedAt(LocalDateTime.now());
         Conversation createdConversation = conversationRepository.saveAndFlush(conversation);
 
         if (createdConversation == null) {
@@ -135,7 +135,7 @@ public class ConversationServiceImpl implements ConversationService {
         messageEntity.setConversationId(createdConversation.getConversationId());
         messageEntity.setSenderId(null);
         messageEntity.setMessage(message);
-        messageEntity.setCreatedAt(LocalDateTime.now());
+//        messageEntity.setCreatedAt(LocalDateTime.now());
         if (file != null) {
             messageEntity.setFileName(file.getName());
             messageEntity.setFileType(file.getContentType());
@@ -149,8 +149,8 @@ public class ConversationServiceImpl implements ConversationService {
     public boolean setConsultantForChat(Long userId, Long conversationId, String message, MultipartFile file) throws IOException {
         Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
         conversation.setUser1Id(userId);
-        conversation.setCreatedAt(LocalDateTime.now());
-        conversation.setCreatedBy(userId);
+//        conversation.setCreatedAt(LocalDateTime.now());
+//        conversation.setCreatedBy(userId);
         Conversation createdConversation = conversationRepository.saveAndFlush(conversation);
 
         if (createdConversation == null) {
@@ -161,8 +161,8 @@ public class ConversationServiceImpl implements ConversationService {
         messageEntity.setConversationId(createdConversation.getConversationId());
         messageEntity.setSenderId(userId);
         messageEntity.setMessage(message);
-        messageEntity.setCreatedAt(LocalDateTime.now());
-        messageEntity.setCreatedBy(userId);
+//        messageEntity.setCreatedAt(LocalDateTime.now());
+//        messageEntity.setCreatedBy(userId);
         if (file != null) {
             messageEntity.setFileName(file.getName());
             messageEntity.setFileType(file.getContentType());
