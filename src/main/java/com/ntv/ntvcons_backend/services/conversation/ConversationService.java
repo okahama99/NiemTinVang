@@ -1,17 +1,14 @@
 package com.ntv.ntvcons_backend.services.conversation;
 
 import com.ntv.ntvcons_backend.entities.ConversationModels.ShowConversationModel;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.util.List;
 
 public interface ConversationService {
     List<ShowConversationModel> getUserConversations(Long userId);
 
-    boolean createConversationForAuthenticated(Long currentUserId, Long targetUserId, String message, MultipartFile file) throws IOException;
+    Long createConversationForAuthenticated(Long currentUserId, Long targetUserId, String message);
 
-    boolean createConversationForUnauthenticated(String clientIp, String clientName, String message, MultipartFile file) throws IOException;
+    Long createConversationForUnauthenticated(String clientIp, String clientName, String message);
 
-    boolean setConsultantForChat(Long userId, Long conversationId, String message, MultipartFile file) throws IOException;
+    Long setConsultantForChat(Long userId, Long conversationId, String message);
 }

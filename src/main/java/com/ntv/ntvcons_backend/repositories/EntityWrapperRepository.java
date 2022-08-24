@@ -122,4 +122,9 @@ public interface EntityWrapperRepository extends JpaRepository<EntityWrapper, Lo
             Collection<Long> workerIdCollection, Collection<Status> statusCollection);
     List<EntityWrapper> findAllByWorkerIdNotNullAndStatusNotIn(
             Collection<Status> statusCollection);
+
+    Optional<EntityWrapper> findByMessageIdAndStatusNotIn(
+            long messageId, Collection<Status> statusCollection);
+    boolean existsByMessageIdAndStatusNotIn(
+            long messageId, Collection<Status> statusCollection);
 }

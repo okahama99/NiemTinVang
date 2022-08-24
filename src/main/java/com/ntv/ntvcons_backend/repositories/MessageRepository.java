@@ -18,4 +18,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findAllByConversationIdAndSenderIp(Long conversationId, String senderIp);
 
     List<Message> findAllByConversationIdAndSenderId(Long conversationId, Long senderId);
+
+    boolean existsByMessageId(
+            long messageId);
 }

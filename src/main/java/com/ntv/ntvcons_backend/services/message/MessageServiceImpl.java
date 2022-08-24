@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,46 +81,41 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean sendMessageAuthenticated(Long userId, Long conversationId, String message, MultipartFile file) throws IOException {
+    public Long sendMessageAuthenticated(Long userId, Long conversationId, String message) {
         Message messageEntity = new Message();
         messageEntity.setConversationId(conversationId);
         messageEntity.setSenderId(userId);
         messageEntity.setMessage(message);
-//        messageEntity.setCreatedAt(LocalDateTime.now());
-//        messageEntity.setCreatedBy(userId);
-        if (file != null) {
-            messageEntity.setFileName(file.getName());
-            messageEntity.setFileType(file.getContentType());
-            messageEntity.setData(file.getBytes());
+        messageEntity.setSendTime(LocalDateTime.now());
+        Message createdMessage = messageRepository.saveAndFlush(messageEntity);
+
+        if (createdMessage == null) {
+            return null;
         }
-        messageRepository.saveAndFlush(messageEntity);
-        return true;
+        return createdMessage.getMessageId();
     }
 
     @Override
-    public boolean sendMessageUnauthenticated(String ipAddress, Long conversationId, String message, MultipartFile file) throws IOException {
+    public Long sendMessageUnauthenticated(String ipAddress, Long conversationId, String message) {
         Message messageEntity = new Message();
         messageEntity.setConversationId(conversationId);
         messageEntity.setSenderIp(ipAddress);
         messageEntity.setMessage(message);
-//        messageEntity.setCreatedAt(LocalDateTime.now());
-        if (file != null) {
-            messageEntity.setFileName(file.getName());
-            messageEntity.setFileType(file.getContentType());
-            messageEntity.setData(file.getBytes());
+        messageEntity.setSendTime(LocalDateTime.now());
+        Message createdMessage = messageRepository.saveAndFlush(messageEntity);
+
+        if (createdMessage == null) {
+            return null;
         }
-        messageRepository.saveAndFlush(messageEntity);
-        return true;
+        return createdMessage.getMessageId();
     }
 
     @Override
     public boolean seenMessageAuthenticated(Long userId, Long conversationId) {
         List<Message> listMessage = messageRepository.findAllByConversationIdAndSenderId(conversationId, userId);
-        if(listMessage!=null){
+        if (listMessage != null) {
             for (Message message : listMessage) {
                 message.setSeen(true);
-//                message.setUpdatedAt(LocalDateTime.now());
-//                message.setUpdatedBy(userId);
                 messageRepository.saveAndFlush(message);
             }
             return true;
@@ -133,15 +126,20 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public boolean seenMessageUnauthenticated(String ipAddress, Long conversationId) {
         List<Message> listMessage = messageRepository.findAllByConversationIdAndSenderIp(conversationId, ipAddress);
-        if(listMessage!=null){
+        if (listMessage != null) {
             for (Message message : listMessage) {
                 message.setSeen(true);
-//                message.setUpdatedAt(LocalDateTime.now());
                 messageRepository.saveAndFlush(message);
             }
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean existsById(Long messageId) {
+        return messageRepository
+                .existsByMessageId(messageId);
     }
 
     private List<ShowMessageModel> getShowMessageModels(Page<Message> pagingResult) {
@@ -159,16 +157,8 @@ public class MessageServiceImpl implements MessageService {
                     model.setSenderId(message.getSenderId());
                     model.setSenderIp(message.getSenderIp());
                     model.setMessage(message.getMessage());
-                    model.setFileName(message.getFileName());
-                    model.setFileType(message.getFileType());
                     model.setSeen(message.getSeen());
-                    model.setData(message.getData());
                     model.setSendTime(message.getSendTime());
-
-//                    model.setCreatedAt(message.getCreatedAt());
-//                    model.setCreatedBy(message.getCreatedBy());
-//                    model.setUpdatedAt(message.getCreatedAt());
-//                    model.setUpdatedBy(message.getUpdatedBy());
                     model.setTotalPage(totalPage);
                     return model;
                 }

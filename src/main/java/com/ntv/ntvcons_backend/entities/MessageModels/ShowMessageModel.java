@@ -9,9 +9,8 @@ import java.time.LocalDateTime;
 @Setter
 public class ShowMessageModel{
     private Long messageId, conversationId, senderId;
-    private String senderIp, message, fileName, fileType;
+    private String senderIp, message;
     private Boolean seen;
-    private byte[] data;
     private LocalDateTime sendTime;
 
     private Long createdBy, updatedBy;

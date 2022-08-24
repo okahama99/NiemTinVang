@@ -45,6 +45,9 @@ public class EntityWrapper extends BaseEntity {
     @Column(name = "workerId")
     private Long workerId;
 
+    @Column(name = "messageId")
+    private Long messageId;
+
     /** For CREATE only */
     public EntityWrapper(long entityId, EntityType type) {
         this.entityWrapperId = null;
@@ -56,6 +59,7 @@ public class EntityWrapper extends BaseEntity {
         this.userId = null;
         this.workerId = null;
         this.taskId = null;
+        this.messageId = null;
 
         switch (type) {
             case BLUEPRINT_ENTITY:
@@ -81,6 +85,8 @@ public class EntityWrapper extends BaseEntity {
                 break;
             case WORKER_ENTITY:
                 this.workerId = entityId;
+            case MESSAGE_ENTITY:
+                this.messageId = entityId;
                 break;
         }
     }

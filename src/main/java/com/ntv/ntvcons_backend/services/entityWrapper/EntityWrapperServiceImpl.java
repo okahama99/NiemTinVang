@@ -6,6 +6,7 @@ import com.ntv.ntvcons_backend.entities.EntityWrapper;
 import com.ntv.ntvcons_backend.repositories.EntityWrapperRepository;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.message.MessageService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.report.ReportService;
 import com.ntv.ntvcons_backend.services.request.RequestService;
@@ -45,6 +46,8 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private WorkerService workerService;
+    @Autowired
+    private MessageService messageService;
     @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
@@ -121,6 +124,13 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                 if (!workerService.existsById(entityId))
                     isNotExists = true;
                 if (entityWrapperRepository.existsByWorkerIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                    isDuplicated = true;
+                break;
+
+            case MESSAGE_ENTITY:
+                if (!messageService.existsById(entityId))
+                    isNotExists = true;
+                if (entityWrapperRepository.existsByMessageIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
                     isDuplicated = true;
                 break;
 
@@ -345,6 +355,12 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                 entityWrapper =
                         entityWrapperRepository
                                 .findByWorkerIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
+                                .orElse(null);
+
+            case MESSAGE_ENTITY:
+                entityWrapper =
+                        entityWrapperRepository
+                                .findByMessageIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
                 break;
 

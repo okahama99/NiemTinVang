@@ -10,9 +10,7 @@ import com.ntv.ntvcons_backend.repositories.MessageRepository;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +66,7 @@ public class ConversationServiceImpl implements ConversationService {
         if (userId == null) {
             ShowConversationModel model = new ShowConversationModel();
 
+            model.setConversationId(conversation.getConversationId());
             model.setName(conversation.getClientName());
             model.setAvatar(null); // khi FE nhận null sẽ set avatar mặc định
 
@@ -77,10 +76,11 @@ public class ConversationServiceImpl implements ConversationService {
             return model;
         } else {
             ShowConversationModel model = new ShowConversationModel();
+            model.setConversationId(conversation.getConversationId());
 
             User user = userRepository.findByUserIdAndStatusNotIn(userId, N_D_S_STATUS_LIST).orElse(null);
             model.setName(user.getFullName());
-//            model.setAvatar(user.getAvatar()); //TODO : thêm avatar
+//            model.setAvatar(user.getAvatar()); //TODO : thêm avatar nếu ông xong nha Thành :v
 
             Message message = messageRepository.findTopByOrderByConversationIdDesc();
             model.setLastMessage(message.getMessage());
@@ -90,85 +90,63 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public boolean createConversationForAuthenticated(Long currentUserId, Long targetUserId, String message, MultipartFile file) throws IOException {
+    public Long createConversationForAuthenticated(Long currentUserId, Long targetUserId, String message) {
         Conversation conversation = new Conversation();
         conversation.setUser1Id(currentUserId);
         conversation.setUser2Id(targetUserId);
-//        conversation.setCreatedAt(LocalDateTime.now());
-//        conversation.setCreatedBy(currentUserId);
         Conversation createdConversation = conversationRepository.saveAndFlush(conversation);
-
-        if (createdConversation == null) {
-            return false;
-        }
 
         Message messageEntity = new Message();
         messageEntity.setConversationId(createdConversation.getConversationId());
         messageEntity.setSenderId(currentUserId);
         messageEntity.setMessage(message);
-//        messageEntity.setCreatedAt(LocalDateTime.now());
-//        messageEntity.setCreatedBy(currentUserId);
-        if (file != null) {
-            messageEntity.setFileName(file.getName());
-            messageEntity.setFileType(file.getContentType());
-            messageEntity.setData(file.getBytes());
+        messageEntity.setSendTime(LocalDateTime.now());
+        Message createdMessage = messageRepository.saveAndFlush(messageEntity);
+
+        if (createdConversation == null || createdMessage == null) {
+            return null;
         }
-        messageRepository.saveAndFlush(messageEntity);
-        return true;
+        return createdMessage.getMessageId();
     }
 
     @Override
-    public boolean createConversationForUnauthenticated(String clientIp, String clientName, String message, MultipartFile file) throws IOException {
+    public Long createConversationForUnauthenticated(String clientIp, String clientName, String message) {
         Conversation conversation = new Conversation();
         conversation.setUser1Id(null);
         conversation.setUser2Id(null);
         conversation.setIpAddress(clientIp);
         conversation.setClientName(clientName);
-//        conversation.setCreatedAt(LocalDateTime.now());
         Conversation createdConversation = conversationRepository.saveAndFlush(conversation);
-
-        if (createdConversation == null) {
-            return false;
-        }
 
         Message messageEntity = new Message();
         messageEntity.setConversationId(createdConversation.getConversationId());
         messageEntity.setSenderId(null);
         messageEntity.setMessage(message);
-//        messageEntity.setCreatedAt(LocalDateTime.now());
-        if (file != null) {
-            messageEntity.setFileName(file.getName());
-            messageEntity.setFileType(file.getContentType());
-            messageEntity.setData(file.getBytes());
+        messageEntity.setSendTime(LocalDateTime.now());
+        Message createdMessage = messageRepository.saveAndFlush(messageEntity);
+
+        if (createdConversation == null || createdMessage == null) {
+            return null;
         }
-        messageRepository.saveAndFlush(messageEntity);
-        return true;
+        return createdMessage.getMessageId();
     }
 
     @Override
-    public boolean setConsultantForChat(Long userId, Long conversationId, String message, MultipartFile file) throws IOException {
+    public Long setConsultantForChat(Long userId, Long conversationId, String message) {
         Conversation conversation = conversationRepository.findById(conversationId).orElse(null);
         conversation.setUser1Id(userId);
-//        conversation.setCreatedAt(LocalDateTime.now());
-//        conversation.setCreatedBy(userId);
         Conversation createdConversation = conversationRepository.saveAndFlush(conversation);
-
-        if (createdConversation == null) {
-            return false;
-        }
 
         Message messageEntity = new Message();
         messageEntity.setConversationId(createdConversation.getConversationId());
         messageEntity.setSenderId(userId);
         messageEntity.setMessage(message);
-//        messageEntity.setCreatedAt(LocalDateTime.now());
-//        messageEntity.setCreatedBy(userId);
-        if (file != null) {
-            messageEntity.setFileName(file.getName());
-            messageEntity.setFileType(file.getContentType());
-            messageEntity.setData(file.getBytes());
+        messageEntity.setSendTime(LocalDateTime.now());
+        Message createdMessage = messageRepository.saveAndFlush(messageEntity);
+
+        if (createdConversation == null || createdMessage == null) {
+            return null;
         }
-        messageRepository.saveAndFlush(messageEntity);
-        return true;
+        return createdMessage.getMessageId();
     }
 }

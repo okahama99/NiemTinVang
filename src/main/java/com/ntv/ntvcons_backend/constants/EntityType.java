@@ -8,7 +8,8 @@ public enum EntityType {
     REQUEST_ENTITY("Request", "requestId", "RequestId"),
     TASK_ENTITY("Task", "taskId", "TaskId"),
     USER_ENTITY("User", "userId", "UserId"),
-    WORKER_ENTITY("Worker", "workerId", "WorkerId");
+    WORKER_ENTITY("Worker", "workerId", "WorkerId"),
+    MESSAGE_ENTITY("Message", "messageId", "MessageId");
 
     private final String EntityName;
     /** camelCase */

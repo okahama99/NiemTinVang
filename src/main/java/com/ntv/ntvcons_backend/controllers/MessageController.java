@@ -1,11 +1,15 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.entities.MessageModels.ShowMessageModel;
 import com.ntv.ntvcons_backend.services.message.MessageService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,13 +29,16 @@ public class MessageController {
     @Autowired
     private MiscUtil miscUtil;
 
+    @Autowired
+    private FileCombineService fileCombineService;
+
     @GetMapping(value = "/v1/getByConversationId", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByConversationId(@RequestParam String searchParam,
+    public ResponseEntity<Object> getByConversationId(@RequestParam String userIdOrclientIp,
                                                       @RequestParam SearchType.MESSAGE searchType,
                                                       @RequestParam Long conversationId,
                                                       @RequestParam int pageNo,
                                                       @RequestParam int pageSize,
-                                                      @RequestParam String sortBy,
+                                                      @RequestParam("ghi la messageId") String sortBy,
                                                       @RequestParam boolean sortTypeAsc) {
         try {
             Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
@@ -40,20 +46,20 @@ public class MessageController {
 
             switch (searchType) {
                 case BY_CONVERSATION_ID_AUTHENTICATED:
-                    list = messageService.getByConversationIdAuthenticated(Long.parseLong(searchParam), conversationId, paging);
+                    list = messageService.getByConversationIdAuthenticated(Long.parseLong(userIdOrclientIp), conversationId, paging);
 
                     if (list == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Message found with Id: '" + searchParam + "'. ");
+                                .body("No Message found with Id: '" + userIdOrclientIp + "'. ");
                     }
                     break;
 
                 case BY_CONVERSATION_ID_UNAUTHENTICATED:
-                    list = messageService.getByConversationIdUnauthenticated(searchParam, conversationId, paging);
+                    list = messageService.getByConversationIdUnauthenticated(userIdOrclientIp, conversationId, paging);
 
                     if (list == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Message found with IPAddress: '" + searchParam + "'. ");
+                                .body("No Message found with IPAddress: '" + userIdOrclientIp + "'. ");
                     }
                     break;
 
@@ -77,11 +83,11 @@ public class MessageController {
 
             switch (searchType) {
                 case BY_CONVERSATION_ID_AUTHENTICATED:
-                    errorMsg += "Id: '" + searchParam + "'. ";
+                    errorMsg += "Id: '" + userIdOrclientIp + "'. ";
                     break;
 
                 case BY_CONVERSATION_ID_UNAUTHENTICATED:
-                    errorMsg += "IPAddress: '" + searchParam + "'. ";
+                    errorMsg += "IPAddress: '" + userIdOrclientIp + "'. ";
                     break;
             }
 
@@ -90,25 +96,37 @@ public class MessageController {
     }
 
     @PreAuthorize("hasAnyAuthority('24','54','14','34','44','4')")
-    @PostMapping(value = "/v1/sendMessageAuthenticated", produces = "application/json;charset=UTF-8",consumes = "multipart/form-data")
+    @PostMapping(value = "/v1/sendMessageAuthenticated", produces = "application/json;charset=UTF-8", consumes = "multipart/form-data")
     public ResponseEntity<Object> sendMessageAuthenticated(@RequestParam Long userId,
                                                            @RequestParam Long conversationId,
                                                            @RequestParam String message,
-                                                           @RequestPart MultipartFile file) throws IOException {
-        boolean result = messageService.sendMessageAuthenticated(userId, conversationId, message, file);
-        if (result) {
+                                                           @RequestPart(required = false) List<MultipartFile> file) throws Exception {
+
+        Long messageId = messageService.sendMessageAuthenticated(userId, conversationId, message);
+
+        if (messageId != null) {
+            if (file != null) {
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        file, FileType.MESSAGE_FILE, messageId, EntityType.MESSAGE_ENTITY, userId);
+            }
             return ResponseEntity.ok().body("Gửi thành công.");
         }
         return ResponseEntity.badRequest().body("Gửi thất bại.");
     }
 
-    @PostMapping(value = "/v1/sendMessageUnauthenticated", produces = "application/json;charset=UTF-8",consumes = "multipart/form-data")
+    @PostMapping(value = "/v1/sendMessageUnauthenticated", produces = "application/json;charset=UTF-8", consumes = "multipart/form-data")
     public ResponseEntity<Object> sendMessageUnauthenticated(@RequestParam String ipAddress,
                                                              @RequestParam Long conversationId,
                                                              @RequestParam String message,
-                                                             @RequestPart MultipartFile file) throws IOException {
-        boolean result = messageService.sendMessageUnauthenticated(ipAddress, conversationId, message, file);
-        if (result) {
+                                                             @RequestPart(required = false) List<MultipartFile> file) throws Exception {
+
+        Long messageId = messageService.sendMessageUnauthenticated(ipAddress, conversationId, message);
+
+        if (messageId != null) {
+            if (file != null) {
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        file, FileType.MESSAGE_FILE, messageId, EntityType.MESSAGE_ENTITY, messageId);
+            }
             return ResponseEntity.ok().body("Gửi thành công.");
         }
         return ResponseEntity.badRequest().body("Gửi thất bại.");
@@ -116,22 +134,22 @@ public class MessageController {
 
     @PostMapping(value = "/v1/seenMessageUnauthenticated", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> seenMessageUnauthenticated(@RequestParam String ipAddress,
-                                                                     @RequestParam Long conversationId){
+                                                             @RequestParam Long conversationId) {
         boolean result = messageService.seenMessageUnauthenticated(ipAddress, conversationId);
         if (result) {
-            return ResponseEntity.ok().body("Tạo thành công.");
+            return ResponseEntity.ok().body("Seen thành công.");
         }
-        return ResponseEntity.badRequest().body("Tạo thất bại.");
+        return ResponseEntity.badRequest().body("Seen thất bại.");
     }
 
     @PreAuthorize("hasAnyAuthority('24','54','14','34','44','4')")
     @PostMapping(value = "/v1/seenMessageAuthenticated", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> seenMessageAuthenticated(@RequestParam Long userId,
-                                                                     @RequestParam Long conversationId){
+                                                           @RequestParam Long conversationId) {
         boolean result = messageService.seenMessageAuthenticated(userId, conversationId);
         if (result) {
-            return ResponseEntity.ok().body("Tạo thành công.");
+            return ResponseEntity.ok().body("Seen thành công.");
         }
-        return ResponseEntity.badRequest().body("Tạo thất bại.");
+        return ResponseEntity.badRequest().body("Seen thất bại.");
     }
 }
