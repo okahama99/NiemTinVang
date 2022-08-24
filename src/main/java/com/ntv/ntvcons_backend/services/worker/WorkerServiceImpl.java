@@ -544,9 +544,13 @@ public class WorkerServiceImpl implements WorkerService {
     /* Utils */
     private WorkerReadDTO fillDTO(Worker worker) throws Exception {
         modelMapper.typeMap(Worker.class, WorkerReadDTO.class)
-            .addMappings(mapper -> {
-                mapper.skip(WorkerReadDTO::setCreatedAt);
-                mapper.skip(WorkerReadDTO::setUpdatedAt);});
+                .addMappings(mapper -> {
+                    mapper.map(
+                            workerEntity -> workerEntity.getGender().getStringValueVie(),
+                            WorkerReadDTO::setGender);
+
+                    mapper.skip(WorkerReadDTO::setCreatedAt);
+                    mapper.skip(WorkerReadDTO::setUpdatedAt);});
 
         long workerId = worker.getWorkerId();
 
@@ -580,6 +584,10 @@ public class WorkerServiceImpl implements WorkerService {
     private List<WorkerReadDTO> fillAllDTO(Collection<Worker> workerCollection, Integer totalPage) throws Exception {
         modelMapper.typeMap(Worker.class, WorkerReadDTO.class)
                 .addMappings(mapper -> {
+                    mapper.map(
+                            workerEntity -> workerEntity.getGender().getStringValueVie(),
+                            WorkerReadDTO::setGender);
+
                     mapper.skip(WorkerReadDTO::setCreatedAt);
                     mapper.skip(WorkerReadDTO::setUpdatedAt);});
 

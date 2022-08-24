@@ -17,7 +17,7 @@ public class WorkerReadDTO extends BaseReadDTO {
     private Long workerId;
     private String fullName;
     private String citizenId;
-    private Gender gender;
+    private String gender;
     private Date birthday;
     private String birthPlace;
     private String socialSecurityCode;
