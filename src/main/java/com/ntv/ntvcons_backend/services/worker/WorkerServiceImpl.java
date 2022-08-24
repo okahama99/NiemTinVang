@@ -561,9 +561,15 @@ public class WorkerServiceImpl implements WorkerService {
         workerDTO.setAddress(
                 locationService.getDTOById(worker.getAddressId()));
         /* Get associated ExternalFile */
-        workerDTO.setFileList(
+        List<ExternalFileReadDTO> fileReadDTOList =
                 eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(workerId, ENTITY_TYPE));
+                        .getAllExternalFileDTOByEntityIdAndEntityType(workerId, ENTITY_TYPE);
+
+        if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+            /* if (fileReadDTOList.size() > 1)
+                Log Error, worker only have 1 avatar file at a time */
+            workerDTO.setFile(fileReadDTOList.get(0));
+        }
 
         /* Đang bận làm / rảnh */
         workerDTO.setIsAvailable(projectWorkerService.getAllByWorkerId(workerId) == null);
@@ -610,8 +616,14 @@ public class WorkerServiceImpl implements WorkerService {
 
                     workerDTO.setAddress(locationIdLocationDTOMap.get(worker.getAddressId()));
 
-                    workerDTO.setFileList(
-                            workerIdExternalFileDTOListMap.get(workerId));
+                    List<ExternalFileReadDTO> fileReadDTOList =
+                            workerIdExternalFileDTOListMap.get(workerId);
+
+                    if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+                        /* if (fileReadDTOList.size() > 1)
+                            Log Error, worker only have 1 avatar file at a time */
+                        workerDTO.setFile(fileReadDTOList.get(0));
+                    }
 
                     /* Đang bận làm / rảnh */
                     workerDTO.setIsAvailable(workerIdProjectWorkerMap.get(workerId) == null);

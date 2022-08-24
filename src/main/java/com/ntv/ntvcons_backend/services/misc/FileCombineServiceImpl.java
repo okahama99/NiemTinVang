@@ -32,7 +32,7 @@ public class FileCombineServiceImpl implements FileCombineService {
 
     /* READ */
     public boolean saveFileInDBAndFirebase(
-            MultipartFile multipartFile, FileType fileType, long entityId, EntityType type, Long createdBy) throws Exception {
+            MultipartFile multipartFile, FileType fileType, long entityId, EntityType entityType, Long createdBy) throws Exception {
         /* Save File to Firebase (get name & link) */
         ExternalFileCreateDTO fileCreateDTO =
                 firebaseService.uploadToFirebase(multipartFile);
@@ -45,13 +45,13 @@ public class FileCombineServiceImpl implements FileCombineService {
 
         /* Create pairing */
         eFEWPairingService
-                .createPairing(entityId, type, newFileDTO.getFileId(), createdBy);
+                .createPairing(entityId, entityType, newFileDTO.getFileId(), createdBy);
 
         return true;
     }
 
     public boolean saveAllFileInDBAndFirebase(
-            List<MultipartFile> multipartFileList, FileType fileType, long entityId, EntityType type, Long createdBy) throws Exception {
+            List<MultipartFile> multipartFileList, FileType fileType, long entityId, EntityType entityType, Long createdBy) throws Exception {
         List<ExternalFileCreateDTO> fileCreateDTOList =
                 firebaseService.uploadAllToFirebase(multipartFileList);
         fileCreateDTOList = fileCreateDTOList.stream()
@@ -71,7 +71,7 @@ public class FileCombineServiceImpl implements FileCombineService {
 
         /* Create pairing */
         eFEWPairingService
-                .createBulkPairingByEntityIdAndEntityType(entityId, type, fileIdSet, createdBy);
+                .createBulkPairingByEntityIdAndEntityType(entityId, entityType, fileIdSet, createdBy);
 
         return true;
     }

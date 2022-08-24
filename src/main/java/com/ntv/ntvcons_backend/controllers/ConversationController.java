@@ -38,7 +38,6 @@ public class ConversationController {
             @RequestParam Long targetUserId,
             @RequestParam String message,
             @RequestPart(required = false) List<MultipartFile> file) throws Exception {
-
         Long messageId =
                 conversationService
                         .createConversationForAuthenticated(currentUserId, targetUserId, message);
@@ -61,7 +60,6 @@ public class ConversationController {
             @RequestParam String clientName,
             @RequestParam String message,
             @RequestPart(required = false) List<MultipartFile> file) throws Exception {
-
         Long messageId =
                 conversationService
                         .createConversationForUnauthenticated(clientIp, clientName, message);
@@ -70,8 +68,9 @@ public class ConversationController {
 
             if (file != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
-                        file, FileType.MESSAGE_FILE, messageId, EntityType.MESSAGE_ENTITY, messageId); // TODO : tạm bỏ messageId vì IP là string, đọc xong xóa nha
+                        file, FileType.MESSAGE_FILE, messageId, EntityType.MESSAGE_ENTITY, null);
             }
+
             return ResponseEntity.ok().body("Tạo thành công.");
         }
 
