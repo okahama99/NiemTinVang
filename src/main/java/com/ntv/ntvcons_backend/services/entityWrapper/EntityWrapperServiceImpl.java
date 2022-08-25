@@ -7,6 +7,7 @@ import com.ntv.ntvcons_backend.repositories.EntityWrapperRepository;
 import com.ntv.ntvcons_backend.services.blueprint.BlueprintService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import com.ntv.ntvcons_backend.services.message.MessageService;
+import com.ntv.ntvcons_backend.services.post.PostService;
 import com.ntv.ntvcons_backend.services.project.ProjectService;
 import com.ntv.ntvcons_backend.services.report.ReportService;
 import com.ntv.ntvcons_backend.services.request.RequestService;
@@ -31,6 +32,9 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private ProjectService projectService;
+    @Lazy /* To avoid circular injection Exception */
+    @Autowired
+    private PostService postService;
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private ReportService reportService;
@@ -78,12 +82,12 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                     isDuplicated = true;
                 break;
 
-//            case POST_ENTITY:
-//            if (!postService.existsById(entityId))
-//                isNotExists = true;
-//            if (entityWrapperRepository.existsByPostIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
-//                isDuplicated = true;
-//                break;
+            case POST_ENTITY:
+            if (!postService.existsById(entityId))
+                isNotExists = true;
+            if (entityWrapperRepository.existsByPostIdAndStatusNotIn(entityId, N_D_S_STATUS_LIST))
+                isDuplicated = true;
+                break;
 
             case PROJECT_ENTITY:
                 if (!projectService.existsById(entityId))
@@ -228,6 +232,11 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                         entityWrapperRepository.findAllByWorkerIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
                 break;
 
+            case MESSAGE_ENTITY:
+                entityWrapperList =
+                        entityWrapperRepository.findAllByMessageIdNotNullAndStatusNotIn(N_D_S_STATUS_LIST);
+                break;
+
             default:
                 throw new IllegalArgumentException("Invalid EntityType used, no such type exists!");
         }
@@ -244,51 +253,48 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
 
         switch (type) {
             case BLUEPRINT_ENTITY:
-                exists =
-                        entityWrapperRepository
-                                .existsByBlueprintIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                exists = entityWrapperRepository
+                        .existsByBlueprintIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case POST_ENTITY:
-                exists =
-                        entityWrapperRepository
-                                .existsByPostIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                exists = entityWrapperRepository
+                        .existsByPostIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case PROJECT_ENTITY:
-                exists =
-                        entityWrapperRepository
-                                .existsByProjectIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                exists = entityWrapperRepository
+                        .existsByProjectIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case REPORT_ENTITY:
-                exists =
-                        entityWrapperRepository
-                                .existsByReportIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                exists = entityWrapperRepository
+                        .existsByReportIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case REQUEST_ENTITY:
-                exists =
-                        entityWrapperRepository
-                                .existsByRequestIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                exists = entityWrapperRepository
+                        .existsByRequestIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case TASK_ENTITY:
-                exists =
-                        entityWrapperRepository
-                                .existsByTaskIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                exists = entityWrapperRepository
+                        .existsByTaskIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case USER_ENTITY:
-                exists =
-                        entityWrapperRepository
-                                .existsByUserIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                exists = entityWrapperRepository
+                        .existsByUserIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             case WORKER_ENTITY:
-                exists =
-                        entityWrapperRepository
-                                .existsByWorkerIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                exists = entityWrapperRepository
+                        .existsByWorkerIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
+                break;
+
+            case MESSAGE_ENTITY:
+                exists = entityWrapperRepository
+                        .existsByMessageIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -356,6 +362,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                         entityWrapperRepository
                                 .findByWorkerIdAndStatusNotIn(entityID, N_D_S_STATUS_LIST)
                                 .orElse(null);
+                break;
 
             case MESSAGE_ENTITY:
                 entityWrapper =
@@ -414,6 +421,11 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
             case WORKER_ENTITY:
                 entityWrapperList =
                         entityWrapperRepository.findAllByWorkerIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                break;
+
+            case MESSAGE_ENTITY:
+                entityWrapperList =
+                        entityWrapperRepository.findAllByMessageIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             default:
@@ -500,6 +512,15 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
                                 .collect(Collectors.toMap(
                                         EntityWrapper::getEntityWrapperId,
                                         EntityWrapper::getWorkerId));
+
+                break;
+
+            case MESSAGE_ENTITY:
+                entityWrapperIdEntityIdMap =
+                        entityWrapperList.stream()
+                                .collect(Collectors.toMap(
+                                        EntityWrapper::getEntityWrapperId,
+                                        EntityWrapper::getMessageId));
 
                 break;
 

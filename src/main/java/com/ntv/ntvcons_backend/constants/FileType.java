@@ -8,7 +8,8 @@ public enum FileType {
     TASK_DOC("TASK_DOC"),
     USER_AVATAR("USER_AVATAR"),
     WORKER_AVATAR("WORKER_AVATAR"),
-    MESSAGE_FILE("MESSAGE_FILE");
+    MESSAGE_FILE("MESSAGE_FILE"),
+    POST_FILE("POST_FILE");
 
     private final String stringValue;
 
@@ -51,6 +52,9 @@ public enum FileType {
 
             case "MESSAGE_FILE":
                 return FileType.MESSAGE_FILE;
+
+            case "POST_FILE":
+                return FileType.POST_FILE;
 
             default:
                 throw new IllegalArgumentException("stringValue: '" + stringValue + "' not supported.");
