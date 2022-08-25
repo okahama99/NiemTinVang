@@ -545,16 +545,15 @@ public class WorkerServiceImpl implements WorkerService {
     private WorkerReadDTO fillDTO(Worker worker) throws Exception {
         modelMapper.typeMap(Worker.class, WorkerReadDTO.class)
                 .addMappings(mapper -> {
-                    mapper.map(
-                            workerEntity -> workerEntity.getGender().getStringValueVie(),
-                            WorkerReadDTO::setGender);
-
+                    mapper.skip(WorkerReadDTO::setGender);
                     mapper.skip(WorkerReadDTO::setCreatedAt);
                     mapper.skip(WorkerReadDTO::setUpdatedAt);});
 
         long workerId = worker.getWorkerId();
 
         WorkerReadDTO workerDTO = modelMapper.map(worker, WorkerReadDTO.class);
+
+        workerDTO.setGender(worker.getGender().getStringValueVie());
 
         if (worker.getCreatedAt() != null)
             workerDTO.setCreatedAt(worker.getCreatedAt().format(dateTimeFormatter));
@@ -584,10 +583,7 @@ public class WorkerServiceImpl implements WorkerService {
     private List<WorkerReadDTO> fillAllDTO(Collection<Worker> workerCollection, Integer totalPage) throws Exception {
         modelMapper.typeMap(Worker.class, WorkerReadDTO.class)
                 .addMappings(mapper -> {
-                    mapper.map(
-                            workerEntity -> workerEntity.getGender().getStringValueVie(),
-                            WorkerReadDTO::setGender);
-
+                    mapper.skip(WorkerReadDTO::setGender);
                     mapper.skip(WorkerReadDTO::setCreatedAt);
                     mapper.skip(WorkerReadDTO::setUpdatedAt);});
 
@@ -614,6 +610,8 @@ public class WorkerServiceImpl implements WorkerService {
                 .map(worker -> {
                     WorkerReadDTO workerDTO =
                             modelMapper.map(worker, WorkerReadDTO.class);
+
+                    workerDTO.setGender(worker.getGender().getStringValueVie());
 
                     if (worker.getCreatedAt() != null)
                         workerDTO.setCreatedAt(worker.getCreatedAt().format(dateTimeFormatter));
