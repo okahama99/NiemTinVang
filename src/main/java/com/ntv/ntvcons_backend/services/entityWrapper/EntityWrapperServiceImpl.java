@@ -385,47 +385,56 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
         switch (type) {
             case BLUEPRINT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByBlueprintIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByBlueprintIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case POST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByPostIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByPostIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case PROJECT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByProjectIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByProjectIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case REPORT_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByReportIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByReportIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case REQUEST_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByRequestIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByRequestIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case TASK_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByTaskIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByTaskIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case USER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByUserIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByUserIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case WORKER_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByWorkerIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByWorkerIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             case MESSAGE_ENTITY:
                 entityWrapperList =
-                        entityWrapperRepository.findAllByMessageIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
+                        entityWrapperRepository
+                                .findAllByMessageIdInAndStatusNotIn(entityIdCollection, N_D_S_STATUS_LIST);
                 break;
 
             default:

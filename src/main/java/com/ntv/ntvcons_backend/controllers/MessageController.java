@@ -9,7 +9,6 @@ import com.ntv.ntvcons_backend.services.message.MessageService;
 import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

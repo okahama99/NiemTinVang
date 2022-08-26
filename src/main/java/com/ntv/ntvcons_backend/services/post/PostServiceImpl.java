@@ -12,7 +12,6 @@ import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
 import com.ntv.ntvcons_backend.repositories.PostCategoryRepository;
 import com.ntv.ntvcons_backend.repositories.PostRepository;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
-import com.ntv.ntvcons_backend.services.postCategory.PostCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
