@@ -13,6 +13,8 @@ public class ShowMessageModel{
     private Boolean seen;
     private LocalDateTime sendTime;
 
+    private MessageFileModel messageFileModel;
+
     private Long createdBy, updatedBy;
     private LocalDateTime createdAt, updatedAt;
     private Integer totalPage;

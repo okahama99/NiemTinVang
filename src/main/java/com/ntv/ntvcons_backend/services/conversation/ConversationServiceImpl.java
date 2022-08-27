@@ -8,6 +8,7 @@ import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.repositories.ConversationRepository;
 import com.ntv.ntvcons_backend.repositories.MessageRepository;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
+import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,9 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ExternalFileService externalFileService;
 
     private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 

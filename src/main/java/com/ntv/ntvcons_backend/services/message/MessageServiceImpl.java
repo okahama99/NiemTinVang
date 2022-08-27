@@ -1,11 +1,11 @@
 package com.ntv.ntvcons_backend.services.message;
 
 import com.google.common.base.Converter;
-import com.ntv.ntvcons_backend.entities.Conversation;
-import com.ntv.ntvcons_backend.entities.Message;
+import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.entities.*;
+import com.ntv.ntvcons_backend.entities.MessageModels.MessageFileModel;
 import com.ntv.ntvcons_backend.entities.MessageModels.ShowMessageModel;
-import com.ntv.ntvcons_backend.repositories.ConversationRepository;
-import com.ntv.ntvcons_backend.repositories.MessageRepository;
+import com.ntv.ntvcons_backend.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -23,6 +24,17 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     private ConversationRepository conversationRepository;
+
+    @Autowired
+    private EntityWrapperRepository entityWrapperRepository;
+
+    @Autowired
+    private ExternalFileEntityWrapperPairingRepository externalFileEntityWrapperPairingRepository;
+
+    @Autowired
+    private ExternalFileRepository externalFileRepository;
+
+    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     @Override
     public List<ShowMessageModel> getByConversationIdAuthenticated(Long userId, Long conversationId, Pageable paging) {
@@ -58,6 +70,30 @@ public class MessageServiceImpl implements MessageService {
                 result.add(model);
             }
         }
+
+        // get file
+        for (ShowMessageModel model : result ) {
+            Optional<EntityWrapper> entityWrapper = entityWrapperRepository.findByMessageIdAndStatusNotIn(model.getMessageId(), N_D_S_STATUS_LIST);
+            if(entityWrapper != null){
+                List<ExternalFileEntityWrapperPairing> list = externalFileEntityWrapperPairingRepository.
+                        findAllByEntityWrapperIdAndStatusNotIn(entityWrapper.get().getEntityWrapperId(),N_D_S_STATUS_LIST);
+                if(list != null){
+                    for (ExternalFileEntityWrapperPairing pairing : list) {
+                        Optional<ExternalFile> file = externalFileRepository.
+                                findByFileIdAndStatusNotIn(pairing.getExternalFileId(), N_D_S_STATUS_LIST);
+
+                        MessageFileModel messageFileModel = new MessageFileModel();
+                        messageFileModel.setFileName(file.get().getFileName());
+                        messageFileModel.setFileLink(file.get().getFileLink());
+                        messageFileModel.setMessageCreatedAt(file.get().getCreatedAt());
+                        String[] data = messageFileModel.getFileName().split(".");
+                        messageFileModel.setFileType(data[1]);
+
+                        model.setMessageFileModel(messageFileModel);
+                    }
+                }
+            }
+        }
         return result;
     }
 
@@ -73,6 +109,30 @@ public class MessageServiceImpl implements MessageService {
                 temp = getShowMessageModels(pagingResult);
                 for (ShowMessageModel model : temp) {
                     result.add(model);
+                }
+            }
+
+            // get file
+            for (ShowMessageModel model : result ) {
+                Optional<EntityWrapper> entityWrapper = entityWrapperRepository.findByMessageIdAndStatusNotIn(model.getMessageId(), N_D_S_STATUS_LIST);
+                if(entityWrapper != null){
+                    List<ExternalFileEntityWrapperPairing> list = externalFileEntityWrapperPairingRepository.
+                            findAllByEntityWrapperIdAndStatusNotIn(entityWrapper.get().getEntityWrapperId(),N_D_S_STATUS_LIST);
+                    if(list != null){
+                        for (ExternalFileEntityWrapperPairing pairing : list) {
+                            Optional<ExternalFile> file = externalFileRepository.
+                                    findByFileIdAndStatusNotIn(pairing.getExternalFileId(), N_D_S_STATUS_LIST);
+
+                            MessageFileModel messageFileModel = new MessageFileModel();
+                            messageFileModel.setFileName(file.get().getFileName());
+                            messageFileModel.setFileLink(file.get().getFileLink());
+                            messageFileModel.setMessageCreatedAt(file.get().getCreatedAt());
+                            String[] data = messageFileModel.getFileName().split(".");
+                            messageFileModel.setFileType(data[1]);
+
+                            model.setMessageFileModel(messageFileModel);
+                        }
+                    }
                 }
             }
             return result;

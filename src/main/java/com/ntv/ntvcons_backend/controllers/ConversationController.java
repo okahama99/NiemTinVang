@@ -6,12 +6,16 @@ import com.ntv.ntvcons_backend.entities.ConversationModels.ShowConversationModel
 import com.ntv.ntvcons_backend.entities.Message;
 import com.ntv.ntvcons_backend.services.conversation.ConversationService;
 import com.ntv.ntvcons_backend.services.misc.FileCombineService;
+import com.ntv.ntvcons_backend.utils.JwtUtil;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -24,29 +28,46 @@ public class ConversationController {
     @Autowired
     private FileCombineService fileCombineService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PreAuthorize("hasAnyAuthority('24','54','14','34','44','4')")
     @PostMapping(value = "/v1/getUserConversations", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getUserConversations(@RequestParam Long tokenUserId) {
-        List<ShowConversationModel> result = conversationService.getUserConversations(tokenUserId);
+    public ResponseEntity<Object> getUserConversations(
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) throws Exception {
+
+        String jwt = jwtUtil.getAndValidateJwt(token);
+        Long userId = jwtUtil.getUserIdFromJWT(jwt);
+        if (userId == null) {
+            throw new IllegalArgumentException("Invalid jwt token.");
+        }
+
+        List<ShowConversationModel> result = conversationService.getUserConversations(userId);
         return ResponseEntity.ok().body(result);
     }
 
     @PreAuthorize("hasAnyAuthority('24','54','14','34','44','4')")
     @PostMapping(value = "/v1/createConversationForAuthenticated", produces = "application/json;charset=UTF-8", consumes = "multipart/form-data")
     public ResponseEntity<Object> createConversationForAuthenticated(
-            @RequestParam Long currentUserId,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token,
             @RequestParam Long targetUserId,
             @RequestParam String message,
             @RequestPart(required = false) List<MultipartFile> file) throws Exception {
 
+        String jwt = jwtUtil.getAndValidateJwt(token);
+        Long userId = jwtUtil.getUserIdFromJWT(jwt);
+        if (userId == null) {
+            throw new IllegalArgumentException("Invalid jwt token.");
+        }
+
         Long messageId =
                 conversationService
-                        .createConversationForAuthenticated(currentUserId, targetUserId, message);
+                        .createConversationForAuthenticated(userId, targetUserId, message);
 
         if (messageId != null) {
             if (file != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
-                        file, FileType.MESSAGE_FILE, messageId, EntityType.MESSAGE_ENTITY, currentUserId);
+                        file, FileType.MESSAGE_FILE, messageId, EntityType.MESSAGE_ENTITY, userId);
             }
             return ResponseEntity.ok().body("Tạo thành công.");
         }
@@ -57,14 +78,14 @@ public class ConversationController {
     @PostMapping(value = "/v1/createConversationForUnauthenticated",
             consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createConversationForUnauthenticated(
-            @RequestParam String clientIp,
+            @RequestParam HttpServletRequest servletRequest,
             @RequestParam String clientName,
             @RequestParam String message,
             @RequestPart(required = false) List<MultipartFile> file) throws Exception {
 
         Long messageId =
                 conversationService
-                        .createConversationForUnauthenticated(clientIp, clientName, message);
+                        .createConversationForUnauthenticated(servletRequest.getRemoteAddr(), clientName, message);
 
         if (messageId != null) {
 
@@ -81,10 +102,17 @@ public class ConversationController {
     @PreAuthorize("hasAnyAuthority('24')")
     @PutMapping(value = "/v1/setConsultantForChat", produces = "application/json;charset=UTF-8", consumes = "multipart/form-data")
     public ResponseEntity<Object> setConsultantForChat(
-            @RequestParam Long userId,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token,
             @RequestParam Long conversationId,
             @RequestParam String message,
             @RequestPart(required = false) List<MultipartFile> file) throws Exception {
+
+        String jwt = jwtUtil.getAndValidateJwt(token);
+        Long userId = jwtUtil.getUserIdFromJWT(jwt);
+        if (userId == null) {
+            throw new IllegalArgumentException("Invalid jwt token.");
+        }
+
         Long messageId =
                 conversationService
                         .setConsultantForChat(userId, conversationId, message);
