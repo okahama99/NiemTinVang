@@ -19,7 +19,7 @@ public interface FirebaseService {
     /* UPDATE */
 
     /* DELETE */
-    boolean deleteFromFirebase(String fileName) throws Exception;
+    boolean deleteFromFirebase(String fileNameFirebase) throws Exception;
 
-    boolean deleteAllFromFirebase(Collection<String> fileNameCollection) throws Exception;
+    boolean deleteAllFromFirebase(Collection<String> fileNameFirebaseCollection) throws Exception;
 }

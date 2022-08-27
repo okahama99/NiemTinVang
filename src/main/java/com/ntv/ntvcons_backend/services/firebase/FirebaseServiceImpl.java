@@ -43,16 +43,17 @@ public class FirebaseServiceImpl implements FirebaseService {
 
         String fileExtension = miscUtil.getExtension(fileName);
 
+        String fileNameFirebase = "";
         do { /* generated random fileName */
-            fileName = UUID.randomUUID().toString().concat(fileExtension);
+            fileNameFirebase = UUID.randomUUID().toString().concat(fileExtension);
         } while(externalFileService /* Test duplicate */
-                .existsByFileNameOrFileLink(fileName, makeFirebaseLink(fileName)));
+                .existsByFileNameOrFileLink(fileName, makeFirebaseLink(fileNameFirebase)));
 
         /* convert multipartFile to File (Create a File in current project folder) */
-        File file = miscUtil.convertMultipartFileToFile(multipartFile, fileName);
+        File file = miscUtil.convertMultipartFileToFile(multipartFile, fileNameFirebase);
 
         /* get uploaded fileLink (upload to Firebase) */
-        String fileLink = uploadFileToGetUrl(fileName, file);
+        String fileLink = uploadFileToGetUrl(fileNameFirebase, file);
 
         /* delete the File stored in current project folder */
         boolean localFileDeleted;
@@ -68,7 +69,8 @@ public class FirebaseServiceImpl implements FirebaseService {
         } while (!localFileDeleted);
 
         ExternalFileCreateDTO fileCreateDTO = new ExternalFileCreateDTO();
-        fileCreateDTO.setFileName(file.getName());
+        fileCreateDTO.setFileName(fileName);
+        fileCreateDTO.setFileNameFirebase(fileNameFirebase);
         fileCreateDTO.setFileLink(fileLink);
 
         return fileCreateDTO;
@@ -76,9 +78,11 @@ public class FirebaseServiceImpl implements FirebaseService {
 
     @Override
     public List<ExternalFileCreateDTO> uploadAllToFirebase(Collection<MultipartFile> multipartFileCollection) throws Exception {
-        Map<String, MultipartFile> fileNameMultipartFileMap = new HashMap<>();
+        Map<String, MultipartFile> fileNameFirebaseMultipartFileMap = new HashMap<>();
+        Map<String, String> fileNameFirebaseFileNameMap = new HashMap<>();
 
         String tmpFileName;
+        String tmpFileNameFirebase;
         for (MultipartFile multipartFile : multipartFileCollection) {
             /* get original fileName */
             tmpFileName = multipartFile.getOriginalFilename();
@@ -87,39 +91,40 @@ public class FirebaseServiceImpl implements FirebaseService {
                 throw new IllegalArgumentException("Filename can not be null");
 
             do { /* generated random fileName */
-                tmpFileName = UUID.randomUUID().toString().concat(miscUtil.getExtension(tmpFileName));
+                tmpFileNameFirebase = UUID.randomUUID().toString().concat(miscUtil.getExtension(tmpFileName));
             } while(externalFileService /* Test duplicate */
-                    .existsByFileNameOrFileLink(tmpFileName, makeFirebaseLink(tmpFileName))
-                    || fileNameMultipartFileMap.containsKey(tmpFileName));
+                    .existsByFileNameOrFileLink(tmpFileName, makeFirebaseLink(tmpFileNameFirebase))
+                    || fileNameFirebaseMultipartFileMap.containsKey(tmpFileNameFirebase));
 
-            fileNameMultipartFileMap.put(tmpFileName, multipartFile);
+            fileNameFirebaseMultipartFileMap.put(tmpFileNameFirebase, multipartFile);
+            fileNameFirebaseFileNameMap.put(tmpFileNameFirebase, tmpFileName);
         }
 
-        Set<String> fileNameSet = fileNameMultipartFileMap.keySet();
+        Set<String> fileNameSet = fileNameFirebaseMultipartFileMap.keySet();
 
         /* convert all multipartFile to File (Create a File in current project folder) */
-        Map<String, File> fileNameFileMap = new HashMap<>();
-        for (String fileName : fileNameSet) {
-            fileNameFileMap.put(
-                    fileName,
+        Map<String, File> fileNameFirebaseFileMap = new HashMap<>();
+        for (String fileNameFirebase : fileNameSet) {
+            fileNameFirebaseFileMap.put(
+                    fileNameFirebase,
                     miscUtil.convertMultipartFileToFile(
-                            fileNameMultipartFileMap.get(fileName), fileName));
+                            fileNameFirebaseMultipartFileMap.get(fileNameFirebase), fileNameFirebase));
         }
 
         /* get all uploaded fileLink (upload to Firebase) */
-        Map<String, String> fileNameFileLinkMap =
-                uploadAllFileToGetNameUrlMap(fileNameFileMap);
+        Map<String, String> fileNameFirebaseFileLinkMap =
+                uploadAllFileToGetNameUrlMap(fileNameFirebaseFileMap);
 
         List<ExternalFileCreateDTO> fileCreateDTOList = new ArrayList<>();
 
         /* delete the File stored in current project folder */
         boolean localFileDeleted;
         int deleteTry;
-        for (String fileName : fileNameSet) {
+        for (String fileNameFirebase : fileNameSet) {
             deleteTry = 0;
             do { /* Xóa cho bằng được */
                 localFileDeleted =
-                        fileNameFileMap.get(fileName).delete();
+                        fileNameFirebaseFileMap.get(fileNameFirebase).delete();
                 deleteTry++;
 
                 if (deleteTry >= 10) {
@@ -129,8 +134,9 @@ public class FirebaseServiceImpl implements FirebaseService {
             } while (!localFileDeleted);
 
             ExternalFileCreateDTO fileCreateDTO = new ExternalFileCreateDTO();
-            fileCreateDTO.setFileName(fileName);
-            fileCreateDTO.setFileLink(fileNameFileLinkMap.get(fileName));
+            fileCreateDTO.setFileName(fileNameFirebaseFileNameMap.get(fileNameFirebase));
+            fileCreateDTO.setFileNameFirebase(fileNameFirebase);
+            fileCreateDTO.setFileLink(fileNameFirebaseFileLinkMap.get(fileNameFirebase));
 
             fileCreateDTOList.add(fileCreateDTO);
         }
@@ -165,7 +171,7 @@ public class FirebaseServiceImpl implements FirebaseService {
 
     /* DELETE */
     @Override
-    public boolean deleteFromFirebase(String fileName) throws Exception {
+    public boolean deleteFromFirebase(String fileNameFirebase) throws Exception {
         /* Get auth key save in local JSON file */
         Credentials credentials =
                 GoogleCredentials.fromStream(
@@ -177,7 +183,7 @@ public class FirebaseServiceImpl implements FirebaseService {
 
         /* Get Blob (File) by name in Firebase storage */
         Blob blob = storage.get(
-                BlobId.of(FirebaseResource.BUCKET_NAME, fileName));
+                BlobId.of(FirebaseResource.BUCKET_NAME, fileNameFirebase));
 
         if (blob == null)
             return false; /* Not found with name */
@@ -186,7 +192,7 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
 
     @Override
-    public boolean deleteAllFromFirebase(Collection<String> fileNameCollection) throws Exception {
+    public boolean deleteAllFromFirebase(Collection<String> fileNameFirebaseCollection) throws Exception {
         /* Get auth key save in local JSON file */
         Credentials credentials =
                 GoogleCredentials.fromStream(
@@ -198,9 +204,9 @@ public class FirebaseServiceImpl implements FirebaseService {
 
         /* Make all BlobId (path) by fileName */
         List<BlobId> blobIdList = new ArrayList<>();
-        for (String fileName : fileNameCollection) {
+        for (String fileNameFirebase : fileNameFirebaseCollection) {
             blobIdList.add(
-                    BlobId.of(FirebaseResource.BUCKET_NAME, fileName));
+                    BlobId.of(FirebaseResource.BUCKET_NAME, fileNameFirebase));
         }
 
         /* Delete all Blob (File) by blobIdList (pathList) in Firebase storage */
@@ -211,9 +217,9 @@ public class FirebaseServiceImpl implements FirebaseService {
     }
 
     /* Utils */
-    private String uploadFileToGetUrl(String fileName, File file) throws Exception {
+    private String uploadFileToGetUrl(String fileNameFirebase, File file) throws Exception {
         /* Blob: An object in Google Cloud Storage */
-        BlobId blobId = BlobId.of(FirebaseResource.BUCKET_NAME, fileName);
+        BlobId blobId = BlobId.of(FirebaseResource.BUCKET_NAME, fileNameFirebase);
 
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("media").build();
 
@@ -230,10 +236,10 @@ public class FirebaseServiceImpl implements FirebaseService {
         storage.create(blobInfo, Files.readAllBytes(file.toPath()));
 
         /* Return url */
-        return makeFirebaseLink(fileName);
+        return makeFirebaseLink(fileNameFirebase);
     }
 
-    private Map<String, String> uploadAllFileToGetNameUrlMap(Map<String, File> fileNameFileMap) throws Exception {
+    private Map<String, String> uploadAllFileToGetNameUrlMap(Map<String, File> fileNameFirebaseFileMap) throws Exception {
         /* Get auth key save in local JSON file */
         Credentials credentials =
                 GoogleCredentials.fromStream(
@@ -245,13 +251,13 @@ public class FirebaseServiceImpl implements FirebaseService {
 
         Map<String, String> fileNameFileLinkMap = new HashMap<>();
 
-        for (String fileName : fileNameFileMap.keySet()) {
+        for (String fileName : fileNameFirebaseFileMap.keySet()) {
             BlobId blobId = BlobId.of(FirebaseResource.BUCKET_NAME, fileName);
 
             BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("media").build();
 
             /* Create file on Firebase storage */
-            storage.create(blobInfo, Files.readAllBytes(fileNameFileMap.get(fileName).toPath()));
+            storage.create(blobInfo, Files.readAllBytes(fileNameFirebaseFileMap.get(fileName).toPath()));
 
             fileNameFileLinkMap.put(fileName, makeFirebaseLink(fileName));
         }
@@ -260,10 +266,10 @@ public class FirebaseServiceImpl implements FirebaseService {
         return fileNameFileLinkMap;
     }
 
-    private String makeFirebaseLink(String fileName) throws Exception {
+    private String makeFirebaseLink(String fileNameFirebase) throws Exception {
         return String.format(
                 FirebaseResource.DOWNLOAD_URL,
-                URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
+                URLEncoder.encode(fileNameFirebase, StandardCharsets.UTF_8.toString()));
     }
 
 }

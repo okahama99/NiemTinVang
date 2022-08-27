@@ -1,10 +1,10 @@
 package com.ntv.ntvcons_backend.dtos.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.constants.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.constraints.*;
 import java.io.Serializable;

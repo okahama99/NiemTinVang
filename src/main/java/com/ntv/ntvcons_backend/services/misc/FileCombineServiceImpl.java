@@ -86,7 +86,7 @@ public class FileCombineServiceImpl implements FileCombineService {
                 externalFileService.deleteExternalFile(fileDTO.getFileId());
 
         boolean isFirebaseDeletedSuccess =
-                firebaseService.deleteFromFirebase(fileDTO.getFileName());
+                firebaseService.deleteFromFirebase(fileDTO.getFileNameFirebase());
 
         boolean isPairingDeletedSuccess =
                 eFEWPairingService.deleteAllByExternalFileId(fileDTO.getFileId());

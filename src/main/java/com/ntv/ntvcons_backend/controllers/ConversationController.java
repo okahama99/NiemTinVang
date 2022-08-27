@@ -3,7 +3,6 @@ package com.ntv.ntvcons_backend.controllers;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.entities.ConversationModels.ShowConversationModel;
-import com.ntv.ntvcons_backend.entities.Message;
 import com.ntv.ntvcons_backend.services.conversation.ConversationService;
 import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.utils.JwtUtil;

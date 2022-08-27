@@ -1,5 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.report;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailCreateDTO;
@@ -8,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import net.minidev.json.annotate.JsonIgnore;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;

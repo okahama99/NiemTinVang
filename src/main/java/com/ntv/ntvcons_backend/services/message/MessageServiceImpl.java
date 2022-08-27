@@ -4,10 +4,11 @@ import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.entities.*;
-import com.ntv.ntvcons_backend.entities.MessageModels.MessageFileModel;
+import com.ntv.ntvcons_backend.entities.Conversation;
+import com.ntv.ntvcons_backend.entities.Message;
 import com.ntv.ntvcons_backend.entities.MessageModels.ShowMessageModel;
-import com.ntv.ntvcons_backend.repositories.*;
+import com.ntv.ntvcons_backend.repositories.ConversationRepository;
+import com.ntv.ntvcons_backend.repositories.MessageRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service

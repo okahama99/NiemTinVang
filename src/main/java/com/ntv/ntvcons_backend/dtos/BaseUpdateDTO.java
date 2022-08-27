@@ -1,9 +1,9 @@
 package com.ntv.ntvcons_backend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ntv.ntvcons_backend.constants.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import net.minidev.json.annotate.JsonIgnore;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

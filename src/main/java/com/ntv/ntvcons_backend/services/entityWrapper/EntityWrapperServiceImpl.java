@@ -50,6 +50,7 @@ public class EntityWrapperServiceImpl implements EntityWrapperService {
     @Lazy /* To avoid circular injection Exception */
     @Autowired
     private WorkerService workerService;
+    @Lazy /* To avoid circular injection Exception */
     @Autowired
     private MessageService messageService;
     @Autowired
