@@ -131,7 +131,7 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
 
         LocalDateTime createdAt = LocalDateTime.now();
 
-        List<ExternalFileEntityWrapperPairing> eWEFPairingList = new ArrayList<>();
+        List<ExternalFileEntityWrapperPairing> eFEWPairingList = new ArrayList<>();
 
         for (Long fileId : fileIdCollection) {
             ExternalFileEntityWrapperPairing newPairing =
@@ -140,10 +140,10 @@ public class ExternalFileEntityWrapperPairingServiceImpl implements ExternalFile
             newPairing.setCreatedBy(createdBy);
             newPairing.setCreatedAt(createdAt);
 
-            eWEFPairingList.add(newPairing);
+            eFEWPairingList.add(newPairing);
         }
 
-        return eFEWPairingRepository.saveAllAndFlush(eWEFPairingList);
+        return eFEWPairingRepository.saveAllAndFlush(eFEWPairingList);
     }
 
     /* READ */

@@ -1,9 +1,11 @@
 package com.ntv.ntvcons_backend.entities.MessageModels;
 
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,7 +15,7 @@ public class ShowMessageModel{
     private Boolean seen;
     private LocalDateTime sendTime;
 
-    private MessageFileModel messageFileModel;
+    private List<ExternalFileReadDTO> fileList;
 
     private Long createdBy, updatedBy;
     private LocalDateTime createdAt, updatedAt;

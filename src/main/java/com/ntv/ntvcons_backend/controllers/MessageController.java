@@ -39,29 +39,30 @@ public class MessageController {
     private JwtUtil jwtUtil;
 
     @GetMapping(value = "/v1/getByConversationId", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> getByConversationId(@RequestHeader(name = "Authorization", required = false) @Parameter(hidden = true) String token,
-                                                      @RequestParam HttpServletRequest servletRequest,
-                                                      @RequestParam SearchType.MESSAGE searchType,
-                                                      @RequestParam Long conversationId,
-                                                      @RequestParam int pageNo,
-                                                      @RequestParam int pageSize,
-                                                      @RequestParam("ghi la messageId") String sortBy,
-                                                      @RequestParam boolean sortTypeAsc) throws Exception {
-
-        String jwt = jwtUtil.getAndValidateJwt(token);
-        Long userId = jwtUtil.getUserIdFromJWT(jwt);
-
+    public ResponseEntity<Object> getByConversationId(
+            @RequestParam HttpServletRequest servletRequest,
+            @RequestParam SearchType.MESSAGE searchType,
+            @RequestParam Long conversationId,
+            @RequestParam int pageNo,
+            @RequestParam int pageSize,
+            @RequestParam @Parameter(example = "messageId") String sortBy,
+            @RequestParam boolean sortTypeAsc,
+            @RequestHeader(name = "Authorization", required = false) @Parameter(hidden = true) String token) {
+        Long userId = null;
         try {
             Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
             List<ShowMessageModel> list;
 
             switch (searchType) {
                 case BY_CONVERSATION_ID_AUTHENTICATED:
-                    if (userId == null) {
+                    String jwt = jwtUtil.getAndValidateJwt(token);
+                    userId = jwtUtil.getUserIdFromJWT(jwt);
+                    if (userId == null)
                         throw new IllegalArgumentException("Invalid jwt token.");
-                    }
 
-                    list = messageService.getByConversationIdAuthenticated(userId, conversationId, paging);
+                    list = messageService
+                            .getByConversationIdAuthenticated(
+                                    userId, conversationId, paging);
 
                     if (list == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -70,7 +71,8 @@ public class MessageController {
                     break;
 
                 case BY_CONVERSATION_ID_UNAUTHENTICATED:
-                    list = messageService.getByConversationIdUnauthenticated(servletRequest.getRemoteAddr(), conversationId, paging);
+                    list = messageService
+                            .getByConversationIdUnauthenticated(servletRequest.getRemoteAddr(), conversationId, paging);
 
                     if (list == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -112,72 +114,82 @@ public class MessageController {
 
     @PreAuthorize("hasAnyAuthority('24','54','14','34','44','4')")
     @PostMapping(value = "/v1/sendMessageAuthenticated", produces = "application/json;charset=UTF-8", consumes = "multipart/form-data")
-    public ResponseEntity<Object> sendMessageAuthenticated(@RequestHeader(name = "Authorization") @Parameter(hidden = true) String token,
-                                                           @RequestParam Long conversationId,
-                                                           @RequestParam String message,
-                                                           @RequestPart(required = false) List<MultipartFile> file) throws Exception {
-
+    public ResponseEntity<Object> sendMessageAuthenticated(
+            @RequestParam Long conversationId,
+            @RequestParam String message,
+            @RequestPart(required = false) List<MultipartFile> file,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) throws Exception {
         String jwt = jwtUtil.getAndValidateJwt(token);
         Long userId = jwtUtil.getUserIdFromJWT(jwt);
-        if (userId == null) {
+        if (userId == null)
             throw new IllegalArgumentException("Invalid jwt token.");
-        }
 
-        Long messageId = messageService.sendMessageAuthenticated(userId, conversationId, message);
+
+        Long messageId = messageService
+                .sendMessageAuthenticated(userId, conversationId, message);
 
         if (messageId != null) {
             if (file != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
                         file, FileType.MESSAGE_FILE, messageId, EntityType.MESSAGE_ENTITY, userId);
             }
+
             return ResponseEntity.ok().body("Gửi thành công.");
         }
         return ResponseEntity.badRequest().body("Gửi thất bại.");
     }
 
     @PostMapping(value = "/v1/sendMessageUnauthenticated", produces = "application/json;charset=UTF-8", consumes = "multipart/form-data")
-    public ResponseEntity<Object> sendMessageUnauthenticated(@RequestParam HttpServletRequest servletRequest,
-                                                             @RequestParam Long conversationId,
-                                                             @RequestParam String message,
-                                                             @RequestPart(required = false) List<MultipartFile> file) throws Exception {
+    public ResponseEntity<Object> sendMessageUnauthenticated(
+            @RequestParam HttpServletRequest servletRequest,
+            @RequestParam Long conversationId,
+            @RequestParam String message,
+            @RequestPart(required = false) List<MultipartFile> file) throws Exception {
 
-        Long messageId = messageService.sendMessageUnauthenticated(servletRequest.getRemoteAddr(), conversationId, message);
+        Long messageId = messageService
+                .sendMessageUnauthenticated(servletRequest.getRemoteAddr(), conversationId, message);
 
         if (messageId != null) {
             if (file != null) {
                 fileCombineService.saveAllFileInDBAndFirebase(
                         file, FileType.MESSAGE_FILE, messageId, EntityType.MESSAGE_ENTITY, messageId);
             }
+
             return ResponseEntity.ok().body("Gửi thành công.");
         }
         return ResponseEntity.badRequest().body("Gửi thất bại.");
     }
 
     @PostMapping(value = "/v1/seenMessageUnauthenticated", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> seenMessageUnauthenticated(@RequestParam HttpServletRequest servletRequest,
-                                                             @RequestParam Long conversationId) {
+    public ResponseEntity<Object> seenMessageUnauthenticated(
+            @RequestParam HttpServletRequest servletRequest,
+            @RequestParam Long conversationId) {
         boolean result = messageService.seenMessageUnauthenticated(servletRequest.getRemoteAddr(), conversationId);
+
         if (result) {
             return ResponseEntity.ok().body("Seen thành công.");
         }
+
         return ResponseEntity.badRequest().body("Seen thất bại.");
     }
 
     @PreAuthorize("hasAnyAuthority('24','54','14','34','44','4')")
     @PostMapping(value = "/v1/seenMessageAuthenticated", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<Object> seenMessageAuthenticated(@RequestHeader(name = "Authorization") @Parameter(hidden = true) String token,
-                                                           @RequestParam Long conversationId) throws Exception {
+    public ResponseEntity<Object> seenMessageAuthenticated(
+            @RequestParam Long conversationId,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) throws Exception {
 
         String jwt = jwtUtil.getAndValidateJwt(token);
         Long userId = jwtUtil.getUserIdFromJWT(jwt);
-        if (userId == null) {
+        if (userId == null)
             throw new IllegalArgumentException("Invalid jwt token.");
-        }
 
         boolean result = messageService.seenMessageAuthenticated(userId, conversationId);
+
         if (result) {
             return ResponseEntity.ok().body("Seen thành công.");
         }
+
         return ResponseEntity.badRequest().body("Seen thất bại.");
     }
 }
