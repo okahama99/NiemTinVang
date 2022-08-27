@@ -1,7 +1,9 @@
 package com.ntv.ntvcons_backend.services.post;
 
 import com.google.common.base.Converter;
+import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.entities.Post;
 import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostModels.CreatePostModel;
@@ -9,16 +11,15 @@ import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
 import com.ntv.ntvcons_backend.repositories.PostCategoryRepository;
 import com.ntv.ntvcons_backend.repositories.PostRepository;
-import com.ntv.ntvcons_backend.services.postCategory.PostCategoryService;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -27,13 +28,13 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private PostCategoryRepository postCategoryRepository;
     @Autowired
-    private PostCategoryService postCategoryService;
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
     private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* CREATE */
     @Override
-    public boolean createPost(CreatePostModel createPostModel) {
+    public Post createPost(CreatePostModel createPostModel) {
         Post post = new Post();
 
         post.setAddress(createPostModel.getAddress());
@@ -43,20 +44,25 @@ public class PostServiceImpl implements PostService {
         post.setScale(createPostModel.getScale());
         post.setOwnerName(createPostModel.getOwnerName());
         post.setStatus(Status.ACTIVE);
+        post.setCreatedBy(createPostModel.getCreatedBy());
         post.setCreatedAt(LocalDateTime.now());
 
-        postRepository.saveAndFlush(post);
-
-        return true;
+        return postRepository.saveAndFlush(post);
     }
 
     /* READ */
     @Override
-    public List<ShowPostModel> getAllAvailablePost(Pageable paging) {
+    public List<ShowPostModel> getAllAvailablePost(Pageable paging) throws Exception {
         Page<Post> pagingResult =
                 postRepository.findAllByStatusNotIn(N_D_S_STATUS_LIST, paging);
 
         return fillAllShowPostModel(pagingResult);
+    }
+
+    @Override
+    public boolean existsById(long postId) {
+        return postRepository
+                .existsByPostIdAndStatusNotIn(postId, N_D_S_STATUS_LIST);
     }
 
     @Override
@@ -67,7 +73,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<ShowPostModel> getAllModelByPostCategoryId(Long postCategoryId, Pageable paging) {
+    public List<ShowPostModel> getAllModelByPostCategoryId(Long postCategoryId, Pageable paging) throws Exception {
         Page<Post> pagingResult = 
                 postRepository.findAllByPostCategoryIdAndStatusNotIn(postCategoryId, N_D_S_STATUS_LIST, paging);
 
@@ -75,7 +81,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<ShowPostModel> getAllModelByAuthorNameContains(String authorName, Pageable paging) {
+    public List<ShowPostModel> getAllModelByAuthorNameContains(String authorName, Pageable paging) throws Exception {
         Page<Post> pagingResult =
                 postRepository.findAllByAuthorNameContainsAndStatusNotIn(authorName, N_D_S_STATUS_LIST, paging);
 
@@ -83,7 +89,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<ShowPostModel> getAllModelByPostTitleContains(String postTitle, Pageable paging) {
+    public List<ShowPostModel> getAllModelByPostTitleContains(String postTitle, Pageable paging) throws Exception {
         Page<Post> pagingResult =
                 postRepository.findAllByPostTitleContainsAndStatusNotIn(postTitle, N_D_S_STATUS_LIST, paging);
 
@@ -91,7 +97,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<ShowPostModel> getAllModelByOwnerNameContains(String ownerName, Pageable paging) {
+    public List<ShowPostModel> getAllModelByOwnerNameContains(String ownerName, Pageable paging) throws Exception {
         Page<Post> pagingResult =
                 postRepository.findAllByOwnerNameContainsAndStatusNotIn(ownerName, N_D_S_STATUS_LIST, paging);
 
@@ -104,7 +110,7 @@ public class PostServiceImpl implements PostService {
                 .existsByAddressAndStatusNotIn(address, N_D_S_STATUS_LIST);
     }
     @Override
-    public List<ShowPostModel> getAllModelByAddressContains(String address, Pageable paging) {
+    public List<ShowPostModel> getAllModelByAddressContains(String address, Pageable paging) throws Exception {
         Page<Post> pagingResult =
                 postRepository.findAllByAddressContainsAndStatusNotIn(address, N_D_S_STATUS_LIST, paging);
 
@@ -112,7 +118,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<ShowPostModel> getAllModelByScaleContains(String scale, Pageable paging) {
+    public List<ShowPostModel> getAllModelByScaleContains(String scale, Pageable paging) throws Exception {
         Page<Post> pagingResult =
                 postRepository.findAllByScaleContainsAndStatusNotIn(scale, N_D_S_STATUS_LIST, paging);
 
@@ -127,29 +133,22 @@ public class PostServiceImpl implements PostService {
 
     /* UPDATE */
     @Override
-    public boolean updatePost(UpdatePostModel updatePostModel) {
+    public Post updatePost(UpdatePostModel updatePostModel) {
         Post post = getById(updatePostModel.getPostId());
 
         if (post == null)
-            return false;
+            return null;
 
-        PostCategory category =
-                postCategoryService.getById(updatePostModel.getPostCategoryId());
-
-        if (category == null)
-            return false;
-
-        post.setPostCategoryId(category.getPostCategoryId());
+        post.setPostCategoryId(updatePostModel.getPostCategoryId());
         post.setAuthorName(updatePostModel.getAuthorName());
         post.setPostTitle(updatePostModel.getPostTitle());
         post.setOwnerName(updatePostModel.getOwnerName());
         post.setAddress(updatePostModel.getAddress());
         post.setScale(updatePostModel.getScale());
         post.setUpdatedAt(LocalDateTime.now());
+        post.setUpdatedBy(updatePostModel.getUpdatedBy());
 
-        postRepository.saveAndFlush(post);
-
-        return true;
+        return postRepository.saveAndFlush(post);
     }
 
     /* DELETE */
@@ -167,9 +166,17 @@ public class PostServiceImpl implements PostService {
     }
 
     /* Utils */
-    private List<ShowPostModel> fillAllShowPostModel(Page<Post> pagingResult) {
+    private List<ShowPostModel> fillAllShowPostModel(Page<Post> pagingResult) throws Exception {
         if (pagingResult.hasContent()) {
             int totalPage = pagingResult.getTotalPages();
+
+            Set<Long> postIdSet = pagingResult.getContent().stream()
+                    .map(Post::getPostId)
+                    .collect(Collectors.toSet());
+
+            Map<Long, List<ExternalFileReadDTO>> postIdFileDTOMap =
+                    eFEWPairingService.mapEntityIdExternalFileDTOListByEntityIdInAndEntityType(
+                            postIdSet, EntityType.POST_ENTITY);
 
             Page<ShowPostModel> modelResult = pagingResult.map(new Converter<Post, ShowPostModel>() {
 
@@ -185,8 +192,9 @@ public class PostServiceImpl implements PostService {
                         model.setPostCategoryDesc(null);
                         model.setPostCategoryName(null);
                     }
+                    long postId = post.getPostId();
 
-                    model.setPostId(post.getPostId());
+                    model.setPostId(postId);
                     model.setPostCategoryId(post.getPostCategoryId());
                     model.setAuthorName(post.getAuthorName());
                     model.setPostTitle(post.getPostTitle());
@@ -200,6 +208,9 @@ public class PostServiceImpl implements PostService {
                     model.setUpdatedAt(post.getCreatedAt());
                     model.setUpdatedBy(post.getUpdatedBy());
                     model.setTotalPage(totalPage);
+
+                    model.setFileList(postIdFileDTOMap.get(postId));
+
                     return model;
                 }
 
@@ -208,6 +219,8 @@ public class PostServiceImpl implements PostService {
                     return null;
                 }
             });
+
+
             return modelResult.getContent();
         } else {
             return new ArrayList<ShowPostModel>();

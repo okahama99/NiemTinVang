@@ -115,7 +115,6 @@ public class WorkerController {
 
             return ResponseEntity.ok().body(newWorkerDTO);
         } catch (IllegalArgumentException iAE) {
-            /* Catch not found Role by roleId, which violate FK constraint */
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {

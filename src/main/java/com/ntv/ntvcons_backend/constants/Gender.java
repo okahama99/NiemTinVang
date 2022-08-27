@@ -4,18 +4,24 @@ package com.ntv.ntvcons_backend.constants;
  * update all old in DB to new enum.
  * Only then deleted old enum here */
 public enum Gender {
-    MALE("MALE"),
-    FEMALE("FEMALE"),
-    UNKNOWN("UNKNOWN");
+    MALE("MALE", "Nam"),
+    FEMALE("FEMALE", "Nữ"),
+    UNKNOWN("UNKNOWN", "Không rõ");
 
     private final String stringValue;
+    private final String stringValueVie;
 
-    Gender(String stringValue) {
+    Gender(String stringValue, String stringValueVie) {
         this.stringValue = stringValue;
+        this.stringValueVie = stringValueVie;
     }
 
     public String getStringValue() {
         return stringValue;
+    }
+
+    public String getStringValueVie() {
+        return stringValueVie;
     }
 
     @Override

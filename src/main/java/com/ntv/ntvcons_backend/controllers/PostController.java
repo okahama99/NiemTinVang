@@ -1,15 +1,23 @@
 package com.ntv.ntvcons_backend.controllers;
 
+import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
+import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.entities.Post;
 import com.ntv.ntvcons_backend.entities.PostCategory;
 import com.ntv.ntvcons_backend.entities.PostModels.CreatePostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.ShowPostModel;
 import com.ntv.ntvcons_backend.entities.PostModels.UpdatePostModel;
+import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.misc.FileCombineService;
 import com.ntv.ntvcons_backend.services.post.PostService;
 import com.ntv.ntvcons_backend.services.postCategory.PostCategoryService;
+import com.ntv.ntvcons_backend.utils.JwtUtil;
 import com.ntv.ntvcons_backend.utils.MiscUtil;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mapping.PropertyReferenceException;
@@ -17,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,7 +37,13 @@ public class PostController {
     @Autowired
     private MiscUtil miscUtil;
     @Autowired
+    private JwtUtil jwtUtil;
+    @Autowired
     private PostCategoryService postCategoryService;
+    @Autowired
+    private FileCombineService fileCombineService;
+    @Autowired
+    private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
     /* CREATE */
     @PreAuthorize("hasAnyAuthority('24','54')")
@@ -40,14 +55,63 @@ public class PostController {
             if (!postCategoryService.existsById(createPostModel.getPostCategoryId())) {
                 return ResponseEntity.ok().body("PostCategoryId không tồn tại.");
             } else {
-                boolean result = postService.createPost(createPostModel);
-                if (result) {
+                Post result = postService.createPost(createPostModel);
+                if (result != null) {
                     return ResponseEntity.ok().body("Tạo thành công.");
                 }
                 return ResponseEntity.badRequest().body("Tạo thất bại.");
             }
         }
 
+    }
+
+    @PreAuthorize("hasAnyAuthority('24','54')")
+    @PostMapping(value = "/v1/createPost/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> createPostWithFile(
+            @RequestPart /* For regular FE input */
+            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
+                    CreatePostModel createPostModel,
+            @RequestPart(required = false) List<MultipartFile> postFileList,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            createPostModel.setCreatedBy(userId);
+
+            if (postService.existsByAddress(createPostModel.getAddress())) {
+                return ResponseEntity.badRequest()
+                        .body("Địa chỉ đã tồn tại dự án khác.");
+            } else {
+                if (!postCategoryService.existsById(createPostModel.getPostCategoryId())) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                            .body("PostCategoryId không tồn tại.");
+                } else {
+                    Post result = postService.createPost(createPostModel);
+
+                    if (result != null) {
+                        if (postFileList != null) {
+                            fileCombineService.saveAllFileInDBAndFirebase(
+                                    postFileList, FileType.POST_FILE, result.getPostId(),
+                                    EntityType.POST_ENTITY, userId);
+                        }
+
+                        return ResponseEntity.ok().body("Tạo thành công.");
+                    }
+
+                    return ResponseEntity.badRequest().body("Tạo thất bại.");
+                }
+            }
+        } catch (IllegalArgumentException iAE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating Post", e.getMessage()));
+        }
     }
 
     /* READ */
@@ -236,7 +300,6 @@ public class PostController {
         }
     }
 
-
     @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getCategoryForCreatePost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getCategoryForCreatePost() {
@@ -251,13 +314,70 @@ public class PostController {
     @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updatePost", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updatePost(@RequestBody UpdatePostModel updatePostModel) {
-        boolean result = postService.updatePost(updatePostModel);
+        if (!postCategoryService.existsById(updatePostModel.getPostCategoryId())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("PostCategoryId không tồn tại.");
+        } else {
+            Post result = postService.updatePost(updatePostModel);
 
-        if (result) {
-            return ResponseEntity.ok().body("Cập nhật thành công.");
+            if (result != null) {
+                return ResponseEntity.ok().body("Cập nhật thành công.");
+            }
+
+            return ResponseEntity.badRequest().body("Cập nhật thất bại.");
         }
+    }
 
-        return ResponseEntity.badRequest().body("Cập nhật thất bại.");
+    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PutMapping(value = "/v1/updatePost/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> updatePostWithFile(
+            @RequestPart /* For regular FE input */
+            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
+                    UpdatePostModel updatePostModel,
+            @RequestPart(required = false) List<MultipartFile> postFileList,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            updatePostModel.setUpdatedBy(userId);
+
+            if (!postCategoryService.existsById(updatePostModel.getPostCategoryId())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("PostCategoryId không tồn tại.");
+            } else {
+                Post result = postService.updatePost(updatePostModel);
+
+                if (result != null) {
+                    if (postFileList != null) {
+                        List<ExternalFileReadDTO> fileDTOList =
+                                eFEWPairingService.getAllExternalFileDTOByEntityIdAndEntityType(
+                                        result.getPostId(), EntityType.POST_ENTITY);
+
+                        if (fileDTOList != null) {
+                            fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+                        }
+
+                        fileCombineService.saveAllFileInDBAndFirebase(
+                                postFileList, FileType.POST_FILE, result.getPostId(),
+                                EntityType.POST_ENTITY, userId);
+                    }
+
+                    return ResponseEntity.ok().body("Cập nhập thành công.");
+                }
+
+                return ResponseEntity.badRequest().body("Cập nhập thất bại.");
+            }
+        } catch (IllegalArgumentException iAE) {
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error creating Post", e.getMessage()));
+        }
     }
 
     /* DELETE */

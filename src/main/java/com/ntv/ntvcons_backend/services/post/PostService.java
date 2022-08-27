@@ -11,31 +11,32 @@ import java.util.List;
 
 public interface PostService {
     /* CREATE */
-    boolean createPost(CreatePostModel createPostModel);
+    Post createPost(CreatePostModel createPostModel);
 
     /* READ */;
-    List<ShowPostModel> getAllAvailablePost(Pageable paging);
+    List<ShowPostModel> getAllAvailablePost(Pageable paging) throws Exception;
 
+    boolean existsById(long postId) throws Exception;
     Post getById(Long postId);
 
-    List<ShowPostModel> getAllModelByPostCategoryId(Long postCategoryId, Pageable paging);
+    List<ShowPostModel> getAllModelByPostCategoryId(Long postCategoryId, Pageable paging) throws Exception;
 
-    List<ShowPostModel> getAllModelByAuthorNameContains(String authorName, Pageable paging);
+    List<ShowPostModel> getAllModelByAuthorNameContains(String authorName, Pageable paging) throws Exception;
 
-    List<ShowPostModel> getAllModelByPostTitleContains(String postTitle, Pageable paging);
+    List<ShowPostModel> getAllModelByPostTitleContains(String postTitle, Pageable paging) throws Exception;
 
-    List<ShowPostModel> getAllModelByOwnerNameContains(String ownerName, Pageable paging);
+    List<ShowPostModel> getAllModelByOwnerNameContains(String ownerName, Pageable paging) throws Exception;
 
     boolean existsByAddress(String address);
-    List<ShowPostModel> getAllModelByAddressContains(String address, Pageable paging);
+    List<ShowPostModel> getAllModelByAddressContains(String address, Pageable paging) throws Exception;
 
-    List<ShowPostModel> getAllModelByScaleContains(String scale, Pageable paging);
+    List<ShowPostModel> getAllModelByScaleContains(String scale, Pageable paging) throws Exception;
 
     /* Ko nên để đây, cần thì gọi api của postCategory */
     List<PostCategory> getAllPostCategoryForCreatePost();
 
     /* UPDATE */
-    boolean updatePost(UpdatePostModel updatePostModel);
+    Post updatePost(UpdatePostModel updatePostModel);
 
     /* DELETE */
     boolean deletePost(Long postId);

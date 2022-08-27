@@ -544,13 +544,16 @@ public class WorkerServiceImpl implements WorkerService {
     /* Utils */
     private WorkerReadDTO fillDTO(Worker worker) throws Exception {
         modelMapper.typeMap(Worker.class, WorkerReadDTO.class)
-            .addMappings(mapper -> {
-                mapper.skip(WorkerReadDTO::setCreatedAt);
-                mapper.skip(WorkerReadDTO::setUpdatedAt);});
+                .addMappings(mapper -> {
+                    mapper.skip(WorkerReadDTO::setGender);
+                    mapper.skip(WorkerReadDTO::setCreatedAt);
+                    mapper.skip(WorkerReadDTO::setUpdatedAt);});
 
         long workerId = worker.getWorkerId();
 
         WorkerReadDTO workerDTO = modelMapper.map(worker, WorkerReadDTO.class);
+
+        workerDTO.setGender(worker.getGender().getStringValueVie());
 
         if (worker.getCreatedAt() != null)
             workerDTO.setCreatedAt(worker.getCreatedAt().format(dateTimeFormatter));
@@ -561,9 +564,15 @@ public class WorkerServiceImpl implements WorkerService {
         workerDTO.setAddress(
                 locationService.getDTOById(worker.getAddressId()));
         /* Get associated ExternalFile */
-        workerDTO.setFileList(
+        List<ExternalFileReadDTO> fileReadDTOList =
                 eFEWPairingService
-                        .getAllExternalFileDTOByEntityIdAndEntityType(workerId, ENTITY_TYPE));
+                        .getAllExternalFileDTOByEntityIdAndEntityType(workerId, ENTITY_TYPE);
+
+        if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+            /* if (fileReadDTOList.size() > 1)
+                Log Error, worker only have 1 avatar file at a time */
+            workerDTO.setFile(fileReadDTOList.get(0));
+        }
 
         /* Đang bận làm / rảnh */
         workerDTO.setIsAvailable(projectWorkerService.getAllByWorkerId(workerId) == null);
@@ -574,6 +583,7 @@ public class WorkerServiceImpl implements WorkerService {
     private List<WorkerReadDTO> fillAllDTO(Collection<Worker> workerCollection, Integer totalPage) throws Exception {
         modelMapper.typeMap(Worker.class, WorkerReadDTO.class)
                 .addMappings(mapper -> {
+                    mapper.skip(WorkerReadDTO::setGender);
                     mapper.skip(WorkerReadDTO::setCreatedAt);
                     mapper.skip(WorkerReadDTO::setUpdatedAt);});
 
@@ -601,6 +611,8 @@ public class WorkerServiceImpl implements WorkerService {
                     WorkerReadDTO workerDTO =
                             modelMapper.map(worker, WorkerReadDTO.class);
 
+                    workerDTO.setGender(worker.getGender().getStringValueVie());
+
                     if (worker.getCreatedAt() != null)
                         workerDTO.setCreatedAt(worker.getCreatedAt().format(dateTimeFormatter));
                     if (worker.getUpdatedAt() != null)
@@ -610,8 +622,14 @@ public class WorkerServiceImpl implements WorkerService {
 
                     workerDTO.setAddress(locationIdLocationDTOMap.get(worker.getAddressId()));
 
-                    workerDTO.setFileList(
-                            workerIdExternalFileDTOListMap.get(workerId));
+                    List<ExternalFileReadDTO> fileReadDTOList =
+                            workerIdExternalFileDTOListMap.get(workerId);
+
+                    if (fileReadDTOList != null && !fileReadDTOList.isEmpty()) {
+                        /* if (fileReadDTOList.size() > 1)
+                            Log Error, worker only have 1 avatar file at a time */
+                        workerDTO.setFile(fileReadDTOList.get(0));
+                    }
 
                     /* Đang bận làm / rảnh */
                     workerDTO.setIsAvailable(workerIdProjectWorkerMap.get(workerId) == null);

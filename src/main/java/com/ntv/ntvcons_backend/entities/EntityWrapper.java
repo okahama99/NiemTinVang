@@ -85,6 +85,7 @@ public class EntityWrapper extends BaseEntity {
                 break;
             case WORKER_ENTITY:
                 this.workerId = entityId;
+                break;
             case MESSAGE_ENTITY:
                 this.messageId = entityId;
                 break;
