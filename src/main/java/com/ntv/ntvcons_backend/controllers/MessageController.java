@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @RestController
@@ -116,7 +117,7 @@ public class MessageController {
     public ResponseEntity<Object> sendMessageAuthenticated(
             @RequestParam Long conversationId,
             @RequestParam String message,
-            @RequestPart(required = false) List<MultipartFile> file,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> file,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) throws Exception {
         String jwt = jwtUtil.getAndValidateJwt(token);
         Long userId = jwtUtil.getUserIdFromJWT(jwt);
@@ -143,7 +144,7 @@ public class MessageController {
             @RequestParam HttpServletRequest servletRequest,
             @RequestParam Long conversationId,
             @RequestParam String message,
-            @RequestPart(required = false) List<MultipartFile> file) throws Exception {
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> file) throws Exception {
 
         Long messageId = messageService
                 .sendMessageUnauthenticated(servletRequest.getRemoteAddr(), conversationId, message);

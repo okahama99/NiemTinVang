@@ -122,7 +122,7 @@ public class ProjectController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     ProjectCreateDTO projectDTO,
-            @RequestPart @Size(min = 1) List<MultipartFile> projectDocList,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);
@@ -486,8 +486,7 @@ public class ProjectController {
             @RequestPart @Valid /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     ProjectUpdateDTO projectDTO,
-            @RequestPart/*(required = false)*/ @Size(min = 1) List<MultipartFile> projectDocList,
-            /*@RequestPart(required = false) MultipartFile blueprintDoc,*/
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> projectDocList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);

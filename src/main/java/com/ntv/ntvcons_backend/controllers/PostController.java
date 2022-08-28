@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @RestController
@@ -72,7 +73,7 @@ public class PostController {
             @RequestPart /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     CreatePostModel createPostModel,
-            @RequestPart(required = false) List<MultipartFile> postFileList,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> postFileList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);
@@ -335,7 +336,7 @@ public class PostController {
             @RequestPart /* For regular FE input */
             @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
                     UpdatePostModel updatePostModel,
-            @RequestPart(required = false) List<MultipartFile> postFileList,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> postFileList,
             @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
         try {
             String jwt = jwtUtil.getAndValidateJwt(token);
