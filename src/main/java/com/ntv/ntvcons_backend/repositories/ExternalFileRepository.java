@@ -34,9 +34,9 @@ public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long
     /** Check duplicate for Update */
     @Query("SELECT case when count(eF) > 0 then true else false end " +
             "FROM ExternalFile eF " +
-            "WHERE (eF.fileName = ?1 or eF.fileLink = ?2) and eF.fileId <> ?3 and eF.status not in ?4 ")
-    boolean existsByFileNameOrFileLinkAndFileIdIsNotAndStatusNotIn(
-            String fileName, String fileLink, long fileId, Collection<Status> statusCollection);
+            "WHERE (eF.fileNameFirebase = ?1 or eF.fileLink = ?2) and eF.fileId <> ?3 and eF.status not in ?4 ")
+    boolean existsByFileNameFirebaseOrFileLinkAndFileIdIsNotAndStatusNotIn(
+            String fileNameFirebase, String fileLink, long fileId, Collection<Status> statusCollection);
 
 
     /* fileName */
@@ -63,9 +63,9 @@ public interface ExternalFileRepository extends JpaRepository<ExternalFile, Long
     /** Check duplicate for Create */
     @Query("SELECT case when count(eF) > 0 then true else false end " +
             "FROM ExternalFile eF " +
-            "WHERE (eF.fileName = ?1 or eF.fileLink = ?2) and eF.status not in ?3 ")
-    boolean existsByFileNameOrFileLinkAndStatusNotIn(
-            String fileName, String fileLink, Collection<Status> statusCollection);
+            "WHERE (eF.fileNameFirebase = ?1 or eF.fileLink = ?2) and eF.status not in ?3 ")
+    boolean existsByFileNameFirebaseOrFileLinkAndStatusNotIn(
+            String fileNameFirebase, String fileLink, Collection<Status> statusCollection);
 
 
     /* filetype */

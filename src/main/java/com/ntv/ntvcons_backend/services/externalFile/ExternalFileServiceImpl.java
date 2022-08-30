@@ -73,11 +73,11 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         /* Check duplicate */
         if (externalFileRepository
-                .existsByFileNameOrFileLinkAndStatusNotIn(
-                        newFile.getFileName(),
+                .existsByFileNameFirebaseOrFileLinkAndStatusNotIn(
+                        newFile.getFileNameFirebase(),
                         newFile.getFileLink(),
                         N_D_S_STATUS_LIST)) {
-            errorMsg += "Already exists another ExternalFile with name: '" + newFile.getFileName()
+            errorMsg += "Already exists another ExternalFile with nameFirebase: '" + newFile.getFileNameFirebase()
                     + "', or with link: '" + newFile.getFileLink() + "'. ";
         }
 
@@ -164,12 +164,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
             /* Check duplicate 2 (input vs DB) */
             for (ExternalFile newFile : newFileList) {
                 if (externalFileRepository
-                        .existsByFileNameOrFileLinkAndStatusNotIn(
-                                newFile.getFileName(),
+                        .existsByFileNameFirebaseOrFileLinkAndStatusNotIn(
+                                newFile.getFileNameFirebase(),
                                 newFile.getFileLink(),
                                 N_D_S_STATUS_LIST)) {
-                    errorMsg.append("Already exists another ExternalFile with name: '")
-                            .append(newFile.getFileName())
+                    errorMsg.append("Already exists another ExternalFile with nameFirebase: '")
+                            .append(newFile.getFileNameFirebase())
                             .append("', or with link: '")
                             .append(newFile.getFileLink()).append("'. ");
                 }
@@ -450,9 +450,10 @@ public class ExternalFileServiceImpl implements ExternalFileService {
     }
 
     @Override
-    public boolean existsByFileNameOrFileLink(String fileName, String fileLink) throws Exception {
+    public boolean existsByFileNameFirebaseOrFileLink(String fileNameFirebase, String fileLink) throws Exception {
         return externalFileRepository
-                .existsByFileNameOrFileLinkAndStatusNotIn(fileName, fileLink, N_D_S_STATUS_LIST);
+                .existsByFileNameFirebaseOrFileLinkAndStatusNotIn(
+                        fileNameFirebase, fileLink, N_D_S_STATUS_LIST);
     }
 
     /* UPDATE */
@@ -500,12 +501,12 @@ public class ExternalFileServiceImpl implements ExternalFileService {
 
         /* Check duplicate */
         if (externalFileRepository
-                .existsByFileNameOrFileLinkAndFileIdIsNotAndStatusNotIn(
-                        updatedFile.getFileName(),
+                .existsByFileNameFirebaseOrFileLinkAndFileIdIsNotAndStatusNotIn(
+                        updatedFile.getFileNameFirebase(),
                         updatedFile.getFileLink(),
                         updatedFile.getFileId(),
                         N_D_S_STATUS_LIST)) {
-            errorMsg += "Already exists another ExternalFile with name: '" + updatedFile.getFileName()
+            errorMsg += "Already exists another ExternalFile with nameFirebase: '" + updatedFile.getFileNameFirebase()
                     + "', or with link: '" + updatedFile.getFileLink() + "'. ";
         }
 
@@ -623,13 +624,13 @@ public class ExternalFileServiceImpl implements ExternalFileService {
         /* Check duplicate 2 (input vs DB) */
         for (ExternalFile updatedFile : updatedFileList) {
             if (externalFileRepository
-                    .existsByFileNameOrFileLinkAndFileIdIsNotAndStatusNotIn(
-                            updatedFile.getFileName(),
+                    .existsByFileNameFirebaseOrFileLinkAndFileIdIsNotAndStatusNotIn(
+                            updatedFile.getFileNameFirebase(),
                             updatedFile.getFileLink(),
                             updatedFile.getFileId(),
                             N_D_S_STATUS_LIST)) {
-                errorMsg.append("Already exists another ExternalFile with name: '")
-                        .append(updatedFile.getFileName())
+                errorMsg.append("Already exists another ExternalFile with nameFirebase: '")
+                        .append(updatedFile.getFileNameFirebase())
                         .append("', or with link: '")
                         .append(updatedFile.getFileLink()).append("'. ");
             }

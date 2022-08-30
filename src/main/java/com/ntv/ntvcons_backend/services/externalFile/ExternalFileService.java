@@ -56,7 +56,7 @@ public interface ExternalFileService {
     Page<ExternalFile> getPageAllByFileLinkContains(Pageable paging, String fileLink) throws Exception;
     List<ExternalFileReadDTO> getAllDTOInPagingByFileLinkContains(Pageable paging, String fileLink) throws Exception;
 
-    boolean existsByFileNameOrFileLink(String fileName, String fileLink) throws Exception;
+    boolean existsByFileNameFirebaseOrFileLink(String fileNameFirebase, String fileLink) throws Exception;
 
     /* UPDATE */
     ExternalFile updateExternalFile(ExternalFile updatedFile) throws Exception;

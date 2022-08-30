@@ -47,7 +47,7 @@ public class FirebaseServiceImpl implements FirebaseService {
         do { /* generated random fileName */
             fileNameFirebase = UUID.randomUUID().toString().concat(fileExtension);
         } while(externalFileService /* Test duplicate */
-                .existsByFileNameOrFileLink(fileName, makeFirebaseLink(fileNameFirebase)));
+                .existsByFileNameFirebaseOrFileLink(fileNameFirebase, makeFirebaseLink(fileNameFirebase)));
 
         /* convert multipartFile to File (Create a File in current project folder) */
         File file = miscUtil.convertMultipartFileToFile(multipartFile, fileNameFirebase);
@@ -93,7 +93,7 @@ public class FirebaseServiceImpl implements FirebaseService {
             do { /* generated random fileName */
                 tmpFileNameFirebase = UUID.randomUUID().toString().concat(miscUtil.getExtension(tmpFileName));
             } while(externalFileService /* Test duplicate */
-                    .existsByFileNameOrFileLink(tmpFileName, makeFirebaseLink(tmpFileNameFirebase))
+                    .existsByFileNameFirebaseOrFileLink(tmpFileNameFirebase, makeFirebaseLink(tmpFileNameFirebase))
                     || fileNameFirebaseMultipartFileMap.containsKey(tmpFileNameFirebase));
 
             fileNameFirebaseMultipartFileMap.put(tmpFileNameFirebase, multipartFile);
