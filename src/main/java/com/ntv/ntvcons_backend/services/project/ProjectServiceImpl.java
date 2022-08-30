@@ -1143,9 +1143,9 @@ public class ProjectServiceImpl implements ProjectService {
         projectDTO.setBlueprint(blueprintService.getDTOByProjectId(projectId));
 
         /* Nullable */
-        projectDTO.setTaskList(taskService.getAllDTOByProjectId(projectId));
-        projectDTO.setReportList(reportService.getAllDTOByProjectId(projectId));
-        projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
+//        projectDTO.setTaskList(taskService.getAllDTOByProjectId(projectId));
+//        projectDTO.setReportList(reportService.getAllDTOByProjectId(projectId));
+//        projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(projectId));
         projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(projectId));
         projectDTO.setFileList(
@@ -1180,15 +1180,15 @@ public class ProjectServiceImpl implements ProjectService {
         Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
                 blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
 
-        /* Get associated Task */
-        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-        /* Get associated Report */
-        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-        /* Get associated Request */
-        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
+//        /* Get associated Task */
+//        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
+//                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
+//        /* Get associated Report */
+//        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
+//                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
+//        /* Get associated Request */
+//        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
+//                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
         /* Get associated ProjectManager */
         Map<Long, List<ProjectManagerReadDTO>> projectIdProjectManagerDTOListMap =
                 projectManagerService.mapProjectIdProjectManagerDTOListByProjectIdIn(projectIdSet);
@@ -1225,9 +1225,9 @@ public class ProjectServiceImpl implements ProjectService {
                     projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(tmpProjectId));
 
                     /* Nullable */
-                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(tmpProjectId));
-                    projectDTO.setReportList(projectIdReportDTOListMap.get(tmpProjectId));
-                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
+//                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(tmpProjectId));
+//                    projectDTO.setReportList(projectIdReportDTOListMap.get(tmpProjectId));
+//                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
                     projectDTO.setProjectWorkerList(projectIdProjectWorkerDTOListMap.get(tmpProjectId));
                     projectDTO.setFileList(

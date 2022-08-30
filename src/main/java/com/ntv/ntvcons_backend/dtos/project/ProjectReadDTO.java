@@ -35,7 +35,7 @@ public class ProjectReadDTO extends BaseReadDTO {
     private String actualEndDate;
     private Double actualCost;
 
-    private List<TaskReadDTO> taskList;
-    private List<ReportReadDTO> reportList;
-    private List<RequestReadDTO> requestList;
+//    private List<TaskReadDTO> taskList;
+//    private List<ReportReadDTO> reportList;
+//    private List<RequestReadDTO> requestList;
 }
