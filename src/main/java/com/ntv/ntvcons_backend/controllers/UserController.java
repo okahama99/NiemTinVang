@@ -77,8 +77,9 @@ public class UserController {
                 String extension = miscUtil.getExtension(fileName);
                 String type = new MimetypesFileTypeMap().getContentType(fileName)
                         .split("/")[0];
-                if (extension.isEmpty() || !type.equals("image"))
+                if (extension.isEmpty() || !type.equals("image")) {
                     throw new IllegalArgumentException("Invalid file type for user avatar. ");
+                }
 
                 fileCombineService.saveFileInDBAndFirebase(
                         userAvatar, FileType.USER_AVATAR, userId, EntityType.USER_ENTITY, userId);
@@ -125,8 +126,9 @@ public class UserController {
             String extension = miscUtil.getExtension(fileName);
             String type = new MimetypesFileTypeMap().getContentType(fileName)
                     .split("/")[0];
-            if (extension.isEmpty() || !type.equals("image"))
+            if (extension.isEmpty() || !type.equals("image")) {
                 throw new IllegalArgumentException("Invalid file type for user avatar. ");
+            }
 
             fileCombineService.saveFileInDBAndFirebase(
                     userAvatar, FileType.USER_AVATAR, userId, EntityType.USER_ENTITY, userId);
@@ -401,8 +403,9 @@ public class UserController {
                 String extension = miscUtil.getExtension(fileName);
                 String type = new MimetypesFileTypeMap().getContentType(fileName)
                         .split("/")[0];
-                if (extension.isEmpty() || !type.equals("image"))
+                if (extension.isEmpty() || !type.equals("image")) {
                     throw new IllegalArgumentException("Invalid file type for user avatar. ");
+                }
 
                 ExternalFileReadDTO fileDTO = updatedUserDTO.getFile();
                 if (fileDTO != null) {
@@ -458,8 +461,9 @@ public class UserController {
             String extension = miscUtil.getExtension(fileName);
             String type = new MimetypesFileTypeMap().getContentType(fileName)
                     .split("/")[0];
-            if (extension.isEmpty() || !type.equals("image"))
+            if (extension.isEmpty() || !type.equals("image")) {
                 throw new IllegalArgumentException("Invalid file type for user avatar. ");
+            }
 
             fileCombineService.saveFileInDBAndFirebase(
                     userAvatar, FileType.USER_AVATAR, userId, EntityType.USER_ENTITY, userId);

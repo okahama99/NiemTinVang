@@ -103,8 +103,9 @@ public class WorkerController {
                 String extension = miscUtil.getExtension(fileName);
                 String type = new MimetypesFileTypeMap().getContentType(fileName)
                         .split("/")[0];
-                if (extension.isEmpty() || !type.equals("image"))
+                if (extension.isEmpty() || !type.equals("image")) {
                     throw new IllegalArgumentException("Invalid file type for worker avatar. ");
+                }
 
                 fileCombineService.saveFileInDBAndFirebase(
                         workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
@@ -151,8 +152,9 @@ public class WorkerController {
             String extension = miscUtil.getExtension(fileName);
             String type = new MimetypesFileTypeMap().getContentType(fileName)
                     .split("/")[0];
-            if (extension.isEmpty() || !type.equals("image"))
+            if (extension.isEmpty() || !type.equals("image")) {
                 throw new IllegalArgumentException("Invalid file type for worker avatar. ");
+            }
 
             fileCombineService.saveFileInDBAndFirebase(
                     workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
@@ -408,8 +410,9 @@ public class WorkerController {
                 String extension = miscUtil.getExtension(fileName);
                 String type = new MimetypesFileTypeMap().getContentType(fileName)
                         .split("/")[0];
-                if (extension.isEmpty() || !type.equals("image"))
+                if (extension.isEmpty() || !type.equals("image")) {
                     throw new IllegalArgumentException("Invalid file type for worker avatar. ");
+                }
 
                 fileCombineService.saveFileInDBAndFirebase(
                         workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
@@ -467,8 +470,9 @@ public class WorkerController {
             String extension = miscUtil.getExtension(fileName);
             String type = new MimetypesFileTypeMap().getContentType(fileName)
                     .split("/")[0];
-            if (extension.isEmpty() || !type.equals("image"))
+            if (extension.isEmpty() || !type.equals("image")) {
                 throw new IllegalArgumentException("Invalid file type for worker avatar. ");
+            }
 
             fileCombineService.saveFileInDBAndFirebase(
                     workerAvatar, FileType.WORKER_AVATAR, workerId, EntityType.WORKER_ENTITY, userId);
