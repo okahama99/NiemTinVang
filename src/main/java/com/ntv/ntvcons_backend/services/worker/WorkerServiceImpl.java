@@ -92,16 +92,16 @@ public class WorkerServiceImpl implements WorkerService {
     public WorkerReadDTO createWorkerByDTO(WorkerCreateDTO newWorkerDTO) throws Exception {
         modelMapper.typeMap(WorkerCreateDTO.class, Worker.class)
             .addMappings(mapper -> {
-                mapper.skip(Worker::setBirthday);});
+                mapper.skip(Worker::setBirthdate);});
 
         Worker newWorker = modelMapper.map(newWorkerDTO, Worker.class);
 
         /* Check input */
-        if (newWorkerDTO.getBirthday() != null) {
+        if (newWorkerDTO.getBirthdate() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-            newWorker.setBirthday(new java.sql.Date(
-                    sdf.parse(newWorkerDTO.getBirthday()).getTime()));
+            newWorker.setBirthdate(new java.sql.Date(
+                    sdf.parse(newWorkerDTO.getBirthdate()).getTime()));
 
             /* Now */
             Calendar calendar = Calendar.getInstance();
@@ -110,13 +110,13 @@ public class WorkerServiceImpl implements WorkerService {
             calendar.add(Calendar.YEAR, -18);
 
             /* Convert calendar to Date */
-            Date minLegalAgeBirthday = calendar.getTime();
+            Date minLegalAgeBirthdate = calendar.getTime();
 
-            if (newWorker.getBirthday().after(minLegalAgeBirthday)) {
+            if (newWorker.getBirthdate().after(minLegalAgeBirthdate)) {
                 throw new IllegalArgumentException(
-                        "This worker birthday: '" + newWorker.getBirthday()
+                        "This worker birthdate: '" + newWorker.getBirthdate()
                                 + "' mean they are younger than 18. Which violate labour law. "
-                                + " Valid birthday must be before: '" + sdf.format(minLegalAgeBirthday) + "'. ");
+                                + " Valid birthdate must be before: '" + sdf.format(minLegalAgeBirthdate) + "'. ");
             }
         }
 
@@ -465,15 +465,16 @@ public class WorkerServiceImpl implements WorkerService {
     public WorkerReadDTO updateWorkerByDTO(WorkerUpdateDTO updatedWorkerDTO) throws Exception {
         modelMapper.typeMap(WorkerUpdateDTO.class, Worker.class)
                 .addMappings(mapper -> {
-                    mapper.skip(Worker::setBirthday);});
+                    mapper.skip(Worker::setBirthdate);});
 
         Worker updatedWorker = modelMapper.map(updatedWorkerDTO, Worker.class);
 
-        if (updatedWorkerDTO.getBirthday() != null) {
+        /* Check input */
+        if (updatedWorkerDTO.getBirthdate() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-            updatedWorker.setBirthday(new java.sql.Date(
-                    sdf.parse(updatedWorkerDTO.getBirthday()).getTime()));
+            updatedWorker.setBirthdate(new java.sql.Date(
+                    sdf.parse(updatedWorkerDTO.getBirthdate()).getTime()));
 
             /* Now */
             Calendar calendar = Calendar.getInstance();
@@ -482,13 +483,13 @@ public class WorkerServiceImpl implements WorkerService {
             calendar.add(Calendar.YEAR, -18);
 
             /* Convert calendar to Date */
-            Date minLegalAgeBirthday = calendar.getTime();
+            Date minLegalAgeBirthdate = calendar.getTime();
 
-            if (updatedWorker.getBirthday().after(minLegalAgeBirthday)) {
+            if (updatedWorker.getBirthdate().after(minLegalAgeBirthdate)) {
                 throw new IllegalArgumentException(
-                        "This worker birthday: '" + updatedWorker.getBirthday()
+                        "This worker birthdate: '" + updatedWorker.getBirthdate()
                                 + "' mean they are younger than 18. Which violate labour law. "
-                                + " Valid birthday must be before: '" + sdf.format(minLegalAgeBirthday) + "'. ");
+                                + " Valid birthdate must be before: '" + sdf.format(minLegalAgeBirthdate) + "'. ");
             }
         }
 

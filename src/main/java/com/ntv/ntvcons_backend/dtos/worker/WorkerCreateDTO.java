@@ -33,7 +33,7 @@ public class WorkerCreateDTO extends BaseCreateDTO {
     /** yyyy-MM-dd HH:mm */
     @Schema(example = "yyyy-MM-dd") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATE_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd'")
-    private String birthday;
+    private String birthdate;
 
     @Schema(example = "Saigon") /* Hint for Swagger */
     @Size(max = 100, message = "birthPlace max length: 100 characters")

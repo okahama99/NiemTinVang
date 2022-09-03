@@ -31,8 +31,8 @@ public class Worker extends BaseEntity {
     @Column(name = "gender", length = 20)
     private Gender gender;
 
-    @Column(name = "birthday")
-    private Date birthday;
+    @Column(name = "birthdate")
+    private Date birthdate;
 
     @Column(name = "birthPlace", length = 100)
     private String birthPlace;

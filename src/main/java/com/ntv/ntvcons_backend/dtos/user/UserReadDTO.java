@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Date;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,4 +18,6 @@ public class UserReadDTO extends BaseReadDTO {
     private String fullName;
     private String phone;
     private String email;
+    private String gender;
+    private Date birthdate;
 }

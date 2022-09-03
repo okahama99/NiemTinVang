@@ -65,7 +65,11 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .claim("id", user.getUserId())
                 .claim("username", user.getUsername())
+                .claim("fullName", user.getFullName())
+                .claim("username", user.getUsername())
                 .claim("role", role.getRoleName())
+                .claim("email", user.getEmail())
+                .claim("phone", user.getPhone())
                 .compact();
     }
 
@@ -84,6 +88,7 @@ public class JwtUtil {
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .claim("id", userPrincipal.getUserID())
                 .claim("username", user.getUsername())
+                .claim("fullName", user.getFullName())
                 .claim("role", userPrincipal.getAuthorities())
                 .claim("email", user.getEmail())
                 .claim("phone", user.getPhone())

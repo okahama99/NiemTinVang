@@ -7,8 +7,11 @@ import com.ntv.ntvcons_backend.dtos.role.RoleReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserCreateDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.dtos.user.UserUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.worker.WorkerCreateDTO;
+import com.ntv.ntvcons_backend.dtos.worker.WorkerUpdateDTO;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.entities.UserModels.RegisterUserModel;
+import com.ntv.ntvcons_backend.entities.Worker;
 import com.ntv.ntvcons_backend.repositories.UserRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
@@ -23,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -113,7 +117,37 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserReadDTO createUserByDTO(UserCreateDTO newUserDTO) throws Exception {
+        modelMapper.typeMap(UserCreateDTO.class, User.class)
+                .addMappings(mapper -> {
+                    mapper.skip(User::setBirthdate);});
+
         User newUser = modelMapper.map(newUserDTO, User.class);
+
+        /* Check input */
+        if (newUserDTO.getBirthdate() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            newUser.setBirthdate(new java.sql.Date(
+                    sdf.parse(newUserDTO.getBirthdate()).getTime()));
+
+            /* Now */
+            Calendar calendar = Calendar.getInstance();
+            /* Tuổi tối thiểu lao động/sở hữu nhà đất TODO:(18 hay 15? hỏi lại anh sơn) */
+            /* Perform addition/subtraction (số dương +, số âm -) */
+            calendar.add(Calendar.YEAR, -18);
+
+            /* TODO: hỏi về tuổi lao động, tuổi sỡ hữu nhà đất tù đó check theo role*/
+
+            /* Convert calendar to Date */
+            Date minLegalAgeBirthdate = calendar.getTime();
+
+            if (newUser.getBirthdate().after(minLegalAgeBirthdate)) {
+                throw new IllegalArgumentException(
+                        "This user birthdate: '" + newUser.getBirthdate()
+                                + "' mean they are younger than 18. Which violate labour/ownership law. "
+                                + " Valid birthdate must be before: '" + sdf.format(minLegalAgeBirthdate) + "'. ");
+            }
+        }
 
         newUser = createUser(newUser);
 
@@ -535,7 +569,36 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserReadDTO updateUserByDTO(UserUpdateDTO updatedUserDTO) throws Exception {
+        modelMapper.typeMap(UserUpdateDTO.class, User.class)
+                .addMappings(mapper -> {
+                    mapper.skip(User::setBirthdate);});
+
         User updatedUser = modelMapper.map(updatedUserDTO, User.class);
+
+        if (updatedUserDTO.getBirthdate() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+            updatedUser.setBirthdate(new java.sql.Date(
+                    sdf.parse(updatedUserDTO.getBirthdate()).getTime()));
+
+            /* Now */
+            Calendar calendar = Calendar.getInstance();
+            /* Tuổi tối thiểu lao động/sở hữu nhà đất TODO:(18 hay 15? hỏi lại anh sơn) */
+            /* Perform addition/subtraction (số dương +, số âm -) */
+            calendar.add(Calendar.YEAR, -18);
+
+            /* TODO: hỏi về tuổi lao động, tuổi sỡ hữu nhà đất tù đó check theo role */
+
+            /* Convert calendar to Date */
+            Date minLegalAgeBirthdate = calendar.getTime();
+
+            if (updatedUser.getBirthdate().after(minLegalAgeBirthdate)) {
+                throw new IllegalArgumentException(
+                        "This user birthdate: '" + updatedUser.getBirthdate()
+                                + "' mean they are younger than 18. Which violate labour/ownership law. "
+                                + " Valid birthdate must be before: '" + sdf.format(minLegalAgeBirthdate) + "'. ");
+            }
+        }
 
         updatedUser = updateUser(updatedUser);
 
@@ -583,12 +646,15 @@ public class UserServiceImpl implements UserService {
     private UserReadDTO fillDTO(User user) throws Exception {
         modelMapper.typeMap(User.class, UserReadDTO.class)
                 .addMappings(mapper -> {
+                    mapper.skip(UserReadDTO::setGender);
                     mapper.skip(UserReadDTO::setCreatedAt);
                     mapper.skip(UserReadDTO::setUpdatedAt);});
 
         long userId = user.getUserId();
 
         UserReadDTO userDTO = modelMapper.map(user, UserReadDTO.class);
+
+        userDTO.setGender(user.getGender().getStringValueVie());
 
         if (user.getCreatedAt() != null)
             userDTO.setCreatedAt(user.getCreatedAt().format(dateTimeFormatter));
@@ -615,6 +681,7 @@ public class UserServiceImpl implements UserService {
     private List<UserReadDTO> fillAllDTO(Collection<User> userCollection, Integer totalPage) throws Exception {
         modelMapper.typeMap(User.class, UserReadDTO.class)
                 .addMappings(mapper -> {
+                    mapper.skip(UserReadDTO::setGender);
                     mapper.skip(UserReadDTO::setCreatedAt);
                     mapper.skip(UserReadDTO::setUpdatedAt);});
 
@@ -638,6 +705,8 @@ public class UserServiceImpl implements UserService {
                 .map(user -> {
                     UserReadDTO userDTO =
                             modelMapper.map(user, UserReadDTO.class);
+
+                    userDTO.setGender(user.getGender().getStringValueVie());
 
                     if (user.getCreatedAt() != null)
                         userDTO.setCreatedAt(user.getCreatedAt().format(dateTimeFormatter));
