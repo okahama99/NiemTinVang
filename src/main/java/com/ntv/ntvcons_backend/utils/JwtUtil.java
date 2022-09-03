@@ -1,6 +1,7 @@
 package com.ntv.ntvcons_backend.utils;
 
 import com.ntv.ntvcons_backend.configs.UserDetailsImpl;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.Role;
 import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.services.role.RoleService;
@@ -78,7 +79,12 @@ public class JwtUtil {
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
 
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-        User user = userService.getById(userPrincipal.getUserID());
+        UserReadDTO userDTO = userService.getDTOById(userPrincipal.getUserID());
+
+        String avatarLink = "";
+
+        if (userDTO.getFile() != null)
+            avatarLink = userDTO.getFile().getFileLink();
 
         // Tạo chuỗi json web token từ id của user.
         return Jwts.builder()
@@ -86,12 +92,13 @@ public class JwtUtil {
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
-                .claim("id", userPrincipal.getUserID())
-                .claim("username", user.getUsername())
-                .claim("fullName", user.getFullName())
+                .claim("id", userDTO.getUserId())
+                .claim("username", userDTO.getUsername())
+                .claim("fullName", userDTO.getFullName())
                 .claim("role", userPrincipal.getAuthorities())
-                .claim("email", user.getEmail())
-                .claim("phone", user.getPhone())
+                .claim("email", userDTO.getEmail())
+                .claim("phone", userDTO.getPhone())
+                .claim("avatarLink", avatarLink)
                 .compact();
     }
 
