@@ -81,7 +81,7 @@ public class JwtUtil {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
         UserReadDTO userDTO = userService.getDTOById(userPrincipal.getUserID());
 
-        String avatarLink = "";
+        String avatarLink = "Không có avatar";
 
         if (userDTO.getFile() != null)
             avatarLink = userDTO.getFile().getFileLink();
