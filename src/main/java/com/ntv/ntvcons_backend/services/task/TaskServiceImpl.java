@@ -728,7 +728,7 @@ public class TaskServiceImpl implements TaskService {
                     throw new IllegalArgumentException("actualEndDate is before actualStartDate");
 
             long diff = ChronoUnit.DAYS.between(updatedTask.getActualStartDate(), updatedTask.getActualEndDate());
-            if (diff < 30L) {
+            if (diff < 1L) {
                 throw new IllegalArgumentException("actualEndDate need to be at least 1 days after actualStartDate");
             }
         }
