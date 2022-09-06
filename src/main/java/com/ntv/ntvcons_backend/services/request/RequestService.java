@@ -1,8 +1,6 @@
 package com.ntv.ntvcons_backend.services.request;
 
-import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.request.*;
 import com.ntv.ntvcons_backend.entities.Request;
 import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
@@ -96,6 +94,12 @@ public interface RequestService {
 
     Request updateRequest(Request updatedRequest) throws Exception;
     RequestReadDTO updateRequestByDTO(RequestUpdateDTO updatedRequestDTO) throws Exception;
+
+    RequestReadDTO editRequestByDTO(RequestEditDTO editedRequestDTO) throws Exception;
+
+    RequestReadDTO verifyRequestByDTO(RequestVerifyDTO verifiedRequestDTO) throws Exception;
+
+    RequestReadDTO removeRequestVerificationById(long requestId, Long updatedBy) throws Exception;
 
     /* DELETE */
     boolean deleteRequest(Long requestId) throws Exception;

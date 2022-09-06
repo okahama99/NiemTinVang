@@ -14,9 +14,6 @@ import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectManager.ProjectManagerReadDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerCreateDTO;
 import com.ntv.ntvcons_backend.dtos.projectWorker.ProjectWorkerReadDTO;
-import com.ntv.ntvcons_backend.dtos.report.ReportReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
-import com.ntv.ntvcons_backend.dtos.task.TaskReadDTO;
 import com.ntv.ntvcons_backend.entities.*;
 import com.ntv.ntvcons_backend.entities.LocationModels.CreateLocationModel;
 import com.ntv.ntvcons_backend.entities.LocationModels.UpdateLocationModel;
@@ -960,16 +957,6 @@ public class ProjectServiceImpl implements ProjectService {
             return null; /* Not found with Id */
 
         long updatedProjectId = updatedProject.getProjectId();
-
-//        /* Update associated Blueprint if changed */
-//        BlueprintUpdateDTO updateBlueprintDTO = updatedProjectDTO.getBlueprint();
-//        if (updateBlueprintDTO != null) {
-//            /* Just in case */
-//            updateBlueprintDTO.setProjectId(updatedProjectId);
-//            updateBlueprintDTO.setUpdatedBy(updatedBy);
-//
-//            blueprintService.updateBlueprintByDTO(updateBlueprintDTO);
-//        }
 
         /* Update associated ProjectManager if changed */
         List<Long> managerIdList = updatedProjectDTO.getManagerIdList();

@@ -5,9 +5,7 @@ import com.ntv.ntvcons_backend.constants.FileType;
 import com.ntv.ntvcons_backend.constants.SearchType;
 import com.ntv.ntvcons_backend.dtos.ErrorResponse;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.request.*;
 import com.ntv.ntvcons_backend.entities.RequestDetailModels.CreateRequestDetailModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.CreateRequestModel;
 import com.ntv.ntvcons_backend.entities.RequestModels.ShowRequestModel;
@@ -481,7 +479,8 @@ public class RequestController {
         return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
 
-    @PreAuthorize("hasAnyAuthority('44')")
+    @Deprecated
+    @PreAuthorize("hasAnyAuthority('44', '54')")
     @PutMapping(value = "/v1.1/updateRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequestAlt1(
             @RequestBody RequestUpdateDTO requestDTO,
@@ -514,6 +513,103 @@ public class RequestController {
     }
 
     @PreAuthorize("hasAnyAuthority('44')")
+    @PutMapping(value = "/v1/editRequest", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> editRequest(
+            @RequestBody RequestEditDTO requestDTO,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            requestDTO.setUpdatedBy(userId);
+
+            RequestReadDTO updatedRequestDTO = requestService.editRequestByDTO(requestDTO);
+
+            if (updatedRequestDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Request found with Id: '" + requestDTO.getRequestId() + "'. ");
+            }
+
+            return ResponseEntity.ok().body(updatedRequestDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found User by Id (updatedBy), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error editing Request with Id: '" + requestDTO.getRequestId() + "'. ",
+                            e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54')")
+    @PutMapping(value = "/v1/verifyRequest", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> verifyRequest(
+            @RequestBody RequestVerifyDTO requestDTO,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            requestDTO.setVerifierId(userId);
+            requestDTO.setUpdatedBy(userId);
+
+            RequestReadDTO verifiedRequestDTO = requestService.verifyRequestByDTO(requestDTO);
+
+            if (verifiedRequestDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Request found with Id: '" + requestDTO.getRequestId() + "'. ");
+            }
+
+            return ResponseEntity.ok().body(verifiedRequestDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found User by Id (updatedBy), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error verifying Request with Id: '" + requestDTO.getRequestId() + "'. ",
+                            e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('54')")
+    @PutMapping(value = "/v1/removeRequestVerification", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> removeRequestVerification(
+            @RequestParam long requestId,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            RequestReadDTO verifiedRequestDTO =
+                    requestService.removeRequestVerificationById(requestId, userId);
+
+            if (verifiedRequestDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Request found with Id: '" + requestId + "'. ");
+            }
+
+            return ResponseEntity.ok().body(verifiedRequestDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found User by Id (updatedBy), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given", iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error removing verification of Request with Id: '" + requestId + "'. ",
+                            e.getMessage()));
+        }
+    }
+
+    @Deprecated
+    @PreAuthorize("hasAnyAuthority('44', '54')")
     @PutMapping(value = "/v1/updateRequest/withFile",
             consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateRequestWithFile(
@@ -559,6 +655,56 @@ public class RequestController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Request with Id: '" + requestDTO.getRequestId() + "'. ",
+                            e.getMessage()));
+        }
+    }
+
+    @PreAuthorize("hasAnyAuthority('44')")
+    @PutMapping(value = "/v1/editRequest/withFile",
+            consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<Object> editRequestWithFile(
+            @RequestPart @Valid /* For regular FE input */
+            @Parameter(schema = @Schema(type = "string", format = "binary")) /* For Swagger input only */
+                    RequestEditDTO requestDTO,
+            @RequestPart(required = false) @Size(min = 1) List<MultipartFile> requestDocList,
+            @RequestHeader(name = "Authorization") @Parameter(hidden = true) String token) {
+        try {
+            String jwt = jwtUtil.getAndValidateJwt(token);
+            Long userId = jwtUtil.getUserIdFromJWT(jwt);
+            if (userId == null)
+                throw new IllegalArgumentException("Invalid jwt.");
+
+            requestDTO.setUpdatedBy(userId);
+
+            RequestReadDTO editedRequestDTO = requestService.editRequestByDTO(requestDTO);
+
+            if (editedRequestDTO == null)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No Request found with Id: '" + requestDTO.getRequestId() + "'. ");
+
+            if (requestDocList != null) {
+                long requestId = editedRequestDTO.getRequestId();
+
+                /* Deleted old request file */
+                List<ExternalFileReadDTO> fileDTOList = editedRequestDTO.getFileList();
+                if (fileDTOList != null)
+                    fileCombineService.deleteAllFileInDBAndFirebaseByFileDTO(fileDTOList);
+
+                fileCombineService.saveAllFileInDBAndFirebase(
+                        requestDocList, FileType.REQUEST_DOC, requestId, EntityType.REQUEST_ENTITY, userId);
+
+                /* Get again after file created & save */
+                editedRequestDTO = requestService.getDTOById(requestId);
+            }
+
+            return ResponseEntity.ok().body(editedRequestDTO);
+        } catch (IllegalArgumentException iAE) {
+            /* Catch not found Project/User/RequestType by respective Id (if changed), which violate FK constraint */
+            return ResponseEntity.badRequest().body(
+                    new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new ErrorResponse("Error editing Request with Id: '" + requestDTO.getRequestId() + "'. ",
                             e.getMessage()));
         }
     }
@@ -680,7 +826,8 @@ public class RequestController {
                             e.getMessage()));
         }
     }
-    
+
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('44','34','14','24')")
     @PutMapping(value = "/v1/updateVerifier", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateVerifier(@RequestBody UpdateRequestVerifierModel updateRequestVerifierModel) {
@@ -693,6 +840,7 @@ public class RequestController {
         return ResponseEntity.badRequest().body("Cập nhật thất bại.");
     }
 
+    @Deprecated
     @PreAuthorize("hasAnyAuthority('54')")
     @PutMapping(value = "/v1/approveRequest", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> approveRequest(@RequestParam Long requestId,

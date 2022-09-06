@@ -1,7 +1,6 @@
 package com.ntv.ntvcons_backend.dtos.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ntv.ntvcons_backend.constants.Regex;
 import com.ntv.ntvcons_backend.dtos.BaseCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,9 +9,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -29,12 +28,9 @@ public class RequestCreateDTO extends BaseCreateDTO {
     @NotNull(message = "requestTypeId REQUIRED for Create")
     private Long requestTypeId;
 
-//    @Schema(description = "NOT NULL; Id > 0") /* Hint for Swagger */
-//    @Positive
-//    @NotNull(message = "RequesterId REQUIRED for Create")
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */
-    private Long RequesterId;
+    private Long RequesterId = null;
 
     @Schema(example = "Yêu cầu xxx",
             description = "NOT NULL; size <= 100") /* Hint for Swagger */
@@ -42,12 +38,9 @@ public class RequestCreateDTO extends BaseCreateDTO {
     @NotNull(message = "requestName REQUIRED for Create")
     private String requestName;
 
-    /** yyyy-MM-dd HH:mm */
-    @Schema(example = "yyyy-MM-dd HH:mm",
-            description = "NOT NULL; date <= now") /* Hint for Swagger */
-    @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
-    @NotNull(message = "requestDate REQUIRED for Create")
-    private String requestDate;
+    @JsonIgnore /* No serialize/deserialize */
+    @Schema(hidden = true) /* No show on swagger */
+    private final LocalDateTime requestDate = LocalDateTime.now();
 
     @Schema(example = "Yêu cầu chi tiêu xxx",
             description = "NOT NULL; size <= 100") /* Hint for Swagger */

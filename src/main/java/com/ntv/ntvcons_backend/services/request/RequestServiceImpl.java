@@ -4,9 +4,7 @@ import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestCreateDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestReadDTO;
-import com.ntv.ntvcons_backend.dtos.request.RequestUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.request.*;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailCreateDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.requestDetail.RequestDetailUpdateDTO;
@@ -145,22 +143,13 @@ public class RequestServiceImpl implements RequestService {
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
 
+        newRequest.setStatus(Status.PENDING);
+
         return requestRepository.saveAndFlush(newRequest);
     }
     @Override
     public RequestReadDTO createRequestByDTO(RequestCreateDTO newRequestDTO) throws Exception {
-        modelMapper.typeMap(RequestCreateDTO.class, Request.class)
-                .addMappings(mapper -> {
-                    mapper.skip(Request::setRequestDate);});
-
         Request newRequest = modelMapper.map(newRequestDTO, Request.class);
-
-        /* Already check NOT NULL */
-        newRequest.setRequestDate(
-                LocalDateTime.parse(newRequestDTO.getRequestDate(), dateTimeFormatter));
-
-//        if (newRequest.getRequestDate().isAfter(LocalDateTime.now()))
-//            throw new IllegalArgumentException("requestDate can't be in the future");
 
         newRequest = createRequest(newRequest);
 
@@ -898,11 +887,21 @@ public class RequestServiceImpl implements RequestService {
                         updatedRequest.getRequestId(),
                         N_D_S_STATUS_LIST)) {
             errorMsg += "Already exists another Request with name: '" + updatedRequest.getRequestName()
-                    + "' for Project with Id:' " +  updatedRequest.getProjectId() + "'. ";
+                    + "' for Project with Id:' " + updatedRequest.getProjectId() + "'. ";
         }
 
-        if (!errorMsg.trim().isEmpty()) 
+        if (!errorMsg.trim().isEmpty())
             throw new IllegalArgumentException(errorMsg);
+
+        if (updatedRequest.getIsVerified() && updatedRequest.getIsApproved() != null) {
+            if (updatedRequest.getIsApproved()) {
+                updatedRequest.setStatus(Status.APPROVED);
+            } else {
+                updatedRequest.setStatus(Status.DENIED);
+            }
+        } else {
+            updatedRequest.setStatus(Status.PENDING);
+        }
 
         updatedRequest.setCreatedAt(oldRequest.getCreatedAt());
         updatedRequest.setCreatedBy(oldRequest.getCreatedBy());
@@ -982,6 +981,133 @@ public class RequestServiceImpl implements RequestService {
         }
 
         return fillDTO(updatedRequest);
+    }
+
+    @Override
+    public RequestReadDTO editRequestByDTO(RequestEditDTO editedRequestDTO) throws Exception {
+        Request existingRequest = getById(editedRequestDTO.getRequestId());
+
+        if (existingRequest == null)
+            return null;
+
+        if (existingRequest.getIsVerified())
+            throw new IllegalArgumentException(
+                    "Request with Id: '" + editedRequestDTO.getRequestId() + "' is already verified. " +
+                            "You can't edit this Request anymore.");
+
+        modelMapper.typeMap(RequestEditDTO.class, Request.class)
+                .addMappings(mapper -> {
+                    mapper.skip(Request::setRequestDate);});
+
+        Request editedRequest = modelMapper.map(editedRequestDTO, Request.class);
+
+        if (editedRequestDTO.getRequestDate() != null) {
+            editedRequest.setRequestDate(
+                    LocalDateTime.parse(editedRequestDTO.getRequestDate(), dateTimeFormatter));
+        } else {
+            editedRequest.setRequestDate(existingRequest.getRequestDate());
+        }
+
+        editedRequest = updateRequest(editedRequest);
+
+        if (editedRequest == null)
+            return null;
+
+        long editedRequestId = editedRequest.getRequestId();
+        Long updatedBy = editedRequest.getUpdatedBy();
+
+        /* (If change) Update/Create associated RequestDetail; Set required FK requestId */
+        List<RequestDetailUpdateDTO> requestDetailDTOList = editedRequestDTO.getRequestDetailList();
+        if (requestDetailDTOList != null) {
+             requestDetailDTOList =
+                    requestDetailDTOList.stream()
+                            .peek(requestDetailDTO -> {
+                                requestDetailDTO.setRequestId(editedRequestId);
+                                requestDetailDTO.setUpdatedBy(updatedBy);})
+                            .collect(Collectors.toList());
+
+            modelMapper.typeMap(RequestDetailUpdateDTO.class, RequestDetailCreateDTO.class)
+                    .addMappings(mapper -> {
+                        mapper.map(RequestDetailUpdateDTO::getUpdatedBy, RequestDetailCreateDTO::setCreatedBy);});
+
+            List<RequestDetailCreateDTO> newRequestDetailDTOList = new ArrayList<>();
+            List<RequestDetailUpdateDTO> updatedRequestDetailDTOList = new ArrayList<>();
+
+            for (RequestDetailUpdateDTO updatedRequestDetailDTO : requestDetailDTOList) {
+                if (updatedRequestDetailDTO.getRequestDetailId() <= 0) {
+                    newRequestDetailDTOList.add(
+                            modelMapper.map(updatedRequestDetailDTO, RequestDetailCreateDTO.class));
+                } else {
+                    updatedRequestDetailDTOList.add(updatedRequestDetailDTO);
+                }
+            }
+
+            /* Create associated RequestDetail */
+            if (!newRequestDetailDTOList.isEmpty()) {
+                requestDetailService.createBulkRequestDetailByDTOList(newRequestDetailDTOList);
+            }
+
+            /* Update associated RequestDetail */
+            if (!updatedRequestDetailDTOList.isEmpty()) {
+                requestDetailService.updateBulkRequestDetailByDTOList(updatedRequestDetailDTOList);
+            }
+        }
+
+        return fillDTO(editedRequest);
+    }
+
+    @Override
+    public RequestReadDTO verifyRequestByDTO(RequestVerifyDTO verifiedRequestDTO) throws Exception {
+        Request existingRequest = getById(verifiedRequestDTO.getRequestId());
+
+        if (existingRequest == null)
+            return null;
+
+        if (existingRequest.getIsVerified())
+            throw new IllegalArgumentException(
+                    "Request with Id: '" + verifiedRequestDTO.getRequestId() + "' is already verified. " +
+                            "You can't verify this Request anymore.");
+
+        existingRequest.setVerifierId(verifiedRequestDTO.getVerifierId());
+        existingRequest.setIsVerified(true);
+        existingRequest.setVerifyDate(LocalDateTime.now());
+        existingRequest.setVerifyNote(verifiedRequestDTO.getVerifyNote());
+        existingRequest.setIsApproved(verifiedRequestDTO.getIsApproved());
+
+        existingRequest = updateRequest(existingRequest);
+
+        if (existingRequest == null)
+            return null;
+
+        return fillDTO(existingRequest);
+    }
+
+    @Override
+    public RequestReadDTO removeRequestVerificationById(long requestId, Long updatedBy) throws Exception {
+        Request existingRequest = getById(requestId);
+
+        if (existingRequest == null)
+            return null;
+
+        if (!existingRequest.getIsVerified())
+            throw new IllegalArgumentException(
+                    "Request with Id: '" + requestId + "' is not yet verified. " +
+                            "You can't remove this Request verification.");
+
+        existingRequest.setVerifierId(null);
+        existingRequest.setIsVerified(false);
+        existingRequest.setVerifyDate(null);
+        existingRequest.setVerifyNote(null);
+        existingRequest.setIsApproved(null);
+        existingRequest.setUpdatedBy(updatedBy);
+        existingRequest.setUpdatedAt(LocalDateTime.now());
+
+        existingRequest = updateRequest(existingRequest);
+
+        if (existingRequest == null)
+            return null;
+
+        return fillDTO(existingRequest);
     }
 
     /* DELETE */
