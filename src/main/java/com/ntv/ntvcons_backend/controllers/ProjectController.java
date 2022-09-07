@@ -35,6 +35,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,7 +57,7 @@ public class ProjectController {
     private JwtUtil jwtUtil;
     @Autowired
     private MiscUtil miscUtil;
-    
+
     /* ================================================ Ver 1 ================================================ */
     /* CREATE */
     @Deprecated
@@ -102,6 +103,17 @@ public class ProjectController {
 
             projectDTO.setCreatedBy(userId);
 
+            List<Long> managerIdList = projectDTO.getManagerIdList();
+            if (managerIdList == null) {
+                projectDTO.setManagerIdList(
+                        new ArrayList<>(Collections.singletonList(userId)));
+            } else {
+                if (!managerIdList.contains(userId)) {
+                    managerIdList.add(userId);
+                    projectDTO.setManagerIdList(managerIdList);
+                }
+            }
+
             ProjectReadDTO newProjectDTO = projectService.createProjectByDTO(projectDTO);
 
             return ResponseEntity.ok().body(newProjectDTO);
@@ -131,6 +143,17 @@ public class ProjectController {
                 throw new IllegalArgumentException("Invalid jwt.");
 
             projectDTO.setCreatedBy(userId);
+
+            List<Long> managerIdList = projectDTO.getManagerIdList();
+            if (managerIdList == null) {
+                projectDTO.setManagerIdList(
+                        new ArrayList<>(Collections.singletonList(userId)));
+            } else {
+                if (!managerIdList.contains(userId)) {
+                    managerIdList.add(userId);
+                    projectDTO.setManagerIdList(managerIdList);
+                }
+            }
 
             ProjectReadDTO newProjectDTO = projectService.createProjectByDTO(projectDTO);
 
@@ -225,7 +248,7 @@ public class ProjectController {
                                              @RequestParam String sortBy,
                                              @RequestParam boolean sortTypeAsc) {
         try {
-            List<ProjectReadDTO> projects = 
+            List<ProjectReadDTO> projects =
                     projectService.getAllInPaging(
                             miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc));
 
