@@ -62,6 +62,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Worker", e.getMessage()));
         }
@@ -115,6 +116,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Worker", e.getMessage()));
         }
@@ -164,6 +166,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error adding file to Worker with Id: '" + workerId + "'. ",
                             e.getMessage()));
@@ -192,6 +195,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Worker", e.getMessage()));
         }
@@ -239,6 +243,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Worker with ";
 
             switch (searchType) {
@@ -325,6 +330,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Worker with ";
 
             switch (searchType) {
@@ -366,6 +372,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Worker with Id: '" + workerDTO.getWorkerId() + "'. ",
                             e.getMessage()));
@@ -423,6 +430,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Worker with Id: '" + workerDTO.getWorkerId() + "'. ",
                             e.getMessage()));
@@ -482,6 +490,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error replacing file of Worker with Id: '" + workerId + "'. ",
                             e.getMessage()));
@@ -500,6 +509,7 @@ public class WorkerController {
 
             return ResponseEntity.ok().body("Deleted Worker with Id: '" + workerId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Worker with Id: '" + workerId + "'. ", e.getMessage()));
         }
@@ -535,6 +545,7 @@ public class WorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting file of Worker with Id: '" + workerId + "'. ",
                             e.getMessage()));

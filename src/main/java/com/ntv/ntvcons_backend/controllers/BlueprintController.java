@@ -63,6 +63,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Blueprint", e.getMessage()));
         }
@@ -105,6 +106,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Blueprint", e.getMessage()));
         }
@@ -148,6 +150,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error adding file to Blueprint with Id: '" + blueprintId + "'. ",
                             e.getMessage()));
@@ -174,6 +177,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Blueprint", e.getMessage()));
         }
@@ -200,6 +204,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Blueprint", e.getMessage()));
         }
@@ -256,6 +261,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Blueprint with ";
 
             switch (searchType) {
@@ -335,6 +341,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Blueprint with ";
 
             switch (searchType) {
@@ -388,6 +395,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Blueprint", e.getMessage()));
         }
@@ -440,6 +448,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Blueprint", e.getMessage()));
         }
@@ -488,6 +497,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error replacing file of Blueprint with Id: '" + blueprintId + "'. ",
                             e.getMessage()));
@@ -506,6 +516,7 @@ public class BlueprintController {
 
             return ResponseEntity.ok().body("Deleted Blueprint with Id: '" + blueprintId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Blueprint with Id: '" + blueprintId + "'. ", e.getMessage()));
         }
@@ -541,6 +552,7 @@ public class BlueprintController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting file of Blueprint with Id: '" + blueprintId + "'. ",
                             e.getMessage()));

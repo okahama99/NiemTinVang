@@ -36,6 +36,7 @@ public class ReportTypeController {
 
             return ResponseEntity.ok().body(newReportTypeDTO);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating ReportType", e.getMessage()));
         }
@@ -63,6 +64,7 @@ public class ReportTypeController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for ReportType", e.getMessage()));
         }
@@ -110,6 +112,7 @@ public class ReportTypeController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for ReportType with ";
 
             switch (searchType) {
@@ -166,6 +169,7 @@ public class ReportTypeController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for ReportType with ";
 
             switch (searchType) {
@@ -192,6 +196,7 @@ public class ReportTypeController {
 
             return ResponseEntity.ok().body(updatedReportTypeDTO);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating ReportType with Id: '" + reportTypeDTO.getReportTypeId() + "'. ",
                             e.getMessage()));
@@ -210,6 +215,7 @@ public class ReportTypeController {
 
             return ResponseEntity.ok().body("Deleted ReportType with Id: '" + reportTypeId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting ReportType with Id: '" + reportTypeId + "'. ", e.getMessage()));
         }

@@ -63,6 +63,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Task", e.getMessage()));
         }
@@ -103,6 +104,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Task", e.getMessage()));
         }
@@ -139,6 +141,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error adding file to Task with Id: '" + taskId + "'. ",
                             e.getMessage()));
@@ -167,6 +170,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Task", e.getMessage()));
         }
@@ -205,6 +209,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Task with ";
 
             switch (searchType) {
@@ -277,6 +282,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Task with ";
 
             switch (searchType) {
@@ -324,6 +330,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Task with Id: '" + taskDTO.getTaskId() + "'. ", e.getMessage()));
         }
@@ -374,6 +381,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Task with Id: '" + taskDTO.getTaskId() + "'. ",
                             e.getMessage()));
@@ -446,6 +454,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error replacing file of Task with Id: '" + taskId + "'. ",
                             e.getMessage()));
@@ -492,6 +501,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error replacing file of Task with Id: '" + taskId + "'. ",
                             e.getMessage()));
@@ -509,6 +519,7 @@ public class TaskController {
 
             return ResponseEntity.ok().body("Deleted Task with Id: '" + taskId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Task with Id: '" + taskId + "'. ", e.getMessage()));
         }
@@ -569,6 +580,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error deleting file of Task with Id: '" + taskId + "'. ",
                             e.getMessage()));
@@ -602,6 +614,7 @@ public class TaskController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error deleting file of Task with Id: '" + taskId + "'. ",
                             e.getMessage()));

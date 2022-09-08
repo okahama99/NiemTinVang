@@ -41,6 +41,7 @@ public class ProjectManagerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating ProjectManager. ",
                             e.getMessage()));
@@ -69,6 +70,7 @@ public class ProjectManagerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for ProjectManager", e.getMessage()));
         }
@@ -107,6 +109,7 @@ public class ProjectManagerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for ProjectManager with ";
 
             switch (searchType) {
@@ -169,6 +172,7 @@ public class ProjectManagerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for ProjectManager with ";
 
             switch (searchType) {
@@ -200,6 +204,7 @@ public class ProjectManagerController {
 
             return ResponseEntity.ok().body(updatedProjectManagerDTO);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating ProjectManager with Id: '" + projectManagerDTO.getProjectManagerId() + "'. ",
                             e.getMessage()));
@@ -218,6 +223,7 @@ public class ProjectManagerController {
 
             return ResponseEntity.ok().body("Deleted ProjectManager with Id: '" + projectManagerId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting ProjectManager with Id: '" + projectManagerId + "'. ", e.getMessage()));
         }

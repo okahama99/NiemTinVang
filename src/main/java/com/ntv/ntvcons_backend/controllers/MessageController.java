@@ -96,6 +96,7 @@ public class MessageController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Message with ";
 
             switch (searchType) {

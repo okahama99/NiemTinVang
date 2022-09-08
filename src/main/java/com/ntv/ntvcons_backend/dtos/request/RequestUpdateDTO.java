@@ -44,18 +44,18 @@ public class RequestUpdateDTO extends BaseUpdateDTO {
     @NotNull(message = "requestName REQUIRED for Update")
     private String requestName;
 
+    @Schema(example = "Yêu cầu chi tiêu xxx",
+            description = "NOT NULL; size <= 100") /* Hint for Swagger */
+    @Size(max = 100, message = "requestDesc max length: 100 characters")
+    @NotNull(message = "requestDesc REQUIRED for Update")
+    private String requestDesc;
+
     /** yyyy-MM-dd HH:mm */
     @Schema(example = "yyyy-MM-dd HH:mm",
             description = "NOT NULL; date <= now") /* Hint for Swagger */
     @Pattern(regexp = Regex.DATETIME_REGEX_1, message = "Need to match pattern 'yyyy-MM-dd HH:mm'")
     @NotNull(message = "requestDate REQUIRED for Update")
     private String requestDate;
-
-    @Schema(example = "Yêu cầu chi tiêu xxx",
-            description = "NOT NULL; size <= 100") /* Hint for Swagger */
-    @Size(max = 100, message = "requestDesc max length: 100 characters")
-    @NotNull(message = "requestDesc REQUIRED for Update")
-    private String requestDesc;
 
     @Schema(description = "Nullable; size >= 1 (if not null)")
     @Size(min = 1, message = "Needed at least 1 detail")

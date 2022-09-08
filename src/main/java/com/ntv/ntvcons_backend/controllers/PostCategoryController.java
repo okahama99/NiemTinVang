@@ -64,6 +64,7 @@ public class PostCategoryController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for PostCategory", e.getMessage()));
         }
@@ -101,6 +102,7 @@ public class PostCategoryController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for PostCategory with ";
 
             switch (searchType) {
@@ -154,6 +156,7 @@ public class PostCategoryController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for PostCategory with ";
 
             switch (searchType) {
@@ -196,6 +199,7 @@ public class PostCategoryController {
 
             return ResponseEntity.ok().body("Deleted PostCategory with Id: '" + postCategoryId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting PostCategory with Id: '" + postCategoryId + "'. ", e.getMessage()));
         }

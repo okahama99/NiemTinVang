@@ -49,6 +49,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating User", e.getMessage()));
         }
@@ -94,6 +95,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating User", e.getMessage()));
         }
@@ -142,6 +144,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error adding file to User with Id: '" + userId + "'. ",
                             e.getMessage()));
@@ -170,6 +173,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for User", e.getMessage()));
         }
@@ -235,6 +239,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for User with ";
 
             switch (searchType) {
@@ -329,6 +334,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for User with ";
 
             switch (searchType) {
@@ -371,6 +377,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating User with Id: '" + userDTO.getUserId() + "'. ",
                             e.getMessage()));
@@ -425,6 +432,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating User with Id: '" + userDTO.getUserId() + "'. ",
                             e.getMessage()));
@@ -477,6 +485,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error replacing file of User with Id: '" + userId + "'. ",
                             e.getMessage()));
@@ -495,6 +504,7 @@ public class UserController {
 
             return ResponseEntity.ok().body("Deleted User with Id: '" + userId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting User with Id: '" + userId + "'. ", e.getMessage()));
         }
@@ -530,6 +540,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting file of User with Id: '" + userId + "'. ",
                             e.getMessage()));

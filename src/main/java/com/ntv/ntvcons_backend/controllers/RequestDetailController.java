@@ -43,6 +43,7 @@ public class RequestDetailController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating RequestDetail", e.getMessage()));
         }
@@ -69,6 +70,7 @@ public class RequestDetailController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for RequestDetail", e.getMessage()));
         }
@@ -104,6 +106,7 @@ public class RequestDetailController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for RequestDetail", e.getMessage()));
         }
@@ -142,6 +145,7 @@ public class RequestDetailController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for RequestDetail with ";
 
             switch (searchType) {
@@ -194,6 +198,7 @@ public class RequestDetailController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for RequestDetail with ";
 
             switch (searchType) {
@@ -225,6 +230,7 @@ public class RequestDetailController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating RequestDetail with Id: '" + requestDetailDTO.getRequestDetailId() + "'. ",
                             e.getMessage()));
@@ -243,6 +249,7 @@ public class RequestDetailController {
 
             return ResponseEntity.ok().body("Deleted RequestDetail with Id: '" + requestDetailId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting RequestDetail with Id: '" + requestDetailId + "'. ", e.getMessage()));
         }

@@ -101,6 +101,7 @@ public class RequestController {
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
+            e.printStackTrace();
 
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Request", e.getMessage()));
@@ -143,6 +144,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Request", e.getMessage()));
         }
@@ -179,6 +181,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error adding file to Request with Id: '" + requestId + "'. ",
                             e.getMessage()));
@@ -217,6 +220,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Request", e.getMessage()));
         }
@@ -243,6 +247,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Request", e.getMessage()));
         }
@@ -281,6 +286,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Request with ";
 
             switch (searchType) {
@@ -385,6 +391,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Request with ";
 
             switch (searchType) {
@@ -439,6 +446,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Request", e.getMessage()));
         }
@@ -460,6 +468,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Request", e.getMessage()));
         }
@@ -506,6 +515,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Request with Id: '" + requestDTO.getRequestId() + "'. ",
                             e.getMessage()));
@@ -538,6 +548,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error editing Request with Id: '" + requestDTO.getRequestId() + "'. ",
                             e.getMessage()));
@@ -571,6 +582,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error verifying Request with Id: '" + requestDTO.getRequestId() + "'. ",
                             e.getMessage()));
@@ -602,6 +614,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error removing verification of Request with Id: '" + requestId + "'. ",
                             e.getMessage()));
@@ -653,6 +666,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Request with Id: '" + requestDTO.getRequestId() + "'. ",
                             e.getMessage()));
@@ -703,6 +717,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error editing Request with Id: '" + requestDTO.getRequestId() + "'. ",
                             e.getMessage()));
@@ -775,6 +790,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error replacing file of Request with Id: '" + requestId + "'. ",
                             e.getMessage()));
@@ -821,6 +837,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error replacing file of Request with Id: '" + requestId + "'. ",
                             e.getMessage()));
@@ -866,6 +883,7 @@ public class RequestController {
 
             return ResponseEntity.ok().body("Deleted Request with Id: '" + requestId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Request with Id: '" + requestId + "'. ", e.getMessage()));
         }
@@ -925,6 +943,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error deleting file of Request with Id: '" + requestId + "'. ",
                             e.getMessage()));
@@ -958,6 +977,7 @@ public class RequestController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error deleting file of Request with Id: '" + requestId + "'. ",
                             e.getMessage()));

@@ -42,6 +42,7 @@ public class ExternalFileController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating ExternalFile", e.getMessage()));
         }
@@ -70,6 +71,7 @@ public class ExternalFileController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for ExternalFile", e.getMessage()));
         }
@@ -126,6 +128,7 @@ public class ExternalFileController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for ExternalFile with ";
 
             switch (searchType) {
@@ -207,6 +210,7 @@ public class ExternalFileController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for ExternalFile with ";
 
             switch (searchType) {
@@ -237,6 +241,7 @@ public class ExternalFileController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating ExternalFile with Id: '" + externalFileDTO.getFileId() + "'. ",
                             e.getMessage()));
@@ -255,6 +260,7 @@ public class ExternalFileController {
 
             return ResponseEntity.ok().body("Deleted ExternalFile with Id: '" + externalFileId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting ExternalFile with Id: '" + externalFileId + "'. ", e.getMessage()));
         }

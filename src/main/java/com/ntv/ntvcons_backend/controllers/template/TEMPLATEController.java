@@ -23,6 +23,7 @@ public class TEMPLATEController {
 //            return ResponseEntity.badRequest().body(
 //                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
 //        } catch (Exception e) {
+//            e.printStackTrace();
 //            return ResponseEntity.internalServerError().body(
 //                    new ErrorResponse("Error creating TEMPLATE", e.getMessage()));
 //        }
@@ -48,6 +49,7 @@ public class TEMPLATEController {
 //            return ResponseEntity.badRequest().body(
 //                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
 //        } catch (Exception e) {
+//            e.printStackTrace();
 //            return ResponseEntity.internalServerError().body(
 //                    new ErrorResponse("Error searching for TEMPLATE", e.getMessage()));
 //        }
@@ -95,6 +97,7 @@ public class TEMPLATEController {
 //            return ResponseEntity.badRequest().body(
 //                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
 //        } catch (Exception e) {
+//            e.printStackTrace();
 //            String errorMsg = "Error searching for TEMPLATE with ";
 //
 //            switch (searchType) {
@@ -124,6 +127,7 @@ public class TEMPLATEController {
 //
 //            return ResponseEntity.ok().body(updatedTEMPLATEDTO);
 //        } catch (Exception e) {
+//            e.printStackTrace();
 //            return ResponseEntity.internalServerError().body(
 //                    new ErrorResponse("Error updating TEMPLATE with Id: '" + temPlateDTO.getTEMPLATEId() + "'. ",
 //                            e.getMessage()));
@@ -141,6 +145,7 @@ public class TEMPLATEController {
 //
 //            return ResponseEntity.ok().body("Deleted TEMPLATE with Id: '" + temPlateId + "'. ");
 //        } catch (Exception e) {
+//            e.printStackTrace();
 //            return ResponseEntity.internalServerError().body(
 //                    new ErrorResponse("Error deleting TEMPLATE with Id: '" + temPlateId + "'. ", e.getMessage()));
 //        }

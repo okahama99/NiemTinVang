@@ -84,6 +84,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error creating Project", e.getMessage()));
         }
@@ -122,6 +123,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error creating Project", e.getMessage()));
         }
@@ -173,6 +175,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error creating Project", e.getMessage()));
         }
@@ -209,6 +212,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error adding file to Project with Id: '" + projectId + "'. ",
                             e.getMessage()));
@@ -236,6 +240,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Project", e.getMessage()));
         }
@@ -262,6 +267,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Project", e.getMessage()));
         }
@@ -309,6 +315,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Project with ";
 
             switch (searchType) {
@@ -419,6 +426,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Project with ";
 
             switch (searchType) {
@@ -497,6 +505,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error Updating Project", e.getMessage()));
         }
@@ -566,6 +575,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error Updating Project", e.getMessage()));
         }
@@ -637,6 +647,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error replacing file of Project with Id: '" + projectId + "'. ",
                             e.getMessage()));
@@ -683,6 +694,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error replacing file of Project with Id: '" + projectId + "'. ",
                             e.getMessage()));
@@ -700,6 +712,7 @@ public class ProjectController {
 
             return ResponseEntity.ok().body("Deleted Project with Id: '" + projectId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Project with Id: '" + projectId + "'. ", e.getMessage()));
         }
@@ -759,6 +772,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error deleting file of Project with Id: '" + projectId + "'. ",
                             e.getMessage()));
@@ -792,6 +806,7 @@ public class ProjectController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error deleting file of Project with Id: '" + projectId + "'. ",
                             e.getMessage()));

@@ -66,6 +66,8 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Report", e.getMessage()));
         }
@@ -107,6 +109,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Report", e.getMessage()));
         }
@@ -143,6 +146,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error adding file to Report with Id: '" + reportId + "'. ",
                             e.getMessage()));
@@ -171,6 +175,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Report", e.getMessage()));
@@ -210,6 +215,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Report with ";
 
             switch (searchType) {
@@ -302,6 +308,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Report with ";
 
             switch (searchType) {
@@ -357,6 +364,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Report with Id: '" + reportDTO.getReportId() + "'. ",
                             e.getMessage()));
@@ -407,6 +415,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating Report with Id: '" + reportDTO.getReportId() + "'. ",
                             e.getMessage()));
@@ -479,6 +488,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error replacing file of Report with Id: '" + reportId + "'. ",
                             e.getMessage()));
@@ -525,6 +535,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error replacing file of Report with Id: '" + reportId + "'. ",
                             e.getMessage()));
@@ -542,6 +553,7 @@ public class ReportController {
 
             return ResponseEntity.ok().body("Deleted Report with Id: '" + reportId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Report with Id: '" + reportId + "'. ", e.getMessage()));
         }
@@ -601,6 +613,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error deleting file of Report with Id: '" + reportId + "'. ",
                             e.getMessage()));
@@ -634,6 +647,7 @@ public class ReportController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(new ErrorResponse("Error deleting file of Report with Id: '" + reportId + "'. ",
                             e.getMessage()));

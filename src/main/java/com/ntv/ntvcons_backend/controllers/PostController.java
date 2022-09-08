@@ -110,6 +110,7 @@ public class PostController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Post", e.getMessage()));
         }
@@ -136,6 +137,7 @@ public class PostController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Post", e.getMessage()));
         }
@@ -173,6 +175,7 @@ public class PostController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Post with ";
 
             switch (searchType) {
@@ -268,6 +271,7 @@ public class PostController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Post with ";
 
             switch (searchType) {
@@ -376,6 +380,7 @@ public class PostController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Post", e.getMessage()));
         }
@@ -393,6 +398,7 @@ public class PostController {
 
             return ResponseEntity.ok().body("Deleted Post with Id: '" + postId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Post with Id: '" + postId + "'. ", e.getMessage()));
         }

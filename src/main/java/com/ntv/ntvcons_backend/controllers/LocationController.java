@@ -40,6 +40,7 @@ public class LocationController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Location", e.getMessage()));
         }
@@ -65,6 +66,7 @@ public class LocationController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Location", e.getMessage()));
         }
@@ -91,6 +93,7 @@ public class LocationController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for Location", e.getMessage()));
         }
@@ -138,6 +141,7 @@ public class LocationController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for Location with ";
 
             switch (searchType) {
@@ -204,6 +208,7 @@ public class LocationController {
 //            return ResponseEntity.badRequest().body(
 //                    new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
 //        } catch (Exception e) {
+//            e.printStackTrace();
 //            String errorMsg = "Error searching for Location with ";
 //
 //            switch (searchType) {
@@ -245,6 +250,7 @@ public class LocationController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating Location", e.getMessage()));
         }
@@ -261,6 +267,7 @@ public class LocationController {
 
             return ResponseEntity.ok().body("Deleted Location with Id: '" + locationId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting Location with Id: '" + locationId + "'. ", e.getMessage()));
         }

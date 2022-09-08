@@ -41,6 +41,7 @@ public class ProjectWorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating ProjectWorker. ",
                             e.getMessage()));
@@ -69,6 +70,7 @@ public class ProjectWorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for ProjectWorker", e.getMessage()));
         }
@@ -107,6 +109,7 @@ public class ProjectWorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for ProjectWorker with ";
 
             switch (searchType) {
@@ -169,6 +172,7 @@ public class ProjectWorkerController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for ProjectWorker with ";
 
             switch (searchType) {
@@ -200,6 +204,7 @@ public class ProjectWorkerController {
 
             return ResponseEntity.ok().body(updatedProjectWorkerDTO);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating ProjectWorker with Id: '" + projectWorkerDTO.getProjectWorkerId() + "'. ",
                             e.getMessage()));
@@ -218,6 +223,7 @@ public class ProjectWorkerController {
 
             return ResponseEntity.ok().body("Deleted ProjectWorker with Id: '" + projectWorkerId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error deleting ProjectWorker with Id: '" + projectWorkerId + "'. ", e.getMessage()));
         }

@@ -41,6 +41,7 @@ public class TaskAssignmentController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given" , iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating TaskAssignment", e.getMessage()));
         }
@@ -68,6 +69,7 @@ public class TaskAssignmentController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error searching for TaskAssignment", e.getMessage()));
         }
@@ -115,6 +117,7 @@ public class TaskAssignmentController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for TaskAssignment with ";
 
             switch (searchType) {
@@ -181,6 +184,7 @@ public class TaskAssignmentController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for TaskAssignment with ";
 
             switch (searchType) {
@@ -216,6 +220,7 @@ public class TaskAssignmentController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating TaskAssignment with Id: '" + taskAssignmentDTO.getAssignmentId() + "'. ",
                             e.getMessage()));
@@ -234,6 +239,7 @@ public class TaskAssignmentController {
 
             return ResponseEntity.ok().body("Deleted TaskAssignment with Id: '" + assignmentId + "'. ");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error updating TaskAssignment with Id: '" + assignmentId + "'. ",
                             e.getMessage()));

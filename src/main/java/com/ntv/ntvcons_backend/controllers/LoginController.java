@@ -79,6 +79,7 @@ public class LoginController {
 
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error Login", e.getMessage()));
         }
@@ -161,6 +162,7 @@ public class LoginController {
             return ResponseEntity.ok().body(user);
         } catch (Exception e) {
             e.printStackTrace();
+            e.printStackTrace();
 
             return ResponseEntity.internalServerError().body(
                     new ErrorResponse("Error creating User", e.getMessage()));
@@ -208,6 +210,7 @@ public class LoginController {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse("Invalid parameter given", pROrIAE.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             String errorMsg = "Error searching for User with roleId: '" + searchParam + "'. ";
 
             return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
