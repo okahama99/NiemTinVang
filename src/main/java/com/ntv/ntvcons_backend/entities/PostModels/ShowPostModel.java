@@ -14,6 +14,7 @@ public class ShowPostModel {
     private Long postId, postCategoryId;
     private String authorName, postTitle, ownerName, address, scale, postCategoryName, postCategoryDesc;
     private Status status;
+    private Double estimatedCost;
 
     private Long createdBy, updatedBy;
     private LocalDateTime createdAt, updatedAt;
