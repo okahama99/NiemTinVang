@@ -13,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -75,13 +74,13 @@ public class ConversationController {
     @PostMapping(value = "/v1/createConversationForUnauthenticated",
             consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> createConversationForUnauthenticated(
-            @RequestParam HttpServletRequest servletRequest,
+            @RequestParam String ipAddress,
             @RequestParam String clientName,
             @RequestParam String message,
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> file) throws Exception {
         Long messageId =
                 conversationService
-                        .createConversationForUnauthenticated(servletRequest.getRemoteAddr(), clientName, message);
+                        .createConversationForUnauthenticated(ipAddress, clientName, message);
 
         if (messageId != null) {
 

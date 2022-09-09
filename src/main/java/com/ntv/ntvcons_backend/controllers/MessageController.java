@@ -18,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class MessageController {
 
     @GetMapping(value = "/v1/getByConversationId", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByConversationId(
-            @RequestParam HttpServletRequest servletRequest,
+            @RequestParam String ipAddress,
             @RequestParam SearchType.MESSAGE searchType,
             @RequestParam Long conversationId,
             @RequestParam int pageNo,
@@ -72,11 +71,11 @@ public class MessageController {
 
                 case BY_CONVERSATION_ID_UNAUTHENTICATED:
                     list = messageService
-                            .getByConversationIdUnauthenticated(servletRequest.getRemoteAddr(), conversationId, paging);
+                            .getByConversationIdUnauthenticated(ipAddress, conversationId, paging);
 
                     if (list == null) {
                         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Message found with IPAddress: '" + servletRequest.getRemoteAddr() + "'. ");
+                                .body("No Message found with IPAddress: '" + ipAddress + "'. ");
                     }
                     break;
 
@@ -105,7 +104,7 @@ public class MessageController {
                     break;
 
                 case BY_CONVERSATION_ID_UNAUTHENTICATED:
-                    errorMsg += "IPAddress: '" + servletRequest.getRemoteAddr() + "'. ";
+                    errorMsg += "IPAddress: '" + ipAddress + "'. ";
                     break;
             }
 
@@ -142,13 +141,13 @@ public class MessageController {
 
     @PostMapping(value = "/v1/sendMessageUnauthenticated", produces = "application/json;charset=UTF-8", consumes = "multipart/form-data")
     public ResponseEntity<Object> sendMessageUnauthenticated(
-            @RequestParam HttpServletRequest servletRequest,
+            @RequestParam String ipAddress,
             @RequestParam Long conversationId,
             @RequestParam String message,
             @RequestPart(required = false) @Size(min = 1) List<MultipartFile> file) throws Exception {
 
         Long messageId = messageService
-                .sendMessageUnauthenticated(servletRequest.getRemoteAddr(), conversationId, message);
+                .sendMessageUnauthenticated(ipAddress, conversationId, message);
 
         if (messageId != null) {
             if (file != null) {
@@ -163,9 +162,9 @@ public class MessageController {
 
     @PostMapping(value = "/v1/seenMessageUnauthenticated", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> seenMessageUnauthenticated(
-            @RequestParam HttpServletRequest servletRequest,
+            @RequestParam String ipAddress,
             @RequestParam Long conversationId) {
-        boolean result = messageService.seenMessageUnauthenticated(servletRequest.getRemoteAddr(), conversationId);
+        boolean result = messageService.seenMessageUnauthenticated(ipAddress, conversationId);
 
         if (result) {
             return ResponseEntity.ok().body("Seen thành công.");

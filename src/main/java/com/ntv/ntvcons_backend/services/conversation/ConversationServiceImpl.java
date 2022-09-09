@@ -74,9 +74,13 @@ public class ConversationServiceImpl implements ConversationService {
             model.setName(conversation.getClientName());
             model.setAvatar(null); // khi FE nhận null sẽ set avatar mặc định
 
-            Message message = messageRepository.findTopByOrderByConversationIdDesc();
-            model.setLastMessage(message.getMessage());
-            model.setLastMessageTime(message.getSendTime());
+            List<Message> listMsg = messageRepository.findAllByConversationIdAndSenderId(conversation.getConversationId(), userId);
+            if(!listMsg.isEmpty())
+            {
+                Message message = listMsg.get(listMsg.size()-1);
+                model.setLastMessage(message.getMessage());
+                model.setLastMessageTime(message.getSendTime());
+            }
             return model;
         } else {
             ShowConversationModel model = new ShowConversationModel();
@@ -86,9 +90,13 @@ public class ConversationServiceImpl implements ConversationService {
             model.setName(user.getFullName());
 //            model.setAvatar(user.getAvatar()); //TODO : thêm avatar nếu ông xong nha Thành :v
 
-            Message message = messageRepository.findTopByOrderByConversationIdDesc();
-            model.setLastMessage(message.getMessage());
-            model.setLastMessageTime(message.getSendTime());
+            List<Message> listMsg = messageRepository.findAllByConversationIdAndSenderId(conversation.getConversationId(), userId);
+            if(!listMsg.isEmpty())
+            {
+                Message message = listMsg.get(listMsg.size()-1);
+                model.setLastMessage(message.getMessage());
+                model.setLastMessageTime(message.getSendTime());
+            }
             return model;
         }
     }
