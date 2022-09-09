@@ -152,7 +152,7 @@ public class UserController {
     }
 
     /* READ */
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    // @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getAll", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAll(@RequestParam int pageNo,
                                          @RequestParam int pageSize,
@@ -179,7 +179,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    // @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByParam(@RequestParam String searchParam,
                                              @RequestParam SearchType.USER searchType) {
@@ -264,7 +264,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    // @PreAuthorize("hasAnyAuthority('54','24')")
     @GetMapping(value = "/v1/getAllByParam", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getAllByParam(@RequestParam String searchParam,
                                                 @RequestParam SearchType.ALL_USER searchType,
@@ -360,7 +360,7 @@ public class UserController {
     }
 
     /* UPDATE */
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    // @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateUser", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateUser(@RequestBody @Valid UserUpdateDTO userDTO) {
         try {
@@ -384,7 +384,7 @@ public class UserController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    // @PreAuthorize("hasAnyAuthority('54','24')")
     @PutMapping(value = "/v1/updateUser/withFile",
             consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> updateUserWithFile(
