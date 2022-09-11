@@ -37,12 +37,15 @@ public class PostServiceImpl implements PostService {
     public Post createPost(CreatePostModel createPostModel) {
         Post post = new Post();
 
-        post.setAddress(createPostModel.getAddress());
         post.setPostCategoryId(createPostModel.getPostCategoryId());
-        post.setPostTitle(createPostModel.getPostTitle());
+
         post.setAuthorName(createPostModel.getAuthorName());
-        post.setScale(createPostModel.getScale());
+        post.setPostTitle(createPostModel.getPostTitle());
         post.setOwnerName(createPostModel.getOwnerName());
+        post.setAddress(createPostModel.getAddress());
+        post.setScale(createPostModel.getScale());
+        post.setEstimatedCost(createPostModel.getEstimatedCost());
+
         post.setStatus(Status.ACTIVE);
         post.setCreatedBy(createPostModel.getCreatedBy());
         post.setCreatedAt(LocalDateTime.now());
@@ -140,11 +143,14 @@ public class PostServiceImpl implements PostService {
             return null;
 
         post.setPostCategoryId(updatePostModel.getPostCategoryId());
+
         post.setAuthorName(updatePostModel.getAuthorName());
         post.setPostTitle(updatePostModel.getPostTitle());
         post.setOwnerName(updatePostModel.getOwnerName());
         post.setAddress(updatePostModel.getAddress());
         post.setScale(updatePostModel.getScale());
+        post.setEstimatedCost(updatePostModel.getEstimatedCost());
+
         post.setUpdatedAt(LocalDateTime.now());
         post.setUpdatedBy(updatePostModel.getUpdatedBy());
 
@@ -196,17 +202,20 @@ public class PostServiceImpl implements PostService {
 
                     model.setPostId(postId);
                     model.setPostCategoryId(post.getPostCategoryId());
+                    
                     model.setAuthorName(post.getAuthorName());
                     model.setPostTitle(post.getPostTitle());
                     model.setOwnerName(post.getOwnerName());
                     model.setAddress(post.getAddress());
                     model.setScale(post.getScale());
-                    model.setStatus(post.getStatus());
+                    model.setEstimatedCost(post.getEstimatedCost());
 
+                    model.setStatus(post.getStatus());
                     model.setCreatedAt(post.getCreatedAt());
                     model.setCreatedBy(post.getCreatedBy());
                     model.setUpdatedAt(post.getCreatedAt());
                     model.setUpdatedBy(post.getUpdatedBy());
+
                     model.setTotalPage(totalPage);
 
                     model.setFileList(postIdFileDTOMap.get(postId));

@@ -35,6 +35,9 @@ public class Post extends BaseEntity {
     @Column(name = "address", nullable = false, length = 100)
     private String address;
 
+    @Column(name = "estimatedCost")
+    private Double estimatedCost;
+
     @Column(name = "scale", nullable = false, length = 100)
     private String scale;
 }

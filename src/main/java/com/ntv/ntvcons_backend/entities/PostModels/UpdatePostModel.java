@@ -10,6 +10,7 @@ import net.minidev.json.annotate.JsonIgnore;
 public class UpdatePostModel {
     private Long postId, postCategoryId;
     private String authorName, postTitle, ownerName, address, scale;
+    private Double estimatedCost;
 
     @JsonIgnore /* No serialize/deserialize */
     @Schema(hidden = true) /* No show on swagger */
