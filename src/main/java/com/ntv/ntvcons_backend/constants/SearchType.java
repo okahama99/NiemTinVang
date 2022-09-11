@@ -200,9 +200,4 @@ public class SearchType {
         BY_ADDRESS_ID,
     }
 
-    public enum MESSAGE{
-        BY_CONVERSATION_ID_AUTHENTICATED,
-        BY_CONVERSATION_ID_UNAUTHENTICATED,
-    }
-
 }

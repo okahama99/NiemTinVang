@@ -39,55 +39,20 @@ public class MessageController {
 
     @GetMapping(value = "/v1/getByConversationId", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByConversationId(
-            @RequestParam(required = false) String ipAddress,
-            @RequestParam SearchType.MESSAGE searchType,
             @RequestParam Long conversationId,
             @RequestParam int pageNo,
             @RequestParam int pageSize,
             @RequestParam @Parameter(example = "messageId") String sortBy,
-            @RequestParam boolean sortTypeAsc,
-            @RequestHeader(name = "Authorization", required = false) @Parameter(hidden = true) String token) {
-        Long userId = null;
+            @RequestParam boolean sortTypeAsc){
         try {
             Pageable paging = miscUtil.makePaging(pageNo, pageSize, sortBy, sortTypeAsc);
-            List<ShowMessageModel> list;
-
-            switch (searchType) {
-                case BY_CONVERSATION_ID_AUTHENTICATED:
-                    String jwt = jwtUtil.getAndValidateJwt(token);
-                    userId = jwtUtil.getUserIdFromJWT(jwt);
-                    if (userId == null)
-                        throw new IllegalArgumentException("Invalid jwt token.");
-
-                    list = messageService
-                            .getByConversationIdAuthenticated(
-                                    userId, conversationId, paging);
-
-                    if (list == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Message found with Id: '" + userId + "'. ");
-                    }
-                    break;
-
-                case BY_CONVERSATION_ID_UNAUTHENTICATED:
-                    list = messageService
-                            .getByConversationIdUnauthenticated(ipAddress, conversationId, paging);
-
-                    if (list == null) {
-                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                                .body("No Message found with IPAddress: '" + ipAddress + "'. ");
-                    }
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("Invalid SearchType used for entity Message");
-            }
+            List<ShowMessageModel> list = messageService.getByConversationId(conversationId, paging);
 
             return ResponseEntity.ok().body(list);
         } catch (NumberFormatException nFE) {
             return ResponseEntity.badRequest().body(
                     new ErrorResponse(
-                            "Invalid parameter type for searchType: '" + searchType
+                            "Invalid parameter type for conversationId: '" + conversationId
                                     + "'. Expecting parameter of type: Long",
                             nFE.getMessage()));
         } catch (IllegalArgumentException iAE) {
@@ -96,17 +61,7 @@ public class MessageController {
                     new ErrorResponse("Invalid parameter given", iAE.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
-            String errorMsg = "Error searching for Message with ";
-
-            switch (searchType) {
-                case BY_CONVERSATION_ID_AUTHENTICATED:
-                    errorMsg += "Id: '" + userId + "'. ";
-                    break;
-
-                case BY_CONVERSATION_ID_UNAUTHENTICATED:
-                    errorMsg += "IPAddress: '" + ipAddress + "'. ";
-                    break;
-            }
+            String errorMsg = "Error searching for Message with ConversationId : " + conversationId;
 
             return ResponseEntity.internalServerError().body(new ErrorResponse(errorMsg, e.getMessage()));
         }

@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 public class ShowMessageModel{
     private Long messageId, conversationId, senderId;
-    private String senderIp, message;
+    private String senderIp, message, avatarLink;
     private Boolean seen;
     private LocalDateTime sendTime;
 

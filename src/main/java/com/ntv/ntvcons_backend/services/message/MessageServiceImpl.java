@@ -3,12 +3,13 @@ package com.ntv.ntvcons_backend.services.message;
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
-import com.ntv.ntvcons_backend.entities.Conversation;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.Message;
 import com.ntv.ntvcons_backend.entities.MessageModels.ShowMessageModel;
-import com.ntv.ntvcons_backend.repositories.ConversationRepository;
 import com.ntv.ntvcons_backend.repositories.MessageRepository;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
+import com.ntv.ntvcons_backend.services.user.UserService;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,35 +27,20 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private MessageRepository messageRepository;
     @Autowired
-    private ConversationRepository conversationRepository;
-    @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
+    @Autowired
+    private UserService userService;
 
     private final EntityType ENTITY_TYPE = EntityType.MESSAGE_ENTITY;
 
     @Override
-    public List<ShowMessageModel> getByConversationIdAuthenticated(
-            Long userId, Long conversationId, Pageable paging) throws Exception {
+    public List<ShowMessageModel> getByConversationId(Long conversationId, Pageable paging) throws Exception {
 
         List<ShowMessageModel> messageModelList = new ArrayList<>();
 
         Page<Message> pagingResult =
                 messageRepository
-                        .findAllByConversationIdAndSenderId(conversationId, userId, paging);
-
-        messageModelList.addAll(fillAllMessageModel(pagingResult));
-
-        return messageModelList;
-    }
-
-    @Override
-    public List<ShowMessageModel> getByConversationIdUnauthenticated(
-            String ipAddress, Long conversationId, Pageable paging) throws Exception {
-        List<ShowMessageModel> messageModelList = new ArrayList<>();
-
-        Page<Message> pagingResult =
-                messageRepository
-                        .findAllByConversationIdAndSenderIp(conversationId, ipAddress, paging);
+                        .findAllByConversationId(conversationId, paging);
 
         messageModelList.addAll(fillAllMessageModel(pagingResult));
 
@@ -138,11 +124,19 @@ public class MessageServiceImpl implements MessageService {
                             messageIdSet, ENTITY_TYPE);
 
             Page<ShowMessageModel> modelResult = pagingResult.map(new Converter<Message, ShowMessageModel>() {
+                @SneakyThrows
                 @Override
                 protected ShowMessageModel doForward(Message message) {
                     ShowMessageModel model = new ShowMessageModel();
 
                     long messageId = message.getMessageId();
+
+                    // get avatar
+                    UserReadDTO userDTO = userService.getDTOById(message.getSenderId());
+                    String avatarLink = "Không có avatar";
+                    if (userDTO.getFile() != null)
+                        avatarLink = userDTO.getFile().getFileLink();
+                    model.setAvatarLink(avatarLink);
 
                     model.setMessageId(messageId);
                     model.setConversationId(message.getConversationId());
