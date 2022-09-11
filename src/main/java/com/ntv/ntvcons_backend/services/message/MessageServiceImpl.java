@@ -2,14 +2,12 @@ package com.ntv.ntvcons_backend.services.message;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
-import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
 import com.ntv.ntvcons_backend.entities.Conversation;
 import com.ntv.ntvcons_backend.entities.Message;
 import com.ntv.ntvcons_backend.entities.MessageModels.ShowMessageModel;
 import com.ntv.ntvcons_backend.repositories.ConversationRepository;
 import com.ntv.ntvcons_backend.repositories.MessageRepository;
-import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
 import com.ntv.ntvcons_backend.services.externalFileEntityWrapperPairing.ExternalFileEntityWrapperPairingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,42 +28,21 @@ public class MessageServiceImpl implements MessageService {
     @Autowired
     private ConversationRepository conversationRepository;
     @Autowired
-    private EntityWrapperService entityWrapperService;
-    @Autowired
     private ExternalFileEntityWrapperPairingService eFEWPairingService;
 
     private final EntityType ENTITY_TYPE = EntityType.MESSAGE_ENTITY;
-    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     @Override
     public List<ShowMessageModel> getByConversationIdAuthenticated(
             Long userId, Long conversationId, Pageable paging) throws Exception {
-        List<Conversation> combineConversationList = new ArrayList<>();
-        List<Conversation> user1ConversationList = conversationRepository.findAllByUser1Id(userId);
-        List<Conversation> user2ConversationList = conversationRepository.findAllByUser2Id(userId);
-
-        if (user1ConversationList == null && user2ConversationList == null) {
-            return null;
-        } else if (user1ConversationList != null
-                && user2ConversationList == null) {
-            combineConversationList.addAll(user1ConversationList);
-        } else if (user1ConversationList == null
-                && user2ConversationList != null) {
-            combineConversationList.addAll(user2ConversationList);
-        } else {
-            combineConversationList.addAll(user1ConversationList);
-            combineConversationList.addAll(user2ConversationList);
-        }
 
         List<ShowMessageModel> messageModelList = new ArrayList<>();
 
-        for (Conversation conversation : combineConversationList) {
-            Page<Message> pagingResult =
-                    messageRepository
-                            .findAllByConversationId(conversation.getConversationId(), paging);
+        Page<Message> pagingResult =
+                messageRepository
+                        .findAllByConversationIdAndSenderId(conversationId, userId, paging);
 
-            messageModelList.addAll(fillAllMessageModel(pagingResult));
-        }
+        messageModelList.addAll(fillAllMessageModel(pagingResult));
 
         return messageModelList;
     }
@@ -73,23 +50,15 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public List<ShowMessageModel> getByConversationIdUnauthenticated(
             String ipAddress, Long conversationId, Pageable paging) throws Exception {
-        List<Conversation> conversationList =
-                conversationRepository.findAllByIpAddress(ipAddress);
+        List<ShowMessageModel> messageModelList = new ArrayList<>();
 
-        if (conversationList != null) {
-            List<ShowMessageModel> result = new ArrayList<>();
+        Page<Message> pagingResult =
+                messageRepository
+                        .findAllByConversationIdAndSenderIp(conversationId, ipAddress, paging);
 
-            for (Conversation conversation : conversationList) {
-                Page<Message> pagingResult =
-                        messageRepository
-                                .findAllByConversationId(conversation.getConversationId(), paging);
+        messageModelList.addAll(fillAllMessageModel(pagingResult));
 
-                result.addAll(fillAllMessageModel(pagingResult));
-            }
-
-            return result;
-        }
-        return null;
+        return messageModelList;
     }
 
     @Override

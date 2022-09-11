@@ -39,7 +39,7 @@ public class MessageController {
 
     @GetMapping(value = "/v1/getByConversationId", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> getByConversationId(
-            @RequestParam String ipAddress,
+            @RequestParam(required = false) String ipAddress,
             @RequestParam SearchType.MESSAGE searchType,
             @RequestParam Long conversationId,
             @RequestParam int pageNo,
