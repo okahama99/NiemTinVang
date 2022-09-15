@@ -2,6 +2,7 @@ package com.ntv.ntvcons_backend.services.project;
 
 import com.google.common.base.Converter;
 import com.ntv.ntvcons_backend.constants.EntityType;
+import com.ntv.ntvcons_backend.constants.RoleEnum;
 import com.ntv.ntvcons_backend.constants.Status;
 import com.ntv.ntvcons_backend.dtos.blueprint.BlueprintReadDTO;
 import com.ntv.ntvcons_backend.dtos.externalFile.ExternalFileReadDTO;
@@ -88,6 +89,7 @@ public class ProjectServiceImpl implements ProjectService {
     private RequestService requestService;
 
     private final EntityType ENTITY_TYPE = EntityType.PROJECT_ENTITY;
+    private final List<Long> NTV_ROLE_ID_LIST = RoleEnum.getAllNTVManager();
     private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
 
     /* READ */
@@ -1130,10 +1132,27 @@ public class ProjectServiceImpl implements ProjectService {
         projectDTO.setBlueprint(blueprintService.getDTOByProjectId(projectId));
 
         /* Nullable */
-//        projectDTO.setTaskList(taskService.getAllDTOByProjectId(projectId));
-//        projectDTO.setReportList(reportService.getAllDTOByProjectId(projectId));
-//        projectDTO.setRequestList(requestService.getAllDTOByProjectId(projectId));
-        projectDTO.setProjectManagerList(projectManagerService.getAllDTOByProjectId(projectId));
+
+        List<ProjectManagerReadDTO> projectManagerDTOList = projectManagerService.getAllDTOByProjectId(projectId);
+        if (projectManagerDTOList != null) {
+            List<ProjectManagerReadDTO> ntvManagerList = new ArrayList<>();
+            List<ProjectManagerReadDTO> userManagerList = new ArrayList<>();
+            long roleId;
+
+            for (ProjectManagerReadDTO projectManagerDTO : projectManagerDTOList) {
+                roleId = projectManagerDTO.getManager().getRole().getRoleId();
+
+                if (NTV_ROLE_ID_LIST.contains(roleId)) {
+                    ntvManagerList.add(projectManagerDTO);
+                } else {
+                    userManagerList.add(projectManagerDTO);
+                }
+            }
+
+            projectDTO.setNtvManagerList(ntvManagerList);
+            projectDTO.setUserManagerList(userManagerList);
+        }
+
         projectDTO.setProjectWorkerList(projectWorkerService.getAllDTOByProjectId(projectId));
         projectDTO.setFileList(
                 eFEWPairingService
@@ -1167,18 +1186,39 @@ public class ProjectServiceImpl implements ProjectService {
         Map<Long, BlueprintReadDTO> projectIdBlueprintDTOMap =
                 blueprintService.mapProjectIdBlueprintDTOByProjectIdIn(projectIdSet);
 
-//        /* Get associated Task */
-//        Map<Long, List<TaskReadDTO>> projectIdTaskDTOListMap =
-//                taskService.mapProjectIdTaskDTOListByProjectIdIn(projectIdSet);
-//        /* Get associated Report */
-//        Map<Long, List<ReportReadDTO>> projectIdReportDTOListMap =
-//                reportService.mapProjectIdReportDTOListByProjectIdIn(projectIdSet);
-//        /* Get associated Request */
-//        Map<Long, List<RequestReadDTO>> projectIdRequestDTOListMap =
-//                requestService.mapProjectIdRequestDTOListByProjectIdIn(projectIdSet);
         /* Get associated ProjectManager */
         Map<Long, List<ProjectManagerReadDTO>> projectIdProjectManagerDTOListMap =
                 projectManagerService.mapProjectIdProjectManagerDTOListByProjectIdIn(projectIdSet);
+
+        Map<Long, List<ProjectManagerReadDTO>> projectIdNtvManagerDTOListMap = new HashMap<>();
+        Map<Long, List<ProjectManagerReadDTO>> projectIdUserManagerDTOListMap = new HashMap<>();
+
+        if (!projectIdProjectManagerDTOListMap.isEmpty()) {
+            for (Long projectId : projectIdProjectManagerDTOListMap.keySet()) {
+                List<ProjectManagerReadDTO> projectManagerDTOList =
+                        projectIdProjectManagerDTOListMap.get(projectId);
+
+                if (projectManagerDTOList != null) {
+                    List<ProjectManagerReadDTO> ntvManagerList = new ArrayList<>();
+                    List<ProjectManagerReadDTO> userManagerList = new ArrayList<>();
+                    long roleId;
+
+                    for (ProjectManagerReadDTO projectManagerDTO : projectManagerDTOList) {
+                        roleId = projectManagerDTO.getManager().getRole().getRoleId();
+
+                        if (NTV_ROLE_ID_LIST.contains(roleId)) {
+                            ntvManagerList.add(projectManagerDTO);
+                        } else {
+                            userManagerList.add(projectManagerDTO);
+                        }
+                    }
+
+                    projectIdNtvManagerDTOListMap.put(projectId, ntvManagerList);
+                    projectIdUserManagerDTOListMap.put(projectId, userManagerList);
+                }
+            }
+        }
+
         /* Get associated ProjectWorker */
         Map<Long, List<ProjectWorkerReadDTO>> projectIdProjectWorkerDTOListMap =
                 projectWorkerService.mapProjectIdProjectWorkerDTOListByProjectIdIn(projectIdSet);
@@ -1212,10 +1252,9 @@ public class ProjectServiceImpl implements ProjectService {
                     projectDTO.setBlueprint(projectIdBlueprintDTOMap.get(tmpProjectId));
 
                     /* Nullable */
-//                    projectDTO.setTaskList(projectIdTaskDTOListMap.get(tmpProjectId));
-//                    projectDTO.setReportList(projectIdReportDTOListMap.get(tmpProjectId));
-//                    projectDTO.setRequestList(projectIdRequestDTOListMap.get(tmpProjectId));
-                    projectDTO.setProjectManagerList(projectIdProjectManagerDTOListMap.get(tmpProjectId));
+                    projectDTO.setNtvManagerList(projectIdNtvManagerDTOListMap.get(tmpProjectId));
+                    projectDTO.setUserManagerList(projectIdUserManagerDTOListMap.get(tmpProjectId));
+
                     projectDTO.setProjectWorkerList(projectIdProjectWorkerDTOListMap.get(tmpProjectId));
                     projectDTO.setFileList(
                             projectIdExternalFileDTOListMap.get(tmpProjectId));
