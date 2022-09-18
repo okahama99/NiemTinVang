@@ -35,18 +35,13 @@ public class ProjectUpdateDTO extends BaseUpdateDTO {
     @Schema(description = "Nullable") /* Hint for Swagger */
     private LocationCreateDTO location;
 
-//    @Schema(example = "10.841139984351623, 106.80988203281531",
-//            description = "NOT NULL, size <= 100") /* Hint for Swagger */
-//    @NotNull(message = "coordinate REQUIRED for Create")
-//    @Size(max = 100, message = "coordinate max length: 100 characters")
-//    private String coordinate;
-
-//    @Schema(description = "Nullable") /* Hint for Swagger */
-//    private BlueprintUpdateDTO blueprint;
+    @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
+    @Size(min = 1, message = "Need at least 1 for Update")
+    private List<Long> ntvManagerIdList;
 
     @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
     @Size(min = 1, message = "Need at least 1 for Update")
-    private List<Long> managerIdList;
+    private List<Long> userManagerIdList;
 
     @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
     @Size(min = 1, message = "Need at least 1 for Update")
