@@ -21,7 +21,8 @@ public class ProjectReadDTO extends BaseReadDTO {
     private LocationReadDTO location;
     private BlueprintReadDTO blueprint;
 
-    private List<ProjectManagerReadDTO> projectManagerList;
+    private List<ProjectManagerReadDTO> ntvManagerList;
+    private List<ProjectManagerReadDTO> userManagerList;
     private List<ProjectWorkerReadDTO> projectWorkerList;
 
     private String planStartDate;
@@ -31,8 +32,4 @@ public class ProjectReadDTO extends BaseReadDTO {
     private String actualStartDate;
     private String actualEndDate;
     private Double actualCost;
-
-//    private List<TaskReadDTO> taskList;
-//    private List<ReportReadDTO> reportList;
-//    private List<RequestReadDTO> requestList;
 }

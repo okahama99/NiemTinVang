@@ -178,15 +178,17 @@ public class UserServiceImpl implements UserService {
             }
         }
         if (!errorMsg.trim().isEmpty())
-        throw new IllegalArgumentException(errorMsg);
-            user.setEmail(registerUserModel.getEmail());
-            user.setUsername(registerUserModel.getUsername());
-            user.setPassword(passwordEncoder.encode(registerUserModel.getPassword()));
-            user.setPhone(registerUserModel.getPhone());
-            user.setFullName(registerUserModel.getFullName());
-            user.setCreatedAt(LocalDateTime.now());
-            user.setRoleId(Long.parseLong("4"));
-            userRepository.saveAndFlush(user);
+            throw new IllegalArgumentException(errorMsg);
+
+        user.setEmail(registerUserModel.getEmail());
+        user.setUsername(registerUserModel.getUsername());
+        user.setPassword(passwordEncoder.encode(registerUserModel.getPassword()));
+        user.setPhone(registerUserModel.getPhone());
+        user.setFullName(registerUserModel.getFullName());
+        user.setCreatedAt(LocalDateTime.now());
+        user.setRoleId(Long.parseLong("4"));
+        userRepository.saveAndFlush(user);
+
         return user;
     }
 
@@ -551,12 +553,13 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-
         if (!errorMsg.trim().isEmpty()) 
             throw new IllegalArgumentException(errorMsg);
 
         if (updatedUser.getPassword() != null) {
             updatedUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        } else {
+            updatedUser.setPassword(oldUser.getPassword());
         }
 
         updatedUser.setCreatedAt(oldUser.getCreatedAt());
