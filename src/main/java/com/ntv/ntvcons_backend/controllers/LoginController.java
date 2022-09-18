@@ -122,18 +122,14 @@ public class LoginController {
         Map<String, String> response = new HashMap<>(2);
 
         // generate OTP.
-        Boolean isGenerated = otpService.generateVerificationOTP(email);
-        if (!isGenerated) {
-            response.put("status", "error");
-            response.put("message", "Không thể khởi tạo OTP.");
+        String result = otpService.generateVerificationOTP(email);
+        if (result == null) {
 
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            return ResponseEntity.badRequest().body("Không thể khởi tạo OTP");
         }
 
         // success message
-        response.put("status", "success");
-        response.put("message", "Đã gửi mã OTP, xin vui lòng kiểm tra email.");
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok().body(result);
     }
 
     @PostMapping(value = "/resetPassword", produces = "application/json;charset=UTF-8")

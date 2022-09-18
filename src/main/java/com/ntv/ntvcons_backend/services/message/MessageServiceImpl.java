@@ -134,8 +134,9 @@ public class MessageServiceImpl implements MessageService {
                     // get avatar
                     UserReadDTO userDTO = userService.getDTOById(message.getSenderId());
                     String avatarLink = "Không có avatar";
-                    if (userDTO.getFile() != null)
+                    if (userDTO.getFile() != null){
                         avatarLink = userDTO.getFile().getFileLink();
+                    }
                     model.setAvatarLink(avatarLink);
 
                     model.setMessageId(messageId);

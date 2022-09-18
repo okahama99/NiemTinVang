@@ -15,4 +15,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
 
     List<Conversation> findAllByIpAddress(String ipAddress);
 
+    Conversation findByUser1IdAndAndUser2Id(Long userId1, Long userId2);
+
 }

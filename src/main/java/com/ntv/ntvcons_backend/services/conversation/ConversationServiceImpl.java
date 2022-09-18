@@ -1,14 +1,12 @@
 package com.ntv.ntvcons_backend.services.conversation;
 
-import com.ntv.ntvcons_backend.constants.Status;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.Conversation;
 import com.ntv.ntvcons_backend.entities.ConversationModels.ShowConversationModel;
 import com.ntv.ntvcons_backend.entities.Message;
-import com.ntv.ntvcons_backend.entities.User;
 import com.ntv.ntvcons_backend.repositories.ConversationRepository;
 import com.ntv.ntvcons_backend.repositories.MessageRepository;
-import com.ntv.ntvcons_backend.repositories.UserRepository;
-import com.ntv.ntvcons_backend.services.externalFile.ExternalFileService;
+import com.ntv.ntvcons_backend.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +24,10 @@ public class ConversationServiceImpl implements ConversationService {
     private MessageRepository messageRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ExternalFileService externalFileService;
-
-    private final List<Status> N_D_S_STATUS_LIST = Status.getAllNonDefaultSearchStatus();
+    private UserService userService;
 
     @Override
-    public List<ShowConversationModel> getUserConversations(Long userId) {
+    public List<ShowConversationModel> getUserConversations(Long userId) throws Exception{
         //Lấy list conversation của user
         List<Conversation> listConversation1 = conversationRepository.findAllByUser1Id(userId);
         List<Conversation> listConversation2 = conversationRepository.findAllByUser2Id(userId);
@@ -66,11 +59,13 @@ public class ConversationServiceImpl implements ConversationService {
         return returnList;
     }
 
-    public ShowConversationModel setupConversationModelData(Conversation conversation, Long userId) {
+    public ShowConversationModel setupConversationModelData(Conversation conversation, Long userId) throws Exception {
         if (userId == null) {
             ShowConversationModel model = new ShowConversationModel();
 
             model.setConversationId(conversation.getConversationId());
+            model.setUser1Id(conversation.getUser1Id());
+            model.setUser2Id(conversation.getUser2Id());
             model.setName(conversation.getClientName());
             model.setAvatar(null); // khi FE nhận null sẽ set avatar mặc định
 
@@ -85,10 +80,20 @@ public class ConversationServiceImpl implements ConversationService {
         } else {
             ShowConversationModel model = new ShowConversationModel();
             model.setConversationId(conversation.getConversationId());
+            model.setUser1Id(conversation.getUser1Id());
+            model.setUser2Id(conversation.getUser2Id());
 
-            User user = userRepository.findByUserIdAndStatusNotIn(userId, N_D_S_STATUS_LIST).orElse(null);
-            model.setName(user.getFullName());
-//            model.setAvatar(user.getAvatar()); //TODO : thêm avatar nếu ông xong nha Thành :v
+//            User user = userRepository.findByUserIdAndStatusNotIn(userId, N_D_S_STATUS_LIST).orElse(null);
+//            model.setName(user.getFullName());
+
+            UserReadDTO userDTO = userService.getDTOById(userId);
+            String avatarLink = "Không có avatar";
+            if (userDTO.getFile() != null){
+                avatarLink = userDTO.getFile().getFileLink();
+            }
+            model.setAvatar(avatarLink);
+            model.setName(userDTO.getFullName());
+
 
             List<Message> listMsg = messageRepository.findAllByConversationIdAndSenderId(conversation.getConversationId(), userId);
             if(!listMsg.isEmpty())
@@ -103,22 +108,56 @@ public class ConversationServiceImpl implements ConversationService {
 
     @Override
     public Long createConversationForAuthenticated(Long currentUserId, Long targetUserId, String message) {
-        Conversation conversation = new Conversation();
-        conversation.setUser1Id(currentUserId);
-        conversation.setUser2Id(targetUserId);
-        Conversation createdConversation = conversationRepository.saveAndFlush(conversation);
+        Conversation existed1 = conversationRepository.findByUser1IdAndAndUser2Id(currentUserId, targetUserId);
+        Conversation existed2 = conversationRepository.findByUser1IdAndAndUser2Id(targetUserId, currentUserId);
+        if(existed1 == null && existed2 == null){
+            Conversation conversation = new Conversation();
+            conversation.setUser1Id(currentUserId);
+            conversation.setUser2Id(targetUserId);
+            Conversation createdConversation = conversationRepository.saveAndFlush(conversation);
 
-        Message messageEntity = new Message();
-        messageEntity.setConversationId(createdConversation.getConversationId());
-        messageEntity.setSenderId(currentUserId);
-        messageEntity.setMessage(message);
-        messageEntity.setSendTime(LocalDateTime.now());
-        Message createdMessage = messageRepository.saveAndFlush(messageEntity);
+            Message messageEntity = new Message();
+            messageEntity.setConversationId(createdConversation.getConversationId());
+            messageEntity.setSenderId(currentUserId);
+            messageEntity.setMessage(message);
+            messageEntity.setSendTime(LocalDateTime.now());
+            Message createdMessage = messageRepository.saveAndFlush(messageEntity);
 
-        if (createdConversation == null || createdMessage == null) {
-            return null;
+            if (createdConversation == null || createdMessage == null) {
+                return null;
+            }
+            return createdMessage.getMessageId();
         }
-        return createdMessage.getMessageId();
+
+        if(existed1 != null){
+            Message newMessage = new Message();
+            newMessage.setConversationId(existed1.getConversationId());
+            newMessage.setSenderId(currentUserId);
+            newMessage.setSendTime(LocalDateTime.now());
+            newMessage.setMessage(message);
+            Message createdNewMessage = messageRepository.saveAndFlush(newMessage);
+
+            if (createdNewMessage == null) {
+                return null;
+            }
+            return createdNewMessage.getMessageId();
+        }
+
+        if(existed2 != null){
+            Message newMessage = new Message();
+            newMessage.setConversationId(existed2.getConversationId());
+            newMessage.setSenderId(currentUserId);
+            newMessage.setSendTime(LocalDateTime.now());
+            newMessage.setMessage(message);
+            Message createdNewMessage = messageRepository.saveAndFlush(newMessage);
+
+            if (createdNewMessage == null) {
+                return null;
+            }
+            return createdNewMessage.getMessageId();
+        }
+
+        return null;
     }
 
     @Override

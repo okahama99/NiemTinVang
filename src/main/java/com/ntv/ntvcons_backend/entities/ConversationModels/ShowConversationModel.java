@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class ShowConversationModel {
-    private Long conversationId;
+    private Long conversationId, user1Id, user2Id;
     private String name;
     private String avatar;
     private String lastMessage;

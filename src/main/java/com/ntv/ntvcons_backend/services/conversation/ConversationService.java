@@ -5,7 +5,7 @@ import com.ntv.ntvcons_backend.entities.ConversationModels.ShowConversationModel
 import java.util.List;
 
 public interface ConversationService {
-    List<ShowConversationModel> getUserConversations(Long userId);
+    List<ShowConversationModel> getUserConversations(Long userId) throws Exception;
 
     Long createConversationForAuthenticated(Long currentUserId, Long targetUserId, String message);
 

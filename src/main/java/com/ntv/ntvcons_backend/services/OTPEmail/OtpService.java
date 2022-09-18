@@ -39,19 +39,19 @@ public class OtpService {
             return true;
     }
 
-    public Boolean generateVerificationOTP(String email) {
+    public String generateVerificationOTP(String email) {
         // generate otp
         Integer otpValue = otpGenerator.generateOTP(email);
         if (otpValue == -1)
         {
-            return  false;
+            return null;
         }
         User user = userRepository.findByEmailAndStatusNotIn(email, N_D_S_STATUS_LIST).orElse(null);
         // fetch user e-mail from database
         // generate emailDTO object
         emailService.send(email, buildSendOtp(user.getFullName(), otpValue), "Niềm Tin Vàng OTP");
         // send generated e-mail
-        return true;
+        return email;
     }
 
     public Integer generatePhoneOTP(String phone) {
