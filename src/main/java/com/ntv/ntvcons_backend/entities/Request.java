@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -53,6 +52,5 @@ public class Request extends BaseEntity {
 
     @Column(name = "isApproved")
     private Boolean isApproved;
-
 
 }

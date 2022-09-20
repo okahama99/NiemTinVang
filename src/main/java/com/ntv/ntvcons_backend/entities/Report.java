@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -38,6 +37,5 @@ public class Report extends BaseEntity {
 
     @Column(name = "reportDate", nullable = false)
     private LocalDateTime reportDate;
-
 
 }

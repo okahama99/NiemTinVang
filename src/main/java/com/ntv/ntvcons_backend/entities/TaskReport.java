@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -31,6 +30,5 @@ public class TaskReport extends BaseEntity {
 
     @Column(name = "taskNote", length = 100)
     private String taskNote;
-
 
 }
