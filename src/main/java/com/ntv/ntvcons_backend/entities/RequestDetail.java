@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -34,6 +33,5 @@ public class RequestDetail extends BaseEntity {
 
     @Column(name = "itemPrice", nullable = false)
     private Double itemPrice;
-
 
 }

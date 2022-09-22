@@ -34,7 +34,11 @@ public class ProjectCreateDTO extends BaseCreateDTO {
 
     @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
     @Size(min = 1, message = "Need at least 1 for Create")
-    private List<Long> managerIdList;
+    private List<Long> ntvManagerIdList;
+
+    @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
+    @Size(min = 1, message = "Need at least 1 for Create")
+    private List<Long> userManagerIdList;
 
     @Schema(description = "Nullable, size >= 1 (if not null)") /* Hint for Swagger */
     @Size(min = 1, message = "Need at least 1 for Create")

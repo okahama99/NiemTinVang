@@ -3,7 +3,6 @@ package com.ntv.ntvcons_backend.entities.ProjectModels;
 import lombok.Getter;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 public class CreateProjectModel {

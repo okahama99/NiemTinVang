@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -25,6 +24,5 @@ public class Role extends BaseEntity {
 
     @Column(name = "roleDesc", length = 100)
     private String roleDesc;
-
 
 }

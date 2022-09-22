@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -25,6 +24,5 @@ public class RequestType extends BaseEntity {
 
     @Column(name = "requestTypeDesc", length = 100)
     private String requestTypeDesc;
-
 
 }

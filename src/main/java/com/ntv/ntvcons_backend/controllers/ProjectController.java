@@ -104,14 +104,14 @@ public class ProjectController {
 
             projectDTO.setCreatedBy(userId);
 
-            List<Long> managerIdList = projectDTO.getManagerIdList();
+            List<Long> managerIdList = projectDTO.getNtvManagerIdList();
             if (managerIdList == null) {
-                projectDTO.setManagerIdList(
+                projectDTO.setNtvManagerIdList(
                         new ArrayList<>(Collections.singletonList(userId)));
             } else {
                 if (!managerIdList.contains(userId)) {
                     managerIdList.add(userId);
-                    projectDTO.setManagerIdList(managerIdList);
+                    projectDTO.setNtvManagerIdList(managerIdList);
                 }
             }
 
@@ -146,14 +146,14 @@ public class ProjectController {
 
             projectDTO.setCreatedBy(userId);
 
-            List<Long> managerIdList = projectDTO.getManagerIdList();
+            List<Long> managerIdList = projectDTO.getNtvManagerIdList();
             if (managerIdList == null) {
-                projectDTO.setManagerIdList(
+                projectDTO.setNtvManagerIdList(
                         new ArrayList<>(Collections.singletonList(userId)));
             } else {
                 if (!managerIdList.contains(userId)) {
                     managerIdList.add(userId);
-                    projectDTO.setManagerIdList(managerIdList);
+                    projectDTO.setNtvManagerIdList(managerIdList);
                 }
             }
 

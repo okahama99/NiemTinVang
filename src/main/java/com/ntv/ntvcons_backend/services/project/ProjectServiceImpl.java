@@ -261,11 +261,15 @@ public class ProjectServiceImpl implements ProjectService {
                 .createEntityWrapper(newProjectId, ENTITY_TYPE, createdBy);
 
         /* Create associated ProjectManager (if present) */
-        List<Long> managerIdList = newProjectDTO.getManagerIdList();
-        if (managerIdList != null) {
-            /* Set<> to avoid duplicate */
-            Set<Long> managerIdSet = new HashSet<>(managerIdList);
+        Set<Long> managerIdSet = new HashSet<>();
 
+        if (newProjectDTO.getNtvManagerIdList() != null)
+            managerIdSet.addAll(newProjectDTO.getNtvManagerIdList());
+
+        if (newProjectDTO.getUserManagerIdList() != null)
+            managerIdSet.addAll(newProjectDTO.getUserManagerIdList());
+
+        if (!managerIdSet.isEmpty()) {
             ProjectManagerCreateDTO projectManagerDTO;
             List<ProjectManagerCreateDTO> projectManagerDTOList = new ArrayList<>();
 
@@ -961,11 +965,15 @@ public class ProjectServiceImpl implements ProjectService {
         long updatedProjectId = updatedProject.getProjectId();
 
         /* Update associated ProjectManager if changed */
-        List<Long> managerIdList = updatedProjectDTO.getManagerIdList();
-        if (managerIdList != null) {
-            /* Set<> to avoid duplicate */
-            Set<Long> managerIdSet = new HashSet<>(managerIdList);
+        Set<Long> managerIdSet = new HashSet<>();
 
+        if (updatedProjectDTO.getNtvManagerIdList() != null)
+            managerIdSet.addAll(updatedProjectDTO.getNtvManagerIdList());
+
+        if (updatedProjectDTO.getUserManagerIdList() != null)
+            managerIdSet.addAll(updatedProjectDTO.getUserManagerIdList());
+
+        if (!managerIdSet.isEmpty()) {
             List<Long> oldManagerIdList = new ArrayList<>();
 
             List<ProjectManager> projectManagerList =

@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -32,6 +31,5 @@ public class ProjectManager extends BaseEntity {
 
     @Column(name = "removeDate")
     private LocalDateTime removeDate;
-
 
 }
