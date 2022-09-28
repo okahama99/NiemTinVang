@@ -181,7 +181,7 @@ public class ProjectController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PreAuthorize("hasAnyAuthority('54','44','24')")
     @PostMapping(value = "/v1/addFile/{projectId}",
             consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> addFileToProjectById(
@@ -581,7 +581,7 @@ public class ProjectController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PreAuthorize("hasAnyAuthority('54','44','24')")
     @PutMapping(value = "/v1/replaceFile/{projectId}",
             consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> replaceFileOfProjectById(
@@ -654,7 +654,7 @@ public class ProjectController {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('54','24')")
+    @PreAuthorize("hasAnyAuthority('54','44','24')")
     @PutMapping(value = "/v1/replaceAllFile/{projectId}",
             consumes = "multipart/form-data", produces = "application/json;charset=UTF-8")
     public ResponseEntity<Object> replaceAllFileOfProjectById(
