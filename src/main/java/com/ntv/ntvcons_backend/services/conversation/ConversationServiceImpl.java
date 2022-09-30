@@ -88,8 +88,10 @@ public class ConversationServiceImpl implements ConversationService {
 
             UserReadDTO userDTO = userService.getDTOById(userId);
             String avatarLink = "Không có avatar";
-            if (userDTO.getFile() != null){
-                avatarLink = userDTO.getFile().getFileLink();
+            if(userDTO != null){
+                if (userDTO.getFile() != null){
+                    avatarLink = userDTO.getFile().getFileLink();
+                }
             }
             model.setAvatar(avatarLink);
             model.setName(userDTO.getFullName());
