@@ -32,7 +32,6 @@ public class WorkerUpdateDTO extends BaseUpdateDTO {
     private String citizenId;
 
     @Schema(example = "UNKNOWN") /* Hint for Swagger */
-    @Size(max = 20, message = "gender max length: 20 characters")
     private Gender gender = Gender.UNKNOWN; /* Default */
 
     /** yyyy-MM-dd HH:mm */
