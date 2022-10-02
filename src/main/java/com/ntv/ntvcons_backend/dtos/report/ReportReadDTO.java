@@ -4,6 +4,7 @@ import com.ntv.ntvcons_backend.dtos.BaseReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportDetail.ReportDetailReadDTO;
 import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,7 @@ public class ReportReadDTO extends BaseReadDTO {
     private Long reportId;
     private Long projectId;
     private ReportTypeReadDTO reportType;
-    private Long reporterId;
+    private UserReadDTO reporter;
     private String reportName;
     private String reportDesc;
     private String reportDate;

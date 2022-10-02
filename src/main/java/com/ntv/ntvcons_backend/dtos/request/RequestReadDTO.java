@@ -17,7 +17,7 @@ public class RequestReadDTO extends BaseReadDTO {
     private Long requestId;
     private Long projectId;
     private RequestTypeReadDTO requestType;
-    private UserReadDTO Requester;
+    private UserReadDTO requester;
     private String requestName;
     private String requestDate;
     private String requestDesc;

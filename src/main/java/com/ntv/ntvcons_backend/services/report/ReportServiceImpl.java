@@ -14,6 +14,7 @@ import com.ntv.ntvcons_backend.dtos.reportType.ReportTypeReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportCreateDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportReadDTO;
 import com.ntv.ntvcons_backend.dtos.taskReport.TaskReportUpdateDTO;
+import com.ntv.ntvcons_backend.dtos.user.UserReadDTO;
 import com.ntv.ntvcons_backend.entities.Report;
 import com.ntv.ntvcons_backend.repositories.ReportRepository;
 import com.ntv.ntvcons_backend.services.entityWrapper.EntityWrapperService;
@@ -802,6 +803,7 @@ public class ReportServiceImpl implements ReportService {
     private ReportReadDTO fillDTO(Report report) throws Exception {
         modelMapper.typeMap(Report.class, ReportReadDTO.class)
             .addMappings(mapper -> {
+                mapper.skip(ReportReadDTO::setReporter);
                 mapper.skip(ReportReadDTO::setReportDate);
                 mapper.skip(ReportReadDTO::setCreatedAt);
                 mapper.skip(ReportReadDTO::setUpdatedAt);});
@@ -820,6 +822,8 @@ public class ReportServiceImpl implements ReportService {
         /* NOT NULL */
         /* Get associated ReportType */
         reportDTO.setReportType(reportTypeService.getDTOById(report.getReportTypeId()));
+        /* Get associated Reporter */
+        reportDTO.setReporter(userService.getDTOById(report.getReporterId()));
 
         /* Nullable */
         /* Get associated ReportDetail */
@@ -837,21 +841,27 @@ public class ReportServiceImpl implements ReportService {
     private List<ReportReadDTO> fillAllDTO(Collection<Report> reportCollection, Integer totalPage) throws Exception {
         modelMapper.typeMap(Report.class, ReportReadDTO.class)
                 .addMappings(mapper -> {
+                    mapper.skip(ReportReadDTO::setReporter);
                     mapper.skip(ReportReadDTO::setReportDate);
                     mapper.skip(ReportReadDTO::setCreatedAt);
                     mapper.skip(ReportReadDTO::setUpdatedAt);});
 
         Set<Long> reportIdSet = new HashSet<>();
         Set<Long> reportTypeIdSet = new HashSet<>();
+        Set<Long> reporterIdSet = new HashSet<>();
 
         for (Report report : reportCollection) {
             reportIdSet.add(report.getReportId());
             reportTypeIdSet.add(report.getReportTypeId());
+            reporterIdSet.add(report.getReporterId());
         }
 
         /* Get associated ReportType */
         Map<Long, ReportTypeReadDTO> reportTypeIdReportTypeDTOMap =
                 reportTypeService.mapReportTypeIdReportTypeDTOByIdIn(reportTypeIdSet);
+        /* Get associated Reporter */
+        Map<Long, UserReadDTO> reporterIdUserDTOMap =
+                userService.mapUserIdUserDTOByIdIn(reporterIdSet);
 
         /* Get associated ReportDetail */
         Map<Long, List<ReportDetailReadDTO>> reportIdReportDetailDTOListMap =
@@ -880,6 +890,7 @@ public class ReportServiceImpl implements ReportService {
 
                     /* NOT NULL */
                     reportDTO.setReportType(reportTypeIdReportTypeDTOMap.get(report.getReportTypeId()));
+                    reportDTO.setReporter(reporterIdUserDTOMap.get(report.getReporterId()));
 
                     /* Nullable */
                     reportDTO.setReportDetailList(reportIdReportDetailDTOListMap.get(tmpReportId));
